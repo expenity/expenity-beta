@@ -109,7 +109,7 @@
 			<div class="chips tabs2" role="tablist">${ TABS.map( ( [ id, k ] ) => `<button type="button" class="chip${ f().tab === id ? ' on' : '' }" role="tab" aria-selected="${ f().tab === id }" data-rep="tab" data-tab="${ id }">${ UI.icon( TAB_ICON[ id ], 18 ) } ${ esc( t( k ) ) }</button>` ).join( '' ) }</div></div>`;
 	}
 	function openFilters() {
-		const wallets = EX.activeAccounts(), cats = EX.catList( 'expense' ).concat( EX.catList( 'income' ) );
+		const wallets = EX.activeAccounts(), cats = [...new Map(EX.catList('expense').concat(EX.catList('income')).map(c=>[c.key,c])).values()];
 		UI.openSheet( `<div class="sheet-head"><button type="button" class="ab-btn" data-close aria-label="${ esc( t( 'close' ) ) }">${ UI.icon( 'x', 24 ) }</button><h2 id="sheetTitle">${ esc( t( 'repFilters' ) ) }</h2><span class="sp"></span></div>
 			<form id="repFilterForm" class="sheet-pad" novalidate>
 			<label class="f"><span>${ esc( t( 'fWallet' ) ) }</span><select name="wallet"><option value="">${ esc( t( 'txAllWallets' ) ) }</option>${ wallets.map( ( a ) => `<option value="${ esc( a.id ) }"${ f().wallet === a.id ? ' selected' : '' }>${ esc( EX.accountName( a ) ) }</option>` ).join( '' ) }</select></label>
@@ -180,11 +180,11 @@
 	function forecast() {
 		const p = R.projection( 90 ), at = ( n ) => p.pts[ n ].y, lo = p.pts.reduce( ( m, x ) => ( x.y < m.y ? x : m ), p.pts[ 0 ] );
 		const td = today(), d = parse( td ), eom = iso( new Date( d.getFullYear(), d.getMonth() + 1, 0 ) ), left = Math.max( 1, dayDiff( eom, td ) + 1 );
-		const toEom = p.pts.find( ( x ) => x.d === eom ) || p.pts[ p.pts.length - 1 ], safe = Math.max( 0, Math.floor( ( toEom.y0 ) / left ) );
+		const spendRoom=EX.safeSpend.calculate();
 		const big = Object.entries( p.events ).filter( ( [ , v ] ) => v < 0 ).sort( ( a, b ) => a[ 1 ] - b[ 1 ] ).slice( 0, 5 );
-		return `<div class="tiles three"><div class="tile"><small>${ esc( t( 'next30' ) ) }</small><b>${ esc( m$( at( 30 ) ) ) }</b><span></span></div><div class="tile"><small>${ esc( t( 'next60' ) ) }</small><b>${ esc( m$( at( 60 ) ) ) }</b><span></span></div><div class="tile"><small>${ esc( t( 'next90' ) ) }</small><b>${ esc( m$( at( 90 ) ) ) }</b><span></span></div></div>
+		return `<button type="button" class="btn btn-ghost" data-safe="details">${UI.icon('wallet',20)} ${esc(t('safeTitle'))}</button><div class="tiles three"><div class="tile"><small>${ esc( t( 'next30' ) ) }</small><b>${ esc( m$( at( 30 ) ) ) }</b><span></span></div><div class="tile"><small>${ esc( t( 'next60' ) ) }</small><b>${ esc( m$( at( 60 ) ) ) }</b><span></span></div><div class="tile"><small>${ esc( t( 'next90' ) ) }</small><b>${ esc( m$( at( 90 ) ) ) }</b><span></span></div></div>
 			<section class="card"><h2>${ esc( t( 'repExpectedBalance' ) ) }</h2>${ line( p.pts.filter( ( _, i ) => i % 2 === 0 ).map( ( x ) => ( { x: short( x.d ), y: x.y } ) ), { label: t( 'repExpectedBalance' ) } ) }<p class="muted small">${ esc( t( 'repIfNothing', { a: m$( p.typical ) } ) ) }</p></section>
-			<div class="tiles"><div class="tile"><small>${ esc( t( 'repSafe' ) ) }</small><b>${ esc( m$( safe ) ) }</b><span>${ esc( t( 'repSafeNote', { n: left } ) ) }</span></div><div class="tile"><small>${ esc( t( 'repLowest' ) ) }</small><b>${ esc( m$( lo.y ) ) }</b><span>${ esc( short( lo.d ) ) }</span></div></div>
+			<div class="tiles"><div class="tile"><small>${ esc( t( 'safeTitle' ) ) }</small><b>${spendRoom.valid?esc(m$(spendRoom.daily)):'—'}</b><span>${esc(t('safePerDay'))} · ${esc(t('safeUntil'))} ${esc(EX.dayName(spendRoom.end))}</span></div><div class="tile"><small>${ esc( t( 'repLowest' ) ) }</small><b>${ esc( m$( lo.y ) ) }</b><span>${ esc( short( lo.d ) ) }</span></div></div>
 			<section class="card"><h2>${ esc( t( 'repUpcomingBig' ) ) }</h2>${ big.length ? `<ul class="plain">${ big.map( ( [ d, v ] ) => `<li>${ esc( short( d ) ) } · <b>${ esc( m$( -v ) ) }</b></li>` ).join( '' ) }</ul>` : noData() }</section>`;
 	}
 	function subs() {

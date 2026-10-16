@@ -1,0 +1,350 @@
+{
+  "version": "0.13.1",
+  "releases": [
+    {
+      "version": "0.13.1",
+      "date": "2026-10-17",
+      "en": [
+        "All balance-card characters, including Mario and Vader, now blur and disappear completely after flipping. The empty space starts collapsing after one second instead of two.",
+        "Updated the legacy beta app to the current release. App publishing now updates both URLs so existing beta installs no longer remain on version 0.5."
+      ],
+      "el": [
+        "Όλοι οι χαρακτήρες της κάρτας, μαζί με Mario και Vader, θολώνουν και εξαφανίζονται εντελώς μετά το γύρισμα. Ο κενός χώρος αρχίζει να μαζεύεται μετά από ένα δευτερόλεπτο αντί για δύο.",
+        "Η παλιά δοκιμαστική εφαρμογή ενημερώθηκε στην τρέχουσα έκδοση, ώστε οι υπάρχουσες εγκαταστάσεις της να μην παραμένουν στην έκδοση 0.5."
+      ]
+    },
+    {
+      "version": "0.13.0",
+      "date": "2026-10-17",
+      "en": [
+        "Home editing now includes Appearance: customize the current theme’s colors, icon color, typography and square or rounded elements without losing its artwork. Preview changes and use Done to save, or Cancel to discard.",
+        "Ten additional locally bundled fonts with Greek and Latin support. Theme styling is saved per template and included in account sync. Reset styling independently of the card layout.",
+        "Mickey/Minnie blur and then disappear completely; Mario and Vader stay as faint blurred watermarks. The two-second gap collapse remains."
+      ],
+      "el": [
+        "Η προσαρμογή της Αρχικής περιλαμβάνει πλέον την Εμφάνιση: αλλάξτε χρώματα, χρώμα εικονιδίων, γραμματοσειρά και τετράγωνες ή στρογγυλεμένες γωνίες χωρίς να χάνονται τα σχέδια του θέματος. Δείτε προεπισκόπηση και πατήστε Έτοιμο για αποθήκευση ή Ακύρωση για απόρριψη.",
+        "Δέκα επιπλέον ενσωματωμένες γραμματοσειρές με ελληνικούς και λατινικούς χαρακτήρες. Οι αλλαγές αποθηκεύονται ανά θέμα και συγχρονίζονται με τον λογαριασμό. Η εμφάνιση επαναφέρεται ανεξάρτητα από τη διάταξη.",
+        "Ο Mickey και η Minnie θολώνουν και εξαφανίζονται εντελώς. Ο Mario και ο Vader παραμένουν αχνά θολωμένοι στο φόντο. Ο κενός χώρος συνεχίζει να μαζεύεται μετά από δύο δευτερόλεπτα."
+      ]
+    },
+    {
+      "version": "0.12.8",
+      "date": "2026-10-17",
+      "en": [
+        "Balance-card characters now blur and fade into a subtle background watermark instead of turning away and disappearing. The card still moves up after two seconds."
+      ],
+      "el": [
+        "Οι χαρακτήρες της κάρτας υπολοίπου θολώνουν και παραμένουν διακριτικά στο φόντο αντί να γυρίζουν και να εξαφανίζονται. Η κάρτα συνεχίζει να ανεβαίνει μετά από δύο δευτερόλεπτα."
+      ]
+    },
+    {
+      "version": "0.12.7",
+      "date": "2026-10-17",
+      "en": [
+        "Two seconds after flipping a character balance card, the empty space above it collapses smoothly and stays collapsed until the next Home visit. Applies to Mario, Mickey/Minnie and Vader."
+      ],
+      "el": [
+        "Δύο δευτερόλεπτα αφού γυρίσετε την κάρτα υπολοίπου με χαρακτήρα, ο κενός χώρος από πάνω μαζεύεται ομαλά και παραμένει έτσι μέχρι την επόμενη επίσκεψη στην Αρχική. Ισχύει για Mario, Mickey/Minnie και Vader."
+      ]
+    },
+    {
+      "version": "0.12.6",
+      "date": "2026-10-17",
+      "en": [
+        "Removed the email-verification notice from Account because email verification is not currently available."
+      ],
+      "el": [
+        "Αφαιρέθηκε η ειδοποίηση επιβεβαίωσης email από τον Λογαριασμό, καθώς η επιβεβαίωση email δεν είναι ακόμη διαθέσιμη."
+      ]
+    },
+    {
+      "version": "0.12.5",
+      "date": "2026-10-17",
+      "en": [
+        "Mario uses your supplied pencil artwork on the balance card, with Goomba, mushroom, Boo and star sketches gently floating in the background. Mickey and Minnie also appear in pencil above their balance card.",
+        "Characters gently move and retreat when the balance card is flipped, staying hidden through redraws and respecting motion settings and compact layouts.",
+        "Scrollbars are hidden throughout the app, including sheets. Touch, wheel and keyboard scrolling remain available."
+      ],
+      "el": [
+        "Ο Mario εμφανίζεται με το σχέδιο μολυβιού που παραχωρήσατε στην κάρτα υπολοίπου, με Goomba, μανιτάρι, Boo και αστέρι να αιωρούνται διακριτικά στο φόντο. Ο Mickey και η Minnie εμφανίζονται επίσης με μολύβι πάνω από τη δική τους κάρτα.",
+        "Οι χαρακτήρες κινούνται διακριτικά και κρύβονται όταν γυρίζετε την κάρτα. Παραμένουν κρυμμένοι στις ανανεώσεις και τηρούν τις ρυθμίσεις κίνησης και τις μικρές διατάξεις.",
+        "Οι γραμμές κύλισης κρύβονται σε όλη την εφαρμογή και στα παράθυρα. Η κύλιση με αφή, ποντίκι και πληκτρολόγιο παραμένει διαθέσιμη."
+      ]
+    },
+    {
+      "version": "0.12.4",
+      "date": "2026-10-17",
+      "en": [
+        "Brick party now uses colored-pencil illustrations with visible graphite contours and hand-shaded texture, replacing the glossy rendered pieces.",
+        "Paper-like balance cards and a visible brick illustration bring the sketchbook style into the dashboard. Floating scenery still respects animation settings; financial controls and records are unchanged."
+      ],
+      "el": [
+        "Το Πάρτι με τουβλάκια χρησιμοποιεί πλέον εικονογράφηση με ξυλομπογιές, περιγράμματα μολυβιού και χειροποίητη σκίαση, αντί για γυαλιστερές τρισδιάστατες αποδόσεις.",
+        "Η κάρτα υπολοίπου θυμίζει χαρτί και περιλαμβάνει ζωγραφισμένα τουβλάκια. Το αιωρούμενο φόντο συνεχίζει να τηρεί τις ρυθμίσεις κίνησης· τα οικονομικά χειριστήρια και οι εγγραφές παραμένουν ίδια."
+      ]
+    },
+    {
+      "version": "0.12.3",
+      "date": "2026-10-17",
+      "en": [
+        "New Vader · Dark orbit theme: pure black, charcoal cards and white controls, with drifting stars, eclipsed planets, an orbital station, fighter patrols and a slow cruiser.",
+        "Includes the user-selected Vader portrait, bundled locally. The larger monochrome character appears behind the balance card, subtly moves and retreats when you flip it. Ordinary redraws do not restart his reveal; returning to Home resets it.",
+        "The theme supports English and Greek, restores on launch, and respects Off/Reduced and system motion preferences. Decorative artwork never intercepts taps or changes records. User receipt photos keep their original colors."
+      ],
+      "el": [
+        "Νέο θέμα Vader · Σκοτεινή τροχιά: απόλυτο μαύρο, ανθρακί κάρτες και λευκά χειριστήρια, με κινούμενα αστέρια, σκιασμένους πλανήτες, διαστημικό σταθμό, καταδιωκτικά και ένα αργό καταδρομικό.",
+        "Περιλαμβάνει την εικόνα του Vader που επέλεξε ο χρήστης, αποθηκευμένη μέσα στην εφαρμογή. Ο μεγαλύτερος ασπρόμαυρος χαρακτήρας εμφανίζεται πίσω από την κάρτα υπολοίπου, κινείται διακριτικά και αποσύρεται όταν τη γυρίζετε. Δεν εμφανίζεται ξανά σε μια απλή ανανέωση της οθόνης· η επιστροφή στην Αρχική επαναφέρει την κίνηση.",
+        "Το θέμα υποστηρίζει ελληνικά και αγγλικά, διατηρείται στο άνοιγμα και τηρεί την απενεργοποιημένη/μειωμένη κίνηση και τις προτιμήσεις της συσκευής. Τα διακοσμητικά δεν εμποδίζουν τα πατήματα ούτε αλλάζουν εγγραφές. Οι φωτογραφίες αποδείξεων διατηρούν τα αρχικά χρώματά τους."
+      ]
+    },
+    {
+      "version": "0.12.2",
+      "date": "2026-10-17",
+      "en": [
+        "Brick party now uses locally bundled, rendered 3D building bricks with raised studs, glossy plastic, thickness and shadows, replacing flat rectangle decorations. The artwork is cached for offline use.",
+        "Removed the low-detail navigation character cameos. Replacement character artwork and the proposed balance-card interaction are pending; no new character animation is included in this release."
+      ],
+      "el": [
+        "Το Πάρτι με τουβλάκια χρησιμοποιεί πλέον τρισδιάστατη εικονογράφηση με ανάγλυφες προεξοχές, γυαλιστερό πλαστικό, πάχος και σκιές, αντί για επίπεδα ορθογώνια. Η εικόνα περιλαμβάνεται στην εφαρμογή και αποθηκεύεται για χρήση χωρίς σύνδεση.",
+        "Αφαιρέθηκαν οι απλοποιημένοι χαρακτήρες από την πλοήγηση. Η νέα εικονογράφηση και η προτεινόμενη αλληλεπίδραση με την κάρτα υπολοίπου εκκρεμούν· αυτή η έκδοση δεν περιλαμβάνει νέα κίνηση χαρακτήρων."
+      ]
+    },
+    {
+      "version": "0.12.1",
+      "date": "2026-10-17",
+      "en": [
+        "New Mario · Pixel adventure theme: sky-blue scenery, drifting pixel clouds, spinning coins, hills and a red-capped character peeking above navigation.",
+        "New Brick party theme: colorful studded building bricks floating over a warm canvas, bold primary colors and dimensional cards.",
+        "New Minnie · Bow atelier theme: watercolor rose, polka dots, floating bows and petals, with Minnie and Mickey peeking from navigation.",
+        "All three themes support English and Greek, persist across launches, and respect animation settings and system reduced motion. Scenery never blocks controls; character cameos hide while dialogs or dashboard editing are open."
+      ],
+      "el": [
+        "Νέο θέμα Mario · Περιπέτεια σε πίξελ: γαλάζιο τοπίο, σύννεφα, περιστρεφόμενα νομίσματα, λόφοι και ένας χαρακτήρας με κόκκινο καπέλο που ξεπροβάλλει από την πλοήγηση.",
+        "Νέο θέμα Πάρτι με τουβλάκια: πολύχρωμα τουβλάκια που αιωρούνται σε ζεστό φόντο, έντονα βασικά χρώματα και κάρτες με αίσθηση βάθους.",
+        "Νέο θέμα Minnie · Ατελιέ φιόγκων: ζωγραφιστό ροζ, πουά, αιωρούμενοι φιόγκοι και πέταλα, με τη Minnie και τον Mickey να ξεπροβάλλουν από την πλοήγηση.",
+        "Και τα τρία θέματα υποστηρίζουν ελληνικά και αγγλικά, διατηρούνται στο επόμενο άνοιγμα και τηρούν τις ρυθμίσεις κίνησης και τη μειωμένη κίνηση της συσκευής. Τα διακοσμητικά δεν εμποδίζουν τα χειριστήρια. Οι χαρακτήρες κρύβονται όταν ανοίγει παράθυρο ή γίνεται επεξεργασία της Αρχικής."
+      ]
+    },
+    {
+      "version": "0.12.0",
+      "date": "2026-10-17",
+      "en": [
+        "Entry forms now use expandable rows for wallet/date, category/tags, repeat and extras. Amount and description remain visible; collapsed fields retain their values and validation opens the relevant row.",
+        "Shared control sizing across the app, including equally sized receipt-scanning and photo-attachment actions. Compact default Greek bank labels and wrapping text prevent horizontal overflow.",
+        "Recurring expenses and income are scheduled directly in the entry form, preserving the entered details without recording a payment.",
+        "Duplicate transactions and schedules into a new editable entry. Transaction copies use today’s date and do not carry payment links or receipt photos.",
+        "Pin up to three saved shortcuts per expense/income type for faster repeat entry.",
+        "Sync details now show pending personal/shared changes, deletions, retry options and the last successful sync.",
+        "Spending ideas now link to recorded evidence, using comparable periods and budget limits. Comparisons are suppressed when required exchange rates are missing or stale.",
+        "Create and edit categories and tags with visual icon and color choices. Inline category creation preserves the open entry.",
+        "More is grouped into money organization, personalization, account/data and help. Creator and blog links are included."
+      ],
+      "el": [
+        "Η καταχώριση οργανώθηκε σε αναπτυσσόμενες ενότητες για πορτοφόλι/ημερομηνία, κατηγορία/ετικέτες, επανάληψη και πρόσθετα. Το ποσό και το όνομα παραμένουν ορατά. Τα πεδία διατηρούνται όταν κλείνει μια ενότητα και τα σφάλματα ανοίγουν τη σχετική ενότητα.",
+        "Κοινοί κανόνες μεγέθους χειριστηρίων σε όλη την εφαρμογή, με ίσα κουμπιά σάρωσης απόδειξης και επισύναψης φωτογραφίας. Συντομότερη προεπιλεγμένη ονομασία τράπεζας και αναδίπλωση κειμένου χωρίς οριζόντια κύλιση.",
+        "Τα επαναλαμβανόμενα έξοδα και έσοδα προγραμματίζονται στην ίδια φόρμα, διατηρώντας τα στοιχεία χωρίς καταχώριση πληρωμής.",
+        "Αντιγραφή κινήσεων και προγραμμάτων ως νέα, επεξεργάσιμη καταχώριση. Τα αντίγραφα κινήσεων έχουν τη σημερινή ημερομηνία, χωρίς συνδέσεις πληρωμής ή φωτογραφίες αποδείξεων.",
+        "Καρφιτσώστε έως τρεις αποθηκευμένες συντομεύσεις ανά τύπο εξόδου/εσόδου για γρηγορότερη καταχώριση.",
+        "Οι λεπτομέρειες συγχρονισμού δείχνουν προσωπικές και κοινόχρηστες αλλαγές σε αναμονή, διαγραφές, επανάληψη προσπάθειας και τον τελευταίο επιτυχή συγχρονισμό.",
+        "Οι ιδέες εξόδων συνδέονται με τις καταχωρίσεις που τις στηρίζουν, συγκρίνοντας αντίστοιχες περιόδους και όρια προϋπολογισμών. Οι συγκρίσεις αποκρύπτονται όταν λείπουν ή έχουν παλιώσει οι απαραίτητες ισοτιμίες.",
+        "Δημιουργία και επεξεργασία κατηγοριών και ετικετών με επιλογές εικονιδίου και χρώματος. Η δημιουργία κατηγορίας μέσα από τη φόρμα διατηρεί την καταχώριση.",
+        "Οι επιλογές στα Περισσότερα ομαδοποιήθηκαν σε οργάνωση οικονομικών, προσαρμογή, λογαριασμό/δεδομένα και βοήθεια. Προστέθηκαν σύνδεσμοι δημιουργού και ιστολογίου."
+      ]
+    },
+    {
+      "version": "0.11.1",
+      "date": "2026-10-17",
+      "en": [
+        "Installation guide videos now play muted, inline and on a loop without native playback controls, in onboarding and Account guides. Tap to pause or resume. Reduced-motion preferences are respected, with a simple Play button when playback needs a tap.",
+        "New Receipt scanner switch in Settings. Turn scanning off to hide it from expense entry; the preference is saved with your settings."
+      ],
+      "el": [
+        "Τα βίντεο εγκατάστασης παίζουν πλέον χωρίς ήχο, μέσα στη σελίδα και σε επανάληψη, χωρίς τα χειριστήρια του προγράμματος περιήγησης, στην αρχική ρύθμιση και στους οδηγούς Λογαριασμού. Πατήστε για παύση ή συνέχεια. Οι προτιμήσεις μειωμένης κίνησης τηρούνται, με απλό κουμπί αναπαραγωγής όταν χρειάζεται πάτημα.",
+        "Νέος διακόπτης Σάρωση αποδείξεων στις Ρυθμίσεις. Απενεργοποιήστε τον για να κρύψετε τη σάρωση από την προσθήκη εξόδου· η προτίμηση αποθηκεύεται με τις ρυθμίσεις σας."
+      ]
+    },
+    {
+      "version": "0.11.0",
+      "date": "2026-10-17",
+      "en": [
+        "New on-device receipt recognition engine for Greek and English, with text detection and angle-aware matching of total labels to amounts. No paid OCR API, receipt upload for recognition, or per-scan charges.",
+        "Recognition files download from the app once (about 40 MB) and are cached for offline use. Processing runs in a background worker; closing the scanner cancels it. An on-device compatibility fallback remains available.",
+        "New Focus on the total: tap the printed total or drag a selection around it to read that area again. Edited fields are preserved. Large amount buttons make uncertain results easier to review and select.",
+        "Fixed purchase totals being hidden by “not refundable” footer text. Improved separation of payable totals from GST/VAT summaries, item counts, cash tendered and change. Missing or conflicting totals still require your review."
+      ],
+      "el": [
+        "Νέα μηχανή αναγνώρισης αποδείξεων για ελληνικά και αγγλικά στη συσκευή σας, με εντοπισμό κειμένου και αντιστοίχιση συνόλου και ποσού ανάλογα με τη γωνία λήψης. Χωρίς πληρωμένη υπηρεσία αναγνώρισης, αποστολή απόδειξης για αναγνώριση ή χρέωση ανά σάρωση.",
+        "Τα αρχεία αναγνώρισης κατεβαίνουν μία φορά από την εφαρμογή (περίπου 40 MB) και διατηρούνται για χρήση χωρίς σύνδεση. Η επεξεργασία γίνεται στο παρασκήνιο και ακυρώνεται όταν κλείσετε τη σάρωση. Διατηρείται εναλλακτική αναγνώριση στη συσκευή για λόγους συμβατότητας.",
+        "Νέα Εστίαση στο σύνολο: πατήστε το τυπωμένο σύνολο ή σύρετε πλαίσιο γύρω του για νέα ανάγνωση της περιοχής. Οι διορθώσεις σας διατηρούνται. Μεγάλα κουμπιά ποσών διευκολύνουν τον έλεγχο και την επιλογή αβέβαιων αποτελεσμάτων.",
+        "Διορθώθηκε η απόκρυψη συνόλων αγοράς λόγω κειμένου πολιτικής επιστροφών. Καλύτερος διαχωρισμός πληρωτέου ποσού από αναλύσεις φόρων, πλήθος ειδών, μετρητά και ρέστα. Ελλιπή ή αντικρουόμενα σύνολα εξακολουθούν να χρειάζονται τον έλεγχό σας."
+      ]
+    },
+    {
+      "version": "0.10.3",
+      "date": "2026-10-17",
+      "en": [
+        "Improved real-photo receipt scanning: detect the paper region, reduce background texture and uneven lighting, and retry narrow thermal print with alternative text layouts when the first pass cannot identify a total.",
+        "Greek total labels tolerate common OCR letter confusions. Amounts and labels are matched by their position across columns; tax, cash tendered, change and conflicting totals are not silently treated as the final amount.",
+        "Store-name suggestions now consider header text confidence and print size instead of taking the first readable line. Verified locally against a real Greek receipt: YUCCA, EUR 3.30. Every suggestion remains editable before saving.",
+        "Photo guidance now explains supported formats and the 20 MB limit. Export RAW/DNG photos to JPEG before choosing them. Recognition remains on your device."
+      ],
+      "el": [
+        "Βελτιωμένη σάρωση πραγματικών φωτογραφιών αποδείξεων: εντοπισμός χαρτιού, περιορισμός υφής φόντου και ανομοιόμορφου φωτισμού, με πρόσθετες προσπάθειες αναγνώρισης στενών θερμικών χαρακτήρων όταν δεν εντοπίζεται σύνολο.",
+        "Οι ελληνικές ενδείξεις συνόλου αναγνωρίζονται και με συνηθισμένα λάθη ανάγνωσης γραμμάτων. Ποσά και ενδείξεις συνδέονται βάσει της θέσης τους στις στήλες· φόροι, μετρητά, ρέστα και αντικρουόμενα σύνολα δεν επιλέγονται αυτόματα ως τελικό ποσό.",
+        "Η πρόταση ονόματος καταστήματος λαμβάνει υπόψη την αξιοπιστία του κειμένου και το μέγεθος των χαρακτήρων στην επικεφαλίδα, αντί για την πρώτη αναγνώσιμη γραμμή. Ελέγχθηκε τοπικά με πραγματική ελληνική απόδειξη: YUCCA, 3,30 EUR. Όλες οι προτάσεις διορθώνονται πριν από την αποθήκευση.",
+        "Οι οδηγίες φωτογραφίας εξηγούν τις υποστηριζόμενες μορφές και το όριο των 20 MB. Εξαγάγετε τα RAW/DNG σε JPEG πριν τα επιλέξετε. Η αναγνώριση παραμένει στη συσκευή σας."
+      ]
+    },
+    {
+      "version": "0.10.2",
+      "date": "2026-10-17",
+      "en": [
+        "Receipt scanning: open Add expense → Scan receipt to recognise English or Greek receipts on your device. Review the name, amount, currency and date before applying them; nothing is saved automatically.",
+        "Safe to spend: a new Home card estimates your remaining spending allowance after upcoming bills, scheduled outflows and reserves. View the calculation and adjust wallets, period and assumptions. Expected income is not counted until received.",
+        "Update popups now show every release since your last viewed version, so feature announcements are not hidden by a later patch. All previous releases remain available from the changelog icon in Account.",
+        "Includes the fix for Cancel being ignored immediately after resizing a Home card."
+      ],
+      "el": [
+        "Σάρωση αποδείξεων: ανοίξτε Προσθήκη εξόδου → Σάρωση απόδειξης για αναγνώριση ελληνικών και αγγλικών αποδείξεων στη συσκευή σας. Ελέγξτε όνομα, ποσό, νόμισμα και ημερομηνία πριν τα μεταφέρετε στη φόρμα· δεν αποθηκεύεται τίποτα αυτόματα.",
+        "Περιθώριο εξόδων: νέα κάρτα στην Αρχική υπολογίζει τι απομένει μετά από λογαριασμούς, προγραμματισμένες εκροές και δεσμευμένα ποσά. Δείτε την ανάλυση και αλλάξτε πορτοφόλια, περίοδο και παραδοχές. Τα αναμενόμενα έσοδα δεν προσμετρώνται πριν εισπραχθούν.",
+        "Το παράθυρο ενημέρωσης δείχνει πλέον όλες τις εκδόσεις από την τελευταία που είδατε, ώστε οι νέες λειτουργίες να μην κρύβονται από μεταγενέστερες διορθώσεις. Όλες οι προηγούμενες εκδόσεις παραμένουν διαθέσιμες από το εικονίδιο ιστορικού εκδόσεων στον Λογαριασμό.",
+        "Περιλαμβάνεται η διόρθωση για το πάτημα Ακύρωση αμέσως μετά την αλλαγή μεγέθους κάρτας στην Αρχική."
+      ]
+    },
+    {
+      "version": "0.10.1",
+      "date": "2026-10-17",
+      "en": [
+        "Fixed a quick Cancel tap after resizing a Home card being ignored. This could leave the dashboard in edit mode and block card actions. Receipt scanning and Safe to spend from 0.10.0 are included."
+      ],
+      "el": [
+        "Διορθώθηκε η παράβλεψη γρήγορου πατήματος Ακύρωση μετά από αλλαγή μεγέθους κάρτας στην Αρχική. Μπορούσε να παραμείνει ενεργή η επεξεργασία και να εμποδίζονται οι ενέργειες των καρτών. Περιλαμβάνονται η σάρωση αποδείξεων και το Περιθώριο εξόδων της έκδοσης 0.10.0."
+      ]
+    },
+    {
+      "version": "0.10.0",
+      "date": "2026-10-17",
+      "en": [
+        "Scan a receipt from Add expense. English and Greek text recognition runs on your device, with merchant, total, currency and date suggestions to review before applying. Nothing is saved automatically.",
+        "Conflicting totals, unclear dates and refunds need review. Keep existing draft fields or replace only the selected ones. Optionally attach a compressed reference photo to your account.",
+        "Recognition files load from the app on first use and are cached for offline scanning. Receipt images are not sent to an OCR service.",
+        "New Safe to spend Home card and Reports calculation: selected wallet balances minus unpaid bills, scheduled outflows, budget allowance and your additional spending, savings and buffer reserves.",
+        "Choose the period and wallets, inspect the breakdown and adjust assumptions. Expected income sets the period but never counts as received money. Savings and shared wallets are excluded by default.",
+        "Paid bills, overlapping budgets and existing goal contributions are not deducted twice. Missing exchange rates or unknown bill amounts block the estimate rather than showing an incomplete spending allowance."
+      ],
+      "el": [
+        "Σαρώστε απόδειξη από την Προσθήκη εξόδου. Η αναγνώριση ελληνικού και αγγλικού κειμένου γίνεται στη συσκευή σας, με προτάσεις για κατάστημα, σύνολο, νόμισμα και ημερομηνία. Δεν αποθηκεύεται τίποτα αυτόματα.",
+        "Διαφορετικά σύνολα, αμφίβολες ημερομηνίες και επιστροφές χρειάζονται έλεγχο. Διατηρήστε τις υπάρχουσες τιμές ή αντικαταστήστε μόνο τα επιλεγμένα πεδία. Προαιρετικά επισυνάψτε συμπιεσμένη φωτογραφία στον λογαριασμό σας.",
+        "Τα αρχεία αναγνώρισης φορτώνονται από την εφαρμογή στην πρώτη χρήση και αποθηκεύονται για σάρωση χωρίς σύνδεση. Οι αποδείξεις δεν στέλνονται σε υπηρεσία αναγνώρισης.",
+        "Νέα κάρτα Περιθώριο εξόδων στην Αρχική και υπολογισμός στις Αναφορές: υπόλοιπα επιλεγμένων πορτοφολιών μείον απλήρωτοι λογαριασμοί, προγραμματισμένες εκροές, προβλέψεις προϋπολογισμών και πρόσθετες δεσμεύσεις εξόδων, αποταμίευσης και προστατευμένου ποσού.",
+        "Επιλέξτε περίοδο και πορτοφόλια, δείτε την ανάλυση και αλλάξτε τις παραδοχές. Το αναμενόμενο έσοδο ορίζει την περίοδο αλλά δεν θεωρείται εισπραγμένο. Αποταμιευτικά και κοινόχρηστα πορτοφόλια εξαιρούνται αρχικά.",
+        "Εξοφλημένοι λογαριασμοί, επικαλυπτόμενοι προϋπολογισμοί και υπάρχουσες εισφορές στόχων δεν αφαιρούνται δύο φορές. Αν λείπουν ισοτιμίες ή ποσά λογαριασμών, δεν εμφανίζεται ελλιπές διαθέσιμο περιθώριο."
+      ]
+    },
+    {
+      "version": "0.9.0",
+      "date": "2026-10-17",
+      "en": [
+        "A clearer + menu with four labelled actions and a redesigned expense/income form. Wallet and currency stay beside the amount, with a separate Save button.",
+        "Input opens only after a field tap. Done closes the keyboard or keypad without saving. Photo, tags and notes expand independently and show their contents.",
+        "Choose an intentional default wallet and an explicit category, including Uncategorized. Suggestions never silently categorise a transaction; currency changes require review.",
+        "Reuse names and categories with optional wallet/amount shortcuts. Unfinished entries recover on the same device for up to 24 hours; meaningful changes are protected when closing.",
+        "Transfers have distinct From/To controls and both amounts for different currencies. Future payments and income open explicit schedules without changing today’s balance.",
+        "Saving handles full storage and repeated taps safely. Undo affects only the new entry and preserves unrelated or newer changes. Activity distinguishes local saves from acknowledged sync.",
+        "Unsynced shared-wallet entries rejected after access changes can be recovered from +. Viewer wallets refresh immediately after a role downgrade. English and Greek layouts wrap without horizontal scrolling."
+      ],
+      "el": [
+        "Πιο ξεκάθαρο μενού + με τέσσερις επιλογές και νέα φόρμα εξόδων/εσόδων. Το πορτοφόλι και το νόμισμα εμφανίζονται δίπλα στο ποσό, με ξεχωριστό κουμπί αποθήκευσης.",
+        "Το πληκτρολόγιο ανοίγει μόνο όταν πατήσετε πεδίο. Το Έτοιμο το κλείνει χωρίς αποθήκευση. Φωτογραφία, ετικέτες και σημείωση ανοίγουν ανεξάρτητα και δείχνουν τι έχετε προσθέσει.",
+        "Ορίστε προεπιλεγμένο πορτοφόλι και επιλέξτε κατηγορία, ακόμη και «Χωρίς κατηγορία». Οι προτάσεις δεν κατηγοριοποιούν αυτόματα την κίνηση· η αλλαγή νομίσματος απαιτεί έλεγχο.",
+        "Επαναχρησιμοποιήστε ονόματα και κατηγορίες, με προαιρετική αποθήκευση πορτοφολιού/ποσού. Τα πρόχειρα επανέρχονται στην ίδια συσκευή για έως 24 ώρες· το κλείσιμο προστατεύει τις ουσιαστικές αλλαγές.",
+        "Οι μεταφορές έχουν ξεχωριστά Από/Προς και δύο ποσά για διαφορετικά νομίσματα. Οι μελλοντικές πληρωμές και εισπράξεις ανοίγουν φόρμα προγραμματισμού χωρίς αλλαγή στο σημερινό υπόλοιπο.",
+        "Ασφαλέστερη αποθήκευση όταν γεμίζει ο χώρος ή πατάτε επανειλημμένα. Η αναίρεση αφορά μόνο τη νέα κίνηση και διατηρεί άλλες ή νεότερες αλλαγές. Οι Κινήσεις ξεχωρίζουν την τοπική αποθήκευση από τον επιβεβαιωμένο συγχρονισμό.",
+        "Κινήσεις σε κοινόχρηστο πορτοφόλι που απορρίφθηκαν μετά από αλλαγή πρόσβασης ανακτώνται από το +. Η προβολή ενημερώνεται αμέσως μετά τον περιορισμό δικαιωμάτων. Οι διατάξεις στα ελληνικά και στα αγγλικά χωρούν χωρίς οριζόντια κύλιση."
+      ]
+    },
+    {
+      "version": "0.8.0",
+      "date": "2026-10-16",
+      "en": [
+        "Simpler Home editing: touch and hold a card, then drag it into place. A gentle jiggle, floating preview and placeholder show what is moving.",
+        "Resize from a card’s corner or choose from three large visual options. On phones, Small is half-width; Medium stays wide and short; Full shows more detail.",
+        "Medium wallet cards keep wallets side by side. Hide cards with the minus button and restore them from Cards.",
+        "A compact Done / Cancel bar replaces the large editor panel. Changes are saved only when you choose Done. Desktop users can open the same editor from Settings."
+      ],
+      "el": [
+        "Απλούστερη προσαρμογή Αρχικής: πατήστε παρατεταμένα μια κάρτα και σύρετέ την στη θέση που θέλετε. Η διακριτική κίνηση, η αιωρούμενη προεπισκόπηση και η ένδειξη θέσης δείχνουν ποια κάρτα μετακινείται.",
+        "Αλλάξτε μέγεθος από τη γωνία της κάρτας ή επιλέξτε από τρεις μεγάλες, οπτικές επιλογές. Στο κινητό, το Μικρό καταλαμβάνει μισό πλάτος, το Μεσαίο παραμένει οριζόντιο και χαμηλό, ενώ το Πλήρες δείχνει περισσότερα στοιχεία.",
+        "Στο Μεσαίο μέγεθος, τα πορτοφόλια παραμένουν δίπλα δίπλα. Κρύψτε κάρτες με το μείον και επαναφέρετέ τες από τις Κάρτες.",
+        "Μια μικρή γραμμή με Έτοιμο / Ακύρωση αντικαθιστά τον μεγάλο πίνακα ελέγχου. Οι αλλαγές αποθηκεύονται μόνο με το Έτοιμο. Σε υπολογιστή, ο ίδιος επεξεργαστής ανοίγει από τις Ρυθμίσεις."
+      ]
+    },
+    {
+      "version": "0.7.0",
+      "date": "2026-10-16",
+      "en": [
+        "New 12-second captioned installation videos for iPhone, Android and desktop, in English and Greek, available in onboarding and Account settings.",
+        "Small, Medium and Full dashboard sizes with visibly different widths and compact summaries.",
+        "Touch-and-hold dashboard editing with a tutorial and a Settings fallback for desktop. The selected card pulses in the theme colour; other cards turn grey.",
+        "Visible tag icons and labels on transaction, bill and recurring-income rows.",
+        "My custom theme is separate from templates, with starting palettes, colour and hex controls, visible preview icons and contrast checks."
+      ],
+      "el": [
+        "Νέα βίντεο εγκατάστασης 12 δευτερολέπτων για iPhone, Android και υπολογιστή, στα ελληνικά και στα αγγλικά, στην αρχική ρύθμιση και στις ρυθμίσεις Λογαριασμού.",
+        "Μικρό, Μεσαίο και Πλήρες μέγεθος ενοτήτων, με διαφορετικά πλάτη και συνοπτικές κάρτες.",
+        "Προσαρμογή Αρχικής με παρατεταμένο πάτημα αφής, οδηγό και εναλλακτική πρόσβαση από τις Ρυθμίσεις σε υπολογιστή. Η επιλεγμένη κάρτα τονίζεται στο χρώμα του θέματος, ενώ οι υπόλοιπες γίνονται γκρι.",
+        "Ορατά εικονίδια και ονόματα ετικετών στις κινήσεις, στους λογαριασμούς και στα επαναλαμβανόμενα έσοδα.",
+        "Το δικό μου θέμα ξεχωρίζει από τα έτοιμα θέματα, με αρχικές παλέτες, επιλογή χρώματος και δεκαεξαδικών τιμών, ορατά εικονίδια προεπισκόπησης και έλεγχο αντίθεσης."
+      ]
+    },
+    {
+      "version": "0.6.1",
+      "date": "2026-10-16",
+      "en": [
+        "Fixed a dashboard style collision that covered the screen, blocked navigation and distorted icons.",
+        "Home customisation now uses its own grid styles, separate from the install animation.",
+        "Fixed goal contributions dropping tags entered in the contribution form.",
+        "Resetting Home restores the automatic order for wallets and urgent bills."
+      ],
+      "el": [
+        "Διορθώθηκε σύγκρουση στυλ στην Αρχική που κάλυπτε την οθόνη, εμπόδιζε την πλοήγηση και παραμόρφωνε τα εικονίδια.",
+        "Η προσαρμογή Αρχικής χρησιμοποιεί πλέον δική της διάταξη, ανεξάρτητη από την κίνηση εγκατάστασης.",
+        "Διορθώθηκε η απώλεια ετικετών που εισάγονταν στη φόρμα προσθήκης χρημάτων σε στόχο.",
+        "Η επαναφορά Αρχικής επαναφέρει την αυτόματη σειρά πορτοφολιών και άμεσων υποχρεώσεων."
+      ]
+    },
+    {
+      "version": "0.6.0",
+      "date": "2026-10-16",
+      "en": [
+        "Clear reminder notices when notifications are off.",
+        "Retained release notes in Account and About, and a one-time update popup.",
+        "Install handoff: finish setup from the installed app, or explicitly continue in the browser.",
+        "Undo-only action notices and reversible transactions from history.",
+        "Reusable tags for financial records and a tag library in More.",
+        "Personalise Home: hold to edit, reorder, resize or hide widgets.",
+        "Greek photo-delete button wraps within the screen.",
+        "Custom names first; predefined suggestions are collapsed."
+      ],
+      "el": [
+        "Ενημέρωση όταν οι υπενθυμίσεις δεν μπορούν να σταλούν επειδή οι ειδοποιήσεις είναι απενεργοποιημένες.",
+        "Ιστορικό εκδόσεων στον Λογαριασμό και στις Πληροφορίες, με μία προβολή μετά την ενημέρωση.",
+        "Συνέχεια της αρχικής ρύθμισης από την εγκατεστημένη εφαρμογή ή ρητή επιλογή χρήσης στο πρόγραμμα περιήγησης.",
+        "Μόνο «Αναίρεση» στα σχετικά μηνύματα και αναίρεση κινήσεων από το ιστορικό.",
+        "Επαναχρησιμοποιούμενες ετικέτες και διαχείρισή τους στα Περισσότερα.",
+        "Προσαρμογή Αρχικής: παρατεταμένο πάτημα, αλλαγή σειράς, μεγέθους και απόκρυψη ενοτήτων.",
+        "Το κουμπί διαγραφής φωτογραφιών χωράει και στα ελληνικά.",
+        "Πρώτα το δικό σας όνομα· οι έτοιμες προτάσεις ανοίγουν προαιρετικά."
+      ]
+    },
+    {
+      "version": "0.5",
+      "en": [
+        "Animated onboarding, saved transaction names, refreshed navigation and Greek translations."
+      ],
+      "el": [
+        "Κινούμενη εισαγωγή, αποθηκευμένα ονόματα κινήσεων, ανανεωμένη πλοήγηση και ελληνικές μεταφράσεις."
+      ]
+    }
+  ]
+}

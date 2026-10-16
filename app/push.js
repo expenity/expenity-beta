@@ -20,7 +20,7 @@
 		if ( ! EX.auth.isSignedIn() ) return 'guest';
 		if ( ! P.supported() ) return isIos() && ! UI.isStandalone() ? 'needs-install' : 'unsupported';
 		if ( Notification.permission === 'denied' ) return 'denied';
-		return S().device.push ? 'on' : 'off';
+		return Notification.permission === 'granted' && S().device.push ? 'on' : 'off';
 	};
 	const subscribeBody = ( sub, hour ) => ( { subscription: sub.toJSON(), tz: tz(), hour, lang: EX.lang() } );
 	const current = async () => { const reg = await navigator.serviceWorker.ready; return { reg, sub: await reg.pushManager.getSubscription() }; };

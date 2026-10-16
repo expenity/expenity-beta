@@ -34,7 +34,7 @@
 	function storeAuth() {
 		try { if ( auth.token ) localStorage.setItem( AUTH_KEY, JSON.stringify( { token: auth.token, user: auth.user } ) ); else localStorage.removeItem( AUTH_KEY ); } catch ( e ) { /* ignore */ }
 	}
-	function setAuth( token, user ) { auth.token = token; auth.user = user; storeAuth(); EX.emit( 'auth' ); }
+	function setAuth( token, user ) { auth.token = token; auth.user = user; storeAuth(); EX.emit( 'auth', {accountChanged:true} ); }
 
 	EX.api = ( ...a ) => api( ...a );
 	async function api( method, path, body, opts = {} ) {
@@ -173,7 +173,7 @@
 			const r = await api( 'GET', '/api/me' );
 			if ( ! r.ok ) return;
 			auth.user = r.json.user; auth.emailEnabled = r.json.emailEnabled; auth.codesLeft = r.json.recoveryCodesLeft;
-			storeAuth(); EX.emit( 'auth' );
+			storeAuth(); EX.emit( 'auth', {accountChanged:false} );
 		},
 		/** Signs out. The data stays in the account; this device's copy is removed. */
 		async logout() {
@@ -242,7 +242,15 @@
 		Object.keys( base ).forEach( ( id ) => { if ( ! seen.has( id ) ) { out.push( { id, kind: base[ id ].k, deleted: true, updatedAt: now } ); sent[ id ] = null; } } );
 		return { changes: out, sent };
 	}
-	sync.pending = () => ( auth.token ? collect( false ).changes.length : 0 );
+	sync.pendingChanges=()=>auth.token?[null,...Object.keys(spaces())].flatMap(scope=>collect(false,scope).changes.map(change=>({id:change.id,kind:change.kind,deleted:!!change.deleted,name:change.data?.name||'',scope,account:change.data?.account||'',blocked:!!scope&&EX.role(acct(change.data?.account)||S().accounts.find(a=>a.space===scope)||{})==='viewer'}))):[];
+    sync.pending = () => sync.pendingChanges().length;
+
+	// Acknowledgement is per record, including shared scopes; a global green dot alone is insufficient.
+	sync.recordStatus=id=>{
+	 const tx=S().txs.find(x=>x.id===id);if(!auth.token)return 'device';if(!tx)return 'error';
+	 const scope=scopeOf('tx',tx),base=baseOf(scope);if(base[tx.id]?.h===hash(tx))return 'synced';
+	 return ['error','off'].includes(sync.status)?'error':'pending';
+	};
 
 	function applyRemote( changes, sent, scope = null ) {
 		const base = baseOf( scope );
@@ -302,8 +310,8 @@
 			batch.forEach( ( c ) => { sentBatch[ c.id ] = sent[ c.id ]; } );
 			EX.persist();
 			let res = await api( 'POST', path, { since: meta.rev, changes: batch.map( ( c ) => ( c.deleted ? { id: c.id, kind: c.kind, deleted: true, updatedAt: c.updatedAt } : { id: c.id, kind: c.kind, data: c.data, updatedAt: c.updatedAt } ) ) } );
-			if ( scope && res.status === 404 ) return 'gone'; // no longer a member: the next refresh removes it
-			if ( scope && res.status === 403 ) { forgetSpaceLocal( scope, false ); meta.rev = 0; meta.base = {}; return 'changed'; } // read-only: take the server's version back
+			if ( scope && res.status === 404 ) {EX.emit('entryrejected',{scope,changes:collect(false,scope).changes.filter(c=>c.kind==='tx'&&!c.deleted).map(c=>c.data)});return 'gone';} // no longer a member: the next refresh removes it
+			if ( scope && res.status === 403 ) { EX.emit('entryrejected', {scope,changes:collect(false,scope).changes.filter(c=>c.kind==='tx'&&!c.deleted).map(c=>c.data)}); forgetSpaceLocal( scope, false ); meta.rev = 0; meta.base = {}; const refreshed=await syncScope(scope); return refreshed==='fail'?'fail':'changed'; } // recover pending input, then immediately restore the server's read-only copy
 			if ( ! res.ok ) { setStatus( res.status === 0 ? 'offline' : res.status === 401 ? 'off' : 'error' ); scheduleRetry(); return 'fail'; }
 			if ( applyRemote( res.json.changes, sentBatch, scope ) ) changed = true;
 			const base = meta.base;
@@ -324,6 +332,7 @@
 
 	/** Remove the local copy of a shared wallet: its account, transactions and bills (and its sync record when `meta`). */
 	function forgetSpaceLocal( id, meta = true ) {
+		EX.emit('entryrejected',{scope:id,changes:collect(false,id).changes.filter(c=>c.kind==='tx'&&!c.deleted).map(c=>c.data)});
 		const ids = new Set( S().accounts.filter( ( a ) => a.space === id ).map( ( a ) => a.id ) );
 		S().accounts = S().accounts.filter( ( a ) => a.space !== id );
 		S().txs = S().txs.filter( ( x ) => ! ids.has( x.account ) );

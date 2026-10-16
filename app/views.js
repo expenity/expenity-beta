@@ -50,10 +50,10 @@
 		const meta = [ x.type === 'transfer' ? `${ walletName( x.account ) } → ${ walletName( x.toAccount ) }` : walletName( x.account ), x.note ].filter( Boolean ).join( ' · ' );
 		const sign = x.type === 'income' ? '+' : x.type === 'expense' ? '−' : '';
 		return `<li class="sw" data-kind="tx" data-id="${ esc( x.id ) }">
-			<div class="sw-back"><div class="sw-l"></div><div class="sw-r">${ swBtn( 'edit', 'pencil', 'actEdit', 'edit' ) }${ swBtn( 'del', 'trash', 'actDelete', 'del' ) }</div></div>
+			<div class="sw-back"><div class="sw-l"></div><div class="sw-r">${ swBtn( 'edit', 'pencil', 'actEdit', 'edit' ) }${ swBtn( 'duplicate', 'copy', 'duplicateRecord', 'duplicate' ) }${ swBtn( 'del', 'trash', 'actDelete', 'del' ) }</div></div>
 			<button type="button" class="sw-front item" data-act="open-tx" data-id="${ esc( x.id ) }" aria-label="${ esc( title ) }, ${ esc( sign + money( Number( x.amount ), cur ) ) }">
 				${ UI.catCi( info.iconName ? info : EX.catInfo( x.category ) ) }
-				<span class="mid"><b>${ esc( title ) }${ x.photo ? UI.icon( 'paperclip', 14 ) : '' }</b><small>${ esc( meta || dayName( x.date ) ) }</small></span>
+				<span class="mid"><b>${ esc( title ) }${ x.photo ? UI.icon( 'paperclip', 14 ) : '' }</b><small>${ esc( meta || dayName( x.date ) ) }</small>${EXA.tagsInline(x.tags)}</span>
 				<span class="a ${ x.type }">${ sign }${ esc( money( Number( x.amount ), cur ) ) }</span>
 			</button></li>`;
 	}
@@ -64,10 +64,10 @@
 		const snoozed = b.snooze && b.snooze > today();
 		const meta = [ showDate ? rel( b.next ) : null, EX.repeatLabel( b.repeat ), b.autopay ? t( 'autopay' ) : null, snoozed ? t( 'snoozed' ) : null ].filter( Boolean ).join( ' · ' );
 		return `<li class="sw ${ cls }" data-kind="bill" data-id="${ esc( b.id ) }">
-			<div class="sw-back"><div class="sw-l">${ swBtn( 'paid', 'check', 'actPaid', 'paid' ) }</div><div class="sw-r">${ swBtn( 'edit', 'pencil', 'actEdit', 'edit' ) }${ swBtn( 'del', 'trash', 'actDelete', 'del' ) }</div></div>
+			<div class="sw-back"><div class="sw-l">${ swBtn( 'paid', 'check', 'actPaid', 'paid' ) }</div><div class="sw-r">${ swBtn( 'edit', 'pencil', 'actEdit', 'edit' ) }${ swBtn( 'duplicate', 'copy', 'duplicateRecord', 'duplicate' ) }${ swBtn( 'del', 'trash', 'actDelete', 'del' ) }</div></div>
 			<button type="button" class="sw-front item" data-act="open-bill" data-id="${ esc( b.id ) }" aria-label="${ esc( b.name ) }, ${ esc( amountText( b ) ) }">
 				${ UI.catCi( EX.catInfo( b.category ) ) }
-				<span class="mid"><b>${ esc( b.name ) }</b><small class="due">${ esc( meta ) }</small></span>
+				<span class="mid"><b>${ esc( b.name ) }</b><small class="due">${ esc( meta ) }</small>${EXA.tagsInline(b.tags)}</span>
 				<span class="a">${ esc( amountText( b ) ) }</span>
 			</button></li>`;
 	}
@@ -90,7 +90,7 @@
 	EXA.appbar = () => {
 		const v = st.view;
 		if ( v === 'more' && st.more !== 'root' ) {
-			const titles = { account: 'rowAccount', wallets: 'walletsTitle', categories: 'catsTitle', reminders: 'rowReminders', data: 'rowData', appearance: 'rowAppearance', install: 'rowInstall', about: 'rowAbout' };
+			const titles = { account: 'rowAccount', wallets: 'walletsTitle', categories: 'catsTitle', tags: 'tags', reminders: 'rowReminders', data: 'rowData', appearance: 'rowAppearance', install: 'rowInstall', about: 'rowAbout' };
 			return `<button type="button" class="ab-btn" data-act="more-back" aria-label="${ esc( t( 'back' ) ) }">${ UI.icon( 'arrow-left', 24 ) }</button><h1 class="ab-title">${ esc( t( titles[ st.more ] ) ) }</h1>`;
 		}
 		const title = { home: null, activity: t( 'tabActivity' ), bills: t( 'tabBills' ), plan: t( 'planTitle' ), reports: t( 'tabReports' ), more: t( 'moreTitle' ) }[ v ];
@@ -160,19 +160,19 @@
 		const rate = mC.inc > 0 ? Math.round( ( ( mC.inc - mC.exp ) / mC.inc ) * 100 ) : null;
 		const count = ( str, c ) => ( str === M( c ) ? ` data-count="${ c / 100 }" data-cur="${ esc( mainCur ) }"` : '' ); // numbers roll up on entering the screen
 		const totalC = EX.mainCents( wallets.map( ( a ) => ( { amount: EX.balance( a ) / 100, currency: a.currency } ) ) );
-		return `<div class="hero-flip${ st.heroFlip ? ' flipped' : '' }" data-act="flip-hero" role="button" tabindex="0" aria-pressed="${ !! st.heroFlip }" aria-label="${ esc( t( 'balanceAria' ) + '. ' + t( 'heroFlipHint' ) ) }">
+		return `<section data-home="balance"><div class="hero-flip${ st.heroFlip ? ' flipped' : '' }${st.characterRetreated?' character-retreated':''}${st.characterCollapsed?' character-collapsed':''}" data-act="flip-hero" role="button" tabindex="0" aria-pressed="${ !! st.heroFlip }" aria-label="${ esc( t( 'balanceAria' ) + '. ' + t( 'heroFlipHint' ) ) }">
 			<section class="hero hero-front"><small>${ esc( t( 'ovBalance' ) ) }</small><b${ count( total, totalC ) }>${ esc( total ) }</b>
 				<div class="hero-tiles"><div><span class="k">${ UI.icon( 'arrow-down-left', 18 ) } ${ esc( t( 'ovIncome' ) ) }</span><b${ count( inc, mC.inc ) }>${ esc( inc ) }</b></div><div><span class="k">${ UI.icon( 'arrow-up-right', 18 ) } ${ esc( t( 'ovExpenses' ) ) }</span><b${ count( exp, mC.exp ) }>${ esc( exp ) }</b></div></div><i class="flip-ic" aria-hidden="true">${ UI.icon( 'refresh', 18 ) }</i></section>
 			<section class="hero hero-back" aria-hidden="true"><small>${ esc( t( 'heroBackTitle' ) ) }</small><b>${ esc( M( mC.inc - mC.exp ) ) }</b>
 				<div class="mini-bars">${ spark.map( ( s ) => `<div><span class="mb-in" style="height:${ Math.max( 4, Math.round( ( s.inc / sMax ) * 100 ) ) }%"></span><span class="mb-out" style="height:${ Math.max( 4, Math.round( ( s.exp / sMax ) * 100 ) ) }%"></span><em>${ esc( s.l ) }</em></div>` ).join( '' ) }</div>
 				<div class="hero-tiles"><div><span class="k">${ esc( t( 'heroRate' ) ) }</span><b>${ rate == null ? '—' : rate + '%' }</b></div><div><span class="k">${ esc( t( 'heroPerDay' ) ) }</span><b>${ esc( M( Math.round( mC.exp / Math.max( 1, now.getDate() ) ) ) ) }</b></div></div><i class="flip-ic" aria-hidden="true">${ UI.icon( 'refresh', 18 ) }</i></section></div>
-			${ promos() }
-			${ urgent ? DUE : WAL }
-			${ urgent ? EXA.ideasHome() : DUE }
-			${ urgent ? WAL : EXA.ideasHome() }
-			${ EXA.planHome() }
+			</section><section data-home="welcome">${ promos() }</section>
+			${ urgent ? `<section data-home="due">${DUE}</section>` : `<section data-home="wallets">${WAL}</section>` }
+			${ urgent ? `<section data-home="ideas">${EXA.ideasHome()}</section>` : `<section data-home="due">${DUE}</section>` }
+			${ urgent ? `<section data-home="wallets">${WAL}</section>` : `<section data-home="ideas">${EXA.ideasHome()}</section>` }
+			<section data-home="goals">${ EXA.planHome() }</section><section data-home="recent">
 			<div class="sec-head"><h2>${ esc( t( 'ovRecent' ) ) }</h2><button type="button" class="link" data-go="activity">${ esc( t( 'seeAll' ) ) }</button></div>
-			${ recent.length ? `<ul class="list">${ recent.map( txItem ).join( '' ) }</ul>` : `<p class="muted pad">${ esc( t( 'txNoneHint' ) ) }</p>` }`;
+			${ recent.length ? `<ul class="list">${ recent.map( txItem ).join( '' ) }</ul>` : `<p class="muted pad">${ esc( t( 'txNoneHint' ) ) }</p>` }</section>`;
 	};
 
 	/* ------------------------------------------------------------------ Activity */
@@ -182,10 +182,11 @@
 		const incomeNav = st.txFilter.type === 'income' ? `<div class="segm income-modes" role="tablist">${ [ ['recorded','incomeRecorded','arrows-sort'], ['recurring','incomeRecurring','repeat'] ].map(([id,label,ic]) => `<button type="button" role="tab" aria-selected="${ ( st.incomeMode || 'recorded' ) === id }" class="${ ( st.incomeMode || 'recorded' ) === id ? 'on' : '' }" data-income-mode="${ id }">${ UI.icon(ic,18) } ${ esc(t(label)) }</button>`).join('') }</div>` : '';
 		const y = Math.floor( st.txMonth / 12 ), m = st.txMonth % 12, fl = st.txFilter;
 		let list = EX.monthTxs( y, m );
+		if(EXA.tagFilter) list=list.filter(x=>(x.tags||[]).includes(EXA.tagFilter));
 		if ( fl.type !== 'all' ) list = list.filter( ( x ) => x.type === fl.type );
 		if ( fl.account ) list = list.filter( ( x ) => x.account === fl.account || x.toAccount === fl.account );
 		const q = EX.fold( fl.q.trim() );
-		if ( q ) list = list.filter( ( x ) => EX.fold( `${ x.name || '' } ${ x.note || '' } ${ x.type === 'transfer' ? '' : EX.catInfo( x.category ).name }` ).includes( q ) );
+		if ( q ) list = list.filter( ( x ) => EX.fold( `${ x.name || '' } ${ x.note || '' } ${(x.tags || []).join(' ')} ${ x.type === 'transfer' ? '' : EX.catInfo( x.category ).name }` ).includes( q ) );
 		const f = EX.flow( list );
 		const groups = [];
 		list.forEach( ( x ) => { const g = groups[ groups.length - 1 ]; if ( g && g.date === x.date ) g.items.push( x ); else groups.push( { date: x.date, items: [ x ] } ); } );
@@ -193,9 +194,9 @@
 		const net = money( ( sumMain( f.income ) - sumMain( f.expense ) ) / 100, mainCur() );
 		const monthHeader = `<div class="monthbar"><button type="button" class="ab-btn" data-txmonth="-1" aria-label="${ esc( t( 'prevMonth' ) ) }">${ UI.icon( 'chevron-left', 24 ) }</button><b>${ esc( monthName( y, m ) ) }</b><button type="button" class="ab-btn" data-txmonth="1" aria-label="${ esc( t( 'nextMonth' ) ) }">${ UI.icon( 'chevron-right', 24 ) }</button></div>
 			<div class="sumrow"><div class="in"><small>${ esc( t( 'ovIncome' ) ) }</small><b>${ esc( EX.sumByCur( f.income ) ) }</b></div><div><small>${ esc( t( 'ovExpenses' ) ) }</small><b>${ esc( EX.sumByCur( f.expense ) ) }</b></div><div><small>${ esc( t( 'ovNet' ) ) }</small><b>${ esc( net ) }</b></div></div>`;
-		return `${ schedules ? '' : monthHeader }
+		return `${EXA.entryReceipt?EXA.entryReceipt():''}${ schedules ? '' : monthHeader }
 			${ st.searchOpen ? `<div class="searchbar">${ UI.icon( 'search', 22 ) }<input id="txSearch" type="search" value="${ esc( fl.q ) }" placeholder="${ esc( t( 'txSearchPh' ) ) }" aria-label="${ esc( t( 'txSearchPh' ) ) }" autocomplete="off"></div>` : '' }
-			<div class="chips" role="group">${ chip( 'all', t( 'typeAll' ) ) }${ chip( 'expense', t( 'typeExpenses' ) ) }${ chip( 'income', t( 'typeIncomes' ) ) }${ chip( 'transfer', t( 'typeTransfer' ) ) }<label class="chip select${ fl.account ? ' on' : '' }">${ UI.icon( 'wallet', 18 ) }<select id="txWalletFilter" aria-label="${ esc( t( 'filterWallet' ) ) }"><option value="">${ esc( t( 'txAllWallets' ) ) }</option>${ S().accounts.map( ( a ) => `<option value="${ esc( a.id ) }"${ fl.account === a.id ? ' selected' : '' }>${ esc( EX.accountName( a ) ) }</option>` ).join( '' ) }</select></label></div>
+			<div class="chips" role="group">${ chip( 'all', t( 'typeAll' ) ) }${ chip( 'expense', t( 'typeExpenses' ) ) }${ chip( 'income', t( 'typeIncomes' ) ) }${ chip( 'transfer', t( 'typeTransfer' ) ) }${EXA.tagFilterHtml()}<label class="chip select${ fl.account ? ' on' : '' }">${ UI.icon( 'wallet', 18 ) }<select id="txWalletFilter" aria-label="${ esc( t( 'filterWallet' ) ) }"><option value="">${ esc( t( 'txAllWallets' ) ) }</option>${ S().accounts.map( ( a ) => `<option value="${ esc( a.id ) }"${ fl.account === a.id ? ' selected' : '' }>${ esc( EX.accountName( a ) ) }</option>` ).join( '' ) }</select></label></div>
 			${ incomeNav }
 			${ schedules ? EXA.incomeSchedules() : groups.length ? groups.map( ( g ) => `<section class="grp"><h2 class="sticky">${ esc( dayName( g.date ) ) }</h2><ul class="list">${ g.items.map( txItem ).join( '' ) }</ul></section>` ).join( '' ) + ( UI.isPhone() ? `<p class="hint">${ esc( t( 'swipeHint' ) ) }</p>` : '' ) : empty( 'arrows-sort', 'teal', t( 'txNone' ), t( 'txNoneHint' ), `<button type="button" class="btn btn-primary" data-act="add">${ esc( t( 'addTx' ) ) }</button>` ) }`;
 	};
@@ -320,20 +321,20 @@
 	EXA.syncLine = syncLine;
 	const row = ( more, icon, color, title, sub ) => `<button type="button" class="mrow" data-more="${ more }">${ UI.ci( icon, color, 40 ) }<span class="mid"><b>${ esc( title ) }</b>${ sub ? `<small>${ esc( sub ) }</small>` : '' }</span>${ chev }</button>`;
 
-	const updateCard = () => `<section class="card"><h2>${ esc( t( 'updTitle' ) ) }</h2><p class="muted small" id="updLine">${ esc( t( 'aboutVersion', { v: window.EXPENITY_VERSION || '0.4' } ) ) }</p><div class="btn-row"><button type="button" class="btn btn-ghost" id="updBtn" data-act="check-update">${ UI.icon( 'refresh', 20 ) } ${ esc( t( 'updCheck' ) ) }</button></div></section>`;
+	const updateCard = () => `<section class="card"><h2>${ esc( t( 'updTitle' ) ) }</h2><p class="muted small" id="updLine">${ esc( t( 'aboutVersion', { v: window.EXPENITY_VERSION || '0.4' } ) ) }</p><div class="btn-row"><button type="button" class="btn btn-ghost" id="updBtn" data-act="check-update">${ UI.icon( 'refresh', 20 ) } ${ esc( t( 'updCheck' ) ) }</button><button type="button" class="ab-btn" data-release-notes aria-label="${esc(EXA.label('changelog'))}" title="${esc(EXA.label('changelog'))}">${UI.icon('notes',22)}</button></div></section>`;
 	function accountView() {
 		if ( ! EX.auth.isSignedIn() ) {
-			return `<section class="card"><p class="muted">${ esc( t( 'acctGuest' ) ) }</p><div class="btn-row stack"><button type="button" class="btn btn-primary" data-act="auth-create">${ esc( t( 'createAccount' ) ) }</button><button type="button" class="btn btn-ghost" data-act="auth-signin">${ esc( t( 'signIn' ) ) }</button></div></section>${ updateCard() }`;
+			return `<section class="card"><p class="muted">${ esc( t( 'acctGuest' ) ) }</p><div class="btn-row stack"><button type="button" class="btn btn-primary" data-act="auth-create">${ esc( t( 'createAccount' ) ) }</button><button type="button" class="btn btn-ghost" data-act="auth-signin">${ esc( t( 'signIn' ) ) }</button></div></section>${ updateCard() }${EXA.installGuideEntry()}`;
 		}
 		const u = EX.auth.user() || {}, d = st.devCache, pk = d ? d.passkeys : [], ss = d ? d.sessions : [], left = EX.auth.codesLeft();
-		return `<section class="card"><p><b>${ esc( t( 'acctSignedIn', { email: u.email || '' } ) ) }</b></p><p class="muted small" id="syncLine">${ syncLine() }</p>${ u.emailVerified ? '' : `<p class="muted small">${ esc( t( 'emailPending' ) ) }</p>` }<div class="btn-row"><button type="button" class="btn btn-ghost" data-act="sync-now">${ UI.icon( 'refresh', 20 ) } ${ esc( t( 'syncNow' ) ) }</button></div></section>
+		return `<section class="card"><p><b>${ esc( t( 'acctSignedIn', { email: u.email || '' } ) ) }</b></p><p class="muted small" id="syncLine">${ syncLine() }</p><div class="btn-row"><button type="button" class="btn btn-ghost" data-act="sync-now">${ UI.icon( 'refresh', 20 ) } ${ esc( t( 'syncNow' ) ) }</button></div></section>
 			<section class="card"><h2>${ esc( t( 'devPasskeys' ) ) }</h2><ul class="plain flat">${ pk.map( ( p ) => `<li><span>${ UI.icon( 'key', 20 ) } <b>${ esc( p.label ) }</b><small class="muted"> ${ esc( t( 'devAdded', { date: fmtDate( p.createdAt ) } ) ) } · ${ esc( p.lastUsed ? t( 'devUsed', { date: fmtDate( p.lastUsed ) } ) : t( 'devNever' ) ) }</small></span>${ pk.length > 1 ? `<button type="button" class="btn btn-ghost btn-sm" data-act="rm-passkey" data-id="${ esc( p.id ) }">${ esc( t( 'devRemove' ) ) }</button>` : '' }</li>` ).join( '' ) }</ul><div class="btn-row"><button type="button" class="btn btn-ghost" data-act="add-passkey">${ esc( t( 'devAdd' ) ) }</button></div></section>
 			<section class="card"><h2>${ esc( t( 'devSessions' ) ) }</h2><ul class="plain flat">${ ss.map( ( s ) => `<li><span>${ UI.icon( 'devices', 20 ) } <small class="muted">${ esc( fmtDate( s.createdAt ) ) }</small> ${ s.current ? `<b>${ esc( t( 'devThis' ) ) }</b>` : '' }</span>${ s.current ? '' : `<button type="button" class="btn btn-ghost btn-sm" data-act="rm-session" data-id="${ esc( s.id ) }">${ esc( t( 'devSignOut' ) ) }</button>` }</li>` ).join( '' ) }</ul></section>
 			<section class="card"><h2>${ esc( t( 'devCodes' ) ) }</h2><p class="muted small">${ left == null ? '' : esc( t( 'codesLeft', { n: left } ) ) }</p><div class="btn-row"><button type="button" class="btn btn-ghost" data-act="new-codes">${ esc( t( 'devCodesBtn' ) ) }</button></div></section>
 			<section class="card"><div class="btn-row"><button type="button" class="btn btn-ghost" data-act="sign-out">${ UI.icon( 'logout', 20 ) } ${ esc( t( 'signOut' ) ) }</button></div></section>
 			<section class="card"><h2>${ esc( t( 'photoStorage' ) ) }</h2><p class="muted small">${ esc( t( 'photoDeleteHelp' ) ) }</p><button type="button" class="btn btn-danger-ghost" data-act="delete-photos">${ UI.icon( 'trash', 20 ) } ${ esc( t( 'photoDeleteAll' ) ) }</button></section>
 			<section class="card danger"><h2>${ esc( t( 'devDelete' ) ) }</h2><p class="muted small">${ esc( t( 'devDeleteText' ) ) }</p><div class="btn-row"><button type="button" class="btn btn-danger" data-act="delete-account">${ esc( t( 'devDelete' ) ) }</button></div></section>
-			${ updateCard() }`;
+			${ updateCard() }${EXA.installGuideEntry()}`;
 	}
 	function remindersView() {
 		const n = typeof Notification === 'undefined' ? null : Notification.permission, on = S().device.notify && n === 'granted';
@@ -349,7 +350,7 @@
 	}
 	function categoriesView() {
 		const custom = S().categories;
-		return `<p class="muted pad">${ esc( t( 'catCustomNote' ) ) }</p>${ custom.length ? `<ul class="list">${ custom.map( ( c ) => `<li><div class="item">${ UI.catCi( EX.catInfo( c.id ) ) }<span class="mid"><b>${ esc( c.name ) }</b><small>${ esc( t( c.type === 'income' ? 'typeIncome' : 'typeExpense' ) ) }</small></span><button type="button" class="btn btn-ghost btn-sm" data-act="del-cat" data-id="${ esc( c.id ) }">${ esc( t( 'del' ) ) }</button></div></li>` ).join( '' ) }</ul>` : `<p class="muted pad">${ esc( t( 'catNone' ) ) }</p>` }
+		return `<p class="muted pad">${ esc( t( 'catCustomNote' ) ) }</p>${ custom.length ? `<ul class="list">${ custom.map( ( c ) => `<li><div class="item">${ UI.catCi( EX.catInfo( c.id ) ) }<span class="mid"><b>${ esc( c.name ) }</b><small>${ esc( t( c.type === 'income' ? 'typeIncome' : 'typeExpense' ) ) }</small></span><button type="button" class="ab-btn" data-edit-category="${esc(c.id)}" aria-label="${esc(t('actEdit'))}">${UI.icon('pencil',20)}</button><button type="button" class="btn btn-ghost btn-sm" data-act="del-cat" data-id="${ esc( c.id ) }">${ esc( t( 'del' ) ) }</button></div></li>` ).join( '' ) }</ul>` : `<p class="muted pad">${ esc( t( 'catNone' ) ) }</p>` }
 			<div class="btn-row"><button type="button" class="btn btn-primary" data-act="add-cat">${ UI.icon( 'plus', 20 ) } ${ esc( t( 'catAdd' ) ) }</button></div>`;
 	}
 	function dataView() {
@@ -362,12 +363,12 @@
 			<section class="card"><h2>${ esc( t( 'sLanguage' ) ) }</h2><div class="chips wrap">${ Object.keys( EX.I18N.langs ).map( ( k ) => `<button type="button" class="chip big${ k === EX.lang() ? ' on' : '' }" data-lang="${ k }" lang="${ k }">${ UI.icon( 'language', 20 ) } ${ esc( EX.I18N.langs[ k ].langName ) }</button>` ).join( '' ) }</div></section>`;
 	}
 	function installView() {
-		if ( UI.isStandalone() ) return `<section class="card"><p>${ esc( t( 'installDone' ) ) }</p></section>`;
-		return `<section class="card"><h2>${ esc( t( 'installTitle' ) ) }</h2><p class="muted">${ esc( t( 'installText' ) ) }</p>${ installSteps() }${ EXA.installEvent ? `<div class="btn-row"><button type="button" class="btn btn-primary" data-act="install">${ esc( t( 'installBtn' ) ) }</button></div>` : '' }</section>`;
+		const installed=UI.isStandalone()?`<p>${esc(t('installDone'))}</p>`:'';
+		return `<section class="card"><h2>${ esc( t( 'installTitle' ) ) }</h2><p class="muted">${ esc( t( 'installText' ) ) }</p>${installed}${EXA.installGuides()}${ EXA.installEvent ? `<div class="btn-row"><button type="button" class="btn btn-primary" data-act="install">${ esc( t( 'installBtn' ) ) }</button></div>` : '' }</section>`;
 	}
 	function aboutView() {
 		const L = ( href, label, icon ) => `<a class="mrow" href="${ href }" target="_blank" rel="noopener noreferrer">${ UI.ci( icon, 'gray', 40 ) }<span class="mid"><b>${ esc( label ) }</b></span>${ UI.icon( 'link', 18 ) }</a>`;
-		return `<section class="card"><h2>${ esc( t( 'aboutTitle' ) ) }</h2><p class="muted">${ esc( t( 'aboutText' ) ) }</p><p class="muted small">${ esc( t( 'aboutVersion', { v: window.EXPENITY_VERSION || '0.3' } ) ) }</p></section>
+		return `<section class="card"><h2>${ esc( t( 'aboutTitle' ) ) }</h2><p class="muted">${ esc( t( 'aboutText' ) ).replace('George Stathopoulos','<a class="creator-link" href="https://george-stathopoulos.github.io/" target="_blank" rel="noopener noreferrer">George Stathopoulos</a>') }</p><p class="muted small">${ esc( t( 'aboutVersion', { v: window.EXPENITY_VERSION || '0.3' } ) ) }</p></section>
 			<div class="list">${ L( 'https://expenity.github.io/expenity/docs/', t( 'aboutHelp' ), 'help-circle' ) }${ L( 'https://george-stathopoulos.github.io/blog/', t( 'aboutBlog' ), 'notes' ) }${ L( 'https://george-stathopoulos.github.io/', t( 'aboutProjects' ), 'category-2' ) }${ L( 'https://github.com/expenity/expenity', t( 'aboutSource' ), 'brand-github' ) }</div>
 			<p class="muted small pad">${ esc( t( 'footerNote' ) ) }</p>
 			${ updateCard() }`;
@@ -377,6 +378,7 @@
 		if ( sub === 'account' ) return accountView();
 		if ( sub === 'wallets' ) return walletsView();
 		if ( sub === 'categories' ) return categoriesView();
+		if ( sub === 'tags' ) return EXA.tagsView();
 		if ( sub === 'reminders' ) return remindersView();
 		if ( sub === 'data' ) return dataView();
 		if ( sub === 'appearance' ) return appearanceView();
@@ -385,7 +387,8 @@
 		const u = EX.auth.user() || {};
 		const signed = EX.auth.isSignedIn();
 		return `<button type="button" class="profile" data-more="account"><span class="avatar big${ signed ? ' on' : '' }">${ signed ? `<span class="who">${ esc( ( u.email || '?' ).charAt( 0 ).toUpperCase() ) }</span>` : UI.icon( 'user-circle', 40 ) }</span><span class="mid"><b>${ esc( signed ? u.email : t( 'signIn' ) ) }</b><small>${ signed ? syncLine() : esc( t( 'rowAccountGuest' ) ) }</small></span>${ chev }</button>
-			<div class="list mlist">${ row( 'wallets', 'wallet', 'teal', t( 'walletsTitle' ), t( 'ovManage' ) ) }<button type="button" class="mrow" data-go="plan">${ UI.ci( 'target', 'pink', 40 ) }<span class="mid"><b>${ esc( t( 'planTitle' ) ) }${ EXA.goalsDiscovery() }</b><small>${ esc( t( 'planMoreSub' ) ) }</small></span>${ UI.icon( 'chevron-right', 18 ) }</button>${ row( 'categories', 'tag', 'purple', t( 'catsTitle' ) ) }${ row( 'reminders', 'bell', 'amber', t( 'rowReminders' ) ) }${ row( 'data', 'database-export', 'blue', t( 'rowData' ) ) }${ row( 'appearance', 'palette', 'pink', t( 'rowAppearance' ) ) }${ UI.isStandalone() ? '' : row( 'install', 'device-mobile', 'green', t( 'rowInstall' ) ) }${ row( 'about', 'info-circle', 'gray', t( 'rowAbout' ) ) }</div>`;
+			<section class="card receipt-setting"><label class="entry-check"><input type="checkbox" role="switch" data-receipt-enabled${S().settings.receiptScanner!==false?' checked':''}>${esc(t('receiptScannerSetting'))}</label><p class="muted small">${esc(t('receiptScannerSettingHelp'))}</p></section>
+            <div class="list mlist">${ row( 'wallets', 'wallet', 'teal', t( 'walletsTitle' ), t( 'ovManage' ) ) }<button type="button" class="mrow" data-go="plan">${ UI.ci( 'target', 'pink', 40 ) }<span class="mid"><b>${ esc( t( 'planTitle' ) ) }${ EXA.goalsDiscovery() }</b><small>${ esc( t( 'planMoreSub' ) ) }</small></span>${ UI.icon( 'chevron-right', 18 ) }</button>${ row( 'tags', 'tag', 'teal', EXA.label('tags') ) }${ row( 'categories', 'tag', 'purple', t( 'catsTitle' ) ) }${ row( 'reminders', 'bell', 'amber', t( 'rowReminders' ) ) }${ row( 'data', 'database-export', 'blue', t( 'rowData' ) ) }<button type="button" class="mrow" data-home-settings>${UI.ci('layout-dashboard','blue',40)}<span class="mid"><b>${esc(EXA.label('editHome'))}</b><small>${esc(EXA.label('editSizeHint'))}</small></span>${chev}</button>${ row( 'appearance', 'palette', 'pink', t( 'rowAppearance' ) ) }${ UI.isStandalone() ? '' : row( 'install', 'device-mobile', 'green', t( 'rowInstall' ) ) }${ row( 'about', 'info-circle', 'gray', t( 'rowAbout' ) ) }</div>`;
 	};
 
 	/** The whole content of the main column for the current screen. */

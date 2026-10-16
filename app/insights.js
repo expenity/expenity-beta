@@ -87,7 +87,7 @@
 	const card = ( o ) => `<div class="idea" data-id="${ esc( o.id ) }">${ UI.ci( o.icon, o.color, 44 ) }<div class="mid"><b>${ esc( o.title ) }</b><p>${ esc( o.text ) }</p>
 		<div class="acts"><button type="button" class="btn btn-ghost sm" data-idea="open" data-id="${ esc( o.id ) }" data-go="${ esc( o.go || '' ) }">${ esc( t( 'ideaOpen' ) ) }</button><button type="button" class="link" data-idea="off" data-id="${ esc( o.id ) }">${ esc( t( 'ideaOff' ) ) }</button></div></div></div>`;
 	EXA.ideasHome = () => {
-		const l = I.list().slice( 0, 2 );
+		const l = I.list().slice( 0, 1 );
 		if ( st.ideasExpanded ) return `<div class="sec-head"><h2>${ esc(t('ideasTitle')) }</h2><button type="button" class="link" data-idea="all">${ esc(t('ideasCollapse')) }</button></div>${ EXA.ideasTab() }`;
 		return `<div class="sec-head"><h2>${ esc( t( 'ideasTitle' ) ) }</h2><button type="button" class="link" data-idea="all">${ esc( t( 'seeAll' ) ) }</button></div>${ l.length ? `<div class="ideas">${ l.map( card ).join( '' ) }</div>` : `<p class="muted pad">${ esc(t('ideasNone')) }</p>` }`;
 	};

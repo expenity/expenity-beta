@@ -96,3 +96,795 @@
 #customThemeForm input[type=color]{width:100%;height:48px;padding:4px}
 :root[data-motion=off] .neon-trails,:root[data-motion=reduced] .neon-trails{display:none}
 @media(prefers-reduced-motion:reduce){:root:not([data-motion=full]) .neon-trails{display:none}}
+/* Custom themes are a separate editor, never a template tile. */
+.tc-name{display:flex;align-items:center;gap:6px}.tc-name .i{flex-shrink:0}.custom-theme-section{margin-top:22px;border-top:1px solid var(--line);padding:18px 0 4px}.custom-theme-heading{display:flex;align-items:flex-start;gap:12px}.custom-theme-heading h3{margin:0 0 5px}.custom-theme-heading p{font-size:.85rem;color:var(--muted);margin:0 0 12px}.custom-theme-section .btn-row{flex-wrap:wrap}.custom-theme-section .btn{white-space:normal;max-width:100%;min-height:44px}.custom-theme-swatches{display:flex;gap:6px;margin:8px 0 16px}.custom-theme-swatches i{width:36px;height:22px;border:1px solid var(--line);border-radius:7px}.custom-start-palettes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:12px 0 22px}.palette-option{display:flex;flex-direction:column;align-items:stretch;gap:8px;min-height:74px;padding:10px;background:var(--surface);color:var(--ink);border:2px solid var(--line);border-radius:12px;cursor:pointer;min-width:0}.palette-option[aria-pressed=true]{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft)}.palette-option>span{display:flex;height:23px;overflow:hidden;border-radius:7px;border:1px solid var(--line)}.palette-option i{flex:1}.palette-option b{font-size:12px;text-align:start}.custom-colour-controls{display:grid;gap:10px;margin-bottom:20px}.custom-colour-row{display:grid;grid-template-columns:minmax(0,1fr) 52px 100px;gap:8px;align-items:center}.custom-colour-row>label{display:flex;align-items:center;gap:7px;font-size:13px;min-width:0;overflow-wrap:anywhere}.custom-colour-row>label .i{flex-shrink:0}.custom-colour-row input[data-palette-hex]{width:100%;min-width:0;font:13px var(--mono);color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:9px;min-height:48px;padding:8px}.custom-colour-row input[type=color]{cursor:pointer;min-height:48px;border:1px solid var(--line);border-radius:9px;background:var(--surface);appearance:auto}#customThemeForm .f>span .i{vertical-align:middle;margin-right:5px}#customThemeForm .sticky-actions{background:var(--surface);padding-top:12px}#palettePreview{display:grid;gap:12px;background:var(--preview-bg);color:var(--preview-ink);border:1px solid var(--preview-icon);border-radius:var(--preview-round);padding:16px;margin-bottom:14px}#palettePreview .palette-preview-nav{display:flex;justify-content:space-around;color:var(--preview-icon);padding:8px}#palettePreview .palette-preview-card{background:var(--preview-accent);color:var(--preview-on-accent);border-radius:var(--preview-round);padding:16px;position:relative}#palettePreview .palette-preview-card b{display:block;margin-top:8px;font-size:28px;padding-right:45px}#palettePreview .palette-preview-add{position:absolute;bottom:14px;right:14px;width:40px;height:40px;display:grid;place-items:center;background:var(--preview-on-accent);color:var(--preview-accent);border:0;border-radius:50%;pointer-events:none}#palettePreview .palette-preview-row{background:var(--preview-surface);color:var(--preview-ink);border-radius:var(--preview-round);display:flex;align-items:center;gap:10px;padding:12px;font-size:13px}#palettePreview .palette-preview-row>.i{color:var(--preview-icon);flex-shrink:0}#palettePreview .palette-preview-row span{flex:1;min-width:0}#palettePreview .palette-preview-row strong{font-size:13px}
+@media(min-width:600px){.custom-start-palettes{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.custom-theme-section{border:1px solid var(--line);background:var(--bg);padding:16px;border-radius:16px;margin:6px 0 24px}.custom-theme-editor .sheet-head h2{display:flex;gap:8px;align-items:center}.custom-theme-editor .sheet-head h2 .i{flex-shrink:0}
+
+/* Playful tribute themes. UI surfaces stay opaque; scenery never handles input. */
+:root:is([data-skin=mario],[data-skin=bricks],[data-skin=minnie]){color-scheme:light;--bg-img:none;--font:var(--round);--font-head:var(--round);--accent-ink:#fff;--brand-ink:#fff;--hero-ink:#fff;--brand:var(--accent);--fab-bg:var(--accent);--accent-2:var(--accent);--card-line:var(--line);--bw:2px;--rk:1.1;--brand-glow:none;--ok:#08734c;--late:#b62038;--late-soft:#ffe4e9;--bar-in:#08734c;--bar-out:var(--accent)}
+:root[data-skin=mario]{--bg:#dcf3ff;--surface:#fffdf2;--ink:#172b49;--ink-2:#294464;--muted:#4a6077;--line:#a8c9db;--accent:#c52b32;--accent-soft:#ffe4d7;--hero-bg:linear-gradient(130deg,#174ea8,#2670b8);--shadow:0 4px 0 #90b7c43b;--font-head:var(--mono);--rk:.55}
+:root[data-skin=bricks]{--bg:#fff5d8;--surface:#fff;--ink:#182d4b;--ink-2:#304966;--muted:#536479;--line:#c9d4e0;--accent:#164bb2;--accent-soft:#e3edff;--hero-bg:linear-gradient(115deg,#164bb2,#186d94);--shadow:0 5px 0 #9daec34d;--rk:.8}
+:root[data-skin=minnie]{--bg:#fff0f3;--surface:#fffafd;--ink:#35202d;--ink-2:#593747;--muted:#795362;--line:#e6becd;--accent:#a7194c;--accent-soft:#fbe0e9;--hero-bg:linear-gradient(125deg,#a7194c,#74254b);--shadow:0 9px 24px #9f2c4b16;--rk:1.4;--font-head:var(--hand)}
+:root[data-skin=mario] .hero{border-bottom:5px solid #f1bd3e}
+:root[data-skin=bricks] .hero{border-bottom:5px solid #f2c52c}
+:root[data-skin=bricks] .card,:root[data-skin=bricks] .wc{border-top-color:#e7bb26}
+:root[data-skin=minnie] .hero{background-image:radial-gradient(circle at 7px 7px,#ffffff12 2px,transparent 3px),var(--hero-bg);background-size:22px 22px,100% 100%}
+:root:is([data-skin=mario],[data-skin=bricks],[data-skin=minnie]) .theme-card.on{outline:2px solid var(--accent);outline-offset:2px}
+.fun-scene{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;contain:strict}
+.fun-scene>i{position:absolute;left:var(--x);top:var(--y);animation-delay:var(--delay);animation-timing-function:ease-in-out;animation-iteration-count:infinite;pointer-events:none}
+.fun-cloud{width:100px;height:24px;background:#fff;box-shadow:20px -18px 0 -2px #fff,45px -10px 0 #fff,16px 12px 0 -6px #fff;opacity:.7;animation:fun-cloud-drift 30s ease-in-out infinite}
+.fun-hill{width:270px;height:180px;top:auto!important;bottom:-45px;border-radius:50% 50% 0 0;background:linear-gradient(150deg,#90d879,#3b9b6a);opacity:.32;animation:fun-hill-breathe 12s ease-in-out infinite}
+.fun-hill:nth-child(5){bottom:10%;width:150px;height:100px;opacity:.18}
+.fun-coin{width:17px;height:23px;border:3px solid #d39b17;background:#ffe07b;box-shadow:inset 3px 0 #fff5bb,3px 3px 0 #e8ac3533;opacity:.6;animation:fun-coin-turn 5s ease-in-out infinite}
+.fun-block{width:38px;height:38px;border:3px solid #bf8128;background:repeating-linear-gradient(0deg,transparent 0 15px,#bf8128 15px 18px),repeating-linear-gradient(90deg,#f1bf60 0 16px,#bf8128 16px 19px);opacity:.35;animation:fun-float 8s ease-in-out infinite}
+.fun-brick{width:clamp(220px,27vw,380px);height:clamp(148px,18vw,254px);background:url('assets/themes/brick-pencil-v3.webp') center/contain no-repeat;opacity:.72;transform:rotate(var(--turn));animation:fun-brick-float 16s ease-in-out infinite}
+.fun-brick:nth-child(1){left:-12%;top:1%;--turn:-8deg}
+.fun-brick:nth-child(2){left:75%;top:38%;--turn:12deg;animation-duration:20s}
+.fun-brick:nth-child(3){left:-7%;top:78%;--turn:6deg;animation-duration:18s}
+.minnie-scene{background:radial-gradient(ellipse at 10% 20%,#e7a0b522,transparent 36%),radial-gradient(ellipse at 90% 70%,#d898b72a,transparent 38%),radial-gradient(circle,#b45a7e22 1.5px,transparent 2px);background-size:auto,auto,32px 32px}
+.fun-bow{width:52px;height:24px;opacity:.23;animation:fun-brick-float 12s ease-in-out infinite;background:radial-gradient(ellipse at center,#a7194c 0 5px,transparent 6px)}
+.fun-bow::before,.fun-bow::after{content:"";position:absolute;top:0;width:24px;height:24px;background:radial-gradient(circle,#fff 1px,transparent 2px),#cf456b;background-size:8px 8px;border-radius:5px 65% 65% 5px;transform:rotate(12deg)}
+.fun-bow::after{right:0;transform:rotate(168deg)}
+.fun-confetti{width:8px;height:8px;border-radius:50%;background:#aa4969;opacity:.2;animation:fun-float 9s ease-in-out infinite}
+.fun-petal{width:20px;height:35px;border-radius:80% 0 80% 0;background:linear-gradient(130deg,#e6a6bc,#cf6f93);opacity:.2;animation:fun-brick-float 16s ease-in-out infinite}
+@keyframes fun-cloud-drift{0%,100%{transform:translateX(-25px)}50%{transform:translateX(55px)}}
+@keyframes fun-hill-breathe{0%,100%{transform:translateY(0)}50%{transform:translateY(8px)}}
+@keyframes fun-coin-turn{0%,35%,100%{transform:rotateY(0) translateY(0)}65%{transform:rotateY(180deg) translateY(-9px)}}
+@keyframes fun-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-18px)}}
+@keyframes fun-brick-float{0%,100%{transform:translateY(0) rotate(var(--turn))}50%{transform:translateY(-24px) rotate(calc(var(--turn) * -1))}}
+:root[data-fun-motion=still] .fun-scene *{animation:none!important}
+:root[data-fun-motion=still] :is(.tabbar,.rail)::before,:root[data-fun-motion=still] :is(.tabbar,.rail)::after{display:none!important}
+:root:has(dialog[open]) :is(.tabbar,.rail)::before,:root:has(dialog[open]) :is(.tabbar,.rail)::after,:root:has(.dashboard-editing) :is(.tabbar,.rail)::before,:root:has(.dashboard-editing) :is(.tabbar,.rail)::after{visibility:hidden}
+.theme-card:is([data-skin-set=mario],[data-skin-set=bricks],[data-skin-set=minnie]) .tc-prev{position:relative;overflow:hidden}
+.theme-card[data-skin-set=mario] .tc-prev::before{content:"";position:absolute;right:9px;top:10px;width:16px;height:18px;background:#ffe07b;border:2px solid #d39b17;box-shadow:-80px 8px 0 -3px #fff}
+.theme-card[data-skin-set=bricks] .tc-prev::before{content:"";position:absolute;right:0;top:0;width:65px;height:50px;background:url('assets/themes/brick-pencil-v3.webp') center/contain no-repeat}
+.theme-card[data-skin-set=minnie] .tc-prev{background-image:radial-gradient(circle,#b45a7e33 2px,transparent 3px)!important;background-size:16px 16px!important}
+:root[data-skin=bricks] .appbar,:root[data-skin=bricks] .sec-head{background:var(--bg)}
+
+/* Vader: monochrome command deck. No colour filter is applied to user photos. */
+:root[data-skin=vader]{color-scheme:dark;--bg:#000;--bg-img:none;--surface:#0b0b0b;--ink:#f3f3f3;--ink-2:#dedede;--muted:#ababab;--line:#3d3d3d;--accent:#fff;--accent-2:#fff;--accent-ink:#000;--accent-soft:#232323;--late:#fff;--late-soft:#252525;--warn:#d6d6d6;--ok:#ededed;--shadow:0 7px 30px #0009;--rk:.65;--bw:1px;--card-line:#4b4b4b;--font-head:var(--mono);--brand:#fff;--brand-ink:#000;--brand-glow:0 0 22px #ffffff16;--fab-bg:#fff;--hero-bg:linear-gradient(125deg,#171717,#050505 70%);--hero-ink:#fff;--bar-in:#fff;--bar-out:#8a8a8a;--tbg:#222;--tfg:#eee}
+:root[data-skin=vader] [class*="tint-"]{--tbg:#202020;--tfg:#e9e9e9}
+:root[data-skin=vader] :is(.appbar,.tabbar,.rail,.sheet,.pane){background:#080808}
+:root[data-skin=vader] .hero{border:1px solid #666;box-shadow:inset 3px 0 #f6f6f6,inset 6px 0 12px #ffffff12,0 15px 36px #0008}
+:root[data-skin=vader] .hero .flip-ic{background:#ffffff12;border:1px solid #ffffff40}
+:root[data-skin=vader] :is(.chart,.ring,.donut,.legend-dot){filter:grayscale(1)}
+:root[data-skin=vader] .sec-head{background:#000}
+:root[data-skin=vader] .ab-title.home b i{color:#fff}
+:root[data-skin=vader] .theme-card.on{outline:2px solid #fff;outline-offset:2px}
+.vader-scene{background:radial-gradient(ellipse at 85% 20%,#ffffff06,transparent 45%)}
+.fun-star{width:2px;height:2px;border-radius:50%;background:#fff;opacity:.42;box-shadow:0 0 5px #ffffff45;animation:orbit-star-drift 38s linear infinite}
+.fun-star:nth-child(3n){width:1px;height:1px;opacity:.22;animation-duration:55s}.fun-star:nth-child(7n){width:3px;height:3px;opacity:.58;animation-duration:42s}
+.fun-planet{width:clamp(200px,35vw,480px);aspect-ratio:1;left:72%!important;top:8%!important;border-radius:50%;background:radial-gradient(circle at 28% 24%,#555,#1c1c1c 27%,#080808 56%,#000 74%);box-shadow:inset 7px 2px 8px #ffffff35,-3px -1px 4px #ffffff12;animation:orbit-world-drift 55s ease-in-out infinite}
+.fun-moon{width:90px;height:90px;left:-35px!important;top:68%!important;border-radius:50%;background:radial-gradient(circle at 20% 20%,#747474,#252525 30%,#050505 65%);box-shadow:inset 2px 1px 3px #aaa;opacity:.6;animation:orbit-world-drift 65s ease-in-out infinite reverse}
+.fun-station{width:85px;height:85px;left:82%!important;top:54%!important;border-radius:50%;background:linear-gradient(0deg,transparent 48%,#000 49% 51%,transparent 52%),repeating-linear-gradient(0deg,#ffffff0a 0 1px,transparent 1px 6px),radial-gradient(circle at 25% 25%,#666,#181818 50%,#010101 74%);box-shadow:inset 2px 1px 3px #aaa;animation:orbit-world-drift 45s ease-in-out infinite}
+.fun-station::after{content:"";position:absolute;left:20%;top:22%;width:26%;height:26%;border:1px solid #666;border-radius:50%;background:radial-gradient(circle at 60% 60%,#121212,#666);transform:rotate(-18deg) scaleY(.8)}
+.fun-fighter,.fun-cruiser{left:-180px!important;width:76px;height:52px;background:url('assets/themes/orbit-fighter.svg') center/contain no-repeat;opacity:.72;animation:orbit-patrol 27s linear infinite;will-change:transform}
+.fun-fighter:nth-last-child(3){width:43px;height:32px;opacity:.45;animation-duration:39s;animation-direction:reverse}
+.fun-fighter:nth-last-child(2){width:61px;height:42px;opacity:.6;animation-duration:32s}
+.fun-cruiser{width:170px;height:90px;background-image:url('assets/themes/orbit-cruiser.svg');opacity:.3;animation:orbit-patrol 70s linear infinite reverse}
+@keyframes orbit-star-drift{0%{transform:translate3d(0,0,0)}100%{transform:translate3d(-25px,50px,0)}}
+@keyframes orbit-world-drift{0%,100%{transform:translate3d(0,0,0) rotate(-7deg)}50%{transform:translate3d(-15px,20px,0) rotate(7deg)}}
+@keyframes orbit-patrol{0%{transform:translate3d(-160px,35px,0) rotate(-15deg)}100%{transform:translate3d(calc(100vw + 340px),-90px,0) rotate(15deg)}}
+:root[data-fun-motion=still] .vader-scene :is(.fun-fighter,.fun-cruiser){display:none}
+.theme-card[data-skin-set=vader] .tc-prev{background-image:radial-gradient(circle at 85% 15%,#fff 1px,transparent 2px),radial-gradient(circle at 15% 80%,#fff 1px,transparent 2px)!important}
+:root[data-skin=vader] .btn-danger{background:#e5e5e5;color:#000;border-color:#fff}
+:root[data-skin=vader] .hero{position:relative;isolation:isolate;overflow:hidden}
+:root[data-skin=vader] .hero::after{content:"";position:absolute;pointer-events:none;z-index:-1;left:-90px;bottom:18px;width:70px;height:48px;background:url('assets/themes/orbit-fighter.svg') center/contain no-repeat;opacity:.3;animation:orbit-card-patrol 23s -9s linear infinite}
+@keyframes orbit-card-patrol{from{transform:translate3d(0,10px,0) rotate(-12deg)}to{transform:translate3d(980px,-20px,0) rotate(15deg)}}
+:root[data-fun-motion=still][data-skin=vader] .hero::after{display:none}
+:root[data-skin=vader] .hero{background-image:radial-gradient(circle at 70% 16%,#ffffff99 0 1px,transparent 1.8px),radial-gradient(circle at 87% 39%,#ffffff66 0 1px,transparent 1.6px),radial-gradient(circle at 54% 70%,#ffffff55 0 .7px,transparent 1.6px),radial-gradient(circle at 15% 90%,#ffffff66 0 1px,transparent 1.8px),radial-gradient(circle at 36% 54%,#ffffff44 0 .7px,transparent 1.6px),var(--hero-bg)}
+:root[data-skin=vader] .hero::before{content:"";position:absolute;pointer-events:none;right:-45px;top:75px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle at 25% 20%,#585858,#171717 33%,#050505 62%);box-shadow:inset 4px 1px 4px #ffffff66;opacity:.35;z-index:-1}
+:root[data-skin=vader] .hero::after{animation-delay:-4s;opacity:.5}
+/* User-selected portrait: locally bundled; grayscale is limited to this decorative artwork. */
+:root[data-skin=vader] .hero-flip{position:relative;isolation:isolate;margin-top:156px}
+:root[data-skin=vader] .hero-flip>.hero{position:relative;z-index:1}
+:root[data-skin=vader] .hero-flip::before{content:"";position:absolute;pointer-events:none;right:16px;bottom:calc(100% - 27px);width:156px;height:190px;background:url('assets/themes/vader-portrait-v1.webp') center 18%/cover no-repeat;filter:grayscale(1) contrast(1.65) brightness(1.12);mix-blend-mode:screen;mask-image:linear-gradient(to right,transparent,#000 18% 82%,transparent);transform-origin:50% 100%;animation:vader-breathe 5s ease-in-out infinite;z-index:0}
+:root[data-skin=vader] #view.enter .hero-flip:not(.character-retreated):not(.character-retreating)::before{animation:vader-emerge 1s .15s both}
+:root[data-skin=vader] .hero-flip.character-retreating::before{animation:character-blur-away .85s ease-in forwards}
+@keyframes vader-breathe{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-3px) scale(1.015)}}
+@keyframes vader-emerge{from{opacity:0;transform:translateY(75px) rotateY(-35deg)}to{opacity:1;transform:translateY(0) rotateY(0)}}
+:root[data-fun-motion=still][data-skin=vader] .hero-flip{margin-top:4px}
+:root[data-fun-motion=still][data-skin=vader] .hero-flip::before{display:none}
+:root[data-skin=vader] :is(.dash-small,.dash-medium,.dashboard-editing) .hero-flip{margin-top:4px}
+:root[data-skin=vader] :is(.dash-small,.dash-medium,.dashboard-editing) .hero-flip::before{display:none}
+:root:has(dialog[open])[data-skin=vader] .hero-flip::before{visibility:hidden}
+
+:root[data-skin=vader] .hero-flip.character-retreated::before{opacity:0;animation:none;filter:var(--character-base-filter,brightness(1)) blur(6px);transform:none;top:16px;bottom:auto;z-index:2}
+/* Sketchbook revision: actual colored-pencil artwork, including a visible card illustration. */
+:root[data-skin=bricks]{--hero-bg:#fffdf0;--hero-ink:#182d4b;--card-line:#d6cdb5;--shadow:0 3px 0 #5b4c2e20}
+:root[data-skin=bricks] .hero{position:relative;isolation:isolate;overflow:hidden;border:1px solid #b8ad8d;border-bottom:3px double #b8ad8d;box-shadow:2px 4px 0 #79664415}
+:root[data-skin=bricks] .hero-tiles>div{background:#164bb20b;border:1px solid #182d4b20}
+:root[data-skin=bricks] .hero .flip-ic{background:#182d4b0d;border:1px solid #182d4b26}
+:root[data-skin=bricks] .hero::after{content:"";position:absolute;right:14px;bottom:8px;width:142px;height:95px;background:url('assets/themes/brick-pencil-v3.webp') center/contain no-repeat;pointer-events:none;z-index:-1;opacity:.8;animation:sketch-brick-sway 14s ease-in-out infinite}
+:root[data-skin=bricks] .fun-brick{width:clamp(280px,32vw,420px);height:clamp(187px,21.4vw,280px);opacity:.66}
+@keyframes sketch-brick-sway{0%,100%{transform:rotate(-5deg) translateY(0)}50%{transform:rotate(3deg) translateY(-5px)}}
+:root[data-skin=bricks][data-fun-motion=still] .hero::after{animation:none}
+:root[data-skin=bricks] .hero-back::after{display:none}
+:root[data-skin=bricks] :is(.dash-small,.dash-medium) .hero::after{display:none}
+
+/* Character illustrations belong to the balance card, never navigation or data controls. */
+:root:is([data-skin=mario],[data-skin=minnie]) .hero-flip{position:relative;isolation:isolate;margin-top:178px}
+:root:is([data-skin=mario],[data-skin=minnie]) .hero-flip>.hero{position:relative;z-index:1}
+:root:is([data-skin=mario],[data-skin=minnie]) .hero-flip::before{content:"";position:absolute;pointer-events:none;right:10px;bottom:calc(100% - 22px);width:214px;height:206px;background:var(--card-character-image) center/290px 290px no-repeat;mix-blend-mode:multiply;transform-origin:50% 100%;animation:card-character-nudge 6s ease-in-out infinite;z-index:0}
+:root[data-skin=mario]{--card-character-image:url('assets/themes/mario-pencil-v4.png')}
+:root[data-skin=minnie]{--card-character-image:url('assets/themes/mickey-minnie-pencil-v1.webp')}
+:root[data-skin=minnie] .hero-flip::before{right:8px;width:248px;height:206px;background-size:248px auto;background-position:center 34%;mask-image:linear-gradient(to right,transparent,#000 5% 95%,transparent)}
+:root:is([data-skin=mario],[data-skin=minnie]) #view.enter .hero-flip:not(.character-retreated):not(.character-retreating)::before{animation:vader-emerge 1s .15s both}
+:root:is([data-skin=mario],[data-skin=minnie]) .hero-flip.character-retreating::before{animation:character-blur-away .85s ease-in forwards}
+:root:is([data-skin=mario],[data-skin=minnie]) .hero-flip.character-retreated::before{opacity:0;animation:none;filter:var(--character-base-filter,brightness(1)) blur(6px);transform:none;top:16px;bottom:auto;z-index:2}
+@keyframes card-character-nudge{0%,45%,100%{transform:translateY(0) rotate(0)}54%{transform:translateY(-4px) rotate(-2deg)}62%{transform:translateY(0) rotate(1deg)}72%{transform:translateY(-2px) rotate(-1deg)}}
+:root:is([data-skin=mario],[data-skin=minnie])[data-fun-motion=still] .hero-flip{margin-top:4px}
+:root:is([data-skin=mario],[data-skin=minnie])[data-fun-motion=still] .hero-flip::before{display:none}
+:root:is([data-skin=mario],[data-skin=minnie]) :is(.dash-small,.dash-medium,.dashboard-editing) .hero-flip{margin-top:4px}
+:root:is([data-skin=mario],[data-skin=minnie]) :is(.dash-small,.dash-medium,.dashboard-editing) .hero-flip::before{display:none}
+:root:has(dialog[open]):is([data-skin=mario],[data-skin=minnie]) .hero-flip::before{visibility:hidden}
+@media(max-width:359px){:root[data-skin=minnie] .hero-flip::before{right:0;width:236px;background-size:236px auto}}
+/* Blend the source paper with the selected theme instead of showing white rectangles. */
+:root:is([data-skin=mario],[data-skin=minnie]) .hero-flip::before{background-color:var(--bg);background-blend-mode:multiply;mix-blend-mode:normal;mask-image:linear-gradient(to right,transparent,#000 5% 95%,transparent)}
+
+:root[data-skin=mario] .hero-flip::before{width:214px;height:206px;background-size:214px auto;background-position:center top}
+
+/* User-supplied transparent sketches; decorative and never interactive. */
+:root[data-skin=mario] .hero-flip::before{background-size:auto 206px;background-position:center;background-color:transparent;background-blend-mode:normal;mask-image:none}
+.mario-scene{background:radial-gradient(circle at 10% 15%,#ffffff80,transparent 48%)}
+.mario-scene>i{width:clamp(100px,17vw,190px);height:clamp(120px,20vw,220px);background:center/contain no-repeat;opacity:.16;animation:fun-brick-float 19s ease-in-out infinite}
+.mario-scene>.fun-sketch-goomba{left:-24px;top:16%;background-image:url('assets/themes/goomba-pencil-v1.png')}
+.mario-scene>.fun-sketch-mushroom{left:auto;right:-22px;top:47%;background-image:url('assets/themes/mushroom-pencil-v1.png');animation-duration:24s}
+.mario-scene>.fun-sketch-boo{left:-30px;top:76%;background-image:url('assets/themes/boo-pencil-v1.png');animation-duration:27s}
+.mario-scene>.fun-sketch-star{left:auto;right:2%;top:5%;width:90px;height:100px;background-image:url('assets/themes/star-pencil-v1.png');opacity:.24;animation-duration:21s}
+:root:has(dialog[open]) .mario-scene{visibility:hidden}
+:root[data-fun-motion=still] .mario-scene>i{animation:none}
+
+/* Reclaim the character's headroom after its retreat, without scrolling the whole page. */
+:root:is([data-skin=vader],[data-skin=mario],[data-skin=minnie]) .hero-flip{transition:margin-top .55s ease}
+:root:is([data-skin=vader],[data-skin=mario],[data-skin=minnie]) .hero-flip.character-collapsed{margin-top:4px}
+:root[data-fun-motion=still] .hero-flip{transition:none}
+@media(prefers-reduced-motion:reduce){:root:is([data-skin=vader],[data-skin=mario],[data-skin=minnie]) .hero-flip{transition:none}}
+
+/* Keep a soft character watermark rather than turning or removing the artwork. */
+:root[data-skin=vader] .hero-flip{--character-base-filter:grayscale(1) contrast(1.65) brightness(1.12)}
+@keyframes character-blur-away{0%{opacity:1;filter:var(--character-base-filter,brightness(1)) blur(0);transform:none}60%{opacity:.2;filter:var(--character-base-filter,brightness(1)) blur(6px);transform:none}100%{opacity:0;filter:var(--character-base-filter,brightness(1)) blur(9px);transform:none}}
+
+/* Locally hosted fonts: Latin and Greek subsets, regular and bold. */
+@font-face {
+  font-family: 'Noto Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(assets/themes/fonts/noto-sans-greek-ext-400.woff2) format('woff2');
+  unicode-range: U+1F00-1FFF;
+}
+@font-face {
+  font-family: 'Noto Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(assets/themes/fonts/noto-sans-greek-400.woff2) format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+@font-face {
+  font-family: 'Noto Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(assets/themes/fonts/noto-sans-latin-ext-400.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Noto Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(assets/themes/fonts/noto-sans-latin-400.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Noto Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(assets/themes/fonts/noto-sans-greek-ext-700.woff2) format('woff2');
+  unicode-range: U+1F00-1FFF;
+}
+@font-face {
+  font-family: 'Noto Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(assets/themes/fonts/noto-sans-greek-700.woff2) format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+@font-face {
+  font-family: 'Noto Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(assets/themes/fonts/noto-sans-latin-ext-700.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Noto Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(assets/themes/fonts/noto-sans-latin-700.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Noto Serif';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(assets/themes/fonts/noto-serif-greek-ext-400.woff2) format('woff2');
+  unicode-range: U+1F00-1FFF;
+}
+@font-face {
+  font-family: 'Noto Serif';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(assets/themes/fonts/noto-serif-greek-400.woff2) format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+@font-face {
+  font-family: 'Noto Serif';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(assets/themes/fonts/noto-serif-latin-ext-400.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Noto Serif';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(assets/themes/fonts/noto-serif-latin-400.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Noto Serif';
+  font-style: normal;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(assets/themes/fonts/noto-serif-greek-ext-700.woff2) format('woff2');
+  unicode-range: U+1F00-1FFF;
+}
+@font-face {
+  font-family: 'Noto Serif';
+  font-style: normal;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(assets/themes/fonts/noto-serif-greek-700.woff2) format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+@font-face {
+  font-family: 'Noto Serif';
+  font-style: normal;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(assets/themes/fonts/noto-serif-latin-ext-700.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Noto Serif';
+  font-style: normal;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(assets/themes/fonts/noto-serif-latin-700.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(assets/themes/fonts/roboto-greek-ext-400.woff2) format('woff2');
+  unicode-range: U+1F00-1FFF;
+}
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(assets/themes/fonts/roboto-greek-400.woff2) format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(assets/themes/fonts/roboto-latin-ext-400.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(assets/themes/fonts/roboto-latin-400.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(assets/themes/fonts/roboto-greek-ext-700.woff2) format('woff2');
+  unicode-range: U+1F00-1FFF;
+}
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(assets/themes/fonts/roboto-greek-700.woff2) format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(assets/themes/fonts/roboto-latin-ext-700.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(assets/themes/fonts/roboto-latin-700.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Roboto Slab';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(assets/themes/fonts/roboto-slab-greek-ext-400.woff2) format('woff2');
+  unicode-range: U+1F00-1FFF;
+}
+@font-face {
+  font-family: 'Roboto Slab';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(assets/themes/fonts/roboto-slab-greek-400.woff2) format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+@font-face {
+  font-family: 'Roboto Slab';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(assets/themes/fonts/roboto-slab-latin-ext-400.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Roboto Slab';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(assets/themes/fonts/roboto-slab-latin-400.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Roboto Slab';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(assets/themes/fonts/roboto-slab-greek-ext-700.woff2) format('woff2');
+  unicode-range: U+1F00-1FFF;
+}
+@font-face {
+  font-family: 'Roboto Slab';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(assets/themes/fonts/roboto-slab-greek-700.woff2) format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+@font-face {
+  font-family: 'Roboto Slab';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(assets/themes/fonts/roboto-slab-latin-ext-700.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Roboto Slab';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(assets/themes/fonts/roboto-slab-latin-700.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(assets/themes/fonts/open-sans-greek-ext-400.woff2) format('woff2');
+  unicode-range: U+1F00-1FFF;
+}
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(assets/themes/fonts/open-sans-greek-400.woff2) format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(assets/themes/fonts/open-sans-latin-ext-400.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(assets/themes/fonts/open-sans-latin-400.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(assets/themes/fonts/open-sans-greek-ext-700.woff2) format('woff2');
+  unicode-range: U+1F00-1FFF;
+}
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(assets/themes/fonts/open-sans-greek-700.woff2) format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(assets/themes/fonts/open-sans-latin-ext-700.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(assets/themes/fonts/open-sans-latin-700.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Fira Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(assets/themes/fonts/fira-sans-greek-ext-400.woff2) format('woff2');
+  unicode-range: U+1F00-1FFF;
+}
+@font-face {
+  font-family: 'Fira Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(assets/themes/fonts/fira-sans-greek-400.woff2) format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+@font-face {
+  font-family: 'Fira Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(assets/themes/fonts/fira-sans-latin-ext-400.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Fira Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(assets/themes/fonts/fira-sans-latin-400.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Fira Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(assets/themes/fonts/fira-sans-greek-ext-700.woff2) format('woff2');
+  unicode-range: U+1F00-1FFF;
+}
+@font-face {
+  font-family: 'Fira Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(assets/themes/fonts/fira-sans-greek-700.woff2) format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+@font-face {
+  font-family: 'Fira Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(assets/themes/fonts/fira-sans-latin-ext-700.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Fira Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(assets/themes/fonts/fira-sans-latin-700.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Comfortaa';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(assets/themes/fonts/comfortaa-greek-400.woff2) format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+@font-face {
+  font-family: 'Comfortaa';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(assets/themes/fonts/comfortaa-latin-ext-400.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Comfortaa';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(assets/themes/fonts/comfortaa-latin-400.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Comfortaa';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(assets/themes/fonts/comfortaa-greek-700.woff2) format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+@font-face {
+  font-family: 'Comfortaa';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(assets/themes/fonts/comfortaa-latin-ext-700.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Comfortaa';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(assets/themes/fonts/comfortaa-latin-700.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Alegreya';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(assets/themes/fonts/alegreya-greek-ext-400.woff2) format('woff2');
+  unicode-range: U+1F00-1FFF;
+}
+@font-face {
+  font-family: 'Alegreya';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(assets/themes/fonts/alegreya-greek-400.woff2) format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+@font-face {
+  font-family: 'Alegreya';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(assets/themes/fonts/alegreya-latin-ext-400.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Alegreya';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(assets/themes/fonts/alegreya-latin-400.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Alegreya';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(assets/themes/fonts/alegreya-greek-ext-700.woff2) format('woff2');
+  unicode-range: U+1F00-1FFF;
+}
+@font-face {
+  font-family: 'Alegreya';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(assets/themes/fonts/alegreya-greek-700.woff2) format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+@font-face {
+  font-family: 'Alegreya';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(assets/themes/fonts/alegreya-latin-ext-700.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Alegreya';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(assets/themes/fonts/alegreya-latin-700.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Literata';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(assets/themes/fonts/literata-greek-ext-400.woff2) format('woff2');
+  unicode-range: U+1F00-1FFF;
+}
+@font-face {
+  font-family: 'Literata';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(assets/themes/fonts/literata-greek-400.woff2) format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+@font-face {
+  font-family: 'Literata';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(assets/themes/fonts/literata-latin-ext-400.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Literata';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(assets/themes/fonts/literata-latin-400.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Literata';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(assets/themes/fonts/literata-greek-ext-700.woff2) format('woff2');
+  unicode-range: U+1F00-1FFF;
+}
+@font-face {
+  font-family: 'Literata';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(assets/themes/fonts/literata-greek-700.woff2) format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+@font-face {
+  font-family: 'Literata';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(assets/themes/fonts/literata-latin-ext-700.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Literata';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(assets/themes/fonts/literata-latin-700.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Geologica';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(assets/themes/fonts/geologica-greek-400.woff2) format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+@font-face {
+  font-family: 'Geologica';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(assets/themes/fonts/geologica-latin-ext-400.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Geologica';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(assets/themes/fonts/geologica-latin-400.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Geologica';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(assets/themes/fonts/geologica-greek-700.woff2) format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+@font-face {
+  font-family: 'Geologica';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(assets/themes/fonts/geologica-latin-ext-700.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Geologica';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(assets/themes/fonts/geologica-latin-700.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* All balance-card characters blur out completely after the flip. */

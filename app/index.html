@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://static.cloudflareinsights.com; connect-src 'self' https://expenity-api.george-stathopoulos.workers.dev https://cloudflareinsights.com http://localhost:* http://127.0.0.1:*; img-src 'self' data:; style-src 'self' 'unsafe-inline'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://static.cloudflareinsights.com; worker-src 'self'; connect-src 'self' https://expenity-api.george-stathopoulos.workers.dev https://cloudflareinsights.com http://localhost:* http://127.0.0.1:*; img-src 'self' data:; style-src 'self' 'unsafe-inline'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <title>[Beta] Expenity: know where your money goes</title>
 <meta name="description" content="Track expenses, income, bills and subscriptions. Sign in with a passkey and use it on every device. Free, English and Greek.">
 <meta name="robots" content="noindex, nofollow">
@@ -17,9 +17,9 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-192.png">
 <!-- Cloudflare Web Analytics: counts visits anonymously, no cookies --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "64332b427a604e879f82853393ebdb0d"}'></script><!-- End Cloudflare Web Analytics -->
-<link rel="stylesheet" href="style.css?v=mvb61o3k">
-<link rel="stylesheet" href="themes.css?v=mvb61o3k">
-<script src="theme.js?v=mvb61o3k"></script>
+<link rel="stylesheet" href="style.css?v=mvbm3l0u">
+<link rel="stylesheet" href="themes.css?v=mvbm3l0u">
+<script src="theme.js?v=mvbm3l0u"></script>
 </head>
 <body>
 <div class="app" id="app">
@@ -42,21 +42,27 @@
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 <datalist id="curList"><option>EUR</option><option>USD</option><option>GBP</option><option>CHF</option><option>CAD</option><option>AUD</option><option>SEK</option><option>NOK</option><option>DKK</option><option>PLN</option><option>TRY</option></datalist>
 
-<script src="icons.js?v=mvb61o3k"></script>
-<script src="i18n.js?v=mvb61o3k"></script>
-<script src="core.js?v=mvb61o3k"></script>
-<script src="sync.js?v=mvb61o3k"></script>
-<script src="ui.js?v=mvb61o3k"></script>
-<script src="views.js?v=mvb61o3k"></script>
-<script src="photos.js?v=mvb61o3k"></script>
-<script src="forms.js?v=mvb61o3k"></script>
-<script src="themes.js?v=mvb61o3k"></script>
-<script src="reports.js?v=mvb61o3k"></script>
-<script src="plan.js?v=mvb61o3k"></script>
-<script src="insights.js?v=mvb61o3k"></script>
-<script src="share.js?v=mvb61o3k"></script>
-<script src="push.js?v=mvb61o3k"></script>
-<script src="flow.js?v=mvb61o3k"></script>
-<script src="app.js?v=mvb61o3k"></script>
+<script src="icons.js?v=mvbm3l0u"></script>
+<script src="i18n.js?v=mvbm3l0u"></script>
+<script src="core.js?v=mvbm3l0u"></script>
+<script src="sync.js?v=mvbm3l0u"></script>
+<script src="ui.js?v=mvbm3l0u"></script>
+<script src="views.js?v=mvbm3l0u"></script>
+<script src="photos.js?v=mvbm3l0u"></script>
+<script src="forms.js?v=mvbm3l0u"></script>
+<script src="themes.js?v=mvbm3l0u"></script>
+<script src="reports.js?v=mvbm3l0u"></script>
+<script src="plan.js?v=mvbm3l0u"></script>
+<script src="insights.js?v=mvbm3l0u"></script>
+<script src="share.js?v=mvbm3l0u"></script>
+<script src="push.js?v=mvbm3l0u"></script>
+<script src="installation.js?v=mvbm3l0u"></script>
+<script src="flow.js?v=mvbm3l0u"></script>
+<script src="enhancements.js?v=mvbm3l0u"></script>
+<script src="safe-spend.js?v=mvbm3l0u"></script>
+<script src="receipts.js?v=mvbm3l0u"></script>
+<script src="dashboard.js?v=mvbm3l0u"></script>
+<script src="productivity.js?v=mvbm3l0u"></script>
+<script src="app.js?v=mvbm3l0u"></script>
 </body>
 </html>

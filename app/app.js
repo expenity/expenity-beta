@@ -12,7 +12,7 @@
 	const $ = ( s, r = document ) => r.querySelector( s );
 	const $$ = ( s, r = document ) => [ ...r.querySelectorAll( s ) ];
 	const toast = UI.toast;
-	window.EXPENITY_VERSION = '0.5';
+	window.EXPENITY_VERSION = '0.13.1';
 
 	/* ------------------------------------------------------------------ Drawing the shell */
 
@@ -22,6 +22,7 @@
 		return `<div class="pane-head"><h2>${ esc( t( 'paneTitle' ) ) }</h2></div>${ h || `<div class="empty small">${ UI.ci( 'point', 'gray', 56 ) }<p>${ esc( t( 'paneEmpty' ) ) }</p></div>` }`;
 	}
 	function render() {
+        EXA.applyCustomTheme?.();
 		const view = $( '#view' );
 		const keep = view.dataset.key === st.view + ':' + st.more ? view.scrollTop : 0;
 		// A redraw (a sync, a change elsewhere) must not steal the field someone is typing in: remember it and put it back.
@@ -44,6 +45,7 @@
 	EXA.render = render;
 	EXA.applyMotion = () => { const m = S().device.motion || 'auto'; if ( m === 'auto' ) delete document.documentElement.dataset.motion; else document.documentElement.dataset.motion = m; try { if ( m === 'auto' ) localStorage.removeItem( 'expenity.motion' ); else localStorage.setItem( 'expenity.motion', m ); } catch ( e ) { /* ignore */ } };
 	function go( view, more = 'root' ) {
+		if(view==='home'&&st.view!=='home'){clearTimeout(st.characterCollapseTimer);st.characterRetreated=false;st.characterCollapsed=false;}
 		st.view = view; st.more = more; st.sel = null;
 		if ( view === 'plan' ) { S().device.goalsDiscovered = true; EX.persist(); }
 		if ( view !== 'activity' ) { st.searchOpen = false; st.txFilter.q = ''; }
@@ -188,10 +190,10 @@
 			case 'rm-passkey': { const r = await EX.auth.removePasskey( el.dataset.id ); if ( r.ok ) { toast( t( 'tPasskeyRemoved' ) ); loadDevices(); } else toast( EXA.errText( r.error ) ); break; }
 			case 'rm-session': { const r = await EX.auth.revokeSession( el.dataset.id ); if ( r.ok ) { toast( t( 'tDeviceOut' ) ); loadDevices(); } else toast( EXA.errText( r.error ) ); break; }
 			case 'new-codes': { const r = await EX.auth.regenerateCodes(); if ( r.ok ) EXA.showCodes( r.recoveryCodes, () => render() ); else toast( EXA.errText( r.error ) ); break; }
-			case 'flip-hero': st.heroFlip = ! el.classList.contains( 'flipped' ); el.classList.toggle( 'flipped', st.heroFlip ); el.setAttribute( 'aria-pressed', String( st.heroFlip ) ); UI.haptic(); break;
+			case 'flip-hero': if(['vader','mario','minnie'].includes(EXA.skin())){if(!st.characterRetreated){st.characterCollapseTimer=setTimeout(()=>{st.characterCollapsed=true;if(st.view==='home')document.querySelector('.hero-flip')?.classList.add('character-collapsed');},1000);}st.characterRetreated=true;el.classList.add('character-retreating');setTimeout(()=>{el.classList.remove('character-retreating');el.classList.add('character-retreated');},900);} st.heroFlip = ! el.classList.contains( 'flipped' ); el.classList.toggle( 'flipped', st.heroFlip ); el.setAttribute( 'aria-pressed', String( st.heroFlip ) ); UI.haptic(); break;
 			case 'delete-photos': await EXA.photos.deleteAll(); break;
 			case 'check-update': checkUpdate( el ); break;
-			case 'apply-update': try { const reg = await navigator.serviceWorker.getRegistration(); if ( reg ) await reg.update(); } catch ( err ) { /* reload anyway */ } location.reload(); break;
+			case 'apply-update': await EXA.applyRelease(); break;
 			case 'sign-out': {
 				if ( ! await EXA.confirm( { title: t( 'signOut' ), text: t( EX.sync.pending() ? 'confirmSignOutUnsynced' : 'confirmSignOut' ), confirm: t( 'signOut' ) } ) ) break;
 				await EX.auth.logout(); st.devCache = null; toast( t( 'tSignedOut' ) ); go( 'home' ); break;
@@ -206,38 +208,20 @@
 		}
 	}
 
-	/** Which build is running: the cache name in sw.js at the time the page loaded. A different one on the server means a new version. */
-	const buildOf = ( text ) => ( /const CACHE = '([^']+)'/.exec( text ) || [] )[ 1 ] || '';
-	const fetchBuild = () => fetch( 'sw.js?check=' + Date.now(), { cache: 'no-store' } ).then( ( r ) => ( r.ok ? r.text() : '' ) ).then( buildOf );
-	async function checkUpdate( btn ) {
-		const line = $( '#updLine' ), b = btn || $( '#updBtn' );
-		const say = ( k, vars ) => { if ( line ) line.textContent = t( k, vars ); };
-		if ( b ) b.disabled = true; say( 'updChecking' );
-		try {
-			const now = await fetchBuild();
-			if ( ! now ) throw new Error( 'offline' );
-			if ( ! EXA.loadedBuild ) EXA.loadedBuild = now;
-			if ( now !== EXA.loadedBuild ) {
-				say( 'updAvailable' );
-				if ( b ) { b.disabled = false; b.dataset.act = 'apply-update'; b.innerHTML = `${ UI.icon( 'download', 20 ) } ${ esc( t( 'updNow' ) ) }`; b.classList.remove( 'btn-ghost' ); b.classList.add( 'btn-primary' ); }
-				return;
-			}
-			say( 'updLatest', { v: window.EXPENITY_VERSION || '0.4' } );
-		} catch ( err ) { say( 'updFail' ); }
-		if ( b ) b.disabled = false;
-	}
+	async function checkUpdate(btn) { await EXA.checkRelease(btn); }
+
 	function init() {
-		fetchBuild().then( ( x ) => { EXA.loadedBuild = x; } ).catch( () => {} );
 		EX.load();
 		fetch( 'favicon.svg' ).then( ( r ) => r.text() ).then( ( svg ) => { logoSvg = svg.replace( '<svg ', '<svg width="34" height="34" aria-hidden="true" ' ); EXA.logoSvg = logoSvg; $$( '#logo' ).forEach( ( l ) => { l.innerHTML = logoSvg; } ); } ).catch( () => {} );
 		UI.initSheet();
 		UI.initSwipe( document.body );
-		UI.initPull( $( '#view' ), () => { EX.sync.run().then( () => toast( t( 'syncDone' ) ) ); }, () => EX.auth.isSignedIn() && ! UI.sheetOpen() );
+		UI.initPull( $( '#view' ), () => { EX.sync.run().then( () => toast( t( 'syncDone' ) ) ); }, () => EX.auth.isSignedIn() && ! UI.sheetOpen() && ! EXA.dashboardEditing() );
 		EXA.readJoinLink();
 		EX.sync.init();
 		EXA.applyMotion();
 		render();
 		EXA.flow.init();
+		EXA.enhancementsInit();
 		if ( ! EXA.flow.active() ) enter();
 		EXA.tryJoin();
 		EXA.push.check();
@@ -253,7 +237,7 @@
 		EX.on( 'savefail', () => toast( t( 'tSaveFail' ) ) );
 
 		window.addEventListener( 'beforeinstallprompt', ( e ) => { e.preventDefault(); EXA.installEvent = e; render(); } );
-		window.addEventListener( 'appinstalled', () => { EXA.installEvent = null; S().device.installDismissed = true; EX.persist(); render(); } );
+		window.addEventListener( 'appinstalled', () => { EXA.installEvent = null; if(EXA.flow.active() && S().device.stage === 'install') EXA.installHandoff(); else { S().device.installDismissed = true; EX.persist(); render(); } } );
 		window.matchMedia( '(min-width: 1200px)' ).addEventListener( 'change', () => { st.sel = null; render(); } );
 
 		document.addEventListener( 'click', async ( e ) => {
@@ -297,8 +281,8 @@
 			const { action, id, kind } = e.detail;
 			const rowEl = e.target.closest ? e.target.closest( '.sw' ) : null;
 			if ( rowEl && ( action === 'del' || action === 'paid' ) && motionOn() ) { rowEl.classList.add( action === 'del' ? 'leaving' : 'paid-out' ); await new Promise( ( r ) => setTimeout( r, 280 ) ); }
-			if ( kind === 'tx' ) { const x = S().txs.find( ( z ) => z.id === id ); if ( action === 'edit' && x ) EXA.openTx( x ); else if ( action === 'del' ) EXA.removeTx( id ); }
-			else { const b = S().bills.find( ( z ) => z.id === id ); if ( action === 'paid' && b ) quickPay( b ); else if ( action === 'edit' && b ) EXA.openBill( b ); else if ( action === 'del' ) EXA.removeBill( id ); }
+			if ( kind === 'tx' ) { const x = S().txs.find( ( z ) => z.id === id ); if(action==='duplicate'&&x){EXA.duplicateRecord('tx',id);return;} if ( action === 'edit' && x ) EXA.openTx( x ); else if ( action === 'del' ) EXA.removeTx( id ); }
+			else { const b = S().bills.find( ( z ) => z.id === id ); if(action==='duplicate'&&b){EXA.duplicateRecord('bill',id);return;} if ( action === 'paid' && b ) quickPay( b ); else if ( action === 'edit' && b ) EXA.openBill( b ); else if ( action === 'del' ) EXA.removeBill( id ); }
 		} );
 
 		document.addEventListener( 'submit', ( e ) => {

@@ -155,10 +155,10 @@
 	};
 	let saveFailed = false;
 	EX.persist = () => {
-		try { localStorage.setItem( KEY, JSON.stringify( S ) ); saveFailed = false; } catch ( e ) { if ( ! saveFailed ) EX.emit( 'savefail' ); saveFailed = true; }
+		try { localStorage.setItem( KEY, JSON.stringify( S ) ); saveFailed = false; return true; } catch ( e ) { if ( ! saveFailed ) EX.emit( 'savefail' ); saveFailed = true; return false; }
 	};
 	/** After any change the user made: store it, tell the app (re-draw) and sync (push). */
-	EX.save = () => { EX.persist(); EX.emit( 'change' ); };
+	EX.save = () => { if ( !EX.persist() ) return false; EX.emit( 'change' ); return true; };
 	EX.replaceState = ( next ) => {
 		const n = blank();
 		S = Object.assign( n, next, { settings: Object.assign( n.settings, next.settings || {} ), device: Object.assign( n.device, next.device || {} ), sync: Object.assign( n.sync, next.sync || {} ) } );
@@ -225,11 +225,13 @@
 		const defaults = Object.values(I18N.langs).map(l=>l[key]).filter(x=>typeof x==='string');
 		return defaults.includes(a.name) ? t(key) : a.name || t(key);
 	};
+	EX.compactAccountName = a => a?.type==='bank' && EX.accountName(a)===t('wtBank') ? t('wtBankCompact') : EX.accountName(a);
 	EX.savedNames = type => (S.settings.savedNames || []).filter(x=>x && x.type===type && typeof x.name==='string');
-	EX.rememberName = (type,name,category) => {
+	EX.rememberName = (type,name,category,extra={}) => {
 		name=String(name||'').trim().slice(0,80);if(!name||!['expense','income'].includes(type))return;
+		const previous=(S.settings.savedNames||[]).find(x=>x.type===type&&EX.fold(x.name)===EX.fold(name));
 		const old=(S.settings.savedNames||[]).filter(x=>!(x.type===type&&EX.fold(x.name)===EX.fold(name)));
-		S.settings.savedNames=[{type,name,category:category||''},...old].slice(0,30);
+		S.settings.savedNames=[{type,name,pinned:!!previous?.pinned,category:category||'',...(extra.account?{account:extra.account}:{}),...(extra.amount?{amount:extra.amount}:{})},...old].slice(0,30);
 	};
 
 	EX.activeAccounts = () => S.accounts.filter( ( a ) => ! a.archived );
@@ -257,6 +259,7 @@
 
 	const builtIn = ( key ) => EX.EXPENSE_CATS.concat( EX.INCOME_CATS ).find( ( c ) => c[ 0 ] === key );
 	EX.catInfo = ( key ) => {
+		if ( key === 'uncategorized' ) return { key, iconName:'dots', color:'gray', name:t('entryUncat') };
 		if ( key === 'goal' ) return { key, icon: '🎯', iconName: 'target', color: 'pink', name: t( 'cat_goal' ) }; // money set aside for a goal
 		const b = builtIn( key );
 		if ( b ) return { key, icon: b[ 1 ], iconName: EX.CAT_STYLE[ key ][ 0 ], color: EX.CAT_STYLE[ key ][ 1 ], name: t( 'cat_' + key ) };
@@ -264,7 +267,7 @@
 		return c ? { key, icon: c.icon || '📌', iconName: c.iconName || null, color: c.color || 'gray', name: c.name, custom: true } : { key: 'other', icon: '📌', iconName: 'dots', color: 'gray', name: t( 'cat_other' ) };
 	};
 	EX.catList = ( type ) => ( type === 'income' ? EX.INCOME_CATS : EX.EXPENSE_CATS ).map( ( c ) => EX.catInfo( c[ 0 ] ) )
-		.concat( S.categories.filter( ( c ) => c.type === type ).map( ( c ) => EX.catInfo( c.id ) ) );
+		.concat( S.categories.filter( ( c ) => c.type === type ).map( ( c ) => EX.catInfo( c.id ) ) ).concat(EX.catInfo('uncategorized'));
 
 	/** Transactions of a month, newest first. */
 	EX.monthTxs = ( y, m ) => { const k = `${ y }-${ pad( m + 1 ) }`; return S.txs.filter( ( x ) => x.date.startsWith( k ) ).sort( ( a, b ) => ( a.date < b.date ? 1 : a.date > b.date ? -1 : 0 ) ); };
@@ -277,7 +280,7 @@
 
 	/** Records a payment of a bill as an expense transaction. */
 	EX.payBill = ( bill, { amount, date, account } ) => {
-		const tx = { id: EX.uid(), type: 'expense', amount: String( amount ), account: account || bill.account || ( EX.activeAccounts()[ 0 ] || {} ).id, category: bill.category, date, name: bill.name, billId: bill.id, due: bill.next, photo: bill.photo || '' };
+		const tx = { id: EX.uid(), type: 'expense', amount: String( amount ), account: account || bill.account || ( EX.activeAccounts()[ 0 ] || {} ).id, category: bill.category, date, name: bill.name, billId: bill.id, due: bill.next, photo: bill.photo || '', tags: bill.tags || [] };
 		S.txs.push( tx );
 		return tx;
 	};

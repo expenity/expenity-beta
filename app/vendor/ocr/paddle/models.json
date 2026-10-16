@@ -1,0 +1,13 @@
+{
+  "sdk": "@paddleocr/paddleocr-js@0.4.2",
+  "models": {
+    "detection.tar": {
+      "source": "https://paddle-model-ecology.bj.bcebos.com/paddlex/official_inference_model/paddle3.0.0/PP-OCRv5_mobile_det_onnx_infer.tar",
+      "sha256": "781056046c9ed77a15c94681605db6a0f62317c2e9cce6931c71da2478d4bc30"
+    },
+    "recognition.tar": {
+      "source": "https://huggingface.co/PaddlePaddle/el_PP-OCRv5_mobile_rec_onnx/tree/8152b89d2ee0e1d4c92decab75fe75e5e3d836b6",
+      "sha256": "c2494265ef9c214d8d9f7f54514892aad81347ec66b72a1db4c7a87ea6a1b6b0"
+    }
+  }
+}

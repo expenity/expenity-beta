@@ -37,7 +37,7 @@
 	let toastTimer = null;
 	UI.toast = ( msg, undo ) => {
 		const el = $( '#toast' );
-		el.innerHTML = `<span>${ EX.esc( msg ) }</span>${ undo ? `<button type="button" class="link">${ EX.esc( EX.t( 'undo' ) ) }</button>` : '' }`;
+		el.innerHTML = `${ undo ? '' : `<span>${ EX.esc( msg ) }</span>` }${ undo ? `<button type="button" class="link">${ EX.esc( EX.t( 'undo' ) ) }</button>` : '' }`;
 		el.hidden = false;
 		el.classList.remove( 'show' ); void el.offsetWidth; el.classList.add( 'show' );
 		if ( undo ) $( 'button', el ).onclick = () => { undo(); el.hidden = true; };
@@ -49,39 +49,39 @@
 	// One <dialog id="sheet"> serves every form and detail. On phones it is a bottom sheet or full-screen sheet; on larger
 	// screens the same markup is a centered dialog (CSS only). Opening pushes a history entry so the back button closes it.
 
-	let lock = false, onClose = null, fromPop = false, pendingBack = false;
+	let lock = false, onClose = null, fromPop = false, pendingBack = false, beforeClose = null;
 	const dlg = () => $( '#sheet' );
 	UI.sheetOpen = () => dlg().open;
 	UI.openSheet = ( html, o = {} ) => {
 		const d = dlg();
 		$( '.sheet-body', d ).innerHTML = html;
-		const desktopField = $( '.sheet-body [autofocus]', d );
 		// Keep focus off editable fields until the person taps one on a touch device.
 		d.querySelectorAll( '.sheet-body [autofocus]' ).forEach( el => el.removeAttribute( 'autofocus' ) );
 		d.className = 'sheet' + ( o.full ? ' full' : '' ) + ( o.tall ? ' tall' : '' ) + ( o.cls ? ' ' + o.cls : '' );
 		lock = !! o.lock;
-		onClose = o.onClose || null;
+		onClose = o.onClose || null; beforeClose = o.beforeClose || null;
 		$( '.sheet-scroll', d ).scrollTop = 0;
 		if ( ! d.open ) { d.showModal(); history.pushState( { xsheet: 1 }, '' ); }
-		if ( desktopField && matchMedia( '(min-width: 600px) and (pointer: fine)' ).matches ) desktopField.focus(); else $( '.sheet-body', d ).focus();
+		$( '.sheet-body', d ).focus();
 	};
-	UI.closeSheet = () => { const d = dlg(); if ( d.open ) d.close(); };
+	UI.closeSheet = ( force = false ) => { const d = dlg(); if ( !force && beforeClose && beforeClose() === false ) return false; if ( d.open ) d.close(); return true; };
 
 	UI.initSheet = () => {
 		const d = dlg();
 		d.addEventListener( 'close', () => {
 			// A native close event is queued: it must not clear a sheet that has already reopened.
 			if ( d.open ) return;
-			const cb = onClose; onClose = null; lock = false;
+			const cb = onClose; onClose = null; beforeClose = null; lock = false;
 			if ( ! fromPop && history.state && history.state.xsheet ) { pendingBack = true; history.back(); }
 			if ( cb ) cb();
 		} );
-		d.addEventListener( 'cancel', ( e ) => { if ( lock ) e.preventDefault(); } );
-		d.addEventListener( 'click', ( e ) => { if ( e.target === d && ! lock ) d.close(); } );
+		d.addEventListener( 'cancel', ( e ) => { e.preventDefault(); if(!lock) UI.closeSheet(); } );
+		d.addEventListener( 'click', ( e ) => { if ( e.target === d && ! lock ) UI.closeSheet(); } );
 		window.addEventListener( 'popstate', () => {
 			if ( pendingBack ) { pendingBack = false; return; }
 			if ( ! d.open ) return;
 			if ( lock ) { history.pushState( { xsheet: 1 }, '' ); return; }
+			if(beforeClose && beforeClose()===false){history.pushState({xsheet:1},'');return;}
 			fromPop = true; d.close(); fromPop = false;
 		} );
 		// Pull the sheet down by its handle to close it (phones).
@@ -89,7 +89,7 @@
 		let y0 = 0, dy = 0, drag = false;
 		grab.addEventListener( 'pointerdown', ( e ) => { drag = true; y0 = e.clientY; dy = 0; d.style.transition = 'none'; grab.setPointerCapture( e.pointerId ); } );
 		grab.addEventListener( 'pointermove', ( e ) => { if ( ! drag ) return; dy = Math.max( 0, e.clientY - y0 ); d.style.transform = `translateY(${ dy }px)`; } );
-		const end = () => { if ( ! drag ) return; drag = false; d.style.transition = ''; d.style.transform = ''; if ( dy > 110 && ! lock ) d.close(); dy = 0; };
+		const end = () => { if ( ! drag ) return; drag = false; d.style.transition = ''; d.style.transform = ''; if ( dy > 110 && ! lock ) UI.closeSheet(); dy = 0; };
 		grab.addEventListener( 'pointerup', end ); grab.addEventListener( 'pointercancel', end );
 	};
 
