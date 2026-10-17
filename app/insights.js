@@ -47,10 +47,10 @@
 		const hasData = S().txs.length > 3 || S().bills.length;
 
 		// 1. Subscriptions that could be cancelled, with what they are worth over a year
-		S().bills.filter( ( b ) => ! b.done && b.category === 'subscriptions' && EX.PER_YEAR[ b.repeat ] ).forEach( ( b ) => {
+		S().bills.filter( ( b ) => ! b.done && b.category === 'subscriptions' && EX.scheduleFactor(b) ).forEach( ( b ) => {
 			const v = EX.convert( num( b.amount ), b.currency || main(), main() );
 			if ( v == null ) return;
-			const yearly = Math.round( v * 100 * EX.PER_YEAR[ b.repeat ] );
+			const yearly = Math.round( v * 100 * EX.scheduleFactor(b) );
 			add( { id: 'sub:' + b.id, icon: 'repeat', color: 'purple', score: 50 + ( wants( 'subs', 'save', 'future' ) ? 30 : 0 ) + Math.min( 20, yearly / 2000 ), title: t( 'ideaSubTitle', { name: b.name } ), text: t( 'ideaSubText', { a: m$( yearly ), m: m$( Math.round( yearly / 12 ) ) } ) + goalLine( yearly ), go: 'bills' } );
 		} );
 

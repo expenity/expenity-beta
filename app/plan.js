@@ -83,7 +83,7 @@
 	P.expectedIncome = ( days ) => {
 		const to = addDays( today(), days );
 		let sum = 0;
-		S().incomes.filter( ( i ) => ! i.done ).forEach( ( i ) => { let d = i.next, n = 0; while ( d && d <= to && n < 60 ) { const v = EX.convert( num( i.amount ), i.currency || main(), main() ); if ( v != null ) sum += Math.round( v * 100 ); d = EX.nextAfter( i, d ); n++; } } );
+		S().incomes.filter( ( i ) => ! i.done ).forEach( ( i ) => { let d = i.next, n = 0; while ( d && d <= to && n < 4000 ) { const v = EX.convert( num( i.amount ), i.currency || main(), main() ); if ( v != null ) sum += Math.round( v * 100 ); d = EX.nextAfter( i, d ); n++; } } );
 		return sum;
 	};
 
@@ -115,7 +115,7 @@
 	function incomeRow( i ) {
 		const days = Math.round( ( parse( i.next ) - parse( today() ) ) / 864e5 );
 		const due = days < 0 ? t( 'relLate', { n: -days } ) : days === 0 ? t( 'relToday' ) : days === 1 ? t( 'relTomorrow' ) : t( 'relIn', { n: days } );
-		return `<li class="irow"><button type="button" class="mrow" data-plan="edit-income" data-id="${ esc( i.id ) }">${ UI.ci( 'briefcase', 'green', 44 ) }<span class="mid"><b>${ esc( i.name ) }</b><small>${ esc( due ) } · ${ esc( EX.repeatLabel( i.repeat ) ) }</small>${EXA.tagsInline(i.tags)}</span><span class="amt">${ esc( money( num( i.amount ), i.currency || main() ) ) }</span></button>
+		return `<li class="irow"><button type="button" class="mrow" data-plan="edit-income" data-id="${ esc( i.id ) }">${ UI.ci( 'briefcase', 'green', 44 ) }<span class="mid"><b>${ esc( i.name ) }</b><small>${ esc( due ) } · ${ esc( EX.scheduleLabel(i) ) }</small>${EXA.tagsInline(i.tags)}</span><span class="amt">${ esc( money( num( i.amount ), i.currency || main() ) ) }</span></button>
 			<button type="button" class="btn btn-ghost sm" data-plan="receive" data-id="${ esc( i.id ) }">${ UI.icon( 'check', 18 ) } ${ esc( t( 'incMark' ) ) }</button></li>`;
 	}
 
@@ -210,7 +210,7 @@
 			<label class="f"><span>${ esc( t( 'incTo' ) ) }</span><select name="account"><option value="">${esc(t('entryChooseWallet'))}</option>${ walletOpts( v.account ) }</select></label>
 			<label class="f"><span>${ esc( t( 'fAmount' ) ) }</span><input name="amount" inputmode="decimal" autocomplete="off" placeholder="0.00" value="${ esc( v.amount ) }"></label>
 			<div class="grid2"><label class="f"><span>${ esc( t( 'incNext' ) ) }</span><input name="next" type="date" value="${ esc( v.next ) }"></label>
-			<label class="f"><span>${ esc( t( 'fRepeats' ) ) }</span><select name="repeat">${ EX.REPEATS.map( ( r ) => `<option value="${ r }"${ v.repeat === r ? ' selected' : '' }>${ esc( t( 'r' + r.charAt( 0 ).toUpperCase() + r.slice( 1 ) ) ) }</option>` ).join( '' ) }</select></label></div>
+			<label class="f"><span>${ esc( t( 'fRepeats' ) ) }</span><select name="repeat">${ EX.REPEATS.map( ( r ) => `<option value="${ r }"${ v.repeat === r ? ' selected' : '' }>${ esc( t( 'r' + r.charAt( 0 ).toUpperCase() + r.slice( 1 ) ) ) }</option>` ).join( '' ) }</select></label></div>${EXA.scheduleFields(v)}
 			<label class="f"><span>${esc(t('fCategory'))}</span><select name="incomeCategory">${EX.catList('income').map(c=>`<option value="${esc(c.key)}"${c.key===(v.category||'salary')?' selected':''}>${esc(c.name)}</option>`).join('')}</select></label><button type="button" class="btn btn-ghost" data-inline-category="income">${esc(t('entryCreateCategory'))}</button><label class="f"><span>${esc(t('fNote'))}</span><textarea name="incomeNote" maxlength="400" rows="2">${esc(v.note||v.notes||'')}</textarea></label>
 			${ EXA.tagsField(typeof v !== 'undefined' ? v.tags : g.tags) }${ EXA.photos.slot( typeof v !== 'undefined' ? v.photo : '' ) }<p class="err" id="planErr" role="alert" hidden></p>
 			<div class="btn-row sticky-actions">${ inc ? `<button type="button" class="btn btn-ghost" data-duplicate="income" data-id="${esc(inc.id)}">${UI.icon('copy',20)} ${esc(t('duplicateRecord'))}</button><button type="button" class="btn btn-danger" data-plan="del-income">${ esc( t( 'del' ) ) }</button>` : '' }<span class="sp"></span><button type="submit" class="btn btn-primary">${ esc( t(inc?'entrySaveChanges':'entryScheduleIncome') ) }</button></div></form>`, { cls: 'small' } );
@@ -269,7 +269,8 @@
 			if ( ! el.next.value ) return err( 'errNext' );
 			const acc = EX.account( el.account.value );
 			if(!acc||!wallets().some(a=>a.id===acc.id))return err('entryWalletGone');
-			const v = { tags: EXA.readTags(f), photo: el.photo.value, name, amount, account: el.account.value, currency: acc.currency || main(), repeat: el.repeat.value, next: el.next.value, day: parse( el.next.value ).getDate(), category: el.incomeCategory.value||'salary', note:el.incomeNote.value.trim() };
+			const schedule=EXA.readSchedule(f),scheduleError=EXA.scheduleError({repeat:el.repeat.value,...schedule});if(scheduleError)return err(scheduleError);const next=EX.scheduleStart({repeat:el.repeat.value,...schedule},el.next.value);if(!next)return err('schedulePickDates');
+            const v = { ...schedule,tags: EXA.readTags(f), photo: el.photo.value, name, amount, account: el.account.value, currency: acc.currency || main(), repeat: el.repeat.value, next, day: editing&&editing.next===next&&editing.day?editing.day:parse(next).getDate(), category: el.incomeCategory.value||'salary', note:el.incomeNote.value.trim() };
 			if ( editing ) { Object.assign( editing, v ); delete editing.done; } else S().incomes.push( Object.assign( { id: uid() }, v ) );
 		} else return false;
 		UI.closeSheet(); EX.save();

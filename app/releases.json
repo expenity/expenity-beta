@@ -1,6 +1,20 @@
 {
-  "version": "0.13.1",
+  "version": "0.14.0",
   "releases": [
+    {
+      "version": "0.14.0",
+      "date": "2026-10-17",
+      "en": [
+        "More flexible recurring expenses and income: daily, weekdays, every N days/weeks/months/years, selected days of the month, or a list of specific calendar dates. Existing weekly, monthly and yearly schedules remain available.",
+        "Specific dates are sorted and deduplicated; schedules finish after their last date. Monthly day selections skip months without that date. Editing, duplication, forecasts and payment/receipt advancement retain schedule details.",
+        "Sentence entry is now a separate mode rather than a second field below the expense name. Review the parsed name, amount and schedule in the form before saving; daily wording works in English and Greek."
+      ],
+      "el": [
+        "Πιο ευέλικτα επαναλαμβανόμενα έξοδα και έσοδα: καθημερινά, Δευτέρα–Παρασκευή, κάθε Ν ημέρες/εβδομάδες/μήνες/έτη, επιλεγμένες ημέρες του μήνα ή λίστα συγκεκριμένων ημερομηνιών. Οι υπάρχουσες εβδομαδιαίες, μηνιαίες και ετήσιες επιλογές διατηρούνται.",
+        "Οι συγκεκριμένες ημερομηνίες ταξινομούνται χωρίς διπλότυπα και το πρόγραμμα ολοκληρώνεται μετά την τελευταία. Οι μηνιαίες επιλογές παραλείπουν τους μήνες χωρίς την επιλεγμένη ημέρα. Τα στοιχεία επανάληψης διατηρούνται στην επεξεργασία, την αντιγραφή, τις προβλέψεις και την καταχώριση πληρωμών ή εισπράξεων.",
+        "Η καταχώριση με πρόταση είναι πλέον ξεχωριστός τρόπος εισαγωγής, όχι δεύτερο πεδίο κάτω από το όνομα. Ελέγξτε το όνομα, το ποσό και την επανάληψη στη φόρμα πριν αποθηκεύσετε. Η καθημερινή επανάληψη αναγνωρίζεται στα ελληνικά και τα αγγλικά."
+      ]
+    },
     {
       "version": "0.13.1",
       "date": "2026-10-17",

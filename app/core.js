@@ -61,10 +61,19 @@
 	EX.monthKey = ( s ) => s.slice( 0, 7 );
 	const dim = EX.dim, iso = EX.iso, parse = EX.parse, today = EX.today, addDays = EX.addDays;
 
+ EX.validDate=s=>typeof s==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(s)&&s>='1900-01-01'&&s<='9999-12-31'&&EX.iso(EX.parse(s))===s;
+ EX.scheduleStart=(v,start)=>v.repeat==='dates'?(v.scheduleDates||[]).filter(EX.validDate).sort()[0]||null:['weekdays','monthdays'].includes(v.repeat)?EX.nextAfter(v,EX.addDays(start,-1)):start;
+ EX.scheduleFactor=b=>{if(EX.PER_YEAR[b.repeat])return EX.PER_YEAR[b.repeat];if(b.repeat==='custom')return ({days:365,weeks:52,months:12,years:1}[b.intervalUnit]||365)/Math.max(1,Number(b.interval)||1);if(b.repeat==='monthdays')return (b.monthDays||[]).length*12;return 0;};
+
 	/** The due date after `s` for a repeating bill, or null for a one-off. */
 	EX.nextAfter = ( bill, s ) => {
 		switch ( bill.repeat ) {
-			case 'weekly': return addDays( s, 7 );
+			case 'daily': return addDays(s,1);
+            case 'weekdays': {let d=addDays(s,1);while([0,6].includes(parse(d).getDay()))d=addDays(d,1);return d;}
+            case 'dates': return (bill.scheduleDates||[]).filter(d=>EX.validDate(d)&&d>s).sort()[0]||null;
+            case 'monthdays': {const days=[...new Set((bill.monthDays||[]).map(Number))].filter(n=>Number.isInteger(n)&&n>=1&&n<=31).sort((a,b)=>a-b);if(!days.length)return null;for(let m=0;m<14;m++){const first=EX.addMonths(s,m,1),base=parse(first);for(const n of days){if(n>EX.dim(base.getFullYear(),base.getMonth()))continue;const d=EX.iso(new Date(base.getFullYear(),base.getMonth(),n));if(d>s)return d;}}return null;}
+            case 'custom': {const n=Number(bill.interval);if(!Number.isInteger(n)||n<1||n>365)return null;return bill.intervalUnit==='weeks'?addDays(s,7*n):bill.intervalUnit==='months'?EX.addMonths(s,n,bill.day):bill.intervalUnit==='years'?EX.addMonths(s,12*n,bill.day):addDays(s,n);}
+            case 'weekly': return addDays( s, 7 );
 			case 'biweekly': return addDays( s, 14 );
 			case 'monthly': return EX.addMonths( s, 1, bill.day );
 			case 'quarterly': return EX.addMonths( s, 3, bill.day );
@@ -97,8 +106,8 @@
 		[ 'tplCard', 'loans', 'monthly' ], [ 'tplGym', 'health', 'monthly' ], [ 'tplPropTax', 'taxes', 'yearly' ], [ 'tplSchool', 'education', 'quarterly' ],
 	];
 	EX.LEADS = [ 0, 1, 2, 3, 5, 7, 14 ];
-	EX.REPEATS = [ 'once', 'weekly', 'biweekly', 'monthly', 'quarterly', 'yearly' ];
-	EX.PER_YEAR = { weekly: 52, biweekly: 26, monthly: 12, quarterly: 4, yearly: 1 };
+	EX.REPEATS = [ 'once', 'daily', 'weekdays', 'custom', 'monthdays', 'dates', 'weekly', 'biweekly', 'monthly', 'quarterly', 'yearly' ];
+	EX.PER_YEAR = { daily:365, weekdays:260, weekly: 52, biweekly: 26, monthly: 12, quarterly: 4, yearly: 1 };
 	EX.WALLET_TYPES = [ [ 'cash', '💵' ], [ 'bank', '🏦' ], [ 'card', '💳' ], [ 'savings', '🐖' ], [ 'other', '👛' ] ];
 	EX.WALLET_ICON = { cash: 'cash', bank: 'building-bank', card: 'credit-card', savings: 'pig-money', other: 'wallet' };
 	// Built-in categories: an icon from the bundled set and a tint (see .tint-* in style.css).
@@ -341,6 +350,7 @@
 		while ( cut( `${ B }(expense|spent|εξοδο|εξοδα|ξοδεψα)${ E }` ) ) out.type = out.type || 'expense';
 		// Repeat.
 		const reps = [
+            [ `${ B }(daily|every day|each day|καθε μερα|καθε ημερα|καθημερινα)${ E }`, 'daily' ],
 			[ `${ B }(bi-?weekly|fortnightly|every (2|two) weeks|καθε (2|δυο) εβδομαδες|ανα (2|δυο) εβδομαδες|δεκαπενθημερ\\p{L}*)${ E }`, 'biweekly' ],
 			[ `${ B }(weekly|every week|each week|εβδομαδιαι\\p{L}*|καθε εβδομαδα)${ E }`, 'weekly' ],
 			[ `${ B }(quarterly|every (3|three) months|τριμηνια\\p{L}*|καθε (3|τρεις) μηνες|καθε τριμηνο)${ E }`, 'quarterly' ],

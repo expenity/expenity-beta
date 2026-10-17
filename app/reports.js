@@ -188,7 +188,7 @@
 			<section class="card"><h2>${ esc( t( 'repUpcomingBig' ) ) }</h2>${ big.length ? `<ul class="plain">${ big.map( ( [ d, v ] ) => `<li>${ esc( short( d ) ) } · <b>${ esc( m$( -v ) ) }</b></li>` ).join( '' ) }</ul>` : noData() }</section>`;
 	}
 	function subs() {
-		const rows = S().bills.filter( ( b ) => ! b.done && b.category === 'subscriptions' && EX.PER_YEAR[ b.repeat ] ).map( ( b ) => { const v = EX.convert( num( b.amount ), b.currency || main(), main() ) || 0, yearly = Math.round( v * 100 * EX.PER_YEAR[ b.repeat ] ); return { b, yearly, monthly: Math.round( yearly / 12 ) }; } ).sort( ( a, b ) => b.yearly - a.yearly );
+		const rows = S().bills.filter( ( b ) => ! b.done && b.category === 'subscriptions' && EX.scheduleFactor(b) ).map( ( b ) => { const v = EX.convert( num( b.amount ), b.currency || main(), main() ) || 0, yearly = Math.round( v * 100 * EX.scheduleFactor(b) ); return { b, yearly, monthly: Math.round( yearly / 12 ) }; } ).sort( ( a, b ) => b.yearly - a.yearly );
 		const changes = [];
 		S().bills.forEach( ( b ) => { const ps = S().txs.filter( ( p ) => p.billId === b.id && num( p.amount ) ).sort( ( a, z ) => ( ( a.due || a.date ) < ( z.due || z.date ) ? -1 : 1 ) ); if ( ps.length >= 2 ) { const a = num( ps[ ps.length - 2 ].amount ), z = num( ps[ ps.length - 1 ].amount ); if ( a && Math.abs( z - a ) / a >= 0.05 ) changes.push( { b, a, z } ); } } );
 		const tot = rows.reduce( ( s, x ) => s + x.yearly, 0 );

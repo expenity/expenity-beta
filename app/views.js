@@ -62,7 +62,7 @@
 		const n = diffDays( b.next, today() );
 		const cls = n < 0 ? 'late' : n === 0 ? 'now' : '';
 		const snoozed = b.snooze && b.snooze > today();
-		const meta = [ showDate ? rel( b.next ) : null, EX.repeatLabel( b.repeat ), b.autopay ? t( 'autopay' ) : null, snoozed ? t( 'snoozed' ) : null ].filter( Boolean ).join( ' · ' );
+		const meta = [ showDate ? rel( b.next ) : null, EX.scheduleLabel(b), b.autopay ? t( 'autopay' ) : null, snoozed ? t( 'snoozed' ) : null ].filter( Boolean ).join( ' · ' );
 		return `<li class="sw ${ cls }" data-kind="bill" data-id="${ esc( b.id ) }">
 			<div class="sw-back"><div class="sw-l">${ swBtn( 'paid', 'check', 'actPaid', 'paid' ) }</div><div class="sw-r">${ swBtn( 'edit', 'pencil', 'actEdit', 'edit' ) }${ swBtn( 'duplicate', 'copy', 'duplicateRecord', 'duplicate' ) }${ swBtn( 'del', 'trash', 'actDelete', 'del' ) }</div></div>
 			<button type="button" class="sw-front item" data-act="open-bill" data-id="${ esc( b.id ) }" aria-label="${ esc( b.name ) }, ${ esc( amountText( b ) ) }">
@@ -295,7 +295,7 @@
 		const upTo = ( n ) => weeks.slice( 0, Math.ceil( n / 7 ) );
 		const sum = ( n ) => EX.sumByCur( upTo( n ).flatMap( ( w ) => w.items ) );
 		const cnt = ( n ) => upTo( n ).reduce( ( k, w ) => k + w.items.length, 0 );
-		const subs = bills.filter( ( b ) => b.category === 'subscriptions' && EX.PER_YEAR[ b.repeat ] ).map( ( b ) => ( { b, yearly: ( Number( b.amount ) || 0 ) * EX.PER_YEAR[ b.repeat ] } ) ).sort( ( a, b ) => b.yearly - a.yearly );
+		const subs = bills.filter( ( b ) => b.category === 'subscriptions' && EX.scheduleFactor(b) ).map( ( b ) => ( { b, yearly: ( Number( b.amount ) || 0 ) * EX.scheduleFactor(b) } ) ).sort( ( a, b ) => b.yearly - a.yearly );
 		const changes = [];
 		S().bills.forEach( ( b ) => {
 			const ps = S().txs.filter( ( p ) => p.billId === b.id && Number( p.amount ) ).sort( ( a, z ) => ( ( a.due || a.date ) < ( z.due || z.date ) ? -1 : 1 ) );
