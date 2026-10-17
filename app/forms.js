@@ -24,7 +24,7 @@
 		const before = JSON.parse( JSON.stringify( b ) );
 		const tx = EX.payBill( b, { amount, date: paidOn || today(), account } );
 		tx.scheduleBefore = { next: before.next, done: !!before.done, snooze: before.snooze || '' };
-		const nx = EX.nextAfter( b, b.next );
+		EXA.playSound?.('success');const nx = EX.nextAfter( b, b.next );
 		if ( ! nx || ( b.end && nx > b.end ) ) { b.done = true; } else { b.next = nx; }
 		delete b.snooze;
 		EXA.st.sel = null;
@@ -116,11 +116,12 @@
 	const copy = x => JSON.parse(JSON.stringify(x));
 	const writable = id => EX.writableAccounts().some(a=>a.id===id);
 	const contentStamp = tx => JSON.stringify(Object.keys(tx||{}).sort().filter(k=>!['u','by'].includes(k)).map(k=>[k,tx[k]]));
+	EXA.scheduleStamp=contentStamp;
 	let draftOwner = '', draftTimer = 0;
 	const owner = () => EX.auth.isSignedIn() ? 'user:'+EX.auth.user()?.id : 'guest';
 	const draftKey = (type,edit='',recovery='') => 'expenity.entryDraft.v1:'+owner()+':'+(edit?'edit:'+edit:recovery?'recovery:'+recovery+':'+type:type);
-	const draftValue = () => ({type:T.type,amount:T.amount,toAmount:T.toAmount,account:T.account,toAccount:T.toAccount,name:T.name,note:T.note,category:T.category,date:T.date,tags:T.tags,photo:T.photo,repeat:T.repeat||'once',interval:T.interval,intervalUnit:T.intervalUnit,monthDays:T.monthDays,scheduleDates:T.scheduleDates,weekDays:T.weekDays,shortMonth:T.shortMonth,endMode:T.endMode,end:T.end,endCount:T.endCount,scheduleEnd:T.scheduleEnd,quick:T.quick,quickText:T.quickText});
-	const meaningful = () => T && (T.editId ? JSON.stringify(draftValue())!==T.baseline : !!(T.amount||T.toAmount||T.name.trim()||T.note.trim()||T.tags.length||T.photo||T.date!==today()));
+	const draftValue = () => ({type:T.type,amount:T.amount,toAmount:T.toAmount,account:T.account,toAccount:T.toAccount,name:T.name,note:T.note,category:T.category,date:T.date,tags:T.tags,photo:T.photo,repeat:T.repeat||'once',interval:T.interval,intervalUnit:T.intervalUnit,monthDays:T.monthDays,scheduleDates:T.scheduleDates,weekDays:T.weekDays,shortMonth:T.shortMonth,endMode:T.endMode,end:T.end,endCount:T.endCount,scheduleEnd:T.scheduleEnd,quick:T.quick,quickText:T.quickText,scheduleKind:T.scheduleKind,editScheduleId:T.editScheduleId,sourceStamp:T.sourceStamp,sourceRecord:T.sourceRecord,scheduleTouched:T.scheduleTouched,lead:T.lead,variable:T.variable,autopay:T.autopay,reference:T.reference,payUrl:T.payUrl});
+	const meaningful = () => T && ((T.editId||T.editScheduleId) ? JSON.stringify(draftValue())!==T.baseline : !!(T.amount||T.toAmount||T.name.trim()||T.note.trim()||T.tags.length||T.photo||T.date!==today()));
 	function storeDraft(){
 		clearTimeout(draftTimer);if(!T||draftOwner!==owner()||T.saving||T.committed)return;
 		readTxFields();
@@ -129,8 +130,8 @@
 	}
 	function dropDraft(){try{if(T.recoveryId)localStorage.setItem(recoveryKey(),JSON.stringify(recoveries().filter(x=>x.tx.id!==T.recoveryId)));for(let i=localStorage.length-1;i>=0;i--){const k=localStorage.key(i);if(k.startsWith('expenity.entryDraft.v1:'+owner()+':')){const v=JSON.parse(localStorage.getItem(k)||'null');if(v?.data?.id===T.id)localStorage.removeItem(k);}}}catch(e){}}
 	function restoreDraft(type,edit,recovery){try{const k=draftKey(type,edit,recovery),d=JSON.parse(localStorage.getItem(k)||'null');if(d&&Date.now()-d.saved<86400000&&d.data.type===type&&d.data.editId===(edit||null))return d.data;if(d)localStorage.removeItem(k);}catch(e){}return null;}
-	function titleKey(){return T.editId?'entrySaveChanges':T.type==='expense'?'entryAddExpense':T.type==='income'?'entryAddIncome':'entryAddTransfer';}
-	function buttonKey(){return T.editId?'entrySaveChanges':T.type==='expense'?'entrySaveExpense':T.type==='income'?'entrySaveIncome':'entrySaveTransfer';}
+	function titleKey(){if(T.scheduleKind)return T.scheduleKind==='bill'?(T.editScheduleId?'editorBillEdit':'editorBillAdd'):(T.editScheduleId?'editorIncomeEdit':'editorIncomeAdd');return T.editId?'entrySaveChanges':T.type==='expense'?'entryAddExpense':T.type==='income'?'entryAddIncome':'entryAddTransfer';}
+	function buttonKey(){return T.editScheduleId?'entrySaveChanges':T.editId?'entrySaveChanges':T.type==='expense'?'entrySaveExpense':T.type==='income'?'entrySaveIncome':'entrySaveTransfer';}
 	const entryButton=(act,label,icon='')=>`<button type="button" class="btn btn-ghost" data-entry="${act}">${icon?UI.icon(icon,20):''}${esc(t(label))}</button>`;
 	function walletChoices(to=false){
 		const id=to?T.toAccount:T.account;
@@ -155,44 +156,54 @@
 	 storeDraft();
 	},true);
 
+ function scheduleBody(){
+  const main=['once','daily','weekly','monthly','yearly','dates','custom'],selected=T.repeat==='monthdays'?'monthly':T.repeat||'once';
+  return `<div class="sheet-head entry-head"><button type="button" class="ab-btn" data-entry="schedule-back" aria-label="${esc(t('back'))}">${UI.icon('arrow-left',24)}</button><h2 id="sheetTitle">${esc(t('editorSchedule'))}</h2></div><div class="tx-scroll entry-scroll focused-schedule"><label class="f"><span>${esc(t('entryDate'))}</span><input type="date" id="scheduleStart" name="next" value="${esc(T.date)}"></label><select id="entryRepeat" hidden>${EX.REPEATS.map(r=>`<option value="${r}"${r===(T.repeat||'once')?' selected':''}>${esc(EX.repeatLabel(r))}</option>`).join('')}</select><div class="schedule-frequency" role="group" aria-label="${esc(t('fRepeats'))}">${main.map(r=>`<button type="button" class="btn btn-ghost${selected===r?' on':''}" data-entry="frequency" data-repeat="${r}" aria-pressed="${selected===r}">${UI.icon(r==='dates'?'calendar':r==='once'?'calendar-event':'repeat',20)}<span>${esc(EX.repeatLabel(r))}</span>${selected===r?UI.icon('check',18):''}</button>`).join('')}</div><details class="schedule-other-frequencies"><summary>${esc(t('editorOtherSchedules'))}</summary>${['weekdays','biweekly','quarterly'].map(r=>`<button type="button" class="btn btn-ghost" data-entry="frequency" data-repeat="${r}">${esc(EX.repeatLabel(r))}</button>`).join('')}</details>${EXA.focusedScheduleFields({...T,next:T.date})}<p id="txErr" class="err" hidden role="alert"></p></div><div class="entry-footer"><button type="button" class="btn btn-primary entry-save" data-entry="schedule-use">${UI.icon('check',20)} ${esc(t('editorUseSchedule'))}</button></div>`;
+ }
+
 	function txBody() {
+        if(T.screen==='schedule')return scheduleBody();
 		const cur=walletCur(T.account),toCur=walletCur(T.toAccount),cross=T.type==='transfer'&&T.toAccount&&cur!==toCur;
-		return `<div class="sheet-head entry-head">${X}<h2 id="sheetTitle">${esc(t(titleKey()))}</h2><button type="button" class="btn btn-ghost entry-change" data-entry="type" aria-expanded="${!!T.typeOpen}">${esc(t('entryChange'))}</button></div>
+		return `<div class="sheet-head entry-head">${X}<h2 id="sheetTitle">${esc(t(titleKey()))}</h2><button type="button" class="btn btn-ghost entry-change"${T.scheduleKind?' hidden':''} data-entry="type" aria-expanded="${!!T.typeOpen}">${esc(t('entryChange'))}</button></div>
 		<div class="tx-scroll entry-scroll${T.quick?' sentence-entry-mode':''}">
 		${T.discard?`<section class="entry-alert" role="alertdialog" aria-labelledby="discardTitle"><h3 id="discardTitle">${esc(t('entryCloseTitle'))}</h3><p>${esc(t('entryCloseText'))}</p><div class="btn-row">${entryButton('keep','entryKeep')}${entryButton('discard','entryDiscard')}</div></section>`:''}
 		${T.pendingShortcut!==undefined?`<section class="entry-alert" role="alert"><p>${esc(t('entryReplace'))}</p>${entryButton('apply-shortcut','entryApply')}${entryButton('cancel-shortcut','cancel')}</section>`:''}
 		${T.pendingSchedule?`<section class="entry-alert" role="alert"><p>${esc(t('entryLeaveSchedule'))}</p>${entryButton('schedule-go','entryContinue')}${entryButton('schedule-cancel','cancel')}</section>`:''}
 		${T.typeOpen?`<div class="entry-type-picker" role="group" aria-label="${esc(t('entryChange'))}">${['expense','income','transfer'].map(type=>`<button type="button" class="chip${type===T.type?' on':''}" data-tx-type="${type}">${esc(t('type'+type[0].toUpperCase()+type.slice(1)))}</button>`).join('')}</div>`:''}
-		${!T.editId&&T.type!=='transfer'?EXA.pinnedEntries?.(T.type)||'':''}<p class="muted small entry-draft-status" id="entryDraftStatus" role="status">${T.resumed?esc(t('entryResumed')):T.draftFail?esc(t('entryDraftFail')):''}</p>
+		${!T.editId&&!T.scheduleKind&&T.type!=='transfer'?EXA.pinnedEntries?.(T.type)||'':''}<p class="muted small entry-draft-status" id="entryDraftStatus" role="status">${T.resumed?esc(t('entryResumed')):T.draftFail?esc(t('entryDraftFail')):''}</p>
 		${T.notice?`<p class="entry-alert" role="status">${esc(t(T.notice))}</p>`:''}
 		${T.type==='transfer'?`<div class="entry-transfer-wallets"><div><span class="entry-label">${esc(t('fromWallet'))}</span>${walletControl()}</div><button type="button" class="ab-btn" data-entry="swap" aria-label="${esc(t('entrySwap'))}">${UI.icon('arrows-exchange',24)}</button><div><span class="entry-label">${esc(t('toWallet'))}</span>${walletControl(true)}</div></div>`:''}
 
-        ${!T.editId&&T.type!=='transfer'?T.quick?`<section class="sentence-entry"><label class="f"><span>${esc(t('quickLabel'))}</span><input id="txQuick" autocomplete="off" spellcheck="false" placeholder="${esc(t('quickTxPh'))}" value="${esc(T.quickText||'')}"></label><p class="muted">${esc(t('sentenceHint'))}</p><div class="sentence-preview" aria-live="polite"><b>${esc(T.name||'—')}</b><span>${esc(EX.money(T.amount||0,cur))}</span><small>${esc(EX.dayName(T.date))} · ${esc(EX.scheduleLabel(T))}</small></div><button type="button" class="btn btn-ghost" data-tx="quick-review">${esc(t('sentenceBack'))}</button></section>`:`<button type="button" class="btn btn-ghost entry-sentence-switch" data-tx="quick">${UI.icon('notes',20)} ${esc(t('sentenceAlternative'))}</button>`:''}
+        ${!T.editId&&!T.scheduleKind&&T.type!=='transfer'?T.quick?`<section class="sentence-entry"><label class="f"><span>${esc(t('quickLabel'))}</span><input id="txQuick" autocomplete="off" spellcheck="false" placeholder="${esc(t('quickTxPh'))}" value="${esc(T.quickText||'')}"></label><p class="muted">${esc(t('sentenceHint'))}</p><div class="sentence-preview" aria-live="polite"><b>${esc(T.name||'—')}</b><span>${esc(EX.money(T.amount||0,cur))}</span><small>${esc(EX.dayName(T.date))} · ${esc(EX.scheduleLabel(T))}</small></div><button type="button" class="btn btn-ghost" data-tx="quick-review">${esc(t('sentenceBack'))}</button></section>`:`<button type="button" class="btn btn-ghost entry-sentence-switch" data-tx="quick">${UI.icon('notes',20)} ${esc(t('sentenceAlternative'))}</button>`:''}
 
 		<div class="entry-amount-panel"><div class="entry-amount-context"><span>${esc(t(T.type==='transfer'?'entrySent':'fAmount'))}</span><span class="entry-currency" aria-label="${esc(cur)}">${esc(T.account?cur:'—')}</span></div>
 		<button type="button" class="amt-display${T.keypadOpen&&T.target==='amount'?' on':''}" data-tx="target-amount" aria-controls="txKeypad" aria-expanded="${!!T.keypadOpen&&T.target==='amount'}" aria-label="${esc(t('fAmount'))}"><span class="cur">${esc(T.account?curSymbol(cur):'')}</span><span class="val${T.amount===''?' zero':''}" id="amtVal">${esc(showAmt(T.amount))}</span></button><small>${esc(t('entryTap'))}</small>
 		${cross?`<span class="entry-label">${esc(t('entryReceived'))} · ${esc(toCur)}</span><button type="button" class="amt-display small" data-tx="target-to" aria-controls="txKeypad" aria-expanded="${!!T.keypadOpen&&T.target==='toAmount'}" aria-label="${esc(t('fToAmount'))}"><span class="cur">${esc(curSymbol(toCur))}</span><span class="val" id="toAmtVal">${esc(showAmt(T.toAmount))}</span></button>`:''}</div>
 
 		${T.currencyReview?`<div class="entry-alert" role="alert"><p>${esc(t('entryCurrencyReview'))}${T.sourceCurrency?' · '+esc(T.sourceCurrency)+' → '+esc(T.account?walletCur(T.account):'—'):''}</p>${entryButton('review-currency','entryReview')}</div>`:''}
-		<div class="entry-name"><label for="txDesc">${esc(t('entryName'))}</label><input id="txDesc" class="desc" maxlength="80" autocomplete="off" autocorrect="off" data-1p-ignore data-lpignore="true" placeholder="${esc(t('descPh'))}" value="${esc(T.name)}">
-		${T.type!=='transfer'?`<label class="remember-name"${T.name.trim()?'':' hidden'}><input type="checkbox" id="rememberName"${T.rememberName?' checked':''}>${UI.icon('bookmark',18)}${esc(t('entryNext'))}</label>${EX.savedNames(T.type).length?`<details class="saved-names"><summary>${UI.icon('bookmark',18)}${esc(t('savedNames'))} (${EX.savedNames(T.type).length}) ${UI.icon('chevron-down',16)}</summary><div class="saved-name-grid">${EX.savedNames(T.type).map((x,i)=>`<span><button type="button" class="chip" data-tx-saved="${i}">${esc(x.name)}</button>${EXA.pinControl?.(T.type,i)||''}</span>`).join('')}</div></details>`:''}`:''}</div>
-        ${T.type==='expense'?EXA.servicePicker():''}
-		${entryGroup('payment',T.type==='expense'?'entryPayment':'entryWalletDate','wallet',[(EX.account(T.account)?EX.compactAccountName(EX.account(T.account)):t('entryChooseWallet')),T.date===today()?t('relToday'):EX.dayName(T.date)].join(' · '),`${T.type!=='transfer'?walletControl():''}${T.walletOpen?walletChoices():''}${T.toWalletOpen?walletChoices(true):''}<div class="entry-date"><button type="button" class="entry-date-button" data-entry="date" aria-expanded="${!!T.dateOpen}">${UI.icon('calendar',22)}<span>${esc(t('entryDate'))}<b>${esc(T.date===today()?t('relToday'):EX.dayName(T.date))}</b></span>${UI.icon('chevron-down',18)}</button>${T.dateOpen?`<div class="entry-date-options"><button type="button" class="chip" data-tx-date="today">${esc(t('relToday'))}</button><button type="button" class="chip" data-tx-date="yesterday">${esc(t('relYesterday'))}</button><label class="f"><span>${esc(t('pickDate'))}</span><input type="date" id="txDate" value="${esc(T.date)}"></label></div>`:''}</div>`)}
-		${entryGroup('category',T.type==='transfer'?'entryTags':'entryCategoryTags','category-2',[T.type!=='transfer'?(T.category?EX.catInfo(T.category).name:t('entryChooseCat')):'',...T.tags].filter(Boolean).join(' · '),`${T.type!=='transfer'?`<div class="entry-category" id="entryCategory">${entryCategories()}</div>`:''}${EXA.tagsField(T.tags)}`)}
-		${!T.editId&&T.type!=='transfer'?entryGroup('repeat','fRepeats','repeat',EX.scheduleLabel(T),`${!T.editId&&T.type!=='transfer'?`<label class="f entry-repeat"><span>${esc(t('fRepeats'))}</span><select id="entryRepeat">${EX.REPEATS.map(r=>`<option value="${r}"${r===(T.repeat||'once')?' selected':''}>${esc(EX.repeatLabel(r))}</option>`).join('')}</select></label>${EXA.scheduleFields(T)}${(T.repeat||'once')!=='once'||T.date>today()?`<p class="entry-alert">${esc(t('scheduleSameForm'))}</p>`:''}`:''}`):''}
-		${entryGroup('extras','entryExtras','paperclip',[T.photo?t('entryPhoto'):'',T.note?t('entryNote'):''].filter(Boolean).join(' · ')||t('entryExtrasHint'),`${T.type==='expense'&&EX.state().settings.receiptScanner!==false?`<button type="button" class="btn btn-ghost entry-scan" data-receipt-scan>${UI.icon('photo',20)}${esc(t('scanReceipt'))}</button>`:''}		<div class="entry-detail-content">${EXA.photos.slot(T.photo)}</div>
-		<div class="entry-detail-content"><label for="txNote">${esc(t('fNote'))}</label><textarea id="txNote" rows="2" maxlength="400" placeholder="${esc(t('notePh'))}">${esc(T.note)}</textarea></div>
-		<div class="entry-more">
-		${T.type!=='transfer'?`<div class="entry-shortcut-options"><b>${esc(t('entryShortcut'))}</b><label class="entry-check"><input id="entryRememberWallet" type="checkbox"${T.rememberWallet?' checked':''}>${esc(t('entryRememberWallet'))}</label><label class="entry-check"><input id="entryRememberAmount" type="checkbox"${T.rememberAmount?' checked':''}>${esc(t('entryRememberAmount'))}</label>${EX.savedNames(T.type).length?`<details><summary>${esc(t('entryManageNames'))}</summary>${EX.savedNames(T.type).map((x,i)=>`<button type="button" class="btn btn-ghost" data-tx-forget="${i}">${UI.icon('trash',18)} ${esc(x.name)}</button>`).join('')}</details>`:''}</div>`:''}
+		<div class="entry-name"><label for="txDesc">${esc(t(T.scheduleKind?'fName':'entryName'))}</label><input id="txDesc" class="desc" maxlength="80" autocomplete="off" autocorrect="off" data-1p-ignore data-lpignore="true" placeholder="${esc(t('descPh'))}" value="${esc(T.name)}">
+		${T.type!=='transfer'?`${EX.savedNames(T.type).length?`<details class="saved-names"><summary>${UI.icon('bookmark',18)}${esc(t('savedNames'))} (${EX.savedNames(T.type).length}) ${UI.icon('chevron-down',16)}</summary><div class="saved-name-grid">${EX.savedNames(T.type).map((x,i)=>`<span><button type="button" class="chip" data-tx-saved="${i}">${esc(x.name)}</button>${EXA.pinControl?.(T.type,i)||''}</span>`).join('')}</div></details>`:''}`:''}</div>
+        <div id="entryServices"${T.name.trim()||T.editScheduleId||T.editId?' hidden':''}>${T.type==='expense'?EXA.servicePicker():''}</div>
+        ${T.type!=='transfer'?`<div class="editor-wallet-row"><span class="editor-row-label">${esc(t(T.type==='income'?'incTo':'fPayFrom'))}</span>${walletControl()}${T.walletOpen?walletChoices():''}</div>`:''}
+        <div class="editor-date-row"><button type="button" class="editor-row" data-entry="date">${UI.ci('calendar','teal',36)}<span><b>${esc(t('entryDate'))}</b><small>${esc(T.date===today()?t('relToday'):EX.parse(T.date).toLocaleDateString(EX.loc(),{day:'numeric',month:'short',year:'numeric'}))}</small></span>${UI.icon('chevron-down',20)}</button>${T.dateOpen?`<div class="entry-date-options"><button type="button" class="chip" data-tx-date="today">${esc(t('relToday'))}</button><button type="button" class="chip" data-tx-date="yesterday">${esc(t('relYesterday'))}</button><label class="f"><span>${esc(t('pickDate'))}</span><input type="date" id="txDate" value="${esc(T.date)}"></label></div>`:''}</div>
+
+        ${T.type!=='transfer'?entryGroup('category','fCategory','category-2',T.category?EX.catInfo(T.category).name:t('entryChooseCat'),`<div class="entry-category" id="entryCategory">${entryCategories()}</div>`):''}
+        ${!T.editId&&T.type!=='transfer'?`<button type="button" class="editor-row" data-entry="schedule-open">${UI.ci('repeat','teal',36)}<span><b>${esc(t('fRepeats'))}</b><small>${esc(EX.scheduleLabel(T))}</small></span>${UI.icon('chevron-right',20)}</button>`:''}
+
+		${entryGroup('extras','editorMore','paperclip',[T.photo?t('entryPhoto'):'',T.note?t('entryNote'):''].filter(Boolean).join(' · ')||t('entryExtrasHint'),`${T.type==='expense'&&EX.state().settings.receiptScanner!==false?`<button type="button" class="btn btn-ghost entry-scan" data-receipt-scan>${UI.icon('photo',20)}${esc(t('scanReceipt'))}</button>`:''}		<div class="entry-detail-content">${EXA.photos.slot(T.photo)}</div>
+		${EXA.tagsField(T.tags)}<div class="entry-detail-content"><label for="txNote">${esc(t('fNote'))}</label><textarea id="txNote" rows="2" maxlength="400" placeholder="${esc(t('notePh'))}">${esc(T.note)}</textarea></div>
+		${T.scheduleKind==='bill'?`<label class="f"><span>${esc(t('fRemind'))}</span><select id="entryLead"><option value="">${esc(t('leadDefault'))}</option>${EX.LEADS.map(n=>`<option value="${n}"${T.lead===n?' selected':''}>${esc(t('lead'+n))}</option>`).join('')}</select></label>${EXA.reminderNotice?.()||''}<label class="entry-check"><input type="checkbox" id="entryVariable"${T.variable?' checked':''}>${esc(t('fVariable'))}</label><label class="entry-check"><input type="checkbox" id="entryAutopay"${T.autopay?' checked':''}>${esc(t('fAutopay'))}</label><label class="f"><span>${esc(t('fRef'))}</span><input id="entryReference" value="${esc(T.reference||'')}"></label><label class="f"><span>${esc(t('fUrl'))}</span><input id="entryPayUrl" type="url" value="${esc(T.payUrl||'')}"></label>`:''}<div class="entry-more">
+		${T.type!=='transfer'?`<div class="entry-shortcut-options"><label class="remember-name"${T.name.trim()?'':' hidden'}><input type="checkbox" id="rememberName"${T.rememberName?' checked':''}>${UI.icon('bookmark',18)}${esc(t('entryNext'))}</label><b>${esc(t('entryShortcut'))}</b><label class="entry-check"><input id="entryRememberWallet" type="checkbox"${T.rememberWallet?' checked':''}>${esc(t('entryRememberWallet'))}</label><label class="entry-check"><input id="entryRememberAmount" type="checkbox"${T.rememberAmount?' checked':''}>${esc(t('entryRememberAmount'))}</label>${EX.savedNames(T.type).length?`<details><summary>${esc(t('entryManageNames'))}</summary>${EX.savedNames(T.type).map((x,i)=>`<button type="button" class="btn btn-ghost" data-tx-forget="${i}">${UI.icon('trash',18)} ${esc(x.name)}</button>`).join('')}</details>`:''}</div>`:''}
 		</div>`)}
-		<p class="err entry-error" id="txErr" role="alert" hidden></p></div>
-		<div class="entry-footer"><div class="tx-field-actions"${T.editingField?'':' hidden'}><button type="button" class="btn btn-ghost" data-tx="field-done">${UI.icon('check',20)}${esc(t('entryDone'))}</button></div><button type="button" class="btn btn-primary entry-save" data-tx="${T.quick?'quick-review':'save'}"${T.saving?' disabled':''}>${esc(t(T.quick?'sentenceReview':!T.editId&&T.type!=='transfer'&&((T.repeat||'once')!=='once'||T.date>today())?(T.type==='income'?'entryScheduleIncome':'entryScheduleBill'):buttonKey()))}</button></div>
+		${T.editScheduleId?`<details class="editor-record-options"><summary>${UI.icon('dots',20)} ${esc(t('editorOptions'))}</summary><button type="button" class="btn btn-ghost" data-entry="duplicate-record">${UI.icon('copy',20)} ${esc(t('duplicateRecord'))}</button><button type="button" class="btn btn-danger" data-entry="delete-record">${UI.icon('trash',20)} ${esc(t('del'))}</button></details>`:''}${T.confirmDelete?`<div class="entry-alert" role="alertdialog"><b>${esc(t('editorDeleteConfirm'))}</b><p>${esc(t('editorDeleteWarning'))}</p><button type="button" class="btn btn-danger" data-entry="delete-confirm">${esc(t('del'))}</button><button type="button" class="btn btn-ghost" data-entry="delete-cancel">${esc(t('cancel'))}</button></div>`:''}<p class="err entry-error" id="txErr" role="alert" hidden></p></div>
+		<div class="entry-footer"><div class="tx-field-actions"${T.editingField?'':' hidden'}><button type="button" class="btn btn-ghost" data-tx="field-done">${UI.icon('check',20)}${esc(t('entryDone'))}</button></div><button type="button" class="btn btn-primary entry-save" data-tx="${T.quick?'quick-review':'save'}"${T.saving?' disabled':''}>${esc(t(T.quick?'sentenceReview':T.editScheduleId?'entrySaveChanges':!T.editId&&T.type!=='transfer'&&((T.repeat||'once')!=='once'||T.date>today())?(T.type==='income'?'entryScheduleIncome':'entryScheduleBill'):buttonKey()))}</button></div>
 		<div id="txKeypad" class="keypad"${T.keypadOpen?'':' hidden'} role="group" aria-label="${esc(t('fAmount'))}"><div class="keypad-head"><span>${esc(t(T.target==='toAmount'?'fToAmount':'fAmount'))}</span><button type="button" class="btn btn-ghost" data-tx="amount-done">${UI.icon('check',20)}${esc(t('entryDone'))}</button></div>${['1','2','3','4','5','6','7','8','9','.','0','<'].map(k=>`<button type="button" class="key" data-key="${k}" aria-label="${k==='<'?esc(t('del')):k==='.'?esc(decimalMark()):k}">${k==='<'?UI.icon('backspace',26):k==='.'?esc(decimalMark()):k}</button>`).join('')}</div>`;
 	}
 	function readTxFields() {
+        if(T&&$('#scheduleStart')?.value)T.date=$('#scheduleStart').value;
         if(T&&$('#entryRepeat')){T.repeat=$('#entryRepeat').value;Object.assign(T,EXA.readSchedule($('#sheet')));}
 		if(!T||!$('#txDesc'))return;
-		T.name=$('#txDesc').value;T.tags=EXA.readTags($('#sheet'));T.rememberName=!!$('#rememberName')?.checked;
+		T.name=$('#txDesc').value;if($('#entryLead')){T.lead=$('#entryLead').value===''?null:Number($('#entryLead').value);T.variable=$('#entryVariable').checked;T.autopay=$('#entryAutopay').checked;T.reference=$('#entryReference').value.trim();T.payUrl=$('#entryPayUrl').value.trim();}T.tags=EXA.readTags($('#sheet'));T.rememberName=!!$('#rememberName')?.checked;
 		T.rememberWallet=!!$('#entryRememberWallet')?.checked;T.rememberAmount=!!$('#entryRememberAmount')?.checked;
 		const def=$('#entryDefault');if(def)T.makeDefault=def.checked;
 		const ph=$('.photo-slot');if(ph)T.photo=EXA.photos.value(ph);
@@ -202,7 +213,7 @@
 		if(read)readTxFields();T.editingField=false;T.keypadOpen=false;const sc=$('.tx-scroll'),top=sc?.scrollTop||0;$('.sheet-body').innerHTML=txBody();if(keepScroll)$('.tx-scroll').scrollTop=top;
 	}
 	function guardEntryClose(){
-		if(!T||T.committed)return true;readTxFields();if(EXA.photos.busy){toast(t('photoWorking'));return false;}
+		if(!T||T.committed)return true;if(T.screen==='schedule'){readTxFields();T.scheduleTouched=true;T.screen='main';drawTx(false,false);return false;}readTxFields();if(EXA.photos.busy){toast(t('photoWorking'));return false;}
 		if(!meaningful())return true;T.discard=true;setKeypad(false);drawTx(false,false);$('#discardTitle')?.scrollIntoView({block:'nearest'});$('[data-entry=keep]')?.focus();return false;
 	}
 	EXA.openTx=(tx,preset={})=>{
@@ -215,6 +226,7 @@
 		draftOwner=owner();T.dateMode=T.date===today()?'today':T.date===addDays(today(),-1)?'yesterday':'other';
 		UI.openSheet(txBody(),{full:true,cls:'tx entry-composer',beforeClose:guardEntryClose,onClose:()=>{clearTimeout(draftTimer);T=null;$('#sheet').style.removeProperty('--entry-height');$('#sheet').style.removeProperty('--entry-top');}});entryViewport();
 	};
+    EXA.cancelScanEntry=id=>{if(T&&T.id===id&&T.scanOrigin&&!T.committed){dropDraft();T.committed=true;UI.closeSheet(true);}};
 	EXA.receiptContext=()=>{if(!T||T.type!=='expense'||T.committed)return null;readTxFields();return {id:T.id,type:T.type,currency:T.account?walletCur(T.account):'',photo:T.photo};};
 	EXA.applyReceipt=data=>{if(!T||T.type!=='expense'||T.id!==data.id||T.committed)return false;readTxFields();
 	 if(data.name!==undefined)T.name=data.name.slice(0,80);if(data.amount!==undefined){T.amount=data.amount;if(data.currency&&(!T.account||data.currency!==walletCur(T.account))){T.sourceCurrency=data.currency;T.currencyReview=true;}}
@@ -260,7 +272,7 @@
 		$$( '.amt-display' ).forEach( b => { b.classList.remove( 'on' ); b.setAttribute( 'aria-expanded', 'false' ); } );
 	} );
 
-	EXA.captureScheduleDraft=()=>{if(T&&$('#txDesc')){readTxFields();storeDraft();}};
+	EXA.captureScheduleDraft=()=>{if(T&&($('#txDesc')||T.screen==='schedule')){readTxFields();storeDraft();}};
 	EXA.refreshEntry=()=>{if(T&&$('#txDesc')){readTxFields();drawTx(true,false);storeDraft();}};
 	EXA.categoryCreated=item=>{if(T&&$('#txDesc')&&item.type===T.type){readTxFields();T.category=item.id;T.catsOpen=false;drawTx(true,false);storeDraft();}};
 	EXA.applySavedEntry=i=>{if(!T)return;readTxFields();applyShortcut(i);};
@@ -280,25 +292,25 @@
 		drawTx( true, false );
 		if ( hadFocus ) { const n = $( '#txQuick' ); n.focus(); n.setSelectionRange( n.value.length, n.value.length ); }
 	}
-	function entryError(key,selector){const e=$('#txErr');e.textContent=t(key);e.hidden=false;const field=$(selector||'[data-tx=save]');const group=field?.closest('[data-entry-group]');if(group){group.open=true;T.entryGroup=group.dataset.entryGroup;}field?.setAttribute('aria-invalid','true');field?.setAttribute('aria-describedby','txErr');field?.scrollIntoView({block:'center'});field?.focus({preventScroll:true});}
+	function entryError(key,selector){EXA.playSound?.('error');const e=$('#txErr');e.textContent=t(key);e.hidden=false;const field=$(selector||'[data-tx=save]');const group=field?.closest('[data-entry-group]');if(group){group.open=true;T.entryGroup=group.dataset.entryGroup;}field?.setAttribute('aria-invalid','true');field?.setAttribute('aria-describedby','txErr');field?.scrollIntoView({block:'center'});field?.focus({preventScroll:true});}
 	function saveTx(){
 		if(!T||T.saving||T.committed)return;if(EXA.photos.busy)return toast(t('photoWorking'));readTxFields();
 		const amount=T.amount.replace(/\.$/,'');
-		if(!/^\d{1,9}(\.\d{1,2})?$/.test(amount)||EX.cents(amount)<=0)return entryError('errAmountReq','[data-tx=target-amount]');
+		if(!(T.scheduleKind==='bill'&&amount==='')&&(!/^\d{1,9}(\.\d{1,2})?$/.test(amount)||EX.cents(amount)<=0))return entryError('errAmountReq','[data-tx=target-amount]');
 		if(!T.date||!/^\d{4}-\d{2}-\d{2}$/.test(T.date))return entryError('errDate','#txDate');
 		if(T.date>today()&&(T.editId||T.type==='transfer'))return entryError('entryFuture','#txDate');
 		if(!writable(T.account)){T.walletOpen=true;drawTx(true,false);return entryError('entryWalletGone','[data-entry=wallet]');}
 		if(T.currencyReview)return entryError('entryCurrencyReview','[data-entry=review-currency]');
 		if(T.type!=='transfer'&&!T.category){T.catsOpen=true;T.entryGroup='category';drawTx(true,false);return entryError('entryCategoryError','[data-tx-cat=uncategorized]');}
 		if(T.type!=='transfer'&&!EX.catList(T.type).some(c=>c.key===T.category)&&T.category!=='uncategorized')return entryError('entryCategoryError','[data-tx-catsmore]');
-		if(!T.editId&&T.type!=='transfer'&&((T.repeat||'once')!=='once'||T.date>today())){
+		if(!T.editId&&T.type!=='transfer'&&(T.scheduleKind||(T.repeat||'once')!=='once'||T.date>today())){
           if(!T.name.trim())return entryError('errNameReq','#txDesc');
           const list=T.type==='income'?S().incomes:S().bills;
-          if(list.some(x=>x.id===T.id))return;
-          const schedule=EXA.readSchedule($('#sheet')),scheduleError=EXA.scheduleError({...T,...schedule});if(scheduleError)return entryError(scheduleError);Object.assign(T,schedule);const prepared=EX.prepareSchedule({repeat:T.repeat||'once',...schedule,day:parse(T.date).getDate()},T.date),next=prepared.next;if(!next)return entryError(prepared.endMode==='date'?'scheduleEndError':'schedulePickDates','#entryRepeat');
-          const record={...prepared,id:T.id,name:T.name.trim(),amount,account:T.account,currency:walletCur(T.account),category:T.category,tags:copy(T.tags),photo:T.photo||'',repeat:T.repeat||'once',next,day:parse(T.date).getDate(),...(T.type==='income'?{note:T.note.trim()}:{notes:T.note.trim(),lead:null})};
-          T.saving=true;list.push(record);if(!EX.save()){list.splice(list.indexOf(record),1);T.saving=false;return entryError('tSaveFail');}
-          const type=T.type;T.committed=true;dropDraft();UI.closeSheet(true);if(type==='income'){EXA.st.txFilter.type='income';EXA.st.incomeMode='recurring';}EXA.go(type==='income'?'activity':'bills');return;
+          const target=T.editScheduleId?list.find(x=>x.id===T.editScheduleId):null;if(T.editScheduleId&&(!target||contentStamp(target)!==T.sourceStamp))return entryError('entryChanged');if(!target&&list.some(x=>x.id===T.id))return;
+          const schedule={...EXA.scheduleData(T),...EXA.readSchedule($('#sheet'))},scheduleError=EXA.scheduleError({...T,...schedule});if(scheduleError)return entryError(scheduleError);Object.assign(T,schedule);const prepared=target&&!T.scheduleTouched&&T.date===target.next?{...schedule,next:target.next,day:target.day,scheduleEnd:target.scheduleEnd}:EX.prepareSchedule({repeat:T.repeat||'once',...schedule,day:target&&target.next===T.date?target.day:parse(T.date).getDate()},T.date),next=prepared.next;if(!next)return entryError(prepared.endMode==='date'?'scheduleEndError':'schedulePickDates','#entryRepeat');
+          if(T.scheduleKind==='bill'&&T.payUrl&&!/^https?:\/\//i.test(T.payUrl))return entryError('errUrl');const record={...prepared,id:target?.id||T.id,name:T.name.trim(),amount,account:T.account,currency:walletCur(T.account),category:T.category,tags:copy(T.tags),photo:T.photo||'',repeat:T.repeat||'once',next,day:prepared.day||parse(T.date).getDate(),...(T.type==='income'?{note:T.note.trim()}:{notes:T.note.trim(),lead:T.lead??null,variable:!!T.variable,autopay:!!T.autopay,reference:T.reference||'',payUrl:T.payUrl||''})};
+          T.saving=true;const old=target?copy(target):null;if(target){Object.assign(target,record);delete target.done;}else list.push(record);if(!EX.save()){if(target){Object.keys(target).forEach(k=>delete target[k]);Object.assign(target,old);}else list.splice(list.indexOf(record),1);T.saving=false;return entryError('tSaveFail');}
+          const type=T.type;EXA.playSound?.('success');T.committed=true;dropDraft();UI.closeSheet(true);if(type==='income'){EXA.st.txFilter.type='income';EXA.st.incomeMode='recurring';}EXA.go(type==='income'?'activity':'bills');return;
         }
 		const tx={type:T.type,amount,account:T.account,date:T.date,name:T.name.trim(),note:T.note.trim(),photo:T.photo||'',tags:T.tags||[]};
 		if(T.type==='transfer'){
@@ -324,7 +336,7 @@
 		 S().settings.savedNames=oldNames;if(oldDefault===undefined)delete S().settings.defaultAccount;else S().settings.defaultAccount=oldDefault;S().device.entryReceipt=oldReceipt;
 		 T.saving=false;return entryError('entryNotSaved');
 		}
-		const expected=contentStamp(record),id=record.id;T.committed=true;dropDraft();UI.closeSheet(true);EX.emit('change');UI.haptic(20);
+		const expected=contentStamp(record),id=record.id;T.committed=true;dropDraft();UI.closeSheet(true);EX.emit('change');UI.haptic(20);EXA.playSound?.('success');
 		if(!editing)toast('',()=>{
 		 const current=S().txs.find(x=>x.id===id);
 		 if(!current||contentStamp(current)!==expected||!writable(current.account)||(current.type==='transfer'&&!writable(current.toAccount)))return toast(t('entryUndoChanged'));
@@ -358,7 +370,7 @@
 		drawTx(true,false);storeDraft();
 	}
 	EXA.txClick=e=>{
-		if(!T||!$('#txDesc'))return false;const g=sel=>e.target.closest(sel);let el;
+		if(!T||(!$('#txDesc')&&T.screen!=='schedule'))return false;const g=sel=>e.target.closest(sel);let el;
 		if((el=g('[data-key]'))){pressKey(el.dataset.key);storeDraft();return true;}
 		if((el=g('[data-tx-saved]'))){readTxFields();const x=EX.savedNames(T.type)[Number(el.dataset.txSaved)];if(x&&(T.name.trim()&&T.name!==x.name||x.amount&&T.amount&&T.amount!==x.amount||x.account&&T.account&&T.account!==x.account)){T.pendingShortcut=Number(el.dataset.txSaved);drawTx(false,false);}else applyShortcut(Number(el.dataset.txSaved));return true;}
 		if((el=g('[data-tx-forget]'))){readTxFields();const x=EX.savedNames(T.type)[Number(el.dataset.txForget)];if(x){S().settings.savedNames=S().settings.savedNames.filter(n=>n!==x);EX.save();drawTx(true,false);}return true;}
@@ -371,6 +383,12 @@
 		if((el=g('[data-tx-date]'))){readTxFields();T.dateMode=el.dataset.txDate;T.date=T.dateMode==='today'?today():T.dateMode==='yesterday'?addDays(today(),-1):T.date;T.dateOpen=T.dateMode==='other';drawTx(true,false);storeDraft();return true;}
 		if((el=g('[data-entry]'))){
 		 readTxFields();const a=el.dataset.entry;
+         if(a==='schedule-open'){T.screen='schedule';drawTx(false,false);return true;}
+         if(a==='frequency'){T.repeat=el.dataset.repeat==='monthly'?'monthdays':el.dataset.repeat;if(T.repeat==='monthdays'&&!T.monthDays?.length)T.monthDays=[parse(T.date).getDate()];T.scheduleTouched=true;drawTx(true,false);storeDraft();return true;}
+         if(a==='schedule-back'||a==='schedule-use'){let error=EXA.scheduleError({...T,next:T.date});if(!error&&!EX.prepareSchedule({...T,day:parse(T.date).getDate()},T.date).next)error='scheduleEndError';if(error&&a==='schedule-use')return entryError(error);T.scheduleTouched=true;T.screen='main';drawTx(false,false);storeDraft();return true;}
+         if(a==='delete-record'||a==='delete-cancel'){T.confirmDelete=a==='delete-record';drawTx(true,false);return true;}
+         if(a==='delete-confirm'){const list=T.scheduleKind==='bill'?S().bills:S().incomes,index=list.findIndex(x=>x.id===T.editScheduleId);if(index>=0&&writable(list[index].account)){list.splice(index,1);T.committed=true;dropDraft();UI.closeSheet(true);EX.save();EXA.playSound?.('success');}return true;}
+         if(a==='duplicate-record'){EXA.duplicateRecord(T.scheduleKind,T.editScheduleId);return true;}
 		 if(a==='discard'){dropDraft();T.committed=true;UI.closeSheet(true);return true;}
 		 if(a==='keep'){T.discard=false;drawTx(true,false);return true;}
 		 if(a==='apply-shortcut'){applyShortcut(T.pendingShortcut);return true;}
@@ -396,11 +414,11 @@
 		 return true;
 		}return false;
 	};
-	EXA.txInput=e=>{if(!T||!$('#txDesc'))return false;
+	EXA.txInput=e=>{if(!T||(!$('#txDesc')&&T.screen!=='schedule'))return false;
 		if(e.target.closest('[data-schedule-panel]')){readTxFields();storeDraft();return true;}
         if(e.target.id==='entryRepeat'){readTxFields();drawTx(true,false);storeDraft();return true;}
 		if(e.target.id==='txQuick'){onTxQuick();storeDraft();return true;}
-		if(e.target.id==='txDesc'&&e.type==='input'){T.name=e.target.value;const r=$('.remember-name');if(r)r.hidden=!T.name.trim();const cat=$('#entryCategory');if(cat)cat.innerHTML=entryCategories();}
+		if(e.target.id==='txDesc'&&e.type==='input'){T.name=e.target.value;const services=$('#entryServices');if(services)services.hidden=!!T.name.trim()||!!T.editScheduleId||!!T.editId;const r=$('.remember-name');if(r)r.hidden=!T.name.trim();const cat=$('#entryCategory');if(cat)cat.innerHTML=entryCategories();}
 		if(e.target.id==='entryCategoryIcon'){const preview=$('.entry-icon-preview');if(preview)preview.innerHTML=UI.ci(e.target.value,'teal',40);}
 		if(['entryRememberAmount','entryRememberWallet'].includes(e.target.id)&&e.target.checked){if(T.name.trim()){T.rememberName=true;$('#rememberName').checked=true;}else{e.target.checked=false;toast(t('entryNoName'));}}
 		if(e.target.id==='entryDefault'){T.defaultTouched=true;T.makeDefault=e.target.checked;}
@@ -460,6 +478,7 @@
 		editingBill = bill || null; quickDay = null;
 		const billDefault=EX.writableAccounts().find(a=>a.id===S().settings.defaultAccount)?.id||(EX.writableAccounts().length===1?EX.writableAccounts()[0].id:'');
 		const v = bill ? Object.assign( {}, bill ) : Object.assign( { currency: S().settings.currency, repeat: 'monthly', category: 'other', lead: null, next: addDays( today(), 7 ), amount: '', name: '', account: billDefault }, prefill || {} );
+		return EXA.openTx(null,{...v,type:'expense',date:v.next,note:v.notes||'',scheduleKind:'bill',editScheduleId:bill?.id||null,sourceStamp:bill?contentStamp(bill):null,sourceRecord:bill?copy(bill):null,recoveryId:'bill-'+(bill?.id||'new')});
 		const wallets = EX.writableAccounts();
 		UI.openSheet( `${ head( t( bill ? 'editTitle' : 'addTitle' ) ) }<form id="billForm" novalidate class="sheet-pad">
 			<label class="f"><span>${ esc( t( 'fName' ) ) }</span><input name="name" required maxlength="80" autocomplete="off" placeholder="${esc(EXA.label('ownName'))}" value="${ esc( v.name ) }"></label>

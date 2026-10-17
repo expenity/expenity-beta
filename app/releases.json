@@ -1,6 +1,22 @@
 {
-  "version": "0.15.1",
+  "version": "0.16.0",
   "releases": [
+    {
+      "version": "0.16.0",
+      "date": "2026-10-17",
+      "en": [
+        "Unified expense, bill and recurring income editor with a prominent amount, readable full-width rows and optional details kept collapsed. Existing bills no longer show name-entry shortcuts.",
+        "Scheduling now has its own focused screen within the editor, with frequency choices, relevant controls, optional ending rules and expandable upcoming dates. Short-month rules appear only when needed.",
+        "Closing a receipt scan started by holding + now cancels the entire new expense. Scanning inside an existing draft preserves that draft when cancelled.",
+        "Added two optional sound sets, Minimal and Normal, in Appearance settings, with an on/off switch, volume and preview. Sounds are generated locally and are off by default."
+      ],
+      "el": [
+        "Ενιαίος επεξεργαστής εξόδων, λογαριασμών και επαναλαμβανόμενων εσόδων, με ευδιάκριτο ποσό, ευανάγνωστες γραμμές και συμπτυγμένες πρόσθετες λεπτομέρειες.",
+        "Η επανάληψη ρυθμίζεται σε ξεχωριστή οθόνη μέσα στον επεξεργαστή, με επιλογή συχνότητας, προαιρετική λήξη και αναπτυσσόμενη προεπισκόπηση ημερομηνιών. Οι κανόνες για μήνες με λιγότερες ημέρες εμφανίζονται μόνο όταν χρειάζονται.",
+        "Το κλείσιμο σάρωσης που ξεκίνησε με παρατεταμένο πάτημα του + ακυρώνει ολόκληρο το νέο έξοδο. Η ακύρωση σάρωσης μέσα σε υπάρχον πρόχειρο διατηρεί το πρόχειρο.",
+        "Προστέθηκαν δύο προαιρετικά σύνολα ήχων, Διακριτικοί και Κανονικοί, στις ρυθμίσεις εμφάνισης, με ενεργοποίηση, ένταση και ακρόαση. Οι ήχοι παράγονται τοπικά και είναι αρχικά απενεργοποιημένοι."
+      ]
+    },
     {
       "version": "0.15.1",
       "date": "2026-10-17",

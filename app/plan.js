@@ -76,7 +76,7 @@
 		S().txs.push( tx );
 		const nx = EX.nextAfter( inc, inc.next );
 		if ( nx ) inc.next = nx; else inc.done = true;
-		EX.save(); UI.haptic();
+		EX.save(); UI.haptic(); EXA.playSound?.('success');
 		toast( t( 'tIncReceived', { name: inc.name } ), () => { S().txs = S().txs.filter( ( x ) => x.id !== tx.id ); Object.keys( inc ).forEach( ( k ) => { delete inc[ k ]; } ); Object.assign( inc, before ); EX.save(); } );
 	};
 	/** Income expected in the next `days` days, in cents of the main currency. */
@@ -205,6 +205,7 @@
 		editing = inc || null;
 		const defaultWallet=wallets().find(a=>a.id===S().settings.defaultAccount)?.id||(wallets().length===1?wallets()[0].id:'');
 		const v = inc || { name: '', amount: '', account: defaultWallet, repeat: 'monthly', next: addDays( today(), 7 ), category: 'salary', ...prefill };
+		return EXA.openTx(null,{...v,type:'income',date:v.next,scheduleKind:'income',editScheduleId:inc?.id||null,sourceStamp:inc?EXA.scheduleStamp(inc):null,sourceRecord:inc?JSON.parse(JSON.stringify(inc)):null,recoveryId:'income-'+(inc?.id||'new')});
 		UI.openSheet( `${ head( t( inc ? 'incEdit' : 'incAdd' ) ) }<form id="incomeForm" novalidate class="sheet-pad">
 			<label class="f"><span>${ esc( t( 'incName' ) ) }</span><input name="iname" maxlength="60" autocomplete="off" value="${ esc( v.name ) }"></label>
 			<label class="f"><span>${ esc( t( 'incTo' ) ) }</span><select name="account"><option value="">${esc(t('entryChooseWallet'))}</option>${ walletOpts( v.account ) }</select></label>
