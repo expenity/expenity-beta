@@ -12,7 +12,11 @@
 	const $ = ( s, r = document ) => r.querySelector( s );
 	const $$ = ( s, r = document ) => [ ...r.querySelectorAll( s ) ];
 	const toast = UI.toast;
-	window.EXPENITY_VERSION = '0.14.0';
+	window.EXPENITY_VERSION = '0.15.0';
+
+ const seenCharacters=new Set();try{for(const skin of JSON.parse(sessionStorage.getItem('expenity.charactersSeen')||'[]'))seenCharacters.add(skin);}catch(_){}
+ const characterSeen=skin=>seenCharacters.has(skin);
+ const rememberCharacter=skin=>{seenCharacters.add(skin);try{sessionStorage.setItem('expenity.charactersSeen',JSON.stringify([...seenCharacters]));}catch(_){}};
 
 	/* ------------------------------------------------------------------ Drawing the shell */
 
@@ -23,6 +27,7 @@
 	}
 	function render() {
         EXA.applyCustomTheme?.();
+        if(st.characterSkin!==EXA.skin()){clearTimeout(st.characterCollapseTimer);st.characterSkin=EXA.skin();st.characterRetreated=characterSeen(EXA.skin());st.characterCollapsed=st.characterRetreated;}
 		const view = $( '#view' );
 		const keep = view.dataset.key === st.view + ':' + st.more ? view.scrollTop : 0;
 		// A redraw (a sync, a change elsewhere) must not steal the field someone is typing in: remember it and put it back.
@@ -41,11 +46,12 @@
 		document.body.dataset.view = st.view;
 		document.documentElement.lang = EX.I18N.langs[ EX.lang() ].htmlLang;
 		document.title = '[Beta] ' + t( 'title' );
+        if(st.view==='home'){EXA.scanShortcutHint?.();if(['mario','minnie','vader'].includes(EXA.skin())&&!st.characterRetreated&&!EXA.flow.active()&&document.documentElement.dataset.funMotion==='on')rememberCharacter(EXA.skin());}
 	}
 	EXA.render = render;
 	EXA.applyMotion = () => { const m = S().device.motion || 'auto'; if ( m === 'auto' ) delete document.documentElement.dataset.motion; else document.documentElement.dataset.motion = m; try { if ( m === 'auto' ) localStorage.removeItem( 'expenity.motion' ); else localStorage.setItem( 'expenity.motion', m ); } catch ( e ) { /* ignore */ } };
 	function go( view, more = 'root' ) {
-		if(view==='home'&&st.view!=='home'){clearTimeout(st.characterCollapseTimer);st.characterRetreated=false;st.characterCollapsed=false;}
+		if(view==='home'&&st.view!=='home'){clearTimeout(st.characterCollapseTimer);st.characterRetreated=characterSeen(EXA.skin());st.characterCollapsed=st.characterRetreated;}
 		st.view = view; st.more = more; st.sel = null;
 		if ( view === 'plan' ) { S().device.goalsDiscovered = true; EX.persist(); }
 		if ( view !== 'activity' ) { st.searchOpen = false; st.txFilter.q = ''; }
@@ -190,7 +196,7 @@
 			case 'rm-passkey': { const r = await EX.auth.removePasskey( el.dataset.id ); if ( r.ok ) { toast( t( 'tPasskeyRemoved' ) ); loadDevices(); } else toast( EXA.errText( r.error ) ); break; }
 			case 'rm-session': { const r = await EX.auth.revokeSession( el.dataset.id ); if ( r.ok ) { toast( t( 'tDeviceOut' ) ); loadDevices(); } else toast( EXA.errText( r.error ) ); break; }
 			case 'new-codes': { const r = await EX.auth.regenerateCodes(); if ( r.ok ) EXA.showCodes( r.recoveryCodes, () => render() ); else toast( EXA.errText( r.error ) ); break; }
-			case 'flip-hero': if(['vader','mario','minnie'].includes(EXA.skin())){if(!st.characterRetreated){st.characterCollapseTimer=setTimeout(()=>{st.characterCollapsed=true;if(st.view==='home')document.querySelector('.hero-flip')?.classList.add('character-collapsed');},1000);}st.characterRetreated=true;el.classList.add('character-retreating');setTimeout(()=>{el.classList.remove('character-retreating');el.classList.add('character-retreated');},900);} st.heroFlip = ! el.classList.contains( 'flipped' ); el.classList.toggle( 'flipped', st.heroFlip ); el.setAttribute( 'aria-pressed', String( st.heroFlip ) ); UI.haptic(); break;
+			case 'flip-hero': if(['vader','mario','minnie'].includes(EXA.skin())){if(!st.characterRetreated){st.characterCollapseTimer=setTimeout(()=>{st.characterCollapsed=true;if(st.view==='home')document.querySelector('.hero-flip')?.classList.add('character-collapsed');},1000);}st.characterRetreated=true;rememberCharacter(EXA.skin());el.classList.add('character-retreating');setTimeout(()=>{el.classList.remove('character-retreating');el.classList.add('character-retreated');},900);} st.heroFlip = ! el.classList.contains( 'flipped' ); el.classList.toggle( 'flipped', st.heroFlip ); el.setAttribute( 'aria-pressed', String( st.heroFlip ) ); UI.haptic(); break;
 			case 'delete-photos': await EXA.photos.deleteAll(); break;
 			case 'check-update': checkUpdate( el ); break;
 			case 'apply-update': await EXA.applyRelease(); break;

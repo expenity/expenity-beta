@@ -116,6 +116,7 @@
   document.body.append(ghost);drag.ghost=ghost;el.classList.add('dash-placeholder');$('#homeGrid').classList.add('dash-moving');UI.haptic(12);autoScroll();
  }
  document.addEventListener('pointerdown',e=>{
+  if(e.target.closest('[data-act=add]'))return;
   if(e.button!==0||UI.sheetOpen()||A.st.view!=='home')return;
   if(draft!==null){
    const handle=e.target.closest('[data-dash-resize]'),card=e.target.closest('[data-dash-drag]');if(!handle&&!card)return;

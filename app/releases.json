@@ -1,6 +1,24 @@
 {
-  "version": "0.14.0",
+  "version": "0.15.0",
   "releases": [
+    {
+      "version": "0.15.0",
+      "date": "2026-10-17",
+      "en": [
+        "Hold + for one second to prepare an expense from a receipt. A progress ring and capture icon provide feedback; release opens capture. Ordinary taps keep the add menu. The shortcut is excluded from Home editing, respects the scanner toggle, and has an accessible menu fallback and a one-time hint.",
+        "Recurring expenses and income now support selected weekdays, a multi-select calendar, ending on a date or after a chosen number of occurrences, and explicit last-day/skip rules for shorter months. A live summary shows the next three occurrences.",
+        "Added 34 expense and six income categories, 29 service/bill-name presets including Google and Greek services, and 37 additional outline icons. Categories, service presets and the larger icon picker use expandable groups. Presets never assume a price or repetition.",
+        "Character reveals are limited to once per theme per app session. Returning Home or refreshing keeps the character hidden and its gap collapsed.",
+        "Fixed the Mickey/Minnie dotted card background when theme colors are customized, and added gentle dot movement that respects motion settings."
+      ],
+      "el": [
+        "Κρατήστε το + για ένα δευτερόλεπτο για καταχώριση εξόδου από απόδειξη. Ένας δακτύλιος προόδου και εικονίδιο λήψης δείχνουν την ενέργεια· αφήνοντας ανοίγει η λήψη. Το απλό πάτημα ανοίγει το μενού. Η συντόμευση εξαιρείται από την επεξεργασία Αρχικής, τηρεί τη ρύθμιση σαρωτή και διαθέτει εναλλακτική στο μενού και οδηγία πρώτης χρήσης.",
+        "Τα επαναλαμβανόμενα έξοδα και έσοδα υποστηρίζουν επιλογή ημερών εβδομάδας, ημερολόγιο πολλαπλών ημερομηνιών, λήξη σε ημερομηνία ή μετά από αριθμό επαναλήψεων και κανόνες για μικρότερους μήνες. Η ζωντανή σύνοψη δείχνει τις επόμενες τρεις ημερομηνίες.",
+        "Προστέθηκαν 34 κατηγορίες εξόδων, έξι εσόδων, 29 έτοιμα ονόματα υπηρεσιών και λογαριασμών με Google και ελληνικές υπηρεσίες, και 37 επιπλέον εικονίδια. Οι επιλογές οργανώνονται σε αναπτυσσόμενες ομάδες. Τα έτοιμα ονόματα δεν ορίζουν αυτόματα ποσό ή επανάληψη.",
+        "Οι χαρακτήρες εμφανίζονται μία φορά ανά θέμα και συνεδρία εφαρμογής. Η επιστροφή στην Αρχική ή η ανανέωση τους διατηρεί κρυμμένους, με τον κενό χώρο μαζεμένο.",
+        "Διορθώθηκε το πουά φόντο της κάρτας Mickey/Minnie κατά την προσαρμογή χρωμάτων και προστέθηκε απαλή κίνηση που τηρεί τις ρυθμίσεις κίνησης."
+      ]
+    },
     {
       "version": "0.14.0",
       "date": "2026-10-17",

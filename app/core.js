@@ -62,25 +62,28 @@
 	const dim = EX.dim, iso = EX.iso, parse = EX.parse, today = EX.today, addDays = EX.addDays;
 
  EX.validDate=s=>typeof s==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(s)&&s>='1900-01-01'&&s<='9999-12-31'&&EX.iso(EX.parse(s))===s;
- EX.scheduleStart=(v,start)=>v.repeat==='dates'?(v.scheduleDates||[]).filter(EX.validDate).sort()[0]||null:['weekdays','monthdays'].includes(v.repeat)?EX.nextAfter(v,EX.addDays(start,-1)):start;
- EX.scheduleFactor=b=>{if(EX.PER_YEAR[b.repeat])return EX.PER_YEAR[b.repeat];if(b.repeat==='custom')return ({days:365,weeks:52,months:12,years:1}[b.intervalUnit]||365)/Math.max(1,Number(b.interval)||1);if(b.repeat==='monthdays')return (b.monthDays||[]).length*12;return 0;};
+ EX.scheduleStart=(v,start)=>v.repeat==='dates'?(v.scheduleDates||[]).filter(EX.validDate).sort()[0]||null:(['weekdays','monthdays'].includes(v.repeat)||v.repeat==='weekly'&&v.weekDays?.length)?EX.nextAfter(v,EX.addDays(start,-1)):start;
+ EX.scheduleFactor=b=>{if(b.repeat==='weekly'&&b.weekDays?.length)return 52*b.weekDays.length;if(EX.PER_YEAR[b.repeat])return EX.PER_YEAR[b.repeat];if(b.repeat==='custom')return ({days:365,weeks:52,months:12,years:1}[b.intervalUnit]||365)/Math.max(1,Number(b.interval)||1);if(b.repeat==='monthdays')return (b.monthDays||[]).length*12;return 0;};
 
 	/** The due date after `s` for a repeating bill, or null for a one-off. */
-	EX.nextAfter = ( bill, s ) => {
+	EX.rawNextAfter = ( bill, s ) => {
 		switch ( bill.repeat ) {
 			case 'daily': return addDays(s,1);
             case 'weekdays': {let d=addDays(s,1);while([0,6].includes(parse(d).getDay()))d=addDays(d,1);return d;}
             case 'dates': return (bill.scheduleDates||[]).filter(d=>EX.validDate(d)&&d>s).sort()[0]||null;
-            case 'monthdays': {const days=[...new Set((bill.monthDays||[]).map(Number))].filter(n=>Number.isInteger(n)&&n>=1&&n<=31).sort((a,b)=>a-b);if(!days.length)return null;for(let m=0;m<14;m++){const first=EX.addMonths(s,m,1),base=parse(first);for(const n of days){if(n>EX.dim(base.getFullYear(),base.getMonth()))continue;const d=EX.iso(new Date(base.getFullYear(),base.getMonth(),n));if(d>s)return d;}}return null;}
+            case 'monthdays': {const days=[...new Set((bill.monthDays||[]).map(Number))].filter(n=>Number.isInteger(n)&&n>=1&&n<=31).sort((a,b)=>a-b);if(!days.length)return null;for(let m=0;m<14;m++){const first=EX.addMonths(s,m,1),base=parse(first);for(const n of days){const max=EX.dim(base.getFullYear(),base.getMonth());if(n>max&&bill.shortMonth!=='last')continue;const d=EX.iso(new Date(base.getFullYear(),base.getMonth(),Math.min(n,max)));if(d>s)return d;}}return null;}
             case 'custom': {const n=Number(bill.interval);if(!Number.isInteger(n)||n<1||n>365)return null;return bill.intervalUnit==='weeks'?addDays(s,7*n):bill.intervalUnit==='months'?EX.addMonths(s,n,bill.day):bill.intervalUnit==='years'?EX.addMonths(s,12*n,bill.day):addDays(s,n);}
-            case 'weekly': return addDays( s, 7 );
+            case 'weekly': {if(!bill.weekDays?.length)return addDays(s,7);for(let k=1;k<=7;k++){const d=addDays(s,k);if(bill.weekDays.includes(parse(d).getDay()))return d;}return null;}
 			case 'biweekly': return addDays( s, 14 );
-			case 'monthly': return EX.addMonths( s, 1, bill.day );
+			case 'monthly': {if(bill.shortMonth==='skip'){for(let k=1;k<=14;k++){const d=EX.addMonths(s,k,bill.day);if(parse(d).getDate()===(bill.day||parse(s).getDate()))return d;}return null;}return EX.addMonths(s,1,bill.day);}
 			case 'quarterly': return EX.addMonths( s, 3, bill.day );
 			case 'yearly': return EX.addMonths( s, 12, bill.day );
 			default: return null;
 		}
 	};
+ EX.nextAfter=(v,s)=>{const d=EX.rawNextAfter(v,s),end=v.endMode==='after'?v.scheduleEnd:v.end;return d&&(!end||d<=end)?d:null;};
+ EX.prepareSchedule=(v,start)=>{const out={...v,day:v.day||parse(start).getDate()};if(['once','dates'].includes(out.repeat)){out.endMode='never';out.end='';}out.next=EX.scheduleStart({...out,end:'',scheduleEnd:''},start);out.end=out.endMode==='date'?out.end||'':out.endMode?'':out.end||'';out.scheduleEnd='';if(out.next&&out.endMode==='after'){let d=out.next;for(let k=1;k<Number(out.endCount);k++){const n=EX.rawNextAfter(out,d);if(!n)break;d=n;}out.scheduleEnd=d;}if(out.end&&out.next>out.end)out.next=null;return out;};
+
 	/** Open due dates of a bill from its current one up to `to` (inclusive). */
 	EX.occurrences = ( bill, to ) => {
 		const out = [];

@@ -100,7 +100,7 @@
 	};
 	EXA.tabbar = () => {
 		const item = ( [ id, icon, label ] ) => `<button type="button" class="tab${ st.view === id ? ' on' : '' }" data-go="${ id }"${ st.view === id ? ' aria-current="page"' : '' }>${ UI.icon( icon, 26 ) }<span>${ esc( t( label ) ) }${ id === 'plan' ? EXA.goalsDiscovery() : '' }</span></button>`;
-		return `${ item( NAV[ 0 ] ) }${ item( NAV[ 1 ] ) }<button type="button" class="fab${ S().txs.length || S().bills.length ? '' : ' nudge' }" data-act="add" aria-label="${ esc( t( 'addNew' ) ) }">${ UI.icon( 'plus', 30 ) }</button>${ item( NAV[ 2 ] ) }${ item( NAV[ 3 ] ) }`;
+		return `${ item( NAV[ 0 ] ) }${ item( NAV[ 1 ] ) }<button type="button" title="${esc(S().settings.receiptScanner!==false?t('scanHoldHint'):t('addNew'))}" class="fab${ S().txs.length || S().bills.length ? '' : ' nudge' }" data-act="add" aria-label="${ esc( t( 'addNew' ) ) }">${ UI.icon( 'plus', 30 ) }</button>${ item( NAV[ 2 ] ) }${ item( NAV[ 3 ] ) }`;
 	};
 	EXA.rail = () => {
 		const item = ( [ id, icon, label ] ) => `<button type="button" class="rail-item${ st.view === id ? ' on' : '' }" data-go="${ id }"${ st.view === id ? ' aria-current="page"' : '' }>${ UI.icon( icon, 24 ) }<span>${ esc( t( label ) ) }${ id === 'plan' ? EXA.goalsDiscovery() : '' }</span></button>`;
@@ -350,7 +350,7 @@
 	}
 	function categoriesView() {
 		const custom = S().categories;
-		return `<p class="muted pad">${ esc( t( 'catCustomNote' ) ) }</p>${ custom.length ? `<ul class="list">${ custom.map( ( c ) => `<li><div class="item">${ UI.catCi( EX.catInfo( c.id ) ) }<span class="mid"><b>${ esc( c.name ) }</b><small>${ esc( t( c.type === 'income' ? 'typeIncome' : 'typeExpense' ) ) }</small></span><button type="button" class="ab-btn" data-edit-category="${esc(c.id)}" aria-label="${esc(t('actEdit'))}">${UI.icon('pencil',20)}</button><button type="button" class="btn btn-ghost btn-sm" data-act="del-cat" data-id="${ esc( c.id ) }">${ esc( t( 'del' ) ) }</button></div></li>` ).join( '' ) }</ul>` : `<p class="muted pad">${ esc( t( 'catNone' ) ) }</p>` }
+		return `<p class="muted pad">${ esc( t( 'catCustomNote' ) ) }</p><details class="catalog-builtins"><summary>${esc(t('catalogBuiltIn'))} (${EX.EXPENSE_CATS.length+EX.INCOME_CATS.length})</summary>${EXA.groupedCategories(EX.catList('expense').concat(EX.catList('income')).filter((c,i,a)=>a.findIndex(x=>x.key===c.key)===i&&!custom.some(x=>x.id===c.key)),c=>`<div class="catalog-category-label">${UI.catCi(c,30)}<span>${esc(c.name)}</span></div>`)}</details>${ custom.length ? `<ul class="list">${ custom.map( ( c ) => `<li><div class="item">${ UI.catCi( EX.catInfo( c.id ) ) }<span class="mid"><b>${ esc( c.name ) }</b><small>${ esc( t( c.type === 'income' ? 'typeIncome' : 'typeExpense' ) ) }</small></span><button type="button" class="ab-btn" data-edit-category="${esc(c.id)}" aria-label="${esc(t('actEdit'))}">${UI.icon('pencil',20)}</button><button type="button" class="btn btn-ghost btn-sm" data-act="del-cat" data-id="${ esc( c.id ) }">${ esc( t( 'del' ) ) }</button></div></li>` ).join( '' ) }</ul>` : `<p class="muted pad">${ esc( t( 'catNone' ) ) }</p>` }
 			<div class="btn-row"><button type="button" class="btn btn-primary" data-act="add-cat">${ UI.icon( 'plus', 20 ) } ${ esc( t( 'catAdd' ) ) }</button></div>`;
 	}
 	function dataView() {

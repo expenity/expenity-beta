@@ -85,7 +85,7 @@
 
 	EXA.openAdd = () => {
 		const row=(act,icon,color,label,sub)=>`<button type="button" class="entry-add-row" data-act="${act}">${UI.ci(icon,color,44)}<span><b>${esc(t(label))}</b><small>${esc(t(sub))}${act.startsWith('tx-')&&restoreDraft(act.slice(3))?' · '+esc(t('entryHasDraft')):''}</small></span>${UI.icon('chevron-right',20)}</button>`;
-		UI.openSheet(`${head(t('addShort'))}<div class="sheet-pad entry-add-menu">${recoveries().length?`<button type="button" class="btn btn-ghost" data-entry-recover>${UI.icon('alert-triangle',20)} ${esc(t('entryRecover'))} (${recoveries().length})</button>`:''}${row('tx-expense','arrow-up-right','red','typeExpense','entryExpenseSub')}${row('tx-income','arrow-down-left','green','typeIncome','entryIncomeSub')}${row('tx-transfer','arrows-exchange','blue','typeTransfer','entryTransferSub')}${row('add-bill','calendar-event','amber','tileBill','entryBillSub')}</div>`,{cls:'small'});
+		UI.openSheet(`${head(t('addShort'))}<div class="sheet-pad entry-add-menu">${recoveries().length?`<button type="button" class="btn btn-ghost" data-entry-recover>${UI.icon('alert-triangle',20)} ${esc(t('entryRecover'))} (${recoveries().length})</button>`:''}${EX.state().settings.receiptScanner!==false?`<button type="button" class="entry-add-row" data-start-receipt>${UI.ci('photo','teal',44)}<span><b>${esc(t('scanReceipt'))}</b><small>${esc(t('scanHoldHint'))}</small></span>${UI.icon('chevron-right',20)}</button>`:''}${row('tx-expense','arrow-up-right','red','typeExpense','entryExpenseSub')}${row('tx-income','arrow-down-left','green','typeIncome','entryIncomeSub')}${row('tx-transfer','arrows-exchange','blue','typeTransfer','entryTransferSub')}${row('add-bill','calendar-event','amber','tileBill','entryBillSub')}</div>`,{cls:'small'});
 	};
 
 	/* ------------------------------------------------------------------ Transaction sheet: amount first, big keypad */
@@ -119,7 +119,7 @@
 	let draftOwner = '', draftTimer = 0;
 	const owner = () => EX.auth.isSignedIn() ? 'user:'+EX.auth.user()?.id : 'guest';
 	const draftKey = (type,edit='',recovery='') => 'expenity.entryDraft.v1:'+owner()+':'+(edit?'edit:'+edit:recovery?'recovery:'+recovery+':'+type:type);
-	const draftValue = () => ({type:T.type,amount:T.amount,toAmount:T.toAmount,account:T.account,toAccount:T.toAccount,name:T.name,note:T.note,category:T.category,date:T.date,tags:T.tags,photo:T.photo,repeat:T.repeat||'once',interval:T.interval,intervalUnit:T.intervalUnit,monthDays:T.monthDays,scheduleDates:T.scheduleDates,quick:T.quick,quickText:T.quickText});
+	const draftValue = () => ({type:T.type,amount:T.amount,toAmount:T.toAmount,account:T.account,toAccount:T.toAccount,name:T.name,note:T.note,category:T.category,date:T.date,tags:T.tags,photo:T.photo,repeat:T.repeat||'once',interval:T.interval,intervalUnit:T.intervalUnit,monthDays:T.monthDays,scheduleDates:T.scheduleDates,weekDays:T.weekDays,shortMonth:T.shortMonth,endMode:T.endMode,end:T.end,endCount:T.endCount,scheduleEnd:T.scheduleEnd,quick:T.quick,quickText:T.quickText});
 	const meaningful = () => T && (T.editId ? JSON.stringify(draftValue())!==T.baseline : !!(T.amount||T.toAmount||T.name.trim()||T.note.trim()||T.tags.length||T.photo||T.date!==today()));
 	function storeDraft(){
 		clearTimeout(draftTimer);if(!T||draftOwner!==owner()||T.saving||T.committed)return;
@@ -142,7 +142,7 @@
 		const recent=S().txs.filter(x=>x.type===T.type&&x.category).slice().sort((a,b)=>(b.date||'').localeCompare(a.date||'')).map(x=>x.category);
 		let ids=[T.category,suggestion,...recent,...cats.map(c=>c.key)].filter(Boolean);ids=[...new Set(ids)].slice(0,3);
 		const tile=c=>`<button type="button" class="catchip${T.category===c.key?' on':''}" data-tx-cat="${esc(c.key)}" aria-pressed="${T.category===c.key}">${UI.catCi(c,36)}<span>${esc(c.name)}${c.key===suggestion?`<small>${esc(t('entrySuggested'))}</small>`:''}</span></button>`;
-		return `<div class="entry-label">${esc(t(T.category?'fCategory':'entryChooseCat'))}</div><div class="cats entry-cat-suggestions">${ids.map(id=>tile(EX.catInfo(id))).join('')}<button type="button" class="catchip more" data-tx-catsmore aria-expanded="${!!T.catsOpen}">${UI.ci(T.catsOpen?'chevron-up':'category-2','gray',36)}<span>${esc(t('entryAllCats'))}</span></button></div>${T.catsOpen?`<div class="entry-allcats"><div class="cats">${cats.map(tile).join('')}</div>${entryButton('new-category','entryCreateCategory','plus')}</div>`:''}`;
+		return `<div class="entry-label">${esc(t(T.category?'fCategory':'entryChooseCat'))}</div><div class="cats entry-cat-suggestions">${ids.map(id=>tile(EX.catInfo(id))).join('')}<button type="button" class="catchip more" data-tx-catsmore aria-expanded="${!!T.catsOpen}">${UI.ci(T.catsOpen?'chevron-up':'category-2','gray',36)}<span>${esc(t('entryAllCats'))}</span></button></div>${T.catsOpen?`<div class="entry-allcats">${EXA.groupedCategories(cats,tile,T.category)}${entryButton('new-category','entryCreateCategory','plus')}</div>`:''}`;
 	}
 	function entryGroup(id,label,icon,summary,body){
 	 const open=(T.entryGroup??'payment')===id;
@@ -176,6 +176,7 @@
 		${T.currencyReview?`<div class="entry-alert" role="alert"><p>${esc(t('entryCurrencyReview'))}${T.sourceCurrency?' · '+esc(T.sourceCurrency)+' → '+esc(T.account?walletCur(T.account):'—'):''}</p>${entryButton('review-currency','entryReview')}</div>`:''}
 		<div class="entry-name"><label for="txDesc">${esc(t('entryName'))}</label><input id="txDesc" class="desc" maxlength="80" autocomplete="off" autocorrect="off" data-1p-ignore data-lpignore="true" placeholder="${esc(t('descPh'))}" value="${esc(T.name)}">
 		${T.type!=='transfer'?`<label class="remember-name"${T.name.trim()?'':' hidden'}><input type="checkbox" id="rememberName"${T.rememberName?' checked':''}>${UI.icon('bookmark',18)}${esc(t('entryNext'))}</label>${EX.savedNames(T.type).length?`<details class="saved-names"><summary>${UI.icon('bookmark',18)}${esc(t('savedNames'))} (${EX.savedNames(T.type).length}) ${UI.icon('chevron-down',16)}</summary><div class="saved-name-grid">${EX.savedNames(T.type).map((x,i)=>`<span><button type="button" class="chip" data-tx-saved="${i}">${esc(x.name)}</button>${EXA.pinControl?.(T.type,i)||''}</span>`).join('')}</div></details>`:''}`:''}</div>
+        ${T.type==='expense'?EXA.servicePicker():''}
 		${entryGroup('payment',T.type==='expense'?'entryPayment':'entryWalletDate','wallet',[(EX.account(T.account)?EX.compactAccountName(EX.account(T.account)):t('entryChooseWallet')),T.date===today()?t('relToday'):EX.dayName(T.date)].join(' · '),`${T.type!=='transfer'?walletControl():''}${T.walletOpen?walletChoices():''}${T.toWalletOpen?walletChoices(true):''}<div class="entry-date"><button type="button" class="entry-date-button" data-entry="date" aria-expanded="${!!T.dateOpen}">${UI.icon('calendar',22)}<span>${esc(t('entryDate'))}<b>${esc(T.date===today()?t('relToday'):EX.dayName(T.date))}</b></span>${UI.icon('chevron-down',18)}</button>${T.dateOpen?`<div class="entry-date-options"><button type="button" class="chip" data-tx-date="today">${esc(t('relToday'))}</button><button type="button" class="chip" data-tx-date="yesterday">${esc(t('relYesterday'))}</button><label class="f"><span>${esc(t('pickDate'))}</span><input type="date" id="txDate" value="${esc(T.date)}"></label></div>`:''}</div>`)}
 		${entryGroup('category',T.type==='transfer'?'entryTags':'entryCategoryTags','category-2',[T.type!=='transfer'?(T.category?EX.catInfo(T.category).name:t('entryChooseCat')):'',...T.tags].filter(Boolean).join(' · '),`${T.type!=='transfer'?`<div class="entry-category" id="entryCategory">${entryCategories()}</div>`:''}${EXA.tagsField(T.tags)}`)}
 		${!T.editId&&T.type!=='transfer'?entryGroup('repeat','fRepeats','repeat',EX.scheduleLabel(T),`${!T.editId&&T.type!=='transfer'?`<label class="f entry-repeat"><span>${esc(t('fRepeats'))}</span><select id="entryRepeat">${EX.REPEATS.map(r=>`<option value="${r}"${r===(T.repeat||'once')?' selected':''}>${esc(EX.repeatLabel(r))}</option>`).join('')}</select></label>${EXA.scheduleFields(T)}${(T.repeat||'once')!=='once'||T.date>today()?`<p class="entry-alert">${esc(t('scheduleSameForm'))}</p>`:''}`:''}`):''}
@@ -259,6 +260,7 @@
 		$$( '.amt-display' ).forEach( b => { b.classList.remove( 'on' ); b.setAttribute( 'aria-expanded', 'false' ); } );
 	} );
 
+	EXA.captureScheduleDraft=()=>{if(T&&$('#txDesc')){readTxFields();storeDraft();}};
 	EXA.refreshEntry=()=>{if(T&&$('#txDesc')){readTxFields();drawTx(true,false);storeDraft();}};
 	EXA.categoryCreated=item=>{if(T&&$('#txDesc')&&item.type===T.type){readTxFields();T.category=item.id;T.catsOpen=false;drawTx(true,false);storeDraft();}};
 	EXA.applySavedEntry=i=>{if(!T)return;readTxFields();applyShortcut(i);};
@@ -293,8 +295,8 @@
           if(!T.name.trim())return entryError('errNameReq','#txDesc');
           const list=T.type==='income'?S().incomes:S().bills;
           if(list.some(x=>x.id===T.id))return;
-          const schedule=EXA.readSchedule($('#sheet')),scheduleError=EXA.scheduleError({...T,...schedule});if(scheduleError)return entryError(scheduleError);Object.assign(T,schedule);const next=EX.scheduleStart(T,T.date);if(!next)return entryError('schedulePickDates');
-          const record={...schedule,id:T.id,name:T.name.trim(),amount,account:T.account,currency:walletCur(T.account),category:T.category,tags:copy(T.tags),photo:T.photo||'',repeat:T.repeat||'once',next,day:parse(T.date).getDate(),...(T.type==='income'?{note:T.note.trim()}:{notes:T.note.trim(),lead:null})};
+          const schedule=EXA.readSchedule($('#sheet')),scheduleError=EXA.scheduleError({...T,...schedule});if(scheduleError)return entryError(scheduleError);Object.assign(T,schedule);const prepared=EX.prepareSchedule({repeat:T.repeat||'once',...schedule,day:parse(T.date).getDate()},T.date),next=prepared.next;if(!next)return entryError(prepared.endMode==='date'?'scheduleEndError':'schedulePickDates','#entryRepeat');
+          const record={...prepared,id:T.id,name:T.name.trim(),amount,account:T.account,currency:walletCur(T.account),category:T.category,tags:copy(T.tags),photo:T.photo||'',repeat:T.repeat||'once',next,day:parse(T.date).getDate(),...(T.type==='income'?{note:T.note.trim()}:{notes:T.note.trim(),lead:null})};
           T.saving=true;list.push(record);if(!EX.save()){list.splice(list.indexOf(record),1);T.saving=false;return entryError('tSaveFail');}
           const type=T.type;T.committed=true;dropDraft();UI.closeSheet(true);if(type==='income'){EXA.st.txFilter.type='income';EXA.st.incomeMode='recurring';}EXA.go(type==='income'?'activity':'bills');return;
         }
@@ -362,6 +364,7 @@
 		if((el=g('[data-tx-forget]'))){readTxFields();const x=EX.savedNames(T.type)[Number(el.dataset.txForget)];if(x){S().settings.savedNames=S().settings.savedNames.filter(n=>n!==x);EX.save();drawTx(true,false);}return true;}
 		if((el=g('[data-tx-type]'))){changeType(el.dataset.txType);return true;}
 		if(g('[data-tx-catsmore]')){readTxFields();T.catsOpen=!T.catsOpen;drawTx(true,false);return true;}
+		if((el=g('[data-service-preset]'))){const p=EX.SERVICE_PRESETS[Number(el.dataset.servicePreset)];if(p){readTxFields();T.name=EXA.servicePresetName(p);T.category=p[2];drawTx(true,false);storeDraft();}return true;}
 		if((el=g('[data-tx-cat]'))){readTxFields();T.entryGroup='category';T.category=el.dataset.txCat;T.catsOpen=false;drawTx(true,false);storeDraft();return true;}
 		if((el=g('[data-tx-wallet]'))){changeWallet(el.dataset.txWallet);return true;}
 		if((el=g('[data-tx-to]'))){changeWallet(el.dataset.txTo,true);return true;}
@@ -394,7 +397,8 @@
 		}return false;
 	};
 	EXA.txInput=e=>{if(!T||!$('#txDesc'))return false;
-		if(e.target.id==='entryRepeat'){readTxFields();drawTx(true,false);storeDraft();return true;}
+		if(e.target.closest('[data-schedule-panel]')){readTxFields();storeDraft();return true;}
+        if(e.target.id==='entryRepeat'){readTxFields();drawTx(true,false);storeDraft();return true;}
 		if(e.target.id==='txQuick'){onTxQuick();storeDraft();return true;}
 		if(e.target.id==='txDesc'&&e.type==='input'){T.name=e.target.value;const r=$('.remember-name');if(r)r.hidden=!T.name.trim();const cat=$('#entryCategory');if(cat)cat.innerHTML=entryCategories();}
 		if(e.target.id==='entryCategoryIcon'){const preview=$('.entry-icon-preview');if(preview)preview.innerHTML=UI.ci(e.target.value,'teal',40);}
@@ -447,7 +451,7 @@
 		if ( cats.length <= CAT_SHOW + 1 ) return cats.map( tile ).join( '' );
 		let shown = open ? cats : cats.slice( 0, CAT_SHOW );
 		if ( ! open && selected && ! shown.some( ( c ) => c.key === selected ) ) { const s = cats.find( ( c ) => c.key === selected ); if ( s ) shown = shown.slice( 0, CAT_SHOW - 1 ).concat( s ); }
-		return shown.map( tile ).join( '' ) + `<button type="button" class="catchip more" ${ moreAttr }>${ UI.ci( open ? 'chevron-up' : 'chevron-down', 'gray', 40 ) }<span>${ esc( t( open ? 'catsLess' : 'catsMore', { n: cats.length - CAT_SHOW } ) ) }</span></button>`;
+		return (open?`<div class="catalog-category-groups">${EXA.groupedCategories(cats,tile,selected)}</div>`:shown.map(tile).join('')) + `<button type="button" class="catchip more" ${ moreAttr }>${ UI.ci( open ? 'chevron-up' : 'chevron-down', 'gray', 40 ) }<span>${ esc( t( open ? 'catsLess' : 'catsMore', { n: cats.length - CAT_SHOW } ) ) }</span></button>`;
 	};
 	let billCatsOpen = false;
 	const catChips = ( selected ) => catGrid( EX.catList( 'expense' ), selected, 'data-bill-cat', billCatsOpen, 'data-bill-catsmore' );
@@ -462,7 +466,7 @@
 			${ bill ? '' : `<div class="quick"><label for="quick">${ esc( t( 'quickLabel' ) ) }</label><input id="quick" type="text" autocomplete="off" placeholder="${ esc( t( 'quickPh' ) ) }" spellcheck="false"><div class="chips-out" id="chips" aria-live="polite"></div><details class="name-suggestions"><summary>${UI.icon('chevron-down',18)} ${esc(EXA.label('suggestions'))}</summary><div class="chip-scroll" id="tpls">${ EX.TEMPLATES.map( ( x, i ) => `<button type="button" class="chip" data-tpl="${ i }">${ UI.icon( EX.CAT_STYLE[ x[ 1 ] ][ 0 ], 18 ) } ${ esc( t( x[ 0 ] ) ) }</button>` ).join( '' ) }</div></details></div>` }
 
 			<label class="f"><span>${ esc( t( 'fPayFrom' ) ) }</span><select name="account"><option value="">${esc(t('entryChooseWallet'))}</option>${ wallets.map( ( a ) => `<option value="${ esc( a.id ) }"${ v.account === a.id ? ' selected' : '' }>${ esc( EX.accountName( a ) ) } (${ esc( a.currency ) })</option>` ).join( '' ) }</select></label>
-			<label class="f"><span>${ esc( t( 'fAmount' ) ) }</span><input name="amount" inputmode="decimal" placeholder="0.00" autocomplete="off" value="${ esc( v.amount ) }"></label>
+			${EXA.servicePicker()}<label class="f"><span>${ esc( t( 'fAmount' ) ) }</span><input name="amount" inputmode="decimal" placeholder="0.00" autocomplete="off" value="${ esc( v.amount ) }"></label>
 			<div class="grid2"><label class="f"><span>${ esc( t( 'fNext' ) ) }</span><input name="next" type="date" required value="${ esc( v.next || '' ) }"></label>
 			<label class="f"><span>${ esc( t( 'fRepeats' ) ) }</span><select name="repeat">${ EX.REPEATS.map( ( r ) => `<option value="${ r }"${ v.repeat === r ? ' selected' : '' }>${ esc( t( 'r' + r.charAt( 0 ).toUpperCase() + r.slice( 1 ) ) ) }</option>` ).join( '' ) }</select></label></div>${EXA.scheduleFields(v)}
 			<div class="lbl">${ esc( t( 'fCategory' ) ) }</div><div class="cats" id="billCats">${ catChips( v.category ) }</div><input type="hidden" name="category" value="${ esc( v.category ) }"><button type="button" class="btn btn-ghost" data-inline-category="expense">${esc(t('entryCreateCategory'))}</button>
@@ -471,7 +475,7 @@
 			<label class="f chk"><input type="checkbox" name="variable"${ v.variable ? ' checked' : '' }> <span>${ esc( t( 'fVariable' ) ) }</span></label>
 			<label class="f chk"><input type="checkbox" name="autopay"${ v.autopay ? ' checked' : '' }> <span>${ esc( t( 'fAutopay' ) ) }</span></label>
 			<details class="more-opts"><summary>${ esc( t( 'tabMore' ) ) }</summary>
-			<label class="f"><span>${ esc( t( 'fEnd' ) ) }</span><input name="end" type="date" value="${ esc( v.end || '' ) }"></label>
+
 			<label class="f"><span>${ esc( t( 'fRef' ) ) }</span><input name="reference" maxlength="80" autocomplete="off" placeholder="${ esc( t( 'fRefPh' ) ) }" value="${ esc( v.reference || '' ) }"></label>
 			<label class="f"><span>${ esc( t( 'fUrl' ) ) }</span><input name="payUrl" type="url" placeholder="https://" autocomplete="off" value="${ esc( v.payUrl || '' ) }"></label>
 			<label class="f"><span>${ esc( t( 'fNotes' ) ) }</span><textarea name="notes" rows="2" maxlength="400">${ esc( v.notes || '' ) }</textarea></label></details>
@@ -482,6 +486,7 @@
 	EXA.billClick = ( e ) => {
 		const f = $( '#billForm' ); if ( ! f ) return false;
 		let el;
+		const preset=e.target.closest('[data-service-preset]');if(preset){const p=EX.SERVICE_PRESETS[Number(preset.dataset.servicePreset)];if(p){f.elements.name.value=EXA.servicePresetName(p);f.elements.category.value=p[2];$('#billCats').innerHTML=catChips(p[2]);}return true;}
 		if ( e.target.closest( '[data-bill-catsmore]' ) ) { billCatsOpen = ! billCatsOpen; const bc = $( '#billCats' ); if ( bc ) bc.innerHTML = catChips( f.elements.category.value ); return true; }
 		if ( ( el = e.target.closest( '[data-bill-cat]' ) ) ) { f.elements.category.value = el.dataset.billCat; $$( '#billCats .catchip' ).forEach( ( b ) => b.classList.toggle( 'on', b === el ) ); return true; }
 		if ( ( el = e.target.closest( '[data-tpl]' ) ) ) {
@@ -520,12 +525,12 @@
 		const wallet = EX.account( g( 'account' ).value );
 		if(!wallet||!writable(wallet.id))return err(t('entryWalletGone'));
 		const cur = wallet ? wallet.currency : S().settings.currency;
-		const end = g( 'end' ).value;
+		const end = !['once','dates'].includes(g('repeat').value)&&g('scheduleEndMode').value==='date'?g('end').value:'';
 		if ( end && end < next ) return err( t( 'errEnd' ) );
 		const payUrl = g( 'payUrl' ).value.trim();
 		if ( payUrl && ! /^https?:\/\//i.test( payUrl ) ) return err( t( 'errUrl' ) );
-		const schedule=EXA.readSchedule(f),scheduleError=EXA.scheduleError({repeat:g('repeat').value,...schedule});if(scheduleError)return err(t(scheduleError));const first=EX.scheduleStart({repeat:g('repeat').value,...schedule},next);if(!first)return err(t('schedulePickDates'));if(end&&first>end)return err(t('errEnd'));
-        const b = { ...schedule,name, amount: amountRaw, currency: cur, next:first, repeat: g( 'repeat' ).value, category: g( 'category' ).value || 'other', end: end || '', account: g( 'account' ).value || '',
+		const schedule=EXA.readSchedule(f),scheduleError=EXA.scheduleError({repeat:g('repeat').value,...schedule,next});if(scheduleError)return err(t(scheduleError));const prepared=EX.prepareSchedule({repeat:g('repeat').value,...schedule,day:editingBill&&editingBill.next===next?editingBill.day:parse(next).getDate()},next),first=prepared.next;if(!first)return err(t(prepared.endMode==='date'?'scheduleEndError':'schedulePickDates'));if(end&&first>end)return err(t('errEnd'));
+        const b = { ...prepared,name, amount: amountRaw, currency: cur, next:first, repeat: g( 'repeat' ).value, category: g( 'category' ).value || 'other', end: prepared.end || '', account: g( 'account' ).value || '',
 			lead: g( 'lead' ).value === '' ? null : Number( g( 'lead' ).value ), variable: g( 'variable' ).checked, autopay: g( 'autopay' ).checked, reference: g( 'reference' ).value.trim(), payUrl, notes: g( 'notes' ).value.trim(), photo: g( 'photo' ).value, tags: EXA.readTags(f) };
 		const was = !! editingBill;
 		if ( editingBill ) { const keepDay = editingBill.next === b.next && editingBill.day ? editingBill.day : null; Object.assign( editingBill, b, { day: keepDay || parse( b.next ).getDate() } ); delete editingBill.done; }
@@ -602,7 +607,7 @@
 		EX.repairCurrencies();
 		UI.closeSheet(); EX.save(); toast( t( 'tWalletSaved' ) );
 	};
-	const CAT_ICONS = ['tag', 'shopping-cart', 'shopping-bag', 'home', 'car', 'bus', 'bike', 'gas-station', 'coffee', 'pizza', 'glass-full', 'heartbeat', 'pill', 'first-aid-kit', 'school', 'book', 'gift', 'plane', 'briefcase', 'heart', 'users', 'paw', 'baby-carriage', 'device-gamepad-2', 'ball-football', 'barbell', 'music', 'movie', 'shirt', 'scissors', 'tools', 'phone', 'wifi', 'bulb', 'droplet', 'flame', 'tree', 'building-store', 'receipt', 'pig-money'];
+	const CAT_ICONS = ['tag', 'shopping-cart', 'shopping-bag', 'home', 'car', 'bus', 'bike', 'gas-station', 'coffee', 'pizza', 'glass-full', 'heartbeat', 'pill', 'first-aid-kit', 'school', 'book', 'gift', 'plane', 'briefcase', 'heart', 'users', 'paw', 'baby-carriage', 'device-gamepad-2', 'ball-football', 'barbell', 'music', 'movie', 'shirt', 'scissors', 'tools', 'phone', 'wifi', 'bulb', 'droplet', 'flame', 'tree', 'building-store', 'receipt', 'pig-money'].concat(EX.EXTRA_ICONS);
 	const CAT_COLORS = ['teal', 'blue', 'purple', 'pink', 'red', 'amber', 'green', 'gray'];
 	let catSel = null;
 	const catPicker = () => `<div class="lbl">${ esc( t( 'cIcon' ) ) }</div><div class="icon-pick cat-icons" role="radiogroup" aria-label="${ esc( t( 'cIcon' ) ) }">${ CAT_ICONS.map( ( n ) => `<button type="button" class="ipick${ catSel.icon === n ? ' on' : '' }" data-cat-icon="${ n }" role="radio" aria-checked="${ catSel.icon === n }" aria-label="${ n }">${ UI.icon( n, 24 ) }</button>` ).join( '' ) }</div>
