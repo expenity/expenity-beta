@@ -12,7 +12,7 @@
 	const $ = ( s, r = document ) => r.querySelector( s );
 	const $$ = ( s, r = document ) => [ ...r.querySelectorAll( s ) ];
 	const toast = UI.toast;
-	window.EXPENITY_VERSION = '0.16.4';
+	window.EXPENITY_VERSION = '0.16.5';
 
  const seenCharacters=new Set();try{for(const skin of JSON.parse(sessionStorage.getItem('expenity.charactersSeen')||'[]'))seenCharacters.add(skin);}catch(_){}
  const characterSeen=skin=>seenCharacters.has(skin);
@@ -21,6 +21,7 @@
 	/* ------------------------------------------------------------------ Drawing the shell */
 
 	let logoSvg = '';
+    let billAttentionUntil=0,billAttentionTimer=0;
 	function paneHtml() {
 		const h = EXA.detailHtml( st.sel );
 		return `<div class="pane-head"><h2>${ esc( t( 'paneTitle' ) ) }</h2></div>${ h || `<div class="empty small">${ UI.ci( 'point', 'gray', 56 ) }<p>${ esc( t( 'paneEmpty' ) ) }</p></div>` }`;
@@ -30,6 +31,9 @@
         if(st.characterSkin!==EXA.skin()){clearTimeout(st.characterCollapseTimer);st.characterSkin=EXA.skin();st.characterRetreated=characterSeen(EXA.skin());st.characterCollapsed=st.characterRetreated;}
 		const view = $( '#view' );
 		const keep = view.dataset.key === st.view + ':' + st.more ? view.scrollTop : 0;
+        if(view.dataset.key!==st.view+':'+st.more){billAttentionUntil=['home','bills'].includes(st.view)?Date.now()+3000:0;}
+        clearTimeout(billAttentionTimer);view.classList.toggle('bill-attention',billAttentionUntil>Date.now());
+        if(billAttentionUntil>Date.now()){view.style.setProperty('--bill-attention-elapsed',((Date.now()-billAttentionUntil+3000)/-1000)+'s');billAttentionTimer=setTimeout(()=>view.classList.remove('bill-attention'),billAttentionUntil-Date.now());}
 		// A redraw (a sync, a change elsewhere) must not steal the field someone is typing in: remember it and put it back.
 		const ae = document.activeElement, inView = ae && ae.id && $( '#view' ).contains( ae ) && /^(INPUT|TEXTAREA|SELECT)$/.test( ae.tagName );
 		const keep0 = inView ? { id: ae.id, value: ae.value, from: ae.selectionStart, to: ae.selectionEnd } : null;

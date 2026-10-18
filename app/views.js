@@ -63,7 +63,7 @@
 		const cls = n < 0 ? 'late' : n === 0 ? 'now' : '';
 		const snoozed = b.snooze && b.snooze > today();
 		const meta = [ showDate ? rel( b.next ) : null, EX.scheduleLabel(b), b.autopay ? t( 'autopay' ) : null, snoozed ? t( 'snoozed' ) : null ].filter( Boolean ).join( ' · ' );
-		return `<li class="sw ${ cls }" data-kind="bill" data-id="${ esc( b.id ) }">
+		return `<li class="sw ${ cls }${n>=0&&n<=Math.max(0,Number(lead(b))||0)?' due-soon-attention':''}" data-kind="bill" data-id="${ esc( b.id ) }">
 			<div class="sw-back"><div class="sw-l">${ swBtn( 'paid', 'check', 'actPaid', 'paid' ) }</div><div class="sw-r">${ swBtn( 'edit', 'pencil', 'actEdit', 'edit' ) }${ swBtn( 'duplicate', 'copy', 'duplicateRecord', 'duplicate' ) }${ swBtn( 'del', 'trash', 'actDelete', 'del' ) }</div></div>
 			<button type="button" class="sw-front item" data-act="open-bill" data-id="${ esc( b.id ) }" aria-label="${ esc( b.name ) }, ${ esc( amountText( b ) ) }">
 				${ UI.catCi( EX.catInfo( b.category ) ) }

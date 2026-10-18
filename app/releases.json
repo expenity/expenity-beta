@@ -1,6 +1,16 @@
 {
-  "version": "0.16.4",
+  "version": "0.16.5",
   "releases": [
+    {
+      "version": "0.16.5",
+      "date": "2026-10-18",
+      "en": [
+        "Due-soon bills wiggle and overdue bills pulse with a warning color for three seconds on entering Home or Bills. Effects respect motion preferences and do not run continuously."
+      ],
+      "el": [
+        "Οι λογαριασμοί που πλησιάζουν κινούνται διακριτικά και οι ληξιπρόθεσμοι πάλλονται με προειδοποιητικό χρώμα για τρία δευτερόλεπτα κατά την είσοδο στην Αρχική ή στους Λογαριασμούς. Τηρούνται οι ρυθμίσεις κίνησης."
+      ]
+    },
     {
       "version": "0.16.4",
       "date": "2026-10-18",
