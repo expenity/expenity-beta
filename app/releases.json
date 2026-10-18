@@ -1,6 +1,16 @@
 {
-  "version": "0.25.0",
+  "version": "0.26.0",
   "releases": [
+    {
+      "version": "0.26.0",
+      "date": "2026-10-18",
+      "en": [
+        "The welcome screen now says where Expenity works: iPhone, Android, iPad and computers, with no app store and no download."
+      ],
+      "el": [
+        "Η οθόνη καλωσορίσματος λέει πλέον πού δουλεύει το Expenity: iPhone, Android, iPad και υπολογιστές, χωρίς app store και χωρίς λήψη."
+      ]
+    },
     {
       "version": "0.25.0",
       "date": "2026-10-18",

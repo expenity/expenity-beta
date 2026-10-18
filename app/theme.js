@@ -1,3 +1,13 @@
+// Demo mode (?demo=1 is what the website's live preview loads): everything is kept in memory, so a visitor's own data, theme and language are never touched.
+try {
+	if ( /[?&]demo=1(&|$)/.test( location.search ) ) {
+		var mem = {}, ms = { getItem: function ( k ) { return Object.prototype.hasOwnProperty.call( mem, k ) ? mem[ k ] : null; }, setItem: function ( k, v ) { mem[ k ] = String( v ); }, removeItem: function ( k ) { delete mem[ k ]; }, clear: function () { mem = {}; }, key: function ( i ) { return Object.keys( mem )[ i ] || null; } };
+		Object.defineProperty( ms, 'length', { get: function () { return Object.keys( mem ).length; } } );
+		Object.defineProperty( window, 'localStorage', { value: ms, configurable: true } );
+		window.EXPENITY_DEMO = true;
+		var sk = /[?&]skin=([a-z]+)/.exec( location.search ); if ( sk ) mem[ 'expenity.skin' ] = sk[ 1 ];
+	}
+} catch ( e ) { /* ignore */ }
 // Applies the saved theme, mode and motion setting before the page draws, so there is no flash. (A separate file because the page's security policy forbids inline scripts.)
 try {
 	var r = document.documentElement, g = function ( k ) { return localStorage.getItem( k ); };

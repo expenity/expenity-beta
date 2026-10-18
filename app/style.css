@@ -795,3 +795,5 @@ html[data-off~=drafts] [data-more=drafts] { display: none !important; }
 .tt-car { display: grid; gap: 8px; } .tt-slide { display: none; text-align: center; } .tt-slide.on { display: grid; gap: 6px; justify-items: center; } .tt-slide h3 { margin: 6px 0 0; font-size: 18px; } .tt-slide p { margin: 0; color: var(--muted); font-size: 14px; } .hp-never { display: block; margin-top: 6px; width: 100%; text-align: center; color: var(--muted); }
 
 .draft-nudge .mid b { white-space: normal; overflow: visible; text-overflow: clip; } .dn-actions { display: flex; align-items: center; gap: 6px; margin-left: auto; }
+
+.dev-strip { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; list-style: none; margin: 4px 0 0; padding: 0; } .dev-strip li { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 999px; background: var(--accent-soft); color: var(--accent-2); font: 700 12.5px var(--font); } .dev-note { margin: 8px 0 0; text-align: center; font-size: 13px; color: var(--muted); }

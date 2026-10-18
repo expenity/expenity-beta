@@ -89,7 +89,7 @@
 			<div class="flow-top"><span class="brand-row"><span id="flowLogo"></span><b class="brand-name">Expen<i>ity</i></b></span>${ langChips() }</div>
 			<div class="flow-body">
 				${ moneyScene() }
-				<h1>${ esc( t( 'onbWelcomeTitle' ) ) }</h1><p class="lead">${ esc( t( 'flowWelcomeText' ) ) }</p>${ EXA.pendingJoin && EXA.pendingJoin() ? `<p class="joinnote">${ UI.icon( 'users', 18 ) } ${ esc( t( 'joinNeedAccount' ) ) }</p>` : '' }
+				<h1>${ esc( t( 'onbWelcomeTitle' ) ) }</h1><p class="lead">${ esc( t( 'flowWelcomeText' ) ) }</p><ul class="dev-strip" aria-label="${ esc( t( 'flowWorksOn' ) ) }"><li>${ UI.icon( 'device-mobile', 18 ) } iPhone</li><li>${ UI.icon( 'device-mobile', 18 ) } Android</li><li>${ UI.icon( 'device-tablet', 18 ) } ${ esc( t( 'flowTablets' ) ) }</li><li>${ UI.icon( 'device-desktop', 18 ) } ${ esc( t( 'flowComputers' ) ) }</li></ul><p class="dev-note">${ esc( t( 'flowNoStore' ) ) }</p>${ EXA.pendingJoin && EXA.pendingJoin() ? `<p class="joinnote">${ UI.icon( 'users', 18 ) } ${ esc( t( 'joinNeedAccount' ) ) }</p>` : '' }
 				<form id="flowRegister" novalidate><label class="f"><span class="sr">${ esc( t( 'authEmail' ) ) }</span><input name="email" type="email" autocomplete="email" placeholder="${ esc( t( 'flowEmailPh' ) ) }" required aria-label="${ esc( t( 'authEmail' ) ) }"></label>
 					<p class="err" id="flowErr" role="alert" hidden></p>
 					<button type="submit" class="btn btn-primary big wide">${ UI.icon( 'key', 22 ) } ${ esc( t( 'flowCreate' ) ) }</button></form>

@@ -12,7 +12,7 @@
 	const $ = ( s, r = document ) => r.querySelector( s );
 	const $$ = ( s, r = document ) => [ ...r.querySelectorAll( s ) ];
 	const toast = UI.toast;
-	window.EXPENITY_VERSION = '0.25.0';
+	window.EXPENITY_VERSION = '0.26.0';
 
  const seenCharacters=new Set();try{for(const skin of JSON.parse(sessionStorage.getItem('expenity.charactersSeen')||'[]'))seenCharacters.add(skin);}catch(_){}
  const characterSeen=skin=>seenCharacters.has(skin);
@@ -337,7 +337,7 @@
 			else if ( e.key === 'Escape' && st.sel ) { st.sel = null; render(); }
 		} );
 
-		if ( 'serviceWorker' in navigator && location.protocol.startsWith( 'http' ) ) navigator.serviceWorker.register( 'sw.js' ).catch( () => {} );
+		if ( ! window.EXPENITY_DEMO && 'serviceWorker' in navigator && location.protocol.startsWith( 'http' ) ) navigator.serviceWorker.register( 'sw.js' ).catch( () => {} );
 	}
 
 	window.EXApp = { buildIcs, goTo: go, render };
