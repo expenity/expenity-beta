@@ -1,6 +1,22 @@
 {
-  "version": "0.24.1",
+  "version": "0.25.0",
   "releases": [
+    {
+      "version": "0.25.0",
+      "date": "2026-10-18",
+      "en": [
+        "First-time setup is richer: choose how much you want to see (Basic, Pro or Advanced), set your daily number or target, and watch animated lessons for scanning receipts, one-sentence entry, handy extras and the help icon.",
+        "Fixed a stray “Hold + to scan a receipt” message that could appear on the welcome screen.",
+        "Greek text now consistently uses the formal “εσείς” form.",
+        "Tutorial animations use words in your language."
+      ],
+      "el": [
+        "Η πρώτη ρύθμιση είναι πλουσιότερη: διαλέξτε πόσα θέλετε να βλέπετε (Βασικό, Pro ή Προχωρημένο), ορίστε το ημερήσιο ποσό ή στόχο σας και δείτε κινούμενα μαθήματα για σάρωση αποδείξεων, καταχώριση με μία πρόταση, χρήσιμα extra και το εικονίδιο βοήθειας.",
+        "Διορθώθηκε ένα περιττό μήνυμα «Κρατήστε πατημένο το + για σάρωση απόδειξης» που μπορούσε να εμφανιστεί στην οθόνη καλωσορίσματος.",
+        "Τα ελληνικά χρησιμοποιούν πλέον σταθερά τον τύπο ευγενείας «εσείς».",
+        "Τα κινούμενα σχέδια των οδηγών χρησιμοποιούν λέξεις στη γλώσσα σας."
+      ]
+    },
     {
       "version": "0.24.1",
       "date": "2026-10-18",

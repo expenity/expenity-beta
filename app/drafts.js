@@ -32,7 +32,7 @@
 		if ( EX.feature && EX.feature( 'drafts' ) === false ) return ''; const l = D.list(); if ( ! l.length ) return '';
 		const s = summary( l[ 0 ] );
 		return `<div class="draft-nudge" role="status"><span class="dn-ic" aria-hidden="true">${ UI.icon( 'pencil', 22 ) }</span><div class="mid"><b>${ esc( t( l.length > 1 ? 'draftNudgeMany' : 'draftNudge', { n: l.length } ) ) }</b><small>${ esc( s.title + ( s.sub ? ' · ' + s.sub : '' ) ) }</small></div>
-			<button type="button" class="btn btn-primary btn-sm" data-draft-open="0">${ esc( t( 'draftContinue' ) ) }</button>${ l.length > 1 ? `<button type="button" class="btn btn-ghost btn-sm" data-draft-all>${ esc( t( 'draftAll' ) ) }</button>` : '' }<button type="button" class="ab-btn" data-draft-dismiss="0" aria-label="${ esc( t( 'draftDismiss' ) ) }">${ UI.icon( 'x', 20 ) }</button></div>`;
+			<div class="dn-actions"><button type="button" class="btn btn-primary btn-sm" data-draft-open="0">${ esc( t( 'draftContinue' ) ) }</button>${ l.length > 1 ? `<button type="button" class="btn btn-ghost btn-sm" data-draft-all>${ esc( t( 'draftAll' ) ) }</button>` : '' }<button type="button" class="ab-btn" data-draft-dismiss="0" aria-label="${ esc( t( 'draftDismiss' ) ) }">${ UI.icon( 'x', 20 ) }</button></div></div>`;
 	};
 	const home = EXA.home;
 	EXA.home = () => { const tmp = document.createElement( 'template' ); tmp.innerHTML = home(); const h = D.home(); if ( h ) { const s = document.createElement( 'section' ); s.dataset.home = 'drafts'; s.innerHTML = h; tmp.content.prepend( s ); } return tmp.innerHTML; };

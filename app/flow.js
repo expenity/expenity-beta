@@ -16,7 +16,7 @@
 	let platform = null, busy = false;
 	const W = { step: 0, wallets: null, curQuery: '' };
 	// The goal step only appears for people who said they want to save for something.
-	const steps = () => [ 'name', 'currency', 'aims' ].concat( ( S().settings.aims || [] ).includes( 'save' ) ? [ 'goal' ] : [] ).concat( [ 'wallets', 'look', 'tour' ] ).concat( EX.feature && EX.feature( 'receipts' ) === false ? [] : [ 'scan' ] ).concat( [ 'quick', 'extras', 'help' ] ).concat( UI.isPhone() ? [ 'tips' ] : [] ).concat( [ 'done' ] );
+	const steps = () => [ 'name', 'currency', 'aims' ].concat( ( S().settings.aims || [] ).includes( 'save' ) ? [ 'goal' ] : [] ).concat( [ 'plan', 'wallets' ] ).concat( EX.feature && EX.feature( 'daily' ) === false ? [] : [ 'target' ] ).concat( [ 'look', 'tour' ] ).concat( EX.feature && EX.feature( 'receipts' ) === false ? [] : [ 'scan' ] ).concat( [ 'quick', 'extras', 'help' ] ).concat( UI.isPhone() ? [ 'tips' ] : [] ).concat( [ 'done' ] );
 	const GOAL_PRESETS = [ [ 'trip', 'plane' ], [ 'car', 'car' ], [ 'gift', 'gift' ], [ 'home', 'home' ], [ 'emergency', 'heart' ], [ 'other', 'target' ] ];
 
 	/* ------------------------------------------------------------------ Stage machine */
@@ -56,7 +56,7 @@
 		return startSetup();
 	};
 	flow.restart = () => startSetup();
-	const startSetup = () => { W.step = Math.min( D().setupStep || 0, steps().length - 1 ); W.wallets = null; setStage( 'setup' ); };
+	const startSetup = () => { W.planSeen = false; W.tgt = null; W.step = Math.min( D().setupStep || 0, steps().length - 1 ); W.wallets = null; setStage( 'setup' ); };
 	function finish() {
 		const d = D();
 		d.stage = 'done'; d.onboarded = true;
@@ -226,6 +226,15 @@
 		} else if ( id === 'scan' || id === 'quick' ) {
 			icon = id === 'scan' ? 'receipt' : 'pencil'; color = id === 'scan' ? 'teal' : 'blue'; title = t( 'tut_' + id ); text = t( 'tutD_' + id );
 			body = EXA.tutorials.body( id );
+		} else if ( id === 'plan' ) {
+			icon = 'sparkles'; color = 'teal'; title = t( 'setupPlanTitle' ); text = t( 'setupPlanText' );
+			const cur = EXA.features.plan();
+			body = `<div class="fx-plans" role="radiogroup">${ [ 'basic', 'pro', 'advanced' ].map( ( p ) => `<button type="button" class="fx-plan${ cur === p ? ' on' : '' }" role="radio" aria-checked="${ cur === p }" data-fstep="plan" data-plan="${ p }"><span class="fx-name">${ esc( t( 'fxPlan_' + p ) ) }${ cur === p ? UI.icon( 'check', 18 ) : '' }</span><small>${ esc( t( 'fxPlanD_' + p ) ) }</small></button>` ).join( '' ) }</div><p class="muted small center">${ esc( t( 'setupPlanNote' ) ) }</p>`;
+		} else if ( id === 'target' ) {
+			icon = 'sun'; color = 'amber'; title = t( 'setupTargetTitle' ); text = t( 'setupTargetText' );
+			const g = W.tgt || ( W.tgt = { period: ( ( S().settings.targets || {} ).spend || {} ).period || 'auto', amount: ( ( S().settings.targets || {} ).spend || {} ).amount || '' } );
+			const c = ( v, label ) => `<button type="button" class="chip big${ g.period === v ? ' on' : '' }" role="radio" aria-checked="${ g.period === v }" data-fstep="tgt" data-tgt="${ v }">${ esc( t( label ) ) }</button>`;
+			body = `<div class="chips wrap" role="radiogroup">${ c( 'auto', 'targetAuto' ) }${ c( 'day', 'targetDay' ) }${ c( 'week', 'targetWeek' ) }${ c( 'month', 'targetMonth' ) }</div>${ g.period === 'auto' ? `<p class="muted small center">${ esc( t( 'setupTargetAuto' ) ) }</p>` : `<label class="f"><span>${ esc( t( 'targetAmount', { cur: S().settings.currency } ) ) }</span><input name="target" inputmode="decimal" value="${ esc( g.amount ) }" placeholder="0"></label>` }${ EXA.tutorials.demo( 'daily' ) }`;
 		} else if ( id === 'extras' ) {
 			icon = 'sparkles'; color = 'purple'; title = t( 'setupExtrasTitle' ); text = t( 'setupExtrasText' );
 			body = EXA.tutorials.carousel();
@@ -253,6 +262,11 @@
 	function next() {
 		const id = steps()[ W.step ];
 		if ( id === 'name' ) { const n = $( '#setupForm [name=name]' ); S().settings.name = n ? n.value.trim() : ''; EX.persist(); }
+		if ( id === 'target' ) {
+			const i = $( '#setupForm [name=target]' ), g = W.tgt || { period: 'auto' }; if ( i ) g.amount = i.value;
+			if ( g.period !== 'auto' ) { if ( ! /^\d{1,9}([.,]\d{1,2})?$/.test( String( g.amount ).trim() ) || parseFloat( String( g.amount ).replace( ',', '.' ) ) <= 0 ) { const e = $( '#setupErr' ); if ( e ) { e.textContent = t( 'targetBad' ); e.hidden = false; } return; } }
+			const st = S().settings; st.targets = { spend: { period: g.period, amount: g.period === 'auto' ? '' : String( g.amount ).trim().replace( ',', '.' ) }, income: ( st.targets || {} ).income || { period: 'off', amount: '' } }; EX.persist();
+		}
 		if ( id === 'goal' ) {
 			readGoals();
 			const err = ( k ) => { const e = $( '#setupErr' ); e.textContent = t( k ); e.hidden = false; };
@@ -285,6 +299,8 @@
 		if ( a === 'plat' ) flow.onPlatform( el.dataset.plat );
 		else if ( a === 'aim' ) { const cur = ( S().settings.aims || [] ).slice(), id = el.dataset.aim, i = cur.indexOf( id ); if ( i >= 0 ) cur.splice( i, 1 ); else cur.push( id ); S().settings.aims = cur; EX.persist(); flow.show( true ); }
 		else if ( a === 'gpreset' ) { readGoals(); W.goals = W.goals || []; const k = el.dataset.k, i = W.goals.findIndex( ( g ) => g.preset === k ); if ( i >= 0 ) W.goals.splice( i, 1 ); else W.goals.push( { preset: k, name: t( 'goalPreset_' + k ), target: '', icon: el.dataset.ic } ); flow.show( true ); }
+		else if ( a === 'plan' ) { S().settings.features = { tier: el.dataset.plan }; D().planChosen = true; EXA.features.apply(); EX.persist(); flow.show( true ); }
+		else if ( a === 'tgt' ) { const i = $( '#setupForm [name=target]' ); if ( i && W.tgt ) W.tgt.amount = i.value; W.tgt = W.tgt || {}; W.tgt.period = el.dataset.tgt; flow.show( true ); const n = $( '#setupForm [name=target]' ); if ( n && el.dataset.tgt !== 'auto' ) n.focus(); }
 		else if ( a === 'cur' ) { S().settings.currency = el.dataset.cur; EX.persist(); flow.show( true ); }
 		else if ( a === 'theme' ) { const v = el.dataset.theme; try { if ( v === 'auto' ) localStorage.removeItem( 'expenity.theme' ); else localStorage.setItem( 'expenity.theme', v ); } catch ( err ) { /* ignore */ } if ( v === 'auto' ) delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = v; flow.show(); }
 		else if ( a === 'motion' ) { EXA.setMotion( el.dataset.motion ); flow.show( true ); }
