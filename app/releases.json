@@ -1,6 +1,16 @@
 {
-  "version": "0.19.2",
+  "version": "0.19.3",
   "releases": [
+    {
+      "version": "0.19.3",
+      "date": "2026-10-18",
+      "en": [
+        "More: every menu row now uses the same bold title and arrow."
+      ],
+      "el": [
+        "Περισσότερα: όλες οι γραμμές μενού έχουν πλέον τον ίδιο έντονο τίτλο και βέλος."
+      ]
+    },
     {
       "version": "0.19.2",
       "date": "2026-10-18",
