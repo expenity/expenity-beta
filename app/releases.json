@@ -1,6 +1,18 @@
 {
-  "version": "0.19.0",
+  "version": "0.19.1",
   "releases": [
+    {
+      "version": "0.19.1",
+      "date": "2026-10-18",
+      "en": [
+        "Profile picture: the chosen character or photo shows a green checkmark, and a photo is previewed round, as it appears in the app.",
+        "Features use proper on/off toggles."
+      ],
+      "el": [
+        "Εικόνα προφίλ: ο επιλεγμένος χαρακτήρας ή η φωτογραφία δείχνει πράσινο σημάδι επιλογής και η φωτογραφία προβάλλεται στρογγυλή, όπως φαίνεται στην εφαρμογή.",
+        "Οι Λειτουργίες έχουν κανονικούς διακόπτες ενεργοποίησης."
+      ]
+    },
     {
       "version": "0.19.0",
       "date": "2026-10-18",

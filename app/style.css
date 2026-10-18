@@ -632,3 +632,12 @@ html[lang=el] body, html[lang=el] body * { letter-spacing: normal !important; }
 .rm-finger { position: absolute; top: 20px; left: 50%; width: 18px; height: 18px; margin-left: -9px; border-radius: 50%; background: var(--ink); opacity: .35; animation: rmFinger 3.6s ease-in-out infinite; }
 @keyframes rmSlide { 0%, 8%, 100% { transform: translateX(0); } 28%, 40% { transform: translateX(-34%); } 52%, 56% { transform: translateX(0); } 74%, 86% { transform: translateX(34%); } }
 @keyframes rmFinger { 0%, 8%, 100% { transform: translateX(0); } 28%, 40% { transform: translateX(-60px); } 52%, 56% { transform: translateX(0); } 74%, 86% { transform: translateX(60px); } }
+
+/* Avatar: selected check, photo preview */
+.av-pick { position: relative; } .av-check { position: absolute; right: -3px; bottom: -3px; z-index: 3; width: 22px; height: 22px; display: grid; place-items: center; border-radius: 50%; background: #22a06b; box-shadow: 0 0 0 2px var(--surface, #fff); animation: checkPop .25s ease; }
+.av-photo-row { display: flex; align-items: center; gap: 14px; margin: 0 0 14px; padding: 10px; border: 1px solid var(--line); border-radius: 16px; } .av-photo-row .av-pick { flex: none; width: 64px; height: 64px; } .av-photo-row .mid small { white-space: normal; color: var(--muted); }
+/* Toggle switch */
+.fx-row input[type=checkbox] { appearance: none; -webkit-appearance: none; flex: none; position: relative; width: 50px; height: 30px; border-radius: 15px; border: 0; background: var(--line); cursor: pointer; transition: background-color .2s; margin: 0; }
+.fx-row input[type=checkbox]::after { content: ""; position: absolute; top: 3px; left: 3px; width: 24px; height: 24px; border-radius: 50%; background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,.35); transition: transform .2s; }
+.fx-row input[type=checkbox]:checked { background: #22a06b; } .fx-row input[type=checkbox]:checked::after { transform: translateX(20px); }
+.fx-row input[type=checkbox]:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }

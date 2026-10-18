@@ -55,11 +55,13 @@
 		} finally { img.close(); }
 	};
 	const set = ( v ) => { const s = EX.state().settings; if ( v ) s.avatar = v; else delete s.avatar; s.u = Date.now(); EX.persist(); EXA.render(); };
+	const CHECK = '<i class="av-check" aria-hidden="true"><svg viewBox="0 0 24 24" width="14" height="14"><path d="M5.5 12.5l4.2 4.2 8.8-9.2" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></i>';
 	const sheet = () => {
 		const cur = A.current();
 		UI.openSheet( `<div class="sheet-head"><button class="ab-btn" data-close aria-label="${ esc( t( 'close' ) ) }">${ UI.icon( 'x', 24 ) }</button><h2>${ esc( t( 'avatarTitle' ) ) }</h2></div><div class="sheet-pad">
-			<div class="av-grid" role="radiogroup" aria-label="${ esc( t( 'avatarTitle' ) ) }">${ A.presets.map( ( id ) => `<button type="button" class="avatar av-pick${ cur && cur.id === id ? ' sel' : '' }" role="radio" aria-checked="${ !! ( cur && cur.id === id ) }" aria-label="${ esc( t( 'av_' + id ) ) }" data-avatar-preset="${ id }">${ A.svg( id ) }</button>` ).join( '' ) }</div>
-			<div class="btn-row"><button type="button" class="btn btn-ghost" data-avatar-photo>${ UI.icon( 'photo', 20 ) } ${ esc( t( 'avatarPhoto' ) ) }</button>${ cur ? `<button type="button" class="btn btn-ghost" data-avatar-clear>${ esc( t( 'avatarClear' ) ) }</button>` : '' }<input type="file" id="avatarFile" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" hidden></div>
+			<div class="av-grid" role="radiogroup" aria-label="${ esc( t( 'avatarTitle' ) ) }">${ A.presets.map( ( id ) => `<button type="button" class="avatar av-pick${ cur && cur.id === id ? ' sel' : '' }" role="radio" aria-checked="${ !! ( cur && cur.id === id ) }" aria-label="${ esc( t( 'av_' + id ) ) }" data-avatar-preset="${ id }">${ A.svg( id ) }${ cur && cur.id === id ? CHECK : '' }</button>` ).join( '' ) }</div>
+			${ cur && cur.type === 'photo' ? `<div class="av-photo-row"><span class="avatar big av-pick sel pic"><img class="av-photo" alt="" src="${ cur.data }">${ CHECK }</span><span class="mid"><b>${ esc( t( 'avatarPhotoActive' ) ) }</b><small>${ esc( t( 'avatarPhotoPreview' ) ) }</small></span></div>` : '' }
+			<div class="btn-row"><button type="button" class="btn btn-ghost" data-avatar-photo>${ UI.icon( 'photo', 20 ) } ${ esc( t( cur && cur.type === 'photo' ? 'avatarPhotoChange' : 'avatarPhoto' ) ) }</button>${ cur ? `<button type="button" class="btn btn-ghost" data-avatar-clear>${ esc( t( 'avatarClear' ) ) }</button>` : '' }<input type="file" id="avatarFile" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" hidden></div>
 			<p class="muted small">${ esc( t( 'avatarHint' ) ) }</p><p class="photo-status" id="avatarStatus" role="status"></p></div>`, { tall: true } );
 	};
 	A.open = sheet;
