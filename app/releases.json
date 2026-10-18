@@ -1,6 +1,16 @@
 {
-  "version": "0.21.0",
+  "version": "0.21.1",
   "releases": [
+    {
+      "version": "0.21.1",
+      "date": "2026-10-18",
+      "en": [
+        "Pressing and holding no longer selects text or shows selection handles anywhere in the app. Fields, receipt text and invite codes can still be selected."
+      ],
+      "el": [
+        "Το παρατεταμένο πάτημα δεν επιλέγει πια κείμενο ούτε εμφανίζει λαβές επιλογής πουθενά στην εφαρμογή. Τα πεδία, το κείμενο απόδειξης και οι κωδικοί πρόσκλησης εξακολουθούν να επιλέγονται."
+      ]
+    },
     {
       "version": "0.21.0",
       "date": "2026-10-18",

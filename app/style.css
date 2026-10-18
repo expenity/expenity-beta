@@ -756,3 +756,7 @@ html[data-off~=filters] .filter-panel { display: none !important; } html[data-of
 @keyframes ttRestore { 0%, 52% { opacity: 0; transform: translateY(120px); } 66%, 86% { opacity: 1; transform: none; } 96%, 100% { opacity: 0; } }
 @keyframes ttDot { 0%, 6% { background: var(--line); transform: scale(1); } 12%, 85% { background: #ff9b2f; transform: scale(1.15); } 96%, 100% { background: var(--line); transform: scale(1); } }
 @keyframes ttChip { 0%, 38% { opacity: 0; transform: scale(.4); } 46%, 90% { opacity: 1; transform: scale(1); } 98%, 100% { opacity: 0; } } @keyframes ttToast { 0%, 40% { opacity: 0; transform: translateY(40px); } 50%, 84% { opacity: 1; transform: none; } 94%, 100% { opacity: 0; } }
+/* No accidental text selection or iOS callouts while pressing and holding the interface; fields and read-only text blocks stay selectable. */
+html, body { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
+input, textarea, select, [contenteditable=true], [contenteditable=""], pre, code, .selectable, .selectable * { -webkit-user-select: text; user-select: text; -webkit-touch-callout: default; }
+.invite-box, .invite-box *, .code, .facts dd, .photo-status { -webkit-user-select: text; user-select: text; }

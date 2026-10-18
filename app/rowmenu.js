@@ -31,5 +31,7 @@
 	[ 'pointerup', 'pointercancel', 'scroll' ].forEach( ( n ) => document.addEventListener( n, cancel, { passive: true, capture: true } ) );
 	// The release after a long press must not also open the row.
 	document.addEventListener( 'click', ( e ) => { if ( performance.now() - fired < 700 && e.target.closest( '.sw' ) ) { e.preventDefault(); e.stopImmediatePropagation(); } }, true );
+	// Holding must never start a text selection (iOS shows selection handles otherwise).
+	document.addEventListener( 'selectstart', ( e ) => { const n = e.target.nodeType === 1 ? e.target : e.target.parentElement; if ( n && ! n.closest( 'input, textarea, select, [contenteditable], pre, code, .selectable' ) ) e.preventDefault(); } );
 	document.addEventListener( 'contextmenu', ( e ) => { if ( e.target.closest( '.sw' ) ) e.preventDefault(); } );
 }() );
