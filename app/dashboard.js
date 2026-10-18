@@ -56,7 +56,7 @@
   return bar+`<div id="homeGrid" class="dashboard-grid dash-grid${draft!==null?' dashboard-editing':''}">${nodes.map(renderWidget).join('')}</div><div id="dashAnnounce" class="sr-only" aria-live="polite"></div>`;
  };
  function select(id){selected=id;all('#homeGrid>[data-home]').forEach(x=>x.dataset.selected=String(x.dataset.home===id));}
- function begin(id){
+ function begin(id){if(EX.feature&&!EX.feature('homeEdit'))return;
   if(draft!==null||UI.sheetOpen()||A.flow.active())return;
   A.homeLookDraft=copy(S().settings.themeLooks||{});source=readSource();draft=copy(layout()).map(x=>({...x,size:sizeOf(x.size)}));
   source.forEach(x=>entry(x.dataset.home));selected=id||null;A.render();UI.haptic(25);

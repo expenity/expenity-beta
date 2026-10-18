@@ -1,6 +1,20 @@
 {
-  "version": "0.17.0",
+  "version": "0.18.0",
   "releases": [
+    {
+      "version": "0.18.0",
+      "date": "2026-10-18",
+      "en": [
+        "New Features page (More → Make it yours): choose Basic, Pro or Advanced, compare them in a table, or switch individual features on and off for your own mix. Nothing is deleted when you switch.",
+        "Themes now have a pencil: adjust colors, font and roundness of any theme. The separate Custom theme is gone.",
+        "Nothing in More is expanded by default any more."
+      ],
+      "el": [
+        "Νέα σελίδα Λειτουργίες (Περισσότερα → Κάν’ το δικό σου): διάλεξε Βασικό, Pro ή Προχωρημένο, δες τη σύγκριση σε πίνακα ή ενεργοποίησε και απενεργοποίησε μεμονωμένες λειτουργίες. Τίποτα δεν διαγράφεται όταν αλλάζεις.",
+        "Τα θέματα έχουν πλέον μολύβι: προσάρμοσε χρώματα, γραμματοσειρά και στρογγυλότητα κάθε θέματος. Το ξεχωριστό Προσαρμοσμένο θέμα αφαιρέθηκε.",
+        "Τίποτα στα Περισσότερα δεν είναι πλέον ανοιχτό από προεπιλογή."
+      ]
+    },
     {
       "version": "0.17.0",
       "date": "2026-10-18",

@@ -90,7 +90,7 @@
 	EXA.appbar = () => {
 		const v = st.view;
 		if ( v === 'more' && st.more !== 'root' ) {
-			const titles = { sounds:'soundsTitle', updates:'updatesTitle', account: 'rowAccount', wallets: 'walletsTitle', categories: 'catsTitle', tags: 'tags', reminders: 'rowReminders', data: 'rowData', appearance: 'rowAppearance', install: 'rowInstall', about: 'rowAbout' };
+			const titles = { features:'fxTitle', sounds:'soundsTitle', updates:'updatesTitle', account: 'rowAccount', wallets: 'walletsTitle', categories: 'catsTitle', tags: 'tags', reminders: 'rowReminders', data: 'rowData', appearance: 'rowAppearance', install: 'rowInstall', about: 'rowAbout' };
 			return `<button type="button" class="ab-btn" data-act="more-back" aria-label="${ esc( t( 'back' ) ) }">${ UI.icon( 'arrow-left', 24 ) }</button><h1 class="ab-title">${ esc( t( titles[ st.more ] ) ) }</h1>`;
 		}
 		const title = { home: null, activity: t( 'tabActivity' ), bills: t( 'tabBills' ), plan: t( 'planTitle' ), reports: t( 'tabReports' ), more: t( 'moreTitle' ) }[ v ];
@@ -376,6 +376,7 @@
 		const sub = st.more;
 		if(sub==='sounds')return EXA.soundSettings();
         if(sub==='updates')return updateCard()+`<section class="card"><h2>${esc(t('syncDetails'))}</h2><p id="syncLine">${syncLine()}</p>${EX.auth.isSignedIn()?`<button type="button" class="btn btn-ghost" data-act="sync-now">${UI.icon('refresh',20)} ${esc(t('syncNow'))}</button>`:''}</section>`;
+        if ( sub === 'features' ) return EXA.features.view();
         if ( sub === 'account' ) return accountView();
 		if ( sub === 'wallets' ) return walletsView();
 		if ( sub === 'categories' ) return categoriesView();

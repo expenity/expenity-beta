@@ -70,15 +70,15 @@
 		const cur = EXA.skin(), th = THEMES.find( ( x ) => x.id === cur ) || THEMES[ 0 ];
 		const mode = root.dataset.theme || 'auto';
 		const mc = ( v, label, ic ) => `<button type="button" class="chip big${ mode === v ? ' on' : '' }" data-mode-set="${ v }">${ UI.icon( ic, 20 ) } ${ esc( label ) }</button>`;
-		return `${EXA.customThemeSection()}<h3>${esc(t('customTemplates'))}</h3><div class="theme-grid" role="radiogroup" aria-label="${ esc( t( 'themesTitle' ) ) }">${ THEMES.filter(x=>x.id!=='custom').map( ( x ) => card( x, cur ) ).join( '' ) }</div>
+		return `<div class="theme-grid" role="radiogroup" aria-label="${ esc( t( 'themesTitle' ) ) }">${ THEMES.filter(x=>x.id!=='custom').map( ( x ) => `<div class="theme-cell">${ card( x, cur ) }<button type="button" class="tc-edit" data-theme-edit="${ x.id }" aria-label="${ esc( t( 'themeEdit', { n: t( 'theme_' + x.id ) } ) ) }">${ UI.icon( 'pencil', 16 ) }</button></div>` ).join( '' ) }</div>
 
 			${ th.mode ? `<div class="lbl pad0">${ esc( t( 'themeLabel' ) ) }</div><div class="chips wrap">${ mc( 'auto', t( 'themeAuto' ), 'device-mobile' ) }${ mc( 'light', t( 'themeLight' ), 'sun' ) }${ mc( 'dark', t( 'themeDark' ), 'moon' ) }</div>` : '' }`;
 	};
 
  const FONT_FAMILIES={sans:'ui-sans-serif, system-ui, sans-serif',serif:'Georgia, serif',mono:'ui-monospace, monospace',noto_sans:'"Noto Sans", sans-serif',noto_serif:'"Noto Serif", serif',roboto:'"Roboto", sans-serif',roboto_slab:'"Roboto Slab", serif',open_sans:'"Open Sans", sans-serif',fira_sans:'"Fira Sans", sans-serif',comfortaa:'"Comfortaa", sans-serif',alegreya:'"Alegreya", serif',literata:'"Literata", serif',geologica:'"Geologica", sans-serif'};
  const FONT_NAMES={noto_sans:'Noto Sans',noto_serif:'Noto Serif',roboto:'Roboto',roboto_slab:'Roboto Slab',open_sans:'Open Sans',fira_sans:'Fira Sans',comfortaa:'Comfortaa',alegreya:'Alegreya',literata:'Literata',geologica:'Geologica'};
- Object.assign(EX.I18N.langs.en,{customSlight:'Slightly rounded',homeAppearance:'Appearance',homeAppearanceHint:'Customize this theme. Apply to preview on Home, then choose Done to save everything.',homeAppearanceReset:'Reset theme styling',homeAppearanceApply:'Preview on Home'});
- Object.assign(EX.I18N.langs.el,{customSlight:'Ελαφρώς στρογγυλεμένο',homeAppearance:'Εμφάνιση',homeAppearanceHint:'Προσαρμόστε το θέμα. Εφαρμόστε για προεπισκόπηση στην Αρχική και πατήστε Έτοιμο για αποθήκευση όλων.',homeAppearanceReset:'Επαναφορά εμφάνισης θέματος',homeAppearanceApply:'Προεπισκόπηση στην Αρχική'});
+ Object.assign(EX.I18N.langs.en,{customSlight:'Slightly rounded',homeAppearance:'Appearance',homeAppearanceHint:'Adjust the colors, font and roundness of this theme. Layout and positions are not affected.',homeAppearanceReset:'Reset theme styling',homeAppearanceApply:'Preview on Home'});
+ Object.assign(EX.I18N.langs.el,{customSlight:'Ελαφρώς στρογγυλεμένο',homeAppearance:'Εμφάνιση',homeAppearanceHint:'Προσαρμόστε χρώματα, γραμματοσειρά και στρογγυλότητα αυτού του θέματος. Η διάταξη και οι θέσεις δεν αλλάζουν.',homeAppearanceReset:'Επαναφορά εμφάνισης θέματος',homeAppearanceApply:'Προεπισκόπηση στην Αρχική'});
 	const defaults = { bg: '#101724', surface: '#1c283b', accent: '#89baff', ink: '#eef4ff', round: '1', font: 'sans', trails: false, icons:'#89baff' };
 	const keys = [ 'bg', 'surface', 'accent', 'ink', 'icons' ];
 	EXA.customPalette = ( supplied ) => {
@@ -113,6 +113,9 @@
   const p=EXA.customPalette(),active=EXA.skin()==='custom';let saved=false;try{saved=!!localStorage.getItem('expenity.custom');}catch(e){}
   return `<section class="custom-theme-section" aria-label="${esc(t('customTitle'))}"><div class="custom-theme-heading">${UI.ci('palette','purple',42)}<div><h3>${esc(t('customTitle'))}</h3><p>${esc(t('customHelp'))}</p></div></div><div class="custom-theme-swatches" aria-hidden="true">${keys.map(k=>`<i style="background:${p[k]}"></i>`).join('')}</div><div class="btn-row"><button type="button" class="btn btn-primary" data-custom-edit>${UI.icon('pencil',20)} ${esc(t(saved?'customEditSaved':'customCreate'))}</button><button type="button" class="btn btn-ghost" data-skin-set="custom"${active?' disabled':''}>${UI.icon(active?'check':'palette',20)} ${esc(t(active?'customActive':'customApply'))}</button></div></section>`;
  };
+ /** When edited from a theme's pencil (not from Home editing) the draft is saved straight away. */
+ EXA.themeEditDirect=false;
+ const finishDirect=()=>{if(!EXA.themeEditDirect)return;S().settings.themeLooks=JSON.parse(JSON.stringify(EXA.homeLookDraft||{}));S().settings.u=Date.now();EX.persist();delete EXA.homeLookDraft;EXA.themeEditDirect=false;};
  const hex=value=>/^#[0-9a-f]{6}$/i.test(value);
  EXA.editHomeAppearance=()=>editCustom(true);
  function editCustom(home=false) {
@@ -131,8 +134,8 @@
   };
   f.addEventListener('input',e=>{const k=e.target.dataset.paletteHex;if(k&&hex(e.target.value))f.elements[k].value=e.target.value;else if(e.target.type==='color'){f.querySelector(`[data-palette-hex="${e.target.name}"]`).value=e.target.value.toUpperCase();}paint();});
   f.addEventListener('change',paint);
-  f.addEventListener('click',e=>{if(home&&e.target.closest('[data-look-reset]')){delete EXA.homeLookDraft[skin];EXA.applyCustomTheme();UI.closeSheet();EXA.render();return;}const b=e.target.closest('[data-palette-preset]');if(!b)return;const v=palettes[Number(b.dataset.palettePreset)];keys.forEach(k=>{f.elements[k].value=v[k];f.querySelector(`[data-palette-hex="${k}"]`).value=v[k].toUpperCase();});paint();});
-  f.addEventListener('submit',e=>{e.preventDefault();e.stopPropagation();paint();if(!error.hidden)return;const v=read();if(home){EXA.homeLookDraft[skin]=v;EXA.applyCustomTheme();UI.closeSheet();EXA.render();return;}store('expenity.custom',JSON.stringify(v));EXA.setSkin('custom');UI.closeSheet();if(EXA.flow.active())EXA.flow.show(true);else EXA.render();});
+  f.addEventListener('click',e=>{if(home&&e.target.closest('[data-look-reset]')){delete EXA.homeLookDraft[skin];finishDirect();EXA.applyCustomTheme();UI.closeSheet();EXA.render();return;}const b=e.target.closest('[data-palette-preset]');if(!b)return;const v=palettes[Number(b.dataset.palettePreset)];keys.forEach(k=>{f.elements[k].value=v[k];f.querySelector(`[data-palette-hex="${k}"]`).value=v[k].toUpperCase();});paint();});
+  f.addEventListener('submit',e=>{e.preventDefault();e.stopPropagation();paint();if(!error.hidden)return;const v=read();if(home){EXA.homeLookDraft[skin]=v;finishDirect();EXA.applyCustomTheme();UI.closeSheet();EXA.render();return;}store('expenity.custom',JSON.stringify(v));EXA.setSkin('custom');UI.closeSheet();if(EXA.flow.active())EXA.flow.show(true);else EXA.render();});
   paint();
  }
 
@@ -159,6 +162,7 @@
 		trails.hidden=!on;
 	};
 	document.addEventListener('click',e=>{if(e.target.closest('[data-custom-edit]'))editCustom();});
+	document.addEventListener('click',e=>{const b=e.target.closest('[data-theme-edit]');if(!b)return;e.preventDefault();e.stopImmediatePropagation();if(EXA.skin()!==b.dataset.themeEdit)EXA.setSkin(b.dataset.themeEdit);if(!EXA.homeLookDraft){EXA.homeLookDraft=JSON.parse(JSON.stringify(S().settings.themeLooks||{}));EXA.themeEditDirect=true;document.getElementById('sheet').addEventListener('close',()=>{if(EXA.themeEditDirect){delete EXA.homeLookDraft;EXA.themeEditDirect=false;EXA.applyCustomTheme();}},{once:true});}EXA.render();editCustom(true);},true);
 	document.addEventListener('visibilitychange',()=>EXA.updateTrails());
 	matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change',()=>EXA.updateTrails());
 	EXA.applyCustomTheme(); EXA.updateTrails();

@@ -3,7 +3,7 @@
 'use strict';const E=window.EX,A=window.EXA,U=window.UI,{t,esc}=E;
 Object.assign(E.I18N.langs.en,{updatesTitle:'Updates & status',soundsTitle:'Sounds',soundsEnable:'Sound effects',soundsMinimal:'Minimal',soundsNormal:'Normal',soundsVolume:'Volume',soundsPreview:'Preview sound',soundsHelp:'Short feedback for saving, payments, undo and scan readiness. Off by default.'});
 Object.assign(E.I18N.langs.el,{updatesTitle:'Ενημερώσεις & κατάσταση',soundsTitle:'Ήχοι',soundsEnable:'Ηχητικά εφέ',soundsMinimal:'Διακριτικοί',soundsNormal:'Κανονικοί',soundsVolume:'Ένταση',soundsPreview:'Ακρόαση',soundsHelp:'Σύντομοι ήχοι για αποθήκευση, πληρωμές, αναίρεση και ετοιμότητα σάρωσης. Αρχικά απενεργοποιημένοι.'});
-const prefs=()=>{const p=E.state().settings.sounds||{};return {enabled:p.enabled===true,set:p.set==='normal'?'normal':'minimal',volume:Number.isFinite(p.volume)?Math.min(1,Math.max(0,p.volume)):.35};};
+const prefs=()=>{const p=E.state().settings.sounds||{};return {enabled:p.enabled===true&&E.feature?.('sounds')!==false,set:p.set==='normal'?'normal':'minimal',volume:Number.isFinite(p.volume)?Math.min(1,Math.max(0,p.volume)):.35};};
 let context=null,last=0;
 const audio=()=>{try{const C=window.AudioContext||window.webkitAudioContext;if(!C)return null;context=context||new C();if(context.state==='suspended')context.resume().catch(()=>{});return context;}catch(_){return null;}};
 A.playSound=(kind='success',preview=false)=>{const p=prefs();if((!p.enabled&&!preview)||document.hidden||p.volume===0)return;const now=performance.now();if(!preview&&now-last<100)return;const c=audio();if(!c)return;last=now;const normal=p.set==='normal',notes=kind==='error'?[330,260]:kind==='undo'?[660,480]:kind==='ready'?[740,980]:normal?[660,880]:[800];
