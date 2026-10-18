@@ -1,6 +1,16 @@
 {
-  "version": "0.20.1",
+  "version": "0.20.2",
   "releases": [
+    {
+      "version": "0.20.2",
+      "date": "2026-10-18",
+      "en": [
+        "Tutorials have previous and next arrows, so you can go through them all without closing each one."
+      ],
+      "el": [
+        "Οι οδηγοί έχουν βέλη προηγούμενου και επόμενου, ώστε να τους δεις όλους χωρίς να κλείνεις τον καθένα."
+      ]
+    },
     {
       "version": "0.20.1",
       "date": "2026-10-18",

@@ -714,3 +714,5 @@ html[lang=el] body, html[lang=el] body * { letter-spacing: normal !important; }
 
 #flow.lang-attn { pointer-events: none; } #flow.lang-attn .flow-lang { animation: langPulse .5s ease-in-out 2; } @keyframes langPulse { 50% { transform: scale(1.12); box-shadow: 0 0 0 6px var(--accent-soft); border-radius: 22px; } }
 .flow .tt-phone { zoom: .82; margin: 0 auto; } .flow .tt-steps { font-size: 14px; }
+
+.tt-navbar { display: flex; align-items: center; justify-content: space-between; width: 100%; } .tt-nav { min-width: 52px; } .tt-nav:disabled { opacity: .35; } .tt-pos { font-weight: 700; color: var(--muted); font-size: 14px; }

@@ -45,7 +45,12 @@
 	const head = ( title, close = true ) => `<div class="sheet-head">${ close ? `<button class="ab-btn" data-close aria-label="${ esc( t( 'close' ) ) }">${ UI.icon( 'x', 24 ) }</button>` : '' }<h2>${ esc( title ) }</h2></div>`;
 	T.body = body;
 	T.view = () => `<section class="card"><p class="muted small">${ esc( t( 'tutIntro' ) ) }</p><div class="list mlist">${ T.list().map( ( x ) => `<button type="button" class="mrow" data-tut="${ x.id }">${ UI.ci( x.icon, 'teal', 36 ) }<span class="mid"><b>${ esc( t( 'tut_' + x.id ) ) }</b><small>${ esc( t( 'tutD_' + x.id ) ) }</small></span>${ UI.icon( 'chevron-right', 18 ) }</button>` ).join( '' ) }</div><div class="btn-row"><button type="button" class="btn btn-ghost" data-tour="start">${ UI.icon( 'refresh', 20 ) } ${ esc( t( 'tourReplay' ) ) }</button></div></section>`;
-	T.open = ( id ) => UI.openSheet( head( t( 'tut_' + id ) ) + `<div class="sheet-pad tt">${ body( id ) }<div class="btn-row"><button type="button" class="btn btn-primary" data-close>${ esc( t( 'tutDone' ) ) }</button></div></div>`, { tall: true } );
+	T.open = ( id ) => {
+		const ids = T.list().map( ( x ) => x.id ), i = ids.indexOf( id );
+		const nav = ( dir, icon, off, label ) => `<button type="button" class="btn btn-ghost tt-nav" data-tut-nav="${ dir }"${ off ? ' disabled' : '' } aria-label="${ esc( t( label ) ) }">${ UI.icon( icon, 22 ) }</button>`;
+		UI.openSheet( head( t( 'tut_' + id ) ) + `<div class="sheet-pad tt">${ body( id ) }<div class="tt-navbar">${ nav( 'prev', 'chevron-left', i <= 0, 'tutPrev' ) }<span class="tt-pos">${ i + 1 } / ${ ids.length }</span>${ nav( 'next', 'chevron-right', i >= ids.length - 1, 'tutNext' ) }</div><div class="btn-row"><button type="button" class="btn btn-primary" data-close>${ esc( t( 'tutDone' ) ) }</button></div></div>`, { tall: true } );
+		T.current = id;
+	};
 
 	/* ---- tour */
 	let seq = [], at = 0;
@@ -58,6 +63,8 @@
 	T.start = () => { seq = tourIds(); if ( ! seq.length ) return; at = 0; step(); };
 	T.maybeStart = () => { const d = EX.state().device; if ( d.tourDone || EXA.flow.active() ) return; T.start(); };
 	document.addEventListener( 'click', ( e ) => {
+		const nv = e.target.closest( '[data-tut-nav]' );
+		if ( nv ) { e.preventDefault(); e.stopImmediatePropagation(); const ids = T.list().map( ( x ) => x.id ), i = ids.indexOf( T.current ) + ( nv.dataset.tutNav === 'next' ? 1 : -1 ); if ( ids[ i ] ) T.open( ids[ i ] ); return; }
 		const b = e.target.closest( '[data-tut],[data-tour]' ); if ( ! b ) return;
 		e.preventDefault(); e.stopImmediatePropagation();
 		if ( b.dataset.tut ) { T.open( b.dataset.tut ); return; }
