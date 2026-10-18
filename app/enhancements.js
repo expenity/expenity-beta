@@ -108,7 +108,7 @@
    if(seen===window.EXPENITY_VERSION&&!forced)return;
    if(!forced&&!seen&&!S().device.onboarded){try{localStorage.setItem('expenity.releaseSeen',window.EXPENITY_VERSION);}catch(e){}return;}
    try{localStorage.removeItem('expenity.showRelease');}catch(e){}
-   notifying=true;A.showReleases(true).finally(()=>{notifying=false;});
+   notifying=true;const prompt=document.createElement('aside');prompt.className='release-prompt card';prompt.setAttribute('role','status');prompt.innerHTML=`<b>${esc(A.label('changelog'))} · ${esc(window.EXPENITY_VERSION)}</b><div class="btn-row"><button type="button" class="btn btn-primary" data-release-open>${esc(EX.lang()==='el'?'Δείτε τις αλλαγές':'View changes')}</button><button type="button" class="btn btn-ghost" data-release-later>${esc(EX.lang()==='el'?'Όχι τώρα':'Not now')}</button></div>`;document.body.append(prompt);const dismiss=()=>{prompt.remove();notifying=false;try{localStorage.setItem('expenity.releaseSeen',window.EXPENITY_VERSION);}catch{}};prompt.querySelector('[data-release-open]').onclick=()=>{prompt.remove();A.showReleases(true).finally(()=>{notifying=false;});};prompt.querySelector('[data-release-later]').onclick=dismiss;
   };
   setTimeout(notify,1600);document.addEventListener('visibilitychange',notify);
   EX.on('change',()=>{if(!A.flow.active())setTimeout(notify,300);});
@@ -138,3 +138,14 @@
  // Collapse preset names as soon as typing begins. Never steal focus or open a keyboard.
  document.addEventListener('focusin',e=>{if(e.target.matches('#quick,#txDesc,[name=name],[name=iname],[name=gname]'))document.querySelectorAll('#sheet .name-suggestions,#sheet .saved-names').forEach(x=>x.open=false);});
 })();
+
+/* Monthly reminder stays local to this device and never exports without a tap. */
+(function(){
+ const {EX,EXA:A,UI}=window,{t,esc}=EX,DAY=86400000;
+ Object.assign(EX.I18N.langs.en,{backupMonthly:'Monthly backup reminder',backupReminderTitle:'Keep a private backup',backupReminderText:'It has been a month since your last backup reminder or export request. Download a copy and store it safely; it contains your financial data.',backupReminderLater:'Remind me next month'});
+ Object.assign(EX.I18N.langs.el,{backupMonthly:'Μηνιαία υπενθύμιση αντιγράφου',backupReminderTitle:'Κρατήστε ένα ιδιωτικό αντίγραφο',backupReminderText:'Πέρασε ένας μήνας από την τελευταία υπενθύμιση ή το αίτημα λήψης αντιγράφου. Αποθηκεύστε το με ασφάλεια· περιέχει τα οικονομικά σας στοιχεία.',backupReminderLater:'Υπενθύμιση τον επόμενο μήνα'});
+ const key=()=> 'expenity.backupReminder.'+(EX.auth.user()?.id||'guest');
+ const home=A.home;A.home=()=>{let at;try{at=Number(localStorage.getItem(key()));if(!at){localStorage.setItem(key(),String(Date.now()));at=Date.now();}}catch{return home();}const s=EX.state(),hasData=s.txs.length||s.bills.length||s.incomes.length;return (hasData&&s.settings.monthlyBackup!==false&&Date.now()-at>=30*DAY?`<aside class="card"><h2>${UI.icon('database-export',22)} ${esc(t('backupReminderTitle'))}</h2><p>${esc(t('backupReminderText'))}</p><div class="btn-row"><button type="button" class="btn btn-primary" id="expJson">${esc(t('dlBackup'))}</button><button type="button" class="btn btn-ghost" data-backup-later>${esc(t('backupReminderLater'))}</button></div></aside>`:'')+home();};
+ document.addEventListener('click',e=>{if(e.target.closest('[data-backup-later],#expJson')){try{localStorage.setItem(key(),String(Date.now()));}catch{}if(A.st.view==='home')setTimeout(()=>A.render(),0);}});
+ document.addEventListener('change',e=>{if(e.target.matches('[data-monthly-backup]')){EX.state().settings.monthlyBackup=e.target.checked;EX.save();}});
+}());

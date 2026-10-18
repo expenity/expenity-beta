@@ -819,3 +819,5 @@ button, a, input, select, textarea, label, summary { touch-action: manipulation;
 .entry-head h2 { min-width: 0; flex: 1; overflow-wrap: normal; word-break: normal; hyphens: auto; font-size: clamp(15px, 4.4vw, 20px); } .entry-head .entry-change { flex: none; }
 /* Editing Home: Chrome's scroll anchoring re-adjusts the scroll position every time a card is reordered, which made the cards jump up and down on Android. */
 #view:has(.dash-editbar) { overflow-anchor: none; }
+
+.release-prompt{position:fixed;z-index:90;left:50%;transform:translateX(-50%);bottom:calc(90px + env(safe-area-inset-bottom));width:min(420px,calc(100% - 32px));box-shadow:var(--shadow)}.release-prompt .btn-row{margin-top:12px}
