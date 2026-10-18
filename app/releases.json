@@ -1,6 +1,16 @@
 {
-  "version": "0.16.3",
+  "version": "0.16.4",
   "releases": [
+    {
+      "version": "0.16.4",
+      "date": "2026-10-18",
+      "en": [
+        "Settings now has a dedicated Sounds page and a single Updates & status page for version, update checks, changelog and sync. Removed repeated account/help links, moved photo management to Data, and kept account security separate."
+      ],
+      "el": [
+        "Οι Ρυθμίσεις έχουν ξεχωριστή σελίδα Ήχων και μία σελίδα Ενημερώσεις & κατάσταση για έκδοση, έλεγχο ενημερώσεων, ιστορικό αλλαγών και συγχρονισμό. Αφαιρέθηκαν διπλές επιλογές και η διαχείριση φωτογραφιών μεταφέρθηκε στα Δεδομένα."
+      ]
+    },
     {
       "version": "0.16.3",
       "date": "2026-10-18",

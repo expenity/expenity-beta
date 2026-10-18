@@ -90,7 +90,7 @@
 	EXA.appbar = () => {
 		const v = st.view;
 		if ( v === 'more' && st.more !== 'root' ) {
-			const titles = { account: 'rowAccount', wallets: 'walletsTitle', categories: 'catsTitle', tags: 'tags', reminders: 'rowReminders', data: 'rowData', appearance: 'rowAppearance', install: 'rowInstall', about: 'rowAbout' };
+			const titles = { sounds:'soundsTitle', updates:'updatesTitle', account: 'rowAccount', wallets: 'walletsTitle', categories: 'catsTitle', tags: 'tags', reminders: 'rowReminders', data: 'rowData', appearance: 'rowAppearance', install: 'rowInstall', about: 'rowAbout' };
 			return `<button type="button" class="ab-btn" data-act="more-back" aria-label="${ esc( t( 'back' ) ) }">${ UI.icon( 'arrow-left', 24 ) }</button><h1 class="ab-title">${ esc( t( titles[ st.more ] ) ) }</h1>`;
 		}
 		const title = { home: null, activity: t( 'tabActivity' ), bills: t( 'tabBills' ), plan: t( 'planTitle' ), reports: t( 'tabReports' ), more: t( 'moreTitle' ) }[ v ];
@@ -324,17 +324,17 @@
 	const updateCard = () => `<section class="card"><h2>${ esc( t( 'updTitle' ) ) }</h2><p class="muted small" id="updLine">${ esc( t( 'aboutVersion', { v: window.EXPENITY_VERSION || '0.4' } ) ) }</p><div class="btn-row"><button type="button" class="btn btn-ghost" id="updBtn" data-act="check-update">${ UI.icon( 'refresh', 20 ) } ${ esc( t( 'updCheck' ) ) }</button><button type="button" class="ab-btn" data-release-notes aria-label="${esc(EXA.label('changelog'))}" title="${esc(EXA.label('changelog'))}">${UI.icon('notes',22)}</button></div></section>`;
 	function accountView() {
 		if ( ! EX.auth.isSignedIn() ) {
-			return `<section class="card"><p class="muted">${ esc( t( 'acctGuest' ) ) }</p><div class="btn-row stack"><button type="button" class="btn btn-primary" data-act="auth-create">${ esc( t( 'createAccount' ) ) }</button><button type="button" class="btn btn-ghost" data-act="auth-signin">${ esc( t( 'signIn' ) ) }</button></div></section>${ updateCard() }${EXA.installGuideEntry()}`;
+			return `<section class="card"><p class="muted">${ esc( t( 'acctGuest' ) ) }</p><div class="btn-row stack"><button type="button" class="btn btn-primary" data-act="auth-create">${ esc( t( 'createAccount' ) ) }</button><button type="button" class="btn btn-ghost" data-act="auth-signin">${ esc( t( 'signIn' ) ) }</button></div></section>`;
 		}
 		const u = EX.auth.user() || {}, d = st.devCache, pk = d ? d.passkeys : [], ss = d ? d.sessions : [], left = EX.auth.codesLeft();
-		return `<section class="card"><p><b>${ esc( t( 'acctSignedIn', { email: u.email || '' } ) ) }</b></p><p class="muted small" id="syncLine">${ syncLine() }</p><div class="btn-row"><button type="button" class="btn btn-ghost" data-act="sync-now">${ UI.icon( 'refresh', 20 ) } ${ esc( t( 'syncNow' ) ) }</button></div></section>
+		return `<section class="card"><p><b>${ esc( t( 'acctSignedIn', { email: u.email || '' } ) ) }</b></p></section>
 			<section class="card"><h2>${ esc( t( 'devPasskeys' ) ) }</h2><ul class="plain flat">${ pk.map( ( p ) => `<li><span>${ UI.icon( 'key', 20 ) } <b>${ esc( p.label ) }</b><small class="muted"> ${ esc( t( 'devAdded', { date: fmtDate( p.createdAt ) } ) ) } · ${ esc( p.lastUsed ? t( 'devUsed', { date: fmtDate( p.lastUsed ) } ) : t( 'devNever' ) ) }</small></span>${ pk.length > 1 ? `<button type="button" class="btn btn-ghost btn-sm" data-act="rm-passkey" data-id="${ esc( p.id ) }">${ esc( t( 'devRemove' ) ) }</button>` : '' }</li>` ).join( '' ) }</ul><div class="btn-row"><button type="button" class="btn btn-ghost" data-act="add-passkey">${ esc( t( 'devAdd' ) ) }</button></div></section>
 			<section class="card"><h2>${ esc( t( 'devSessions' ) ) }</h2><ul class="plain flat">${ ss.map( ( s ) => `<li><span>${ UI.icon( 'devices', 20 ) } <small class="muted">${ esc( fmtDate( s.createdAt ) ) }</small> ${ s.current ? `<b>${ esc( t( 'devThis' ) ) }</b>` : '' }</span>${ s.current ? '' : `<button type="button" class="btn btn-ghost btn-sm" data-act="rm-session" data-id="${ esc( s.id ) }">${ esc( t( 'devSignOut' ) ) }</button>` }</li>` ).join( '' ) }</ul></section>
 			<section class="card"><h2>${ esc( t( 'devCodes' ) ) }</h2><p class="muted small">${ left == null ? '' : esc( t( 'codesLeft', { n: left } ) ) }</p><div class="btn-row"><button type="button" class="btn btn-ghost" data-act="new-codes">${ esc( t( 'devCodesBtn' ) ) }</button></div></section>
 			<section class="card"><div class="btn-row"><button type="button" class="btn btn-ghost" data-act="sign-out">${ UI.icon( 'logout', 20 ) } ${ esc( t( 'signOut' ) ) }</button></div></section>
-			<section class="card"><h2>${ esc( t( 'photoStorage' ) ) }</h2><p class="muted small">${ esc( t( 'photoDeleteHelp' ) ) }</p><button type="button" class="btn btn-danger-ghost" data-act="delete-photos">${ UI.icon( 'trash', 20 ) } ${ esc( t( 'photoDeleteAll' ) ) }</button></section>
+
 			<section class="card danger"><h2>${ esc( t( 'devDelete' ) ) }</h2><p class="muted small">${ esc( t( 'devDeleteText' ) ) }</p><div class="btn-row"><button type="button" class="btn btn-danger" data-act="delete-account">${ esc( t( 'devDelete' ) ) }</button></div></section>
-			${ updateCard() }${EXA.installGuideEntry()}`;
+			`;
 	}
 	function remindersView() {
 		const n = typeof Notification === 'undefined' ? null : Notification.permission, on = S().device.notify && n === 'granted';
@@ -354,7 +354,7 @@
 			<div class="btn-row"><button type="button" class="btn btn-primary" data-act="add-cat">${ UI.icon( 'plus', 20 ) } ${ esc( t( 'catAdd' ) ) }</button></div>`;
 	}
 	function dataView() {
-		return `<section class="card"><p class="muted small">${ esc( t( 'sDataDesc', { b: S().bills.length, p: S().txs.length } ) ) }</p><div class="btn-row stack"><button type="button" class="btn btn-ghost" id="expJson">${ UI.icon( 'database-export', 20 ) } ${ esc( t( 'dlBackup' ) ) }</button><button type="button" class="btn btn-ghost" id="expCsv">${ UI.icon( 'file-export', 20 ) } ${ esc( t( 'dlCsv2' ) ) }</button><label class="btn btn-ghost file">${ UI.icon( 'upload', 20 ) } ${ esc( t( 'restore' ) ) }<input type="file" id="impJson" accept="application/json,.json" hidden></label></div></section>
+		return `<section class="card"><h2>${ esc( t( 'photoStorage' ) ) }</h2><p class="muted small">${ esc( t( 'photoDeleteHelp' ) ) }</p><button type="button" class="btn btn-danger-ghost" data-act="delete-photos">${ UI.icon( 'trash', 20 ) } ${ esc( t( 'photoDeleteAll' ) ) }</button></section><section class="card"><p class="muted small">${ esc( t( 'sDataDesc', { b: S().bills.length, p: S().txs.length } ) ) }</p><div class="btn-row stack"><button type="button" class="btn btn-ghost" id="expJson">${ UI.icon( 'database-export', 20 ) } ${ esc( t( 'dlBackup' ) ) }</button><button type="button" class="btn btn-ghost" id="expCsv">${ UI.icon( 'file-export', 20 ) } ${ esc( t( 'dlCsv2' ) ) }</button><label class="btn btn-ghost file">${ UI.icon( 'upload', 20 ) } ${ esc( t( 'restore' ) ) }<input type="file" id="impJson" accept="application/json,.json" hidden></label></div></section>
 			${ EX.auth.isSignedIn() ? '' : `<section class="card danger"><h2>${ esc( t( 'sDanger' ) ) }</h2><p class="muted small">${ esc( t( 'sDangerDesc' ) ) }</p><div class="btn-row"><button type="button" class="btn btn-danger" id="wipeBtn">${ esc( t( 'wipe' ) ) }</button></div></section>` }`;
 	}
 	function appearanceView() {
@@ -368,14 +368,15 @@
 	}
 	function aboutView() {
 		const L = ( href, label, icon ) => `<a class="mrow" href="${ href }" target="_blank" rel="noopener noreferrer">${ UI.ci( icon, 'gray', 40 ) }<span class="mid"><b>${ esc( label ) }</b></span>${ UI.icon( 'link', 18 ) }</a>`;
-		return `<section class="card"><h2>${ esc( t( 'aboutTitle' ) ) }</h2><p class="muted">${ esc( t( 'aboutText' ) ).replace('George Stathopoulos','<a class="creator-link" href="https://george-stathopoulos.github.io/" target="_blank" rel="noopener noreferrer">George Stathopoulos</a>') }</p><p class="muted small">${ esc( t( 'aboutVersion', { v: window.EXPENITY_VERSION || '0.3' } ) ) }</p></section>
+		return `<section class="card"><h2>${ esc( t( 'aboutTitle' ) ) }</h2><p class="muted">${ esc( t( 'aboutText' ) ).replace('George Stathopoulos','<a class="creator-link" href="https://george-stathopoulos.github.io/" target="_blank" rel="noopener noreferrer">George Stathopoulos</a>') }</p></section>
 			<div class="list">${ L( 'https://expenity.github.io/expenity/docs/', t( 'aboutHelp' ), 'help-circle' ) }${ L( 'https://george-stathopoulos.github.io/blog/', t( 'aboutBlog' ), 'notes' ) }${ L( 'https://george-stathopoulos.github.io/', t( 'aboutProjects' ), 'category-2' ) }${ L( 'https://github.com/expenity/expenity', t( 'aboutSource' ), 'brand-github' ) }</div>
-			<p class="muted small pad">${ esc( t( 'footerNote' ) ) }</p>
-			${ updateCard() }`;
+			<p class="muted small pad">${ esc( t( 'footerNote' ) ) }</p>`;
 	}
 	EXA.more = () => {
 		const sub = st.more;
-		if ( sub === 'account' ) return accountView();
+		if(sub==='sounds')return EXA.soundSettings();
+        if(sub==='updates')return updateCard()+`<section class="card"><h2>${esc(t('syncDetails'))}</h2><p id="syncLine">${syncLine()}</p>${EX.auth.isSignedIn()?`<button type="button" class="btn btn-ghost" data-act="sync-now">${UI.icon('refresh',20)} ${esc(t('syncNow'))}</button>`:''}</section>`;
+        if ( sub === 'account' ) return accountView();
 		if ( sub === 'wallets' ) return walletsView();
 		if ( sub === 'categories' ) return categoriesView();
 		if ( sub === 'tags' ) return EXA.tagsView();
