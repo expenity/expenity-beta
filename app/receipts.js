@@ -119,7 +119,7 @@
   if(!A.receiptContext?.()||A.receiptContext().id!==context.id)return err('entryChanged');
   const job=session;working=true;R.uploading=true;const button=$('[type=submit]');button.disabled=true;
   try{if(f.keepPhoto.checked){const jpg=await A.photos.compress(file);const r=await EX.api('POST','/api/photos',{data:jpg});if(!r.ok)throw Error('photoUnavailable');data.photo=r.json.id;}
-   if(job!==session)return;if(!A.applyReceipt(data))throw Error('entryChanged');working=false;R.uploading=false;cleanup();
+   if(job!==session)return;if(!A.applyReceipt(data))throw Error('entryChanged');working=false;R.uploading=false;cleanup();UI.done(t('scanApplied'));
   }catch(error){if(job===session){working=false;R.uploading=false;button.disabled=false;err(error.message==='entryChanged'?'entryChanged':'photoUnavailable');}}
  }
  function receiptViewport(){if(!dialog||!window.visualViewport)return;dialog.style.setProperty('--receipt-height',visualViewport.height+'px');dialog.style.setProperty('--receipt-top',visualViewport.offsetTop+'px');}

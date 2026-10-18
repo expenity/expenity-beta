@@ -45,6 +45,14 @@
 		toastTimer = setTimeout( () => { el.hidden = true; }, undo ? 7000 : 4500 );
 	};
 
+	/** A confirmation: the toast with an animated checkmark in front of the message. */
+	UI.done = ( msg ) => {
+		UI.toast( msg );
+		const el = $( '#toast' );
+		el.insertAdjacentHTML( 'afterbegin', '<svg class="toast-check" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#34d399"/><path d="M6.5 12.5l3.8 3.8 7.2-8" fill="none" stroke="#10201a" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>' );
+		window.EXA?.playSound?.( 'success' );
+	};
+
 	/* ------------------------------------------------------------------ Bottom sheet */
 	// One <dialog id="sheet"> serves every form and detail. On phones it is a bottom sheet or full-screen sheet; on larger
 	// screens the same markup is a centered dialog (CSS only). Opening pushes a history entry so the back button closes it.

@@ -67,14 +67,14 @@
 		const b = e.target.closest( '[data-avatar-open],[data-avatar-preset],[data-avatar-photo],[data-avatar-clear]' ); if ( ! b ) return;
 		e.preventDefault(); e.stopImmediatePropagation();
 		if ( b.hasAttribute( 'data-avatar-open' ) ) sheet();
-		else if ( b.dataset.avatarPreset ) { set( { type: 'preset', id: b.dataset.avatarPreset } ); sheet(); }
+		else if ( b.dataset.avatarPreset ) { set( { type: 'preset', id: b.dataset.avatarPreset } ); sheet(); UI.done( t( 'tSaved' ) ); }
 		else if ( b.hasAttribute( 'data-avatar-clear' ) ) { set( null ); sheet(); }
 		else document.getElementById( 'avatarFile' ).click();
 	}, true );
 	document.addEventListener( 'change', async ( e ) => {
 		if ( e.target.id !== 'avatarFile' || ! e.target.files[ 0 ] ) return;
 		const st = document.getElementById( 'avatarStatus' );
-		try { const data = await A.compress( e.target.files[ 0 ] ); set( { type: 'photo', data } ); sheet(); UI.toast( t( 'tSaved' ) ); }
+		try { const data = await A.compress( e.target.files[ 0 ] ); set( { type: 'photo', data } ); sheet(); UI.done( t( 'tSaved' ) ); }
 		catch ( err ) { if ( st ) st.textContent = t( 'photoType' ); }
 		e.target.value = '';
 	} );

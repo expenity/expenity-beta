@@ -11,9 +11,9 @@
   if(!/^image\/(jpeg|png|webp|heic|heif)$/.test(file.type)||file.size>20*1024*1024)throw Error('photoType');
   let img;try{img=await createImageBitmap(file,{imageOrientation:'from-image'});}catch(e){throw Error('photoType');}
   try{
-   const canvas=document.createElement('canvas');let edge=1280;
+   const canvas=document.createElement('canvas');let edge=1000;
    while(edge>=320){const ratio=Math.min(1,edge/Math.max(img.width,img.height));canvas.width=Math.max(1,Math.round(img.width*ratio));canvas.height=Math.max(1,Math.round(img.height*ratio));const ctx=canvas.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.drawImage(img,0,0,canvas.width,canvas.height);
-    for(const quality of [.8,.65,.5,.35]){const blob=await new Promise(r=>canvas.toBlob(r,'image/jpeg',quality));if(blob&&blob.size<=96*1024)return await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=reject;reader.readAsDataURL(blob);});}edge=Math.floor(edge*.75);
+    for(const quality of [.7,.55,.45,.35]){const blob=await new Promise(r=>canvas.toBlob(r,'image/jpeg',quality));if(blob&&blob.size<=60*1024)return await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=reject;reader.readAsDataURL(blob);});}edge=Math.floor(edge*.75);
    }throw Error('photoType');
   }finally{img.close();}
  };
@@ -49,7 +49,7 @@
  document.addEventListener('change',async e=>{
   if(!e.target.matches('.photo-file'))return;const slot=e.target.closest('.photo-slot'),file=e.target.files[0];if(!file)return;
   const status=slot.querySelector('.photo-status');P.busy++;slot.dataset.busy='true';status.textContent=t('photoWorking');
-  try{const data=await P.compress(file);if(!slot.isConnected)return;const r=await EX.api('POST','/api/photos',{data});if(!r.ok)throw Error(r.error==='photo_limit'?'photoLimit':'photoUnavailable');if(slot.isConnected){slot.outerHTML=P.slot(r.json.id);EX.emit('photochange');}}
+  try{const data=await P.compress(file);if(!slot.isConnected)return;const r=await EX.api('POST','/api/photos',{data});if(!r.ok)throw Error(r.error==='photo_limit'?'photoLimit':'photoUnavailable');UI.done(t('photoAttached'));if(slot.isConnected){slot.outerHTML=P.slot(r.json.id);EX.emit('photochange');}}
   catch(err){if(status.isConnected)status.textContent=t(err.message==='photoType'?'photoType':err.message==='photoLimit'?'photoLimit':'photoUnavailable');}
   finally{P.busy--;delete slot.dataset.busy;e.target.value='';}
  });
