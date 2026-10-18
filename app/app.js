@@ -12,7 +12,7 @@
 	const $ = ( s, r = document ) => r.querySelector( s );
 	const $$ = ( s, r = document ) => [ ...r.querySelectorAll( s ) ];
 	const toast = UI.toast;
-	window.EXPENITY_VERSION = '0.28.0';
+	window.EXPENITY_VERSION = '0.28.1';
 
  const seenCharacters=new Set();try{for(const skin of JSON.parse(sessionStorage.getItem('expenity.charactersSeen')||'[]'))seenCharacters.add(skin);}catch(_){}
  const characterSeen=skin=>seenCharacters.has(skin);
@@ -275,7 +275,7 @@
 			if ( ( el = e.target.closest( '[data-act]' ) ) ) { onAction( el.dataset.act, el ); return; }
 			const id = e.target.closest( 'button, label' ) ? ( e.target.closest( 'button, label' ).id || '' ) : '';
 			if ( id === 'icsBtn' ) { if ( ! EXA.active().length ) { toast( t( 'tNeedBill' ) ); return; } EXA.download( 'expenity-bills.ics', buildIcs(), 'text/calendar' ); toast( t( 'tIcs' ) ); }
-			else if ( id === 'expJson' ) { const s = S(); EXA.download( 'expenity-backup-' + today() + '.json', JSON.stringify( { version: 2, bills: s.bills, txs: s.txs, accounts: s.accounts, categories: s.categories, budgets: s.budgets, goals: s.goals, incomes: s.incomes, settings: s.settings }, null, 1 ), 'application/json' ); }
+			else if ( id === 'expJson' ) { const s = S(); EXA.download( 'expenity-backup-' + today() + '.json', JSON.stringify( { version: 2, bills: s.bills, txs: s.txs, accounts: s.accounts, categories: s.categories, budgets: s.budgets, goals: s.goals, incomes: s.incomes, settings: s.settings }, null, 1 ), 'application/json' ); toast( t( 'freshBackupDone' ) ); }
 			else if ( id === 'expCsv' ) {
 				const rows = [ t( 'csvHead2' ) ].concat( S().txs.slice().sort( ( a, b ) => ( a.date < b.date ? 1 : -1 ) ).map( ( x ) => [ x.date, t( x.type === 'income' ? 'typeIncome' : x.type === 'transfer' ? 'typeTransfer' : 'typeExpense' ), x.name || '', x.type === 'transfer' ? t( 'catTransfer' ) : EX.catInfo( x.category ).name, EXA.walletName( x.account ), x.amount, EX.txCurrency( x ), x.toAccount ? EXA.walletName( x.toAccount ) : '', x.note || '' ] ) );
 				EXA.download( 'expenity-transactions.csv', '﻿' + rows.map( ( r ) => r.map( csvCell ).join( ',' ) ).join( '\n' ), 'text/csv;charset=utf-8' );

@@ -1,8 +1,8 @@
-/** Start fresh: removes every record and setting (here and, for an account, on the server) and begins setup again, like a new person. */
+/** Reset account: removes every record and setting (here and, for an account, on the server and so on every device after its next sync) and begins setup again, like a new person. */
 ( function () {
 	'use strict';
 	const { EX, EXA, UI } = window, { t } = EX;
-	EXA.startFresh = async () => {
+	EXA.resetAccount = EXA.startFresh = async () => {
 		const S = EX.state();
 		if ( S.accounts.some( ( a ) => a.space ) ) { UI.toast( t( 'freshShared' ) ); return; }
 		if ( ! await EXA.confirm( { title: t( 'freshTitle' ), text: t( 'freshConfirm' ), confirm: t( 'freshBtn' ) } ) ) return;

@@ -1,6 +1,18 @@
 {
-  "version": "0.28.0",
+  "version": "0.28.1",
   "releases": [
+    {
+      "version": "0.28.1",
+      "date": "2026-10-19",
+      "en": [
+        "Start fresh is now called Reset account, and it says clearly that it empties all your devices (each one at its next sync) while your account and passkeys stay.",
+        "New \"Download a backup first\" button on the same card, so you can keep your data before resetting."
+      ],
+      "el": [
+        "Η \u00abΝέα αρχή\u00bb λέγεται πλέον \u00abΕπαναφορά λογαριασμού\u00bb και λέει καθαρά ότι αδειάζει όλες τις συσκευές σας (κάθε μία στον επόμενο συγχρονισμό της), ενώ ο λογαριασμός και τα passkeys σας παραμένουν.",
+        "Νέο κουμπί \u00abΚατεβάστε πρώτα αντίγραφο ασφαλείας\u00bb στην ίδια κάρτα, ώστε να κρατήσετε τα δεδομένα σας πριν από την επαναφορά."
+      ]
+    },
     {
       "version": "0.28.0",
       "date": "2026-10-18",
@@ -197,12 +209,12 @@
       "en": [
         "Animated tutorials in More → Help & about → Tutorials: scanning receipts, swiping, press-and-hold, one-sentence entry, first entry, bills, repeating income, budgets and goals, reports, notifications, themes, features, profile picture, Home editing, sync, shared wallets, and backup.",
         "A short welcome tour opens once after first-time setup. You can skip it, and replay it from the Tutorials page.",
-        "Account → Start fresh: removes all your records and settings and takes you through setup again, like a new user."
+        "Account → Reset account: removes all your records and settings and takes you through setup again, like a new user."
       ],
       "el": [
         "Κινούμενοι οδηγοί στο Περισσότερα → Βοήθεια → Οδηγοί: σάρωση αποδείξεων, σύρσιμο, παρατεταμένο πάτημα, προσθήκη με μία πρόταση, πρώτη εγγραφή, λογαριασμοί, επαναλαμβανόμενα έσοδα, προϋπολογισμοί και στόχοι, αναφορές, ειδοποιήσεις, θέματα, λειτουργίες, εικόνα προφίλ, επεξεργασία Αρχικής, συγχρονισμός, κοινά πορτοφόλια και αντίγραφο ασφαλείας.",
         "Μια σύντομη περιήγηση καλωσορίσματος ανοίγει μία φορά μετά τη ρύθμιση. Μπορείς να την παραλείψεις και να την ξαναδείς από τη σελίδα Οδηγοί.",
-        "Λογαριασμός → Νέα αρχή: αφαιρεί όλες τις εγγραφές και τις ρυθμίσεις σου και σε πάει ξανά στη ρύθμιση, σαν νέο χρήστη."
+        "Λογαριασμός → Επαναφορά λογαριασμού: αφαιρεί όλες τις εγγραφές και τις ρυθμίσεις σας και σας πάει ξανά στη ρύθμιση, σαν νέο χρήστη."
       ]
     },
     {
