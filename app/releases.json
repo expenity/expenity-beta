@@ -1,6 +1,16 @@
 {
-  "version": "0.21.1",
+  "version": "0.21.2",
   "releases": [
+    {
+      "version": "0.21.2",
+      "date": "2026-10-18",
+      "en": [
+        "Fixed the press-and-hold menu sometimes doing nothing when you chose an action."
+      ],
+      "el": [
+        "Διορθώθηκε το μενού παρατεταμένου πατήματος που κάποιες φορές δεν έκανε τίποτα όταν διάλεγες ενέργεια."
+      ]
+    },
     {
       "version": "0.21.1",
       "date": "2026-10-18",

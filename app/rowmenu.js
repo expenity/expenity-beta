@@ -17,7 +17,7 @@
 		sheet.querySelector( '.rm' ).addEventListener( 'click', ( e ) => {
 			const b = e.target.closest( '[data-rm]' ); if ( ! b ) return;
 			const action = b.dataset.rm; UI.closeSheet( true );
-			setTimeout( () => r.isConnected && r.dispatchEvent( new CustomEvent( 'swipeaction', { bubbles: true, detail: { action, id, kind } } ) ), 60 );
+			setTimeout( () => { const live = r.isConnected ? r : document.querySelector( `.sw[data-id="${ id }"]` ) || document; live.dispatchEvent( new CustomEvent( 'swipeaction', { bubbles: true, detail: { action, id, kind } } ) ); }, 60 );
 		} );
 	}
 	const cancel = () => { clearTimeout( timer ); timer = null; row = null; };
