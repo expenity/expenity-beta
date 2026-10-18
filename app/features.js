@@ -12,7 +12,8 @@
 	const FEATURES = [
 		[ 'recurring', 'pro', 'repeat' ], [ 'plan', 'pro', 'target' ], [ 'tags', 'pro', 'tag' ], [ 'presets', 'pro', 'pin' ],
 		[ 'photos', 'pro', 'photo' ], [ 'avatar', 'pro', 'mood-smile' ], [ 'push', 'pro', 'bell' ], [ 'shared', 'pro', 'users' ],
-		[ 'receipts', 'advanced', 'receipt' ], [ 'insights', 'advanced', 'bulb' ], [ 'forecast', 'advanced', 'wallet' ],
+		[ 'dupGuard', 'pro', 'copy' ], [ 'daily', 'pro', 'sun' ], [ 'filters', 'pro', 'adjustments-horizontal' ], [ 'trash', 'pro', 'trash' ], [ 'priceAlert', 'pro', 'trending-up' ],
+		[ 'receipts', 'advanced', 'receipt' ], [ 'streaks', 'advanced', 'flame' ], [ 'insights', 'advanced', 'bulb' ], [ 'forecast', 'advanced', 'wallet' ],
 		[ 'sounds', 'advanced', 'music' ], [ 'homeEdit', 'advanced', 'layout-dashboard' ], [ 'themeEdit', 'advanced', 'pencil' ],
 	].map( ( [ id, tier, icon ] ) => ( { id, tier, icon } ) );
 	const CORE = [ 'wallets', 'entries', 'categories', 'bills', 'activity', 'reports', 'themes', 'backup' ];
@@ -37,7 +38,7 @@
 
 	// Behaviour that CSS cannot switch off.
 	const wrap = ( obj, key, id, empty ) => { const f = obj && obj[ key ]; if ( typeof f !== 'function' ) return; obj[ key ] = function () { return fx.on( id ) ? f.apply( this, arguments ) : empty; }; };
-	wrap( EXA, 'ideasHome', 'insights', '' ); wrap( EXA, 'safeHome', 'forecast', '' ); wrap( EXA, 'pushCard', 'push', '' ); wrap( EXA, 'tagsInline', 'tags', '' ); wrap( EXA, 'pinnedEntries', 'presets', '' );
+	wrap( EXA, 'ideasHome', 'insights', '' ); wrap( EXA, 'safeHome', 'forecast', '' ); wrap( EXA, 'pushCard', 'push', '' ); wrap( EXA, 'tagsInline', 'tags', '' ); wrap( EXA, 'dailyHome', 'daily', '' ); wrap( EXA, 'streakHome', 'streaks', '' ); wrap( EXA, 'priceChip', 'priceAlert', '' ); wrap( EXA, 'pinnedEntries', 'presets', '' );
 	if ( EXA.avatar ) wrap( EXA.avatar, 'current', 'avatar', null );
 
 	const mark = ( on ) => on ? `<span class="fx-yes" aria-label="${ esc( t( 'fxIncluded' ) ) }">${ UI.icon( 'check', 18 ) }</span>` : `<span class="fx-no" aria-label="${ esc( t( 'fxNotIncluded' ) ) }">–</span>`;

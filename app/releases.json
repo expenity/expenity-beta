@@ -1,6 +1,28 @@
 {
-  "version": "0.20.2",
+  "version": "0.21.0",
   "releases": [
+    {
+      "version": "0.21.0",
+      "date": "2026-10-18",
+      "en": [
+        "Duplicate guard: a warning before adding an entry identical to one from the last few days.",
+        "Daily number on Home: one friendly figure for what you can spend today.",
+        "Activity filters: amount range and date range (also across months), alongside tags.",
+        "Recently deleted: restore deleted entries and bills for 30 days (More → Account & data).",
+        "Streaks: a flame for consecutive days within budget, with your best streak and no-spend days.",
+        "Bill price-change alerts: a note and a red chip when a bill costs more than last time.",
+        "All six are in the Features page (Pro, and Streaks in Advanced) and each has an animated tutorial."
+      ],
+      "el": [
+        "Φρουρός διπλότυπων: προειδοποίηση πριν προστεθεί εγγραφή ίδια με μία των τελευταίων ημερών.",
+        "Ημερήσιο ποσό στην Αρχική: ένας φιλικός αριθμός για όσα μπορείς να ξοδέψεις σήμερα.",
+        "Φίλτρα Κινήσεων: εύρος ποσού και ημερομηνιών (και σε πολλούς μήνες), μαζί με τις ετικέτες.",
+        "Πρόσφατα διαγραμμένα: επαναφορά διαγραμμένων εγγραφών και λογαριασμών για 30 ημέρες (Περισσότερα → Λογαριασμός & δεδομένα).",
+        "Σερί: μια φλόγα για διαδοχικές μέρες εντός προϋπολογισμού, με το καλύτερο σερί και τις μέρες χωρίς έξοδα.",
+        "Ειδοποιήσεις αύξησης τιμής λογαριασμών: σημείωση και κόκκινο σήμα όταν ένας λογαριασμός κοστίζει περισσότερο.",
+        "Και τα έξι υπάρχουν στη σελίδα Λειτουργίες (Pro, και τα Σερί στο Προχωρημένο) και το καθένα έχει κινούμενο οδηγό."
+      ]
+    },
     {
       "version": "0.20.2",
       "date": "2026-10-18",

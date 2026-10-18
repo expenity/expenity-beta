@@ -335,6 +335,7 @@
 		if(T.editId&&(!editing||contentStamp(editing)!==T.original))return entryError('entryChanged');
 		if(editing&&(!writable(editing.account)||(editing.type==='transfer'&&!writable(editing.toAccount))))return entryError('entryWalletGone');
 		if(!editing&&S().txs.some(x=>x.id===T.id)){T.committed=true;dropDraft();UI.closeSheet(true);return;}
+		if(!editing&&!T.dupOk&&EXA.dupFind){const dup=EXA.dupFind(tx);if(dup){EXA.dupWarn(dup).then(go=>{if(go){T.dupOk=true;saveTx();}});return;}}
 		T.saving=true;const old=editing?copy(editing):null,oldNames=copy(S().settings.savedNames||[]),oldDefault=S().settings.defaultAccount,oldReceipt=S().device.entryReceipt;
 		if(T.rememberName&&T.type!=='transfer')EX.rememberName(T.type,tx.name,tx.category,{account:T.rememberWallet?T.account:'',amount:T.rememberAmount?amount:''});
 		if(T.makeDefault)S().settings.defaultAccount=T.account;

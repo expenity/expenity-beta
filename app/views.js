@@ -12,7 +12,7 @@
 
 	const nowMonth = () => new Date().getFullYear() * 12 + new Date().getMonth();
 	EXA.st = {
-		view: 'home', more: 'root', billsMode: 'list', txMonth: nowMonth(), txFilter: { type: 'all', account: '', q: '' }, searchOpen: false,
+		view: 'home', more: 'root', billsMode: 'list', txMonth: nowMonth(), txFilter: { type: 'all', account: '', q: '', min: '', max: '', from: '', to: '' }, searchOpen: false,
 		calMonth: nowMonth(), calDay: null, planTab: 'budgets', repPeriod: 'month', devCache: null, sel: null, nowMonth,
 	};
 	const st = EXA.st;
@@ -67,7 +67,7 @@
 			<div class="sw-back"><div class="sw-l">${ swBtn( 'paid', 'check', 'actPaid', 'paid' ) }</div><div class="sw-r">${ swBtn( 'edit', 'pencil', 'actEdit', 'edit' ) }${ swBtn( 'duplicate', 'copy', 'duplicateRecord', 'duplicate' ) }${ swBtn( 'del', 'trash', 'actDelete', 'del' ) }</div></div>
 			<button type="button" class="sw-front item" data-act="open-bill" data-id="${ esc( b.id ) }" aria-label="${ esc( b.name ) }, ${ esc( amountText( b ) ) }">
 				${ UI.catCi( EX.catInfo( b.category ) ) }
-				<span class="mid"><b>${ esc( b.name ) }</b><small class="due">${ esc( meta ) }</small>${EXA.tagsInline(b.tags)}</span>
+				<span class="mid"><b>${ esc( b.name ) }${ EXA.priceChip ? EXA.priceChip( b ) : '' }</b><small class="due">${ esc( meta ) }</small>${EXA.tagsInline(b.tags)}</span>
 				<span class="a">${ esc( amountText( b ) ) }</span>
 			</button></li>`;
 	}
@@ -90,7 +90,7 @@
 	EXA.appbar = () => {
 		const v = st.view;
 		if ( v === 'more' && st.more !== 'root' ) {
-			const titles = { tutorials:'tutTitle', features:'fxTitle', sounds:'soundsTitle', updates:'updatesTitle', account: 'rowAccount', wallets: 'walletsTitle', categories: 'catsTitle', tags: 'tags', reminders: 'rowReminders', data: 'rowData', appearance: 'rowAppearance', install: 'rowInstall', about: 'rowAbout' };
+			const titles = { trash:'trashTitle', tutorials:'tutTitle', features:'fxTitle', sounds:'soundsTitle', updates:'updatesTitle', account: 'rowAccount', wallets: 'walletsTitle', categories: 'catsTitle', tags: 'tags', reminders: 'rowReminders', data: 'rowData', appearance: 'rowAppearance', install: 'rowInstall', about: 'rowAbout' };
 			return `<button type="button" class="ab-btn" data-act="more-back" aria-label="${ esc( t( 'back' ) ) }">${ UI.icon( 'arrow-left', 24 ) }</button><h1 class="ab-title">${ esc( t( titles[ st.more ] ) ) }</h1>`;
 		}
 		const title = { home: null, activity: t( 'tabActivity' ), bills: t( 'tabBills' ), plan: t( 'planTitle' ), reports: t( 'tabReports' ), more: t( 'moreTitle' ) }[ v ];
@@ -182,7 +182,8 @@
 		const schedules = st.txFilter.type === 'income' && st.incomeMode === 'recurring';
 		const incomeNav = st.txFilter.type === 'income' ? `<div class="segm income-modes" role="tablist">${ [ ['recorded','incomeRecorded','arrows-sort'], ['recurring','incomeRecurring','repeat'] ].map(([id,label,ic]) => `<button type="button" role="tab" aria-selected="${ ( st.incomeMode || 'recorded' ) === id }" class="${ ( st.incomeMode || 'recorded' ) === id ? 'on' : '' }" data-income-mode="${ id }">${ UI.icon(ic,18) } ${ esc(t(label)) }</button>`).join('') }</div>` : '';
 		const y = Math.floor( st.txMonth / 12 ), m = st.txMonth % 12, fl = st.txFilter;
-		let list = EX.monthTxs( y, m );
+		let list = EXA.rangeTxs ? ( EXA.rangeTxs() || EX.monthTxs( y, m ) ) : EX.monthTxs( y, m );
+		if ( EXA.applyFilters ) list = EXA.applyFilters( list );
 		if(EXA.tagFilter) list=list.filter(x=>(x.tags||[]).includes(EXA.tagFilter));
 		if ( fl.type !== 'all' ) list = list.filter( ( x ) => x.type === fl.type );
 		if ( fl.account ) list = list.filter( ( x ) => x.account === fl.account || x.toAccount === fl.account );
@@ -195,8 +196,9 @@
 		const net = money( ( sumMain( f.income ) - sumMain( f.expense ) ) / 100, mainCur() );
 		const monthHeader = `<div class="monthbar"><button type="button" class="ab-btn" data-txmonth="-1" aria-label="${ esc( t( 'prevMonth' ) ) }">${ UI.icon( 'chevron-left', 24 ) }</button><b>${ esc( monthName( y, m ) ) }</b><button type="button" class="ab-btn" data-txmonth="1" aria-label="${ esc( t( 'nextMonth' ) ) }">${ UI.icon( 'chevron-right', 24 ) }</button></div>
 			<div class="sumrow"><div class="in"><small>${ esc( t( 'ovIncome' ) ) }</small><b>${ esc( EX.sumByCur( f.income ) ) }</b></div><div><small>${ esc( t( 'ovExpenses' ) ) }</small><b>${ esc( EX.sumByCur( f.expense ) ) }</b></div><div><small>${ esc( t( 'ovNet' ) ) }</small><b>${ esc( net ) }</b></div></div>`;
-		return `${EXA.entryReceipt?EXA.entryReceipt():''}${ schedules ? '' : monthHeader }
+		return `${EXA.entryReceipt?EXA.entryReceipt():''}${ schedules ? '' : ( EXA.filtersActive && EXA.rangeTxs && EXA.rangeTxs() ? '' : monthHeader ) }
 			${ st.searchOpen ? `<div class="searchbar">${ UI.icon( 'search', 22 ) }<input id="txSearch" type="search" value="${ esc( fl.q ) }" placeholder="${ esc( t( 'txSearchPh' ) ) }" aria-label="${ esc( t( 'txSearchPh' ) ) }" autocomplete="off"></div>` : '' }
+			${ st.searchOpen && EXA.filterPanel ? EXA.filterPanel() : '' }
 			<div class="chips" role="group">${ chip( 'all', t( 'typeAll' ) ) }${ chip( 'expense', t( 'typeExpenses' ) ) }${ chip( 'income', t( 'typeIncomes' ) ) }${ chip( 'transfer', t( 'typeTransfer' ) ) }${EXA.tagFilterHtml()}<label class="chip select${ fl.account ? ' on' : '' }">${ UI.icon( 'wallet', 18 ) }<select id="txWalletFilter" aria-label="${ esc( t( 'filterWallet' ) ) }"><option value="">${ esc( t( 'txAllWallets' ) ) }</option>${ S().accounts.map( ( a ) => `<option value="${ esc( a.id ) }"${ fl.account === a.id ? ' selected' : '' }>${ esc( EX.accountName( a ) ) }</option>` ).join( '' ) }</select></label></div>
 			${ incomeNav }
 			${ schedules ? EXA.incomeSchedules() : groups.length ? groups.map( ( g ) => `<section class="grp"><h2 class="sticky">${ esc( dayName( g.date ) ) }</h2><ul class="list">${ g.items.map( txItem ).join( '' ) }</ul></section>` ).join( '' ) + ( UI.isPhone() ? `<p class="hint">${ esc( t( 'swipeHint' ) ) }</p>` : '' ) : empty( 'arrows-sort', 'teal', t( 'txNone' ), t( 'txNoneHint' ), `<button type="button" class="btn btn-primary" data-act="add">${ esc( t( 'addTx' ) ) }</button>` ) }`;
@@ -378,6 +380,7 @@
 		const sub = st.more;
 		if(sub==='sounds')return EXA.soundSettings();
         if(sub==='updates')return updateCard()+`<section class="card"><h2>${esc(t('syncDetails'))}</h2><p id="syncLine">${syncLine()}</p>${EX.auth.isSignedIn()?`<button type="button" class="btn btn-ghost" data-act="sync-now">${UI.icon('refresh',20)} ${esc(t('syncNow'))}</button>`:''}</section>`;
+        if ( sub === 'trash' ) return EXA.trashView();
         if ( sub === 'tutorials' ) return EXA.tutorials.view();
         if ( sub === 'features' ) return EXA.features.view();
         if ( sub === 'account' ) return accountView();
