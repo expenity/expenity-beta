@@ -4,7 +4,7 @@
  const EX=window.EX,A=window.EXA,UI=window.UI,S=EX.state,esc=EX.esc;
  const $=(s,r=document)=>r.querySelector(s),all=(s,r=document)=>[...r.querySelectorAll(s)];
  const originalHome=A.home,keys=['drafts','balance','daily','streak','welcome','due','wallets','safe','ideas','goals','recent'];
- const words={en:{drafts:'Unfinished entries',daily:'Daily number',streak:'Streak',safe:'Safe to spend',title:'Customize Home',done:'Done',cancel:'Cancel',cards:'Cards',add:'Add cards',hidden:'Hidden cards',empty:'All available cards are on Home.',reset:'Reset layout',small:'Small',medium:'Medium',full:'Full',size:'Resize',hide:'Hide',restore:'Add',hint:'Drag to move · Pull the corner to resize',dismiss:'Dismiss hint',drag:'Drag to move. Use arrow keys to move, Enter to resize.',smallHelp:'Half-width summary',mediumHelp:'Wide, short card',fullHelp:'Wide, more detail',noData:'Nothing to show yet.',balance:'Balance',welcome:'Account & install',due:'Due soon',wallets:'Wallets',ideas:'Ideas for you',goals:'Budgets & goals',recent:'Recent activity'},el:{drafts:'Ημιτελείς εγγραφές',daily:'Ημερήσιο ποσό',streak:'Σερί',safe:'Περιθώριο εξόδων',title:'Προσαρμογή Αρχικής',done:'Έτοιμο',cancel:'Ακύρωση',cards:'Κάρτες',add:'Προσθήκη καρτών',hidden:'Κρυμμένες κάρτες',empty:'Όλες οι διαθέσιμες κάρτες βρίσκονται στην Αρχική.',reset:'Επαναφορά διάταξης',small:'Μικρό',medium:'Μεσαίο',full:'Πλήρες',size:'Αλλαγή μεγέθους',hide:'Απόκρυψη',restore:'Προσθήκη',hint:'Σύρετε για μετακίνηση · Τραβήξτε τη γωνία για μέγεθος',dismiss:'Απόκρυψη οδηγίας',drag:'Σύρετε για μετακίνηση. Χρησιμοποιήστε τα βέλη για σειρά και Enter για μέγεθος.',smallHelp:'Σύνοψη στο μισό πλάτος',mediumHelp:'Οριζόντια, χαμηλή κάρτα',fullHelp:'Οριζόντια, περισσότερα στοιχεία',noData:'Δεν υπάρχει ακόμη περιεχόμενο.',balance:'Υπόλοιπο',welcome:'Λογαριασμός & εγκατάσταση',due:'Πλησιάζουν',wallets:'Πορτοφόλια',ideas:'Ιδέες για εσάς',goals:'Προϋπολογισμοί & στόχοι',recent:'Πρόσφατες κινήσεις'}};
+ const words={en:{drafts:'Unfinished entries',daily:'Daily number',streak:'Streak',safe:'Safe to spend',title:'Personalise Home',done:'Done',cancel:'Cancel',cards:'Cards',add:'Add cards',hidden:'Hidden cards',empty:'All available cards are on Home.',reset:'Reset layout',small:'Small',medium:'Medium',full:'Full',size:'Resize',hide:'Hide',restore:'Add',hint:'Drag to move · Pull the corner to resize',dismiss:'Dismiss hint',drag:'Drag to move. Use arrow keys to move, Enter to resize.',smallHelp:'Half-width summary',mediumHelp:'Wide, short card',fullHelp:'Wide, more detail',noData:'Nothing to show yet.',balance:'Balance',welcome:'Account & install',due:'Due soon',wallets:'Wallets',ideas:'Ideas for you',goals:'Budgets & goals',recent:'Recent activity'},el:{drafts:'Ημιτελείς εγγραφές',daily:'Ημερήσιο ποσό',streak:'Σερί',safe:'Περιθώριο εξόδων',title:'Προσαρμογή Αρχικής',done:'Έτοιμο',cancel:'Ακύρωση',cards:'Κάρτες',add:'Προσθήκη καρτών',hidden:'Κρυμμένες κάρτες',empty:'Όλες οι διαθέσιμες κάρτες βρίσκονται στην Αρχική.',reset:'Επαναφορά διάταξης',small:'Μικρό',medium:'Μεσαίο',full:'Πλήρες',size:'Αλλαγή μεγέθους',hide:'Απόκρυψη',restore:'Προσθήκη',hint:'Σύρετε για μετακίνηση · Τραβήξτε τη γωνία για μέγεθος',dismiss:'Απόκρυψη οδηγίας',drag:'Σύρετε για μετακίνηση. Χρησιμοποιήστε τα βέλη για σειρά και Enter για μέγεθος.',smallHelp:'Σύνοψη στο μισό πλάτος',mediumHelp:'Οριζόντια, χαμηλή κάρτα',fullHelp:'Οριζόντια, περισσότερα στοιχεία',noData:'Δεν υπάρχει ακόμη περιεχόμενο.',balance:'Υπόλοιπο',welcome:'Λογαριασμός & εγκατάσταση',due:'Πλησιάζουν',wallets:'Πορτοφόλια',ideas:'Ιδέες για εσάς',goals:'Προϋπολογισμοί & στόχοι',recent:'Πρόσφατες κινήσεις'}};
  const t=k=>(words[EX.lang()]||words.en)[k],L=k=>esc(t(k));
  const copy=x=>JSON.parse(JSON.stringify(x));
  const sizeOf=s=>s==='compact'?'medium':s==='wide'?'full':['small','medium','full'].includes(s)?s:'full';
@@ -60,7 +60,7 @@
  function select(id){selected=id;all('#homeGrid>[data-home]').forEach(x=>x.dataset.selected=String(x.dataset.home===id));}
  function begin(id){if(EX.feature&&!EX.feature('homeEdit'))return;
   if(draft!==null||UI.sheetOpen()||A.flow.active())return;
-  A.homeLookDraft=copy(S().settings.themeLooks||{});source=readSource();draft=copy(layout()).map(x=>({...x,size:sizeOf(x.size)}));
+  A.cancelLookPreview?.();A.homeLookDraft=copy(S().settings.themeLooks||{});source=readSource();draft=copy(layout()).map(x=>({...x,size:sizeOf(x.size)}));
   source.forEach(x=>entry(x.dataset.home));selected=id||null;A.render();UI.haptic(25);
  }
  function closeEditor(save){
@@ -101,21 +101,31 @@
   if(drag){const d=drag;drag=null;d.ghost?.remove();widget(d.id)?.classList.remove('dash-placeholder');$('#homeGrid')?.classList.remove('dash-moving');releaseCapture(d.pointer);if(d.started&&!cancel)blockClickUntil=performance.now()+350;}
   if(resize){const r=resize;resize=null;releaseCapture(r.pointer);if(cancel&&r.started)applySize(r.id,r.base);if(!cancel){blockClickUntil=performance.now()+350;if(!r.started)sizePicker(r.id);}}
  }
+ // Reordering while dragging: judged at most every 200 ms (the time a swap animation takes), and a card must be dragged 60% (down)
+ // or 40% (up) of the way across its neighbour before they swap. Without this, a swap moved the neighbour under the finger, which
+ // swapped back, and near the screen edges the scrolling kept bringing a new card under the finger every frame: cards shook up and down.
+ let lastMoveAt=0,lastFrame=0,scrollCarry=0;
  function dragStep(x,y){
   if(!drag?.started)return;drag.x=x;drag.y=y;
   drag.ghost.style.transform=`translate(${x-drag.startX}px,${y-drag.startY}px) scale(1.025)`;
+  if(performance.now()-lastMoveAt<200)return;
   const hit=document.elementFromPoint(x,y)?.closest('#homeGrid>[data-home]');
-  if(hit&&hit.dataset.home!==drag.id){const ids=order(),from=ids.indexOf(drag.id),to=ids.indexOf(hit.dataset.home),r=hit.getBoundingClientRect(),own=widget(drag.id)?.getBoundingClientRect();const horizontal=own&&Math.abs(own.top-r.top)<24;const after=horizontal?x>r.left+r.width/2:y>r.top+r.height/2;if((to>from&&after)||(to<from&&!after))move(drag.id,hit.dataset.home);}
+  if(hit&&hit.dataset.home!==drag.id){const ids=order(),from=ids.indexOf(drag.id),to=ids.indexOf(hit.dataset.home),r=hit.getBoundingClientRect(),own=widget(drag.id)?.getBoundingClientRect();const horizontal=own&&Math.abs(own.top-r.top)<24;
+   const passed=horizontal?(to>from?x>r.left+r.width*.55:x<r.left+r.width*.45):(to>from?y>r.top+r.height*.6:y<r.top+r.height*.4);
+   if(passed){lastMoveAt=performance.now();move(drag.id,hit.dataset.home);}}
  }
- function autoScroll(){
-  if(!drag?.started)return;const view=$('#view'),r=view.getBoundingClientRect(),top=r.top+Math.min(80,r.height*.16),bottom=r.bottom-60;
-  const delta=drag.y<top?-Math.min(16,(top-drag.y)*.3):drag.y>bottom?Math.min(16,(drag.y-bottom)*.3):0;
-  if(delta){view.scrollTop+=delta;dragStep(drag.x,drag.y);}scrollFrame=requestAnimationFrame(autoScroll);
+ // Edge scrolling by time, not by frame (a 120 Hz phone scrolled twice as fast), gentler, and starting below the sticky toolbar.
+ function autoScroll(ts){
+  if(!drag?.started)return;const view=$('#view'),r=view.getBoundingClientRect(),bar=$('.dash-editbar'),barBottom=bar?Math.max(r.top,bar.getBoundingClientRect().bottom):r.top;
+  const top=barBottom+56,bottom=r.bottom-56,dt=Math.min(48,ts-(lastFrame||ts));lastFrame=ts;
+  const speed=drag.y<top?-Math.min(480,(top-drag.y)*6):drag.y>bottom?Math.min(480,(drag.y-bottom)*6):0;
+  if(speed){scrollCarry+=speed*dt/1000;const step=Math.trunc(scrollCarry);if(step){scrollCarry-=step;const was=view.scrollTop;view.scrollTop=was+step;if(view.scrollTop!==was)dragStep(drag.x,drag.y);}}else scrollCarry=0;
+  scrollFrame=requestAnimationFrame(autoScroll);
  }
  function startDrag(){
   const el=widget(drag.id),rect=el.getBoundingClientRect();drag.started=true;
   const ghost=el.cloneNode(true);ghost.removeAttribute('data-home');ghost.setAttribute('aria-hidden','true');all('[id]',ghost).forEach(x=>x.removeAttribute('id'));ghost.classList.add('dash-ghost');ghost.style.cssText=`position:fixed;left:${rect.left}px;top:${rect.top}px;width:${rect.width}px;height:${rect.height}px;margin:0;pointer-events:none;z-index:9999`;
-  document.body.append(ghost);drag.ghost=ghost;el.classList.add('dash-placeholder');$('#homeGrid').classList.add('dash-moving');UI.haptic(12);autoScroll();
+  document.body.append(ghost);drag.ghost=ghost;el.classList.add('dash-placeholder');$('#homeGrid').classList.add('dash-moving');UI.haptic(12);lastFrame=0;scrollCarry=0;lastMoveAt=0;scrollFrame=requestAnimationFrame(autoScroll);
  }
  document.addEventListener('pointerdown',e=>{
   if(e.target.closest('[data-act=add]'))return;
@@ -171,5 +181,5 @@
   if(step&&ids[i+step]){e.preventDefault();move(id,ids[i+step]);el.focus({preventScroll:true});}
   if(e.key==='Enter'){e.preventDefault();sizePicker(id);}
  });
- EX.on('auth',()=>{stopGesture(true);delete A.homeLookDraft;A.applyCustomTheme();draft=null;source=null;selected=null;});
+ EX.on('auth',()=>{A.cancelLookPreview?.();stopGesture(true);delete A.homeLookDraft;A.applyCustomTheme();draft=null;source=null;selected=null;});
 })();

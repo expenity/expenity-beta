@@ -12,7 +12,7 @@
 	const $ = ( s, r = document ) => r.querySelector( s );
 	const $$ = ( s, r = document ) => [ ...r.querySelectorAll( s ) ];
 	const toast = UI.toast;
-	window.EXPENITY_VERSION = '0.28.1';
+	window.EXPENITY_VERSION = '0.28.2';
 
  const seenCharacters=new Set();try{for(const skin of JSON.parse(sessionStorage.getItem('expenity.charactersSeen')||'[]'))seenCharacters.add(skin);}catch(_){}
  const characterSeen=skin=>seenCharacters.has(skin);
@@ -51,6 +51,20 @@
 		document.documentElement.lang = EX.I18N.langs[ EX.lang() ].htmlLang;
 		document.title = '[Beta] ' + t( 'title' );
         if(st.view==='home'){EXA.scanShortcutHint?.();if(['mario','minnie','vader'].includes(EXA.skin())&&!st.characterRetreated&&!EXA.flow.active()&&document.documentElement.dataset.funMotion==='on')rememberCharacter(EXA.skin());}
+	}
+	// Typing in the Activity search: swap only the results (summary and list) and keep the search field itself. Rebuilding the whole
+	// screen on every key made the page flash on Android and fought the keyboard.
+	function renderSearchResults() {
+		const view = $( '#view' ), input = $( '#txSearch' ), bar = input && input.closest( '.searchbar' );
+		if ( ! bar || st.view !== 'activity' || ! view.contains( bar ) ) return false;
+		const tpl = document.createElement( 'template' ); tpl.innerHTML = EXA.screen();
+		const fresh = [ ...tpl.content.childNodes ], newBar = fresh.find( ( n ) => n.nodeType === 1 && n.classList.contains( 'searchbar' ) );
+		if ( ! newBar ) return false;
+		const top = view.scrollTop, at = fresh.indexOf( newBar );
+		[ ...view.childNodes ].forEach( ( n ) => { if ( n !== bar ) n.remove(); } );
+		fresh.forEach( ( n, i ) => { if ( i < at ) view.insertBefore( n, bar ); else if ( i > at ) view.appendChild( n ); } );
+		view.scrollTop = top;
+		return true;
 	}
 	EXA.render = render;
 	EXA.applyMotion = () => { const m = S().device.motion || 'auto'; if ( m === 'auto' ) delete document.documentElement.dataset.motion; else document.documentElement.dataset.motion = m; try { if ( m === 'auto' ) localStorage.removeItem( 'expenity.motion' ); else localStorage.setItem( 'expenity.motion', m ); } catch ( e ) { /* ignore */ } };
@@ -305,11 +319,11 @@
 		} );
 		document.addEventListener( 'input', ( e ) => {
 			if ( EXA.flow.onInput( e ) ) return;
-			if ( e.target.id === 'txSearch' ) { st.txFilter.q = e.target.value; if ( ! e.isComposing ) render(); return; }
+			if ( e.target.id === 'txSearch' ) { st.txFilter.q = e.target.value; if ( ! e.isComposing && ! renderSearchResults() ) render(); return; }
 			if ( EXA.txInput( e ) ) return;
 			EXA.billInput( e );
 		} );
-		document.addEventListener( 'compositionend', ( e ) => { if ( e.target.id === 'txSearch' ) { st.txFilter.q = e.target.value; render(); } } );
+		document.addEventListener( 'compositionend', ( e ) => { if ( e.target.id === 'txSearch' ) { st.txFilter.q = e.target.value; if ( ! renderSearchResults() ) render(); } } );
 		document.addEventListener( 'change', ( e ) => {
 			if ( EXA.repChange( e ) || EXA.shareChange( e ) || EXA.pushChange( e ) ) return;
 			const id = e.target.id;

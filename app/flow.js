@@ -15,6 +15,12 @@
 	const flow = ( EXA.flow = {} );
 	let platform = null, busy = false;
 	const W = { step: 0, wallets: null, curQuery: '' };
+	// The currency buttons for the current search text. Typing redraws only this, not the whole step.
+	const curGrid = () => {
+		const q = EX.fold( W.curQuery || '' );
+		const list = COMMON.concat( [ S().settings.currency ] ).filter( ( c, i, a ) => a.indexOf( c ) === i ).filter( ( c ) => ! q || EX.fold( c + ' ' + curName( c ) ).includes( q ) );
+		return list.map( ( c ) => `<button type="button" class="cur${ c === S().settings.currency ? ' on' : '' }" data-fstep="cur" data-cur="${ c }" role="radio" aria-checked="${ c === S().settings.currency }"><b>${ esc( curSym( c ) ) }</b><span>${ c }</span><small>${ esc( curName( c ) ) }</small></button>` ).join( '' );
+	};
 	// The goal step only appears for people who said they want to save for something.
 	const steps = () => [ 'name', 'currency', 'aims' ].concat( ( S().settings.aims || [] ).includes( 'save' ) ? [ 'goal' ] : [] ).concat( [ 'plan', 'wallets' ] ).concat( EX.feature && EX.feature( 'daily' ) === false ? [] : [ 'target' ] ).concat( [ 'look', 'tour' ] ).concat( EX.feature && EX.feature( 'receipts' ) === false ? [] : [ 'scan' ] ).concat( [ 'quick', 'extras', 'help' ] ).concat( UI.isPhone() ? [ 'tips' ] : [] ).concat( [ 'done' ] );
 	const GOAL_PRESETS = [ [ 'trip', 'plane' ], [ 'car', 'car' ], [ 'gift', 'gift' ], [ 'home', 'home' ], [ 'emergency', 'heart' ], [ 'other', 'target' ] ];
@@ -194,10 +200,8 @@
 			body = `<label class="f"><span class="sr">${ esc( t( 'setupNamePh' ) ) }</span><input name="name" maxlength="40" autocomplete="given-name" placeholder="${ esc( t( 'setupNamePh' ) ) }" value="${ esc( S().settings.name || '' ) }" aria-label="${ esc( t( 'setupNamePh' ) ) }"></label>`;
 		} else if ( id === 'currency' ) {
 			icon = 'coin'; color = 'amber'; title = t( 'setupCurTitle' ); text = t( 'setupCurText' );
-			const q = EX.fold( W.curQuery || '' );
-			const list = COMMON.concat( [ S().settings.currency ] ).filter( ( c, i, a ) => a.indexOf( c ) === i ).filter( ( c ) => ! q || EX.fold( c + ' ' + curName( c ) ).includes( q ) );
 			body = `<div class="searchbar">${ UI.icon( 'search', 22 ) }<input id="curSearch" type="search" value="${ esc( W.curQuery || '' ) }" placeholder="${ esc( t( 'setupSearch' ) ) }" aria-label="${ esc( t( 'setupSearch' ) ) }" autocomplete="off"></div>
-				<div class="cur-grid" role="radiogroup">${ list.map( ( c ) => `<button type="button" class="cur${ c === S().settings.currency ? ' on' : '' }" data-fstep="cur" data-cur="${ c }" role="radio" aria-checked="${ c === S().settings.currency }"><b>${ esc( curSym( c ) ) }</b><span>${ c }</span><small>${ esc( curName( c ) ) }</small></button>` ).join( '' ) }</div>`;
+				<div class="cur-grid" role="radiogroup">${ curGrid() }</div>`;
 		} else if ( id === 'aims' ) {
 			icon = 'target'; color = 'pink'; title = t( 'aimsSetupTitle' ); text = t( 'aimsSetupText' );
 			if ( ! W.aimsSeen && ! ( S().settings.aims || [] ).length ) S().settings.aims = [ 'track' ]; W.aimsSeen = true; // one is already chosen to show that more than one can be
@@ -289,7 +293,7 @@
 	}
 	flow.onInput = ( e ) => {
 		if ( e.target.id === 'curSearch' && e.isComposing ) { W.curQuery = e.target.value; return true; }
-		if ( e.target.id === 'curSearch' ) { W.curQuery = e.target.value; const pos = e.target.selectionStart; flow.show(); const i = $( '#curSearch' ); if ( i ) { i.focus(); i.setSelectionRange( pos, pos ); } return true; }
+		if ( e.target.id === 'curSearch' ) { W.curQuery = e.target.value; const g = $( '.cur-grid' ); if ( g ) g.innerHTML = curGrid(); else flow.show(); return true; }
 		return false;
 	};
 	flow.onStepClick = ( e ) => {

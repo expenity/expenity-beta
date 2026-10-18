@@ -281,6 +281,7 @@
 	EXA.txKey = pressKey;
 	function onTxQuick() {
 		const q = $( '#txQuick' ); if ( ! q ) return;readTxFields();
+		const typeBefore = T.type;
 		T.quickText = q.value;
 		if ( ! q.value.trim() ) return;
 		const p = EX.parseQuick( q.value, { past: true } );
@@ -290,9 +291,18 @@
         if(p.repeat)T.repeat=p.repeat;
 		if ( p.date ) { T.date = p.date; T.dateMode = p.date === today() ? 'today' : p.date === addDays( today(), -1 ) ? 'yesterday' : 'other'; }
 		if ( T.type !== 'transfer' ) { const c = guessCategory( p.name, T.type ); const list = EX.catList( T.type === 'income' ? 'income' : 'expense' ).map( ( x ) => x.key ); if(T.category&&!list.includes(T.category)&&T.category!=='uncategorized')T.category=null; }
+		// Update only the preview while typing. Rebuilding the whole sheet on every key made the buttons below flicker (Android most of all, where the
+		// keyboard and the sheet re-lay out each time) and could interrupt the keyboard's own text suggestions.
+		if ( T.type === typeBefore && paintQuickPreview() ) return;
 		const hadFocus = document.activeElement && document.activeElement.id === 'txQuick';
 		drawTx( true, false );
 		if ( hadFocus ) { const n = $( '#txQuick' ); n.focus(); n.setSelectionRange( n.value.length, n.value.length ); }
+	}
+	function paintQuickPreview() {
+		const pv = $( '.sentence-preview' ); if ( ! pv ) return false;
+		pv.innerHTML = `<b>${ esc( T.name || '\u2014' ) }</b><span>${ esc( EX.money( T.amount || 0, walletCur( T.account ) ) ) }</span><small>${ esc( EX.dayName( T.date ) ) } \u00b7 ${ esc( EX.scheduleLabel( T ) ) }</small>`;
+		const h = $( '#sheetTitle' ); if ( h ) h.textContent = t( titleKey() );
+		return true;
 	}
 	function entryError(key,selector){EXA.playSound?.('error');const e=$('#txErr');e.textContent=t(key);e.hidden=false;const field=$(selector||'[data-tx=save]');const group=field?.closest('[data-entry-group]');if(group){group.open=true;T.entryGroup=group.dataset.entryGroup;}field?.setAttribute('aria-invalid','true');field?.setAttribute('aria-describedby','txErr');field?.scrollIntoView({block:'center'});field?.focus({preventScroll:true});}
 	function saveTx(){

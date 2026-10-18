@@ -51,7 +51,9 @@
 	T.list = () => LIST.filter( ( x ) => ! x.feature || EX.feature?.( x.feature ) !== false );
 	const touch = () => UI.isPhone();
 	const isNew = ( id ) => !! LIST.find( ( x ) => x.id === id && x.fresh );
-	const body = ( id ) => `<div class="tt-phone${ isNew( id ) ? ' fancy' : '' }" aria-hidden="true">${ DEMOS[ id ]() }</div><ol class="tt-steps">${ [ 1, 2, 3 ].map( ( n ) => `<li>${ esc( t( `tut_${ id }_${ n }` ) ) }</li>` ).join( '' ) }</ol>`;
+	// **label** marks the exact name of a button or menu: everything is escaped first, only that pair becomes bold.
+	const bold = ( s ) => esc( s ).replace( /\*\*(.+?)\*\*/g, '<b>$1</b>' );
+	const body = ( id ) => `<div class="tt-phone${ isNew( id ) ? ' fancy' : '' }" aria-hidden="true">${ DEMOS[ id ]() }</div><ol class="tt-steps">${ [ 1, 2, 3 ].map( ( n ) => `<li>${ bold( t( `tut_${ id }_${ n }` ) ) }</li>` ).join( '' ) }</ol>`;
 	const head = ( title, close = true ) => `<div class="sheet-head">${ close ? `<button class="ab-btn" data-close aria-label="${ esc( t( 'close' ) ) }">${ UI.icon( 'x', 24 ) }</button>` : '' }<h2>${ esc( title ) }</h2></div>`;
 	T.body = body;
 	T.demo = ( id ) => `<div class="tt-phone fancy" aria-hidden="true">${ DEMOS[ id ]() }</div>`;

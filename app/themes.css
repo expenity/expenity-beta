@@ -1,6 +1,6 @@
 /* Expenity themes. A theme is a set of tokens (colors, shapes, type, borders, glow) plus a little decoration.
    The default Emerald theme lives in style.css; every other theme sets data-skin on <html>. Fonts are system stacks only. */
-:root[data-skin] { --serif: "Noto Serif", Georgia, "Times New Roman", serif; --hand: "Alegreya", "Noto Serif", Georgia, serif; --mono: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", "Noto Sans Mono", "DejaVu Sans Mono", "Courier New", monospace; --round: "Comfortaa", "Noto Sans", ui-sans-serif, system-ui, sans-serif; }
+:root[data-skin] { --serif: "Noto Serif", Georgia, "Times New Roman", serif; --hand: "Alegreya", "Noto Serif", Georgia, serif; --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", "Noto Sans Mono", "DejaVu Sans Mono", monospace; --round: "Comfortaa", "Noto Sans", ui-sans-serif, system-ui, sans-serif; }
 
 /* Shared tint pairs for dark themes (colored icon circles) */
 :root[data-skin="terminal"], :root[data-skin="synthwave"], :root[data-skin="blueprint"], :root[data-skin="oled"], :root[data-skin="chalk"], :root[data-skin="minimal"][data-theme="dark"] { color-scheme: dark; }
@@ -893,3 +893,55 @@
 :root[data-skin=minnie][data-fun-motion=on] .hero{animation:minnie-card-dots 20s linear infinite}
 :root[data-skin=minnie][data-fun-motion=still] .hero{animation:none}
 @keyframes minnie-card-dots{from{background-position:0 0,0 0}to{background-position:44px 22px,0 0}}
+/* Monospace with proper Greek: the phone's own monospace font has no Greek letters, so Android mixes in other fonts. */
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(assets/themes/fonts/jetbrains-mono-greek-400.woff2) format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(assets/themes/fonts/jetbrains-mono-latin-ext-400.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(assets/themes/fonts/jetbrains-mono-latin-400.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(assets/themes/fonts/jetbrains-mono-greek-700.woff2) format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(assets/themes/fonts/jetbrains-mono-latin-ext-700.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(assets/themes/fonts/jetbrains-mono-latin-700.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* Preview on Home: Apply or Cancel in a clear panel above the tab bar. */
+.look-preview { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(var(--tab-h) + var(--safe-b) + 18px); z-index: 250; width: min(440px, calc(100vw - 24px)); display: grid; gap: 10px; padding: 14px 16px; background: var(--surface); color: var(--ink); border: 2px solid var(--accent); border-radius: calc(18px * var(--rk)); box-shadow: 0 14px 40px rgba(0, 0, 0, 0.28); text-align: center; }
+.look-preview b { font-size: 15px; } .look-preview .btn-row { display: flex; gap: 10px; } .look-preview .btn { flex: 1; }

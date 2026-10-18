@@ -75,10 +75,10 @@
 			${ th.mode ? `<div class="lbl pad0">${ esc( t( 'themeLabel' ) ) }</div><div class="chips wrap">${ mc( 'auto', t( 'themeAuto' ), 'device-mobile' ) }${ mc( 'light', t( 'themeLight' ), 'sun' ) }${ mc( 'dark', t( 'themeDark' ), 'moon' ) }</div>` : '' }`;
 	};
 
- const FONT_FAMILIES={sans:'ui-sans-serif, system-ui, sans-serif',serif:'Georgia, serif',mono:'ui-monospace, monospace',noto_sans:'"Noto Sans", sans-serif',noto_serif:'"Noto Serif", serif',roboto:'"Roboto", sans-serif',roboto_slab:'"Roboto Slab", serif',open_sans:'"Open Sans", sans-serif',fira_sans:'"Fira Sans", sans-serif',comfortaa:'"Comfortaa", sans-serif',alegreya:'"Alegreya", serif',literata:'"Literata", serif',geologica:'"Geologica", sans-serif'};
+ const FONT_FAMILIES={sans:'"Noto Sans", ui-sans-serif, system-ui, sans-serif',serif:'"Noto Serif", Georgia, serif',mono:'"JetBrains Mono", ui-monospace, monospace',noto_sans:'"Noto Sans", sans-serif',noto_serif:'"Noto Serif", serif',roboto:'"Roboto", sans-serif',roboto_slab:'"Roboto Slab", serif',open_sans:'"Open Sans", sans-serif',fira_sans:'"Fira Sans", sans-serif',comfortaa:'"Comfortaa", sans-serif',alegreya:'"Alegreya", serif',literata:'"Literata", serif',geologica:'"Geologica", sans-serif'};
  const FONT_NAMES={noto_sans:'Noto Sans',noto_serif:'Noto Serif',roboto:'Roboto',roboto_slab:'Roboto Slab',open_sans:'Open Sans',fira_sans:'Fira Sans',comfortaa:'Comfortaa',alegreya:'Alegreya',literata:'Literata',geologica:'Geologica'};
- Object.assign(EX.I18N.langs.en,{customSlight:'Slightly rounded',homeAppearance:'Appearance',homeAppearanceHint:'Adjust the colors, font and roundness of this theme. Layout and positions are not affected.',homeAppearanceReset:'Reset theme styling',homeAppearanceApply:'Preview on Home'});
- Object.assign(EX.I18N.langs.el,{customSlight:'Ελαφρώς στρογγυλεμένο',homeAppearance:'Εμφάνιση',homeAppearanceHint:'Προσαρμόστε χρώματα, γραμματοσειρά και στρογγυλότητα αυτού του θέματος. Η διάταξη και οι θέσεις δεν αλλάζουν.',homeAppearanceReset:'Επαναφορά εμφάνισης θέματος',homeAppearanceApply:'Προεπισκόπηση στην Αρχική'});
+ Object.assign(EX.I18N.langs.en,{customSlight:'Slightly rounded',homeAppearance:'Appearance',homeAppearanceHint:'Adjust the colors, font and roundness of this theme. Layout and positions are not affected.',homeAppearanceReset:'Reset theme styling',homeAppearanceApply:'Preview on Home',lookPreviewTitle:'Previewing your changes',lookApply:'Apply',lookKeep:'Keep editing',lookApplied:'Theme updated.'});
+ Object.assign(EX.I18N.langs.el,{customSlight:'Ελαφρώς στρογγυλεμένο',homeAppearance:'Εμφάνιση',homeAppearanceHint:'Προσαρμόστε χρώματα, γραμματοσειρά και στρογγυλότητα αυτού του θέματος. Η διάταξη και οι θέσεις δεν αλλάζουν.',homeAppearanceReset:'Επαναφορά εμφάνισης θέματος',homeAppearanceApply:'Προεπισκόπηση στην Αρχική',lookPreviewTitle:'Προεπισκόπηση των αλλαγών σας',lookApply:'Εφαρμογή',lookKeep:'Συνέχεια επεξεργασίας',lookApplied:'Το θέμα ενημερώθηκε.'});
 	const defaults = { bg: '#101724', surface: '#1c283b', accent: '#89baff', ink: '#eef4ff', round: '1', font: 'sans', trails: false, icons:'#89baff' };
 	const keys = [ 'bg', 'surface', 'accent', 'ink', 'icons' ];
 	EXA.customPalette = ( supplied ) => {
@@ -115,7 +115,35 @@
  };
  /** When edited from a theme's pencil (not from Home editing) the draft is saved straight away. */
  EXA.themeEditDirect=false;
- const finishDirect=()=>{if(!EXA.themeEditDirect)return;S().settings.themeLooks=JSON.parse(JSON.stringify(EXA.homeLookDraft||{}));S().settings.u=Date.now();EX.persist();delete EXA.homeLookDraft;EXA.themeEditDirect=false;};
+ const finishDirect=()=>{if(!EXA.themeEditDirect)return;EXA.themeEditPrev=null;S().settings.themeLooks=JSON.parse(JSON.stringify(EXA.homeLookDraft||{}));S().settings.u=Date.now();EX.persist();delete EXA.homeLookDraft;EXA.themeEditDirect=false;};
+ // Leaving the editor without saving: the draft goes, and so does the temporary switch to the theme that was being edited.
+ function discardDirectEdit(){
+  if(!EXA.themeEditDirect)return;
+  delete EXA.homeLookDraft;EXA.themeEditDirect=false;
+  const back=EXA.themeEditPrev;EXA.themeEditPrev=null;
+  if(back&&back!==EXA.skin())EXA.setSkin(back);else EXA.applyCustomTheme();
+ }
+ // "Preview on Home": the edited look is shown on the real Home screen, nothing is saved yet, and a clear panel offers Apply or Cancel.
+ let lookBar=null;
+ const closeLookBar=()=>{lookBar?.remove();lookBar=null;};
+ EXA.cancelLookPreview=()=>{if(!lookBar)return;closeLookBar();delete EXA.homeLookDraft;const back=EXA.themeEditPrev;EXA.themeEditPrev=null;if(back&&back!==EXA.skin())EXA.setSkin(back);else EXA.applyCustomTheme();};
+ function startLookPreview(){
+  EXA.themeEditDirect=false;closeLookBar();
+  UI.closeSheet();EXA.applyCustomTheme();EXA.go('home');
+  lookBar=document.createElement('div');lookBar.className='look-preview';lookBar.setAttribute('role','region');lookBar.setAttribute('aria-label',t('lookPreviewTitle'));
+  lookBar.innerHTML=`<b>${esc(t('lookPreviewTitle'))}</b><div class="btn-row"><button type="button" class="btn btn-primary" data-look-apply>${esc(t('lookApply'))}</button><button type="button" class="btn btn-ghost" data-look-cancel>${esc(t('lookKeep'))}</button></div>`;
+  document.body.append(lookBar);
+ }
+ document.addEventListener('click',e=>{
+  if(!lookBar)return;
+  if(e.target.closest('[data-look-apply]')){S().settings.themeLooks=JSON.parse(JSON.stringify(EXA.homeLookDraft||{}));S().settings.u=Date.now();EX.persist();delete EXA.homeLookDraft;EXA.themeEditPrev=null;closeLookBar();EXA.applyCustomTheme();EXA.render();UI.toast(t('lookApplied'));}
+  else if(e.target.closest('[data-look-cancel]')){
+   // Back to the editor of the same theme with every change still in it. Closing the editor then discards them, as before.
+   closeLookBar();EXA.themeEditDirect=true;EXA.go('more','appearance');
+   document.getElementById('sheet').addEventListener('close',discardDirectEdit,{once:true});
+   editCustom(true);
+  }
+ });
  const hex=value=>/^#[0-9a-f]{6}$/i.test(value);
  EXA.editHomeAppearance=()=>editCustom(true);
  function editCustom(home=false) {
@@ -135,7 +163,7 @@
   f.addEventListener('input',e=>{const k=e.target.dataset.paletteHex;if(k&&hex(e.target.value))f.elements[k].value=e.target.value;else if(e.target.type==='color'){f.querySelector(`[data-palette-hex="${e.target.name}"]`).value=e.target.value.toUpperCase();}paint();});
   f.addEventListener('change',paint);
   f.addEventListener('click',e=>{if(home&&e.target.closest('[data-look-reset]')){delete EXA.homeLookDraft[skin];finishDirect();EXA.applyCustomTheme();UI.closeSheet();EXA.render();return;}const b=e.target.closest('[data-palette-preset]');if(!b)return;const v=palettes[Number(b.dataset.palettePreset)];keys.forEach(k=>{f.elements[k].value=v[k];f.querySelector(`[data-palette-hex="${k}"]`).value=v[k].toUpperCase();});paint();});
-  f.addEventListener('submit',e=>{e.preventDefault();e.stopPropagation();paint();if(!error.hidden)return;const v=read();if(home){EXA.homeLookDraft[skin]=v;finishDirect();EXA.applyCustomTheme();UI.closeSheet();EXA.render();return;}store('expenity.custom',JSON.stringify(v));EXA.setSkin('custom');UI.closeSheet();if(EXA.flow.active())EXA.flow.show(true);else EXA.render();});
+  f.addEventListener('submit',e=>{e.preventDefault();e.stopPropagation();paint();if(!error.hidden)return;const v=read();if(home){EXA.homeLookDraft[skin]=v;if(EXA.themeEditDirect){startLookPreview();return;}EXA.applyCustomTheme();UI.closeSheet();EXA.render();return;}store('expenity.custom',JSON.stringify(v));EXA.setSkin('custom');UI.closeSheet();if(EXA.flow.active())EXA.flow.show(true);else EXA.render();});
   paint();
  }
 
@@ -162,7 +190,7 @@
 		trails.hidden=!on;
 	};
 	document.addEventListener('click',e=>{if(e.target.closest('[data-custom-edit]'))editCustom();});
-	document.addEventListener('click',e=>{const b=e.target.closest('[data-theme-edit]');if(!b)return;e.preventDefault();e.stopImmediatePropagation();if(EXA.skin()!==b.dataset.themeEdit)EXA.setSkin(b.dataset.themeEdit);if(!EXA.homeLookDraft){EXA.homeLookDraft=JSON.parse(JSON.stringify(S().settings.themeLooks||{}));EXA.themeEditDirect=true;document.getElementById('sheet').addEventListener('close',()=>{if(EXA.themeEditDirect){delete EXA.homeLookDraft;EXA.themeEditDirect=false;EXA.applyCustomTheme();}},{once:true});}EXA.render();editCustom(true);},true);
+	document.addEventListener('click',e=>{const b=e.target.closest('[data-theme-edit]');if(!b)return;e.preventDefault();e.stopImmediatePropagation();if(EXA.skin()!==b.dataset.themeEdit){EXA.themeEditPrev=EXA.skin();EXA.setSkin(b.dataset.themeEdit);}if(!EXA.homeLookDraft){EXA.homeLookDraft=JSON.parse(JSON.stringify(S().settings.themeLooks||{}));EXA.themeEditDirect=true;document.getElementById('sheet').addEventListener('close',discardDirectEdit,{once:true});}EXA.render();editCustom(true);},true);
 	document.addEventListener('visibilitychange',()=>EXA.updateTrails());
 	matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change',()=>EXA.updateTrails());
 	EXA.applyCustomTheme(); EXA.updateTrails();

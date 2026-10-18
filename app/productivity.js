@@ -13,7 +13,19 @@ A.duplicateRecord=(kind,id)=>{
 A.pinnedEntries=type=>{const all=EX.savedNames(type),pins=all.map((x,i)=>({x,i})).filter(o=>o.x.pinned).slice(0,3);return pins.length?`<section class="entry-pins"><b>${esc(t('pinnedEntries'))}</b><div>${pins.map(({x,i})=>`<button type="button" class="btn btn-ghost" data-tx-saved="${i}">${UI.catCi(EX.catInfo(x.category),28)}<span>${esc(x.name)}${x.amount?`<small>${esc(EX.money(x.amount,EX.account(x.account)?.currency||S().settings.currency))}</small>`:''}</span></button>`).join('')}</div></section>`:'';};
 A.pinControl=(type,index)=>{const x=EX.savedNames(type)[index];return `<button type="button" class="ab-btn" data-pin-entry="${index}" data-pin-type="${type}" aria-label="${esc(t(x?.pinned?'unpinEntry':'pinEntry'))}" aria-pressed="${!!x?.pinned}">${UI.icon('bookmark',18)}</button>`;};
 let needsSignin=false;
-A.syncAttention=()=>{const count=EX.sync.pending();return (count||needsSignin||EX.auth.isSignedIn()&&['error','offline'].includes(EX.sync.status))?`<button type="button" class="sync-attention" data-sync-details aria-label="${esc(needsSignin?t('syncSignIn'):t('syncWaiting',{n:count}))}">${UI.icon('cloud-off',18)}<span>${esc(needsSignin?t('syncSignIn'):t('syncWaiting',{n:count}))}</span></button>`:'';};
+// Quiet by default: normal syncing and short connection drops stay invisible. The pill appears only when you must sign in again, or when
+// changes have been waiting (or the device has been offline or failing) for a full minute. The avatar dot still shows the live state.
+const SYNC_SHOW_AFTER=60000;let syncSince=0,syncTimer=0;
+A.syncAttention=()=>{
+ const signedIn=EX.auth.isSignedIn(),count=EX.sync.pending(),problem=count>0||signedIn&&['error','offline'].includes(EX.sync.status);
+ const pill=()=>`<button type="button" class="sync-attention" data-sync-details aria-label="${esc(needsSignin?t('syncSignIn'):t('syncWaiting',{n:count}))}">${UI.icon('cloud-off',18)}<span>${esc(needsSignin?t('syncSignIn'):t('syncWaiting',{n:count}))}</span></button>`;
+ if(needsSignin)return pill();
+ if(!problem){syncSince=0;clearTimeout(syncTimer);syncTimer=0;return '';}
+ if(!syncSince)syncSince=Date.now();
+ const wait=SYNC_SHOW_AFTER-(Date.now()-syncSince);
+ if(wait>0){clearTimeout(syncTimer);syncTimer=setTimeout(()=>refreshSync(),wait+50);return '';}
+ return pill();
+};
 A.syncDetails=()=>{const pending=EX.sync.pendingChanges();UI.openSheet(closeHead(t('syncDetails'))+`<div class="sheet-pad" id="syncDetails"><p>${esc(!EX.auth.isSignedIn()?t('syncLocalOnly'):EX.sync.status==='offline'?t('syncOffline'):pending.length?t('syncWaiting',{n:pending.length}):t('syncOnline'))}</p><p class="muted">${esc(t('syncOtherDevice'))}</p>${EX.sync.last?`<p>${esc(t('syncConfirmed',{time:new Date(EX.sync.last).toLocaleString(EX.loc())}))}</p>`:''}<ul class="plain">${pending.map(x=>`<li class="sync-record">${UI.icon(x.deleted?'trash':'clock',20)}<span>${esc(x.name||t('syncKind_'+x.kind))}<small>${esc(x.deleted?t('syncDeletion'):x.blocked?t('syncReadOnly'):t(x.scope?'syncShared':'syncPersonal'))}</small></span></li>`).join('')}</ul><button type="button" class="btn btn-primary" data-sync-retry>${esc(t(EX.auth.isSignedIn()?'syncRetry':'signIn'))}</button></div>`,{tall:true});};
 const appbar=A.appbar;A.appbar=()=>{const html=appbar();return html.replace('<span class="sp"></span>',`<span class="sp"></span><span id="syncAttention">${A.syncAttention()}</span>`);};
 const refreshSync=()=>{const el=$('#syncAttention');if(el)el.innerHTML=A.syncAttention();};EX.on('syncstatus',refreshSync);EX.on('change',()=>queueMicrotask(refreshSync));EX.on('authexpired',()=>{needsSignin=true;refreshSync();});EX.on('auth',()=>{if(EX.auth.isSignedIn())needsSignin=false;refreshSync();});
