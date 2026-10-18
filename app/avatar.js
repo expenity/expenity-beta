@@ -56,27 +56,32 @@
 	};
 	const set = ( v ) => { const s = EX.state().settings; if ( v ) s.avatar = v; else delete s.avatar; s.u = Date.now(); EX.persist(); EXA.render(); };
 	const CHECK = '<i class="av-check" aria-hidden="true"><svg viewBox="0 0 24 24" width="14" height="14"><path d="M5.5 12.5l4.2 4.2 8.8-9.2" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></i>';
-	const sheet = () => {
-		const cur = A.current();
+	// Choices are only a preview until Save; Cancel (or the X) leaves the picture as it was.
+	let pending, undef;
+	const sheet = ( fresh ) => {
+		if ( fresh === true ) pending = undef;
+		const saved = A.current(), cur = pending === undef ? saved : pending;
 		UI.openSheet( `<div class="sheet-head"><button class="ab-btn" data-close aria-label="${ esc( t( 'close' ) ) }">${ UI.icon( 'x', 24 ) }</button><h2>${ esc( t( 'avatarTitle' ) ) }</h2></div><div class="sheet-pad">
 			<div class="av-grid" role="radiogroup" aria-label="${ esc( t( 'avatarTitle' ) ) }">${ A.presets.map( ( id ) => `<button type="button" class="avatar av-pick${ cur && cur.id === id ? ' sel' : '' }" role="radio" aria-checked="${ !! ( cur && cur.id === id ) }" aria-label="${ esc( t( 'av_' + id ) ) }" data-avatar-preset="${ id }">${ A.svg( id ) }${ cur && cur.id === id ? CHECK : '' }</button>` ).join( '' ) }</div>
 			${ cur && cur.type === 'photo' ? `<div class="av-photo-row"><span class="avatar big av-pick sel pic"><img class="av-photo" alt="" src="${ cur.data }">${ CHECK }</span><span class="mid"><b>${ esc( t( 'avatarPhotoActive' ) ) }</b><small>${ esc( t( 'avatarPhotoPreview' ) ) }</small></span></div>` : '' }
 			<div class="btn-row"><button type="button" class="btn btn-ghost" data-avatar-photo>${ UI.icon( 'photo', 20 ) } ${ esc( t( cur && cur.type === 'photo' ? 'avatarPhotoChange' : 'avatarPhoto' ) ) }</button>${ cur ? `<button type="button" class="btn btn-ghost" data-avatar-clear>${ esc( t( 'avatarClear' ) ) }</button>` : '' }<input type="file" id="avatarFile" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" hidden></div>
-			<p class="muted small">${ esc( t( 'avatarHint' ) ) }</p><p class="photo-status" id="avatarStatus" role="status"></p></div>`, { tall: true } );
+			<p class="muted small">${ esc( t( 'avatarHint' ) ) }</p><p class="photo-status" id="avatarStatus" role="status"></p><div class="btn-row av-actions"><button type="button" class="btn btn-ghost" data-avatar-cancel>${ esc( t( 'cancel' ) ) }</button><button type="button" class="btn btn-primary" data-avatar-save>${ esc( t( 'save' ) ) }</button></div></div>`, { tall: true } );
 	};
 	A.open = sheet;
 	document.addEventListener( 'click', ( e ) => {
-		const b = e.target.closest( '[data-avatar-open],[data-avatar-preset],[data-avatar-photo],[data-avatar-clear]' ); if ( ! b ) return;
+		const b = e.target.closest( '[data-avatar-open],[data-avatar-preset],[data-avatar-photo],[data-avatar-clear],[data-avatar-save],[data-avatar-cancel]' ); if ( ! b ) return;
 		e.preventDefault(); e.stopImmediatePropagation();
-		if ( b.hasAttribute( 'data-avatar-open' ) ) sheet();
-		else if ( b.dataset.avatarPreset ) { set( { type: 'preset', id: b.dataset.avatarPreset } ); sheet(); UI.done( t( 'tSaved' ) ); }
-		else if ( b.hasAttribute( 'data-avatar-clear' ) ) { set( null ); sheet(); }
+		if ( b.hasAttribute( 'data-avatar-open' ) ) sheet( true );
+		else if ( b.dataset.avatarPreset ) { pending = { type: 'preset', id: b.dataset.avatarPreset }; sheet(); }
+		else if ( b.hasAttribute( 'data-avatar-clear' ) ) { pending = null; sheet(); }
+		else if ( b.hasAttribute( 'data-avatar-save' ) ) { set( pending === undef ? A.current() : pending ); pending = undef; UI.closeSheet( true ); UI.done( t( 'tSaved' ) ); }
+		else if ( b.hasAttribute( 'data-avatar-cancel' ) ) { pending = undef; UI.closeSheet( true ); }
 		else document.getElementById( 'avatarFile' ).click();
 	}, true );
 	document.addEventListener( 'change', async ( e ) => {
 		if ( e.target.id !== 'avatarFile' || ! e.target.files[ 0 ] ) return;
 		const st = document.getElementById( 'avatarStatus' );
-		try { const data = await A.compress( e.target.files[ 0 ] ); set( { type: 'photo', data } ); sheet(); UI.done( t( 'tSaved' ) ); }
+		try { const data = await A.compress( e.target.files[ 0 ] ); pending = { type: 'photo', data }; sheet(); }
 		catch ( err ) { if ( st ) st.textContent = t( 'photoType' ); }
 		e.target.value = '';
 	} );
