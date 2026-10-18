@@ -122,7 +122,7 @@
 	let draftOwner = '', draftTimer = 0;
 	const owner = () => EX.auth.isSignedIn() ? 'user:'+EX.auth.user()?.id : 'guest';
 	const draftKey = (type,edit='',recovery='') => 'expenity.entryDraft.v1:'+owner()+':'+(edit?'edit:'+edit:recovery?'recovery:'+recovery+':'+type:type);
-	const draftValue = () => ({type:T.type,amount:T.amount,toAmount:T.toAmount,account:T.account,toAccount:T.toAccount,name:T.name,note:T.note,category:T.category,date:T.date,tags:T.tags,photo:T.photo,repeat:T.repeat||'once',interval:T.interval,intervalUnit:T.intervalUnit,monthDays:T.monthDays,scheduleDates:T.scheduleDates,weekDays:T.weekDays,shortMonth:T.shortMonth,endMode:T.endMode,end:T.end,endCount:T.endCount,scheduleEnd:T.scheduleEnd,quick:T.quick,quickText:T.quickText,scheduleKind:T.scheduleKind,editScheduleId:T.editScheduleId,sourceStamp:T.sourceStamp,sourceRecord:T.sourceRecord,scheduleTouched:T.scheduleTouched,lead:T.lead,variable:T.variable,autopay:T.autopay,reference:T.reference,payUrl:T.payUrl});
+	const draftValue = () => ({type:T.type,amount:T.amount,toAmount:T.toAmount,account:T.account,toAccount:T.toAccount,name:T.name,note:T.note,category:T.category,date:T.date,tags:T.tags,photo:T.photo,repeat:T.repeat||'once',interval:T.interval,intervalUnit:T.intervalUnit,monthDays:T.monthDays,scheduleDates:T.scheduleDates,weekDays:T.weekDays,shortMonth:T.shortMonth,endMode:T.endMode,end:T.end,endCount:T.endCount,scheduleEnd:T.scheduleEnd,quick:T.quick,quickText:T.quickText,scheduleKind:T.scheduleKind,editScheduleId:T.editScheduleId,sourceStamp:T.sourceStamp,sourceRecord:T.sourceRecord,splits:T.splits,reimbursement:T.reimbursement,scheduleTouched:T.scheduleTouched,lead:T.lead,variable:T.variable,autopay:T.autopay,reference:T.reference,payUrl:T.payUrl});
 	const meaningful = () => T && ((T.editId||T.editScheduleId) ? JSON.stringify(draftValue())!==T.baseline : !!(T.amount||T.toAmount||T.name.trim()||T.note.trim()||T.tags.length||T.photo||T.date!==today()));
 	function storeDraft(){
 		clearTimeout(draftTimer);if(!T||draftOwner!==owner()||T.saving||T.committed)return;
@@ -132,7 +132,7 @@
 	}
 	function dropDraft(){try{if(T.recoveryId)localStorage.setItem(recoveryKey(),JSON.stringify(recoveries().filter(x=>x.tx.id!==T.recoveryId)));for(let i=localStorage.length-1;i>=0;i--){const k=localStorage.key(i);if(k.startsWith('expenity.entryDraft.v1:'+owner()+':')){const v=JSON.parse(localStorage.getItem(k)||'null');if(v?.data?.id===T.id)localStorage.removeItem(k);}}}catch(e){}}
 	function restoreDraft(type,edit,recovery){try{const k=draftKey(type,edit,recovery),d=JSON.parse(localStorage.getItem(k)||'null');if(d&&Date.now()-d.saved<86400000&&d.data.type===type&&d.data.editId===(edit||null))return d.data;if(d)localStorage.removeItem(k);}catch(e){}return null;}
-	function titleKey(){if(T.scheduleKind)return T.scheduleKind==='bill'?(T.editScheduleId?'editorBillEdit':'editorBillAdd'):(T.editScheduleId?'editorIncomeEdit':'editorIncomeAdd');return T.editId?'entrySaveChanges':T.type==='expense'?'entryAddExpense':T.type==='income'?'entryAddIncome':'entryAddTransfer';}
+	function titleKey(){if(T.scheduleKind)return T.scheduleKind==='bill'?(T.editScheduleId?'editorBillEdit':'editorBillAdd'):(T.editScheduleId?'editorIncomeEdit':'editorIncomeAdd');return T.editId?'amEdit':T.type==='expense'?'entryAddExpense':T.type==='income'?'entryAddIncome':'entryAddTransfer';}
 	function buttonKey(){return T.editScheduleId?'entrySaveChanges':T.editId?'entrySaveChanges':T.type==='expense'?'entrySaveExpense':T.type==='income'?'entrySaveIncome':'entrySaveTransfer';}
 	const entryButton=(act,label,icon='')=>`<button type="button" class="btn btn-ghost" data-entry="${act}">${icon?UI.icon(icon,20):''}${esc(t(label))}</button>`;
 	function walletChoices(to=false){
@@ -166,7 +166,7 @@
 	function txBody() {
         if(T.screen==='schedule')return scheduleBody();
 		const cur=walletCur(T.account),toCur=walletCur(T.toAccount),cross=T.type==='transfer'&&T.toAccount&&cur!==toCur;
-		return `<div class="sheet-head entry-head">${X}<h2 id="sheetTitle">${esc(t(titleKey()))}</h2><button type="button" class="btn btn-ghost entry-change"${T.scheduleKind?' hidden':''} data-entry="type" aria-expanded="${!!T.typeOpen}">${esc(t('entryChange'))}</button></div>
+		return `<div class="sheet-head entry-head">${X}<h2 id="sheetTitle">${esc(t(titleKey()))}</h2><button type="button" class="btn btn-ghost entry-change"${T.scheduleKind||T.editId?' hidden':''} data-entry="type" aria-expanded="${!!T.typeOpen}">${esc(t('entryChange'))}</button></div>
 		<div class="tx-scroll entry-scroll${T.quick?' sentence-entry-mode':''}">
 		${T.discard?`<section class="entry-alert" role="alertdialog" aria-labelledby="discardTitle"><h3 id="discardTitle">${esc(t('entryCloseTitle'))}</h3><p>${esc(t('entryCloseText'))}</p><div class="btn-row">${entryButton('keep','entryKeep')}${entryButton('discard','entryDiscard')}</div></section>`:''}
 		${T.pendingShortcut!==undefined?`<section class="entry-alert" role="alert"><p>${esc(t('entryReplace'))}</p>${entryButton('apply-shortcut','entryApply')}${entryButton('cancel-shortcut','cancel')}</section>`:''}
@@ -192,6 +192,7 @@
         ${T.type!=='transfer'?entryGroup('category','fCategory','category-2',T.category?EX.catInfo(T.category).name:t('entryChooseCat'),`<div class="entry-category" id="entryCategory">${entryCategories()}</div>`):''}
         ${!T.editId&&T.type!=='transfer'?`<button type="button" class="editor-row" data-entry="schedule-open">${UI.ci('repeat','teal',36)}<span><b>${esc(t('fRepeats'))}</b><small>${esc(EX.scheduleLabel(T))}</small></span>${UI.icon('chevron-right',20)}</button>`:''}
 
+		${EXA.advancedEditor?.(T)||''}
 		${entryGroup('extras','editorMore','paperclip',[T.photo?t('entryPhoto'):'',T.note?t('entryNote'):''].filter(Boolean).join(' · ')||t('entryExtrasHint'),`${T.type==='expense'&&EX.state().settings.receiptScanner!==false?`<button type="button" class="btn btn-ghost entry-scan" data-receipt-scan>${UI.icon('photo',20)}${esc(t(T.scannedReceipt?'rescanReceipt':'scanReceipt'))}</button>`:''}		<div class="entry-detail-content">${EXA.photos.slot(T.photo)}</div>
 		${EXA.tagsField(T.tags)}<div class="entry-detail-content"><label for="txNote">${esc(t('fNote'))}</label><textarea id="txNote" rows="2" maxlength="400" placeholder="${esc(t('notePh'))}">${esc(T.note)}</textarea></div>
 		${T.scheduleKind==='bill'?`<label class="f"><span>${esc(t('fRemind'))}</span><select id="entryLead"><option value="">${esc(t('leadDefault'))}</option>${EX.LEADS.map(n=>`<option value="${n}"${T.lead===n?' selected':''}>${esc(t('lead'+n))}</option>`).join('')}</select></label>${EXA.reminderNotice?.()||''}<label class="entry-check"><input type="checkbox" id="entryVariable"${T.variable?' checked':''}>${esc(t('fVariable'))}</label><label class="entry-check"><input type="checkbox" id="entryAutopay"${T.autopay?' checked':''}>${esc(t('fAutopay'))}</label><label class="f"><span>${esc(t('fRef'))}</span><input id="entryReference" value="${esc(T.reference||'')}"></label><label class="f"><span>${esc(t('fUrl'))}</span><input id="entryPayUrl" type="url" value="${esc(T.payUrl||'')}"></label>`:''}<div class="entry-more">
@@ -201,10 +202,11 @@
 		<div class="entry-footer"><div class="tx-field-actions"${T.editingField?'':' hidden'}><button type="button" class="btn btn-ghost" data-tx="field-done">${UI.icon('check',20)}${esc(t('entryDone'))}</button></div><button type="button" class="btn btn-primary entry-save" data-tx="${T.quick?'quick-review':'save'}"${T.saving?' disabled':''}>${esc(t(T.quick?'sentenceReview':T.editScheduleId?'entrySaveChanges':!T.editId&&T.type!=='transfer'&&((T.repeat||'once')!=='once'||T.date>today())?(T.type==='income'?'entryScheduleIncome':'entryScheduleBill'):buttonKey()))}</button></div>
 		<div id="txKeypad" class="keypad"${T.keypadOpen?'':' hidden'} role="group" aria-label="${esc(t('fAmount'))}"><div class="keypad-head"><span>${esc(t(T.target==='toAmount'?'fToAmount':'fAmount'))}</span><button type="button" class="btn btn-ghost" data-tx="amount-done">${UI.icon('check',20)}${esc(t('entryDone'))}</button></div>${['1','2','3','4','5','6','7','8','9','.','0','<'].map(k=>`<button type="button" class="key" data-key="${k}" aria-label="${k==='<'?esc(t('del')):k==='.'?esc(decimalMark()):k}">${k==='<'?UI.icon('backspace',26):k==='.'?esc(decimalMark()):k}</button>`).join('')}</div>`;
 	}
+	EXA.advancedDraft=()=>{readTxFields();return T;};EXA.redrawAdvanced=()=>{drawTx(true,false);storeDraft();};
 	function readTxFields() {
         if(T&&$('#scheduleStart')?.value)T.date=$('#scheduleStart').value;
         if(T&&$('#entryRepeat')){T.repeat=$('#entryRepeat').value;Object.assign(T,EXA.readSchedule($('#sheet')));}
-		if(!T||!$('#txDesc'))return;
+		if(!T||!$('#txDesc'))return;EXA.readAdvanced?.(T);
 		T.name=$('#txDesc').value;if($('#entryLead')){T.lead=$('#entryLead').value===''?null:Number($('#entryLead').value);T.variable=$('#entryVariable').checked;T.autopay=$('#entryAutopay').checked;T.reference=$('#entryReference').value.trim();T.payUrl=$('#entryPayUrl').value.trim();}T.tags=EXA.readTags($('#sheet'));T.rememberName=!!$('#rememberName')?.checked;
 		T.rememberWallet=!!$('#entryRememberWallet')?.checked;T.rememberAmount=!!$('#entryRememberAmount')?.checked;
 		const def=$('#entryDefault');if(def)T.makeDefault=def.checked;
@@ -218,7 +220,7 @@
 		if(!T||T.committed)return true;if(T.screen==='schedule'){readTxFields();T.scheduleTouched=true;T.screen='main';drawTx(false,false);return false;}readTxFields();if(EXA.photos.busy){toast(t('photoWorking'));return false;}
 		if(!meaningful())return true;T.discard=true;setKeypad(false);drawTx(false,false);$('#discardTitle')?.scrollIntoView({block:'nearest'});$('[data-entry=keep]')?.focus();return false;
 	}
-	EXA.openTx=(tx,preset={})=>{
+	EXA.openTx=(tx,preset={})=>{if(tx?.reimbursementOf)return EXA.openDetail('tx',S().txs.some(x=>x.id===tx.reimbursementOf)?tx.reimbursementOf:tx.id);
 		if(T&&UI.sheetOpen()&&!T.committed){if(meaningful()){UI.closeSheet();return;}UI.closeSheet(true);}
 		EX.ensureWallet();const ws=EX.writableAccounts(),def=ws.find(a=>a.id===S().settings.defaultAccount),account=def?.id||(ws.length===1?ws[0].id:'');
 		const v={type:'expense',repeat:'once',date:today(),account,amount:'',toAmount:'',name:'',note:'',category:null,...(tx||preset)};
@@ -308,6 +310,7 @@
 	function saveTx(){
 		if(!T||T.saving||T.committed)return;if(EXA.photos.busy)return toast(t('photoWorking'));readTxFields();
 		const amount=T.amount.replace(/\.$/,'');
+        const advancedError=EXA.validateAdvanced?.(T);if(advancedError){const group=$('[data-advanced-group="'+(advancedError==='amSplitError'?'splits':'reimbursement')+'"]');if(group)group.open=true;return entryError(advancedError,advancedError==='amSplitError'?'[data-am-amount]':'[data-am-expected]');}
         const failures=[];
         if(!(T.scheduleKind==='bill'&&amount==='')&&(!/^\d{1,9}(\.\d{1,2})?$/.test(amount)||EX.cents(amount)<=0))failures.push(['errAmountReq','[data-tx=target-amount]']);
         if(!writable(T.account))failures.push(['entryWalletGone','[data-entry=wallet]']);
@@ -334,7 +337,7 @@
           T.saving=true;const old=target?copy(target):null;if(target){Object.assign(target,record);delete target.done;}else{list.push(record);if(T.type==='income')EXA.settleIncome?.(record);}if(!EX.save()){if(target){Object.keys(target).forEach(k=>delete target[k]);Object.assign(target,old);}else list.splice(list.indexOf(record),1);T.saving=false;return entryError('tSaveFail');}
           const type=T.type;EXA.playSound?.('success');T.committed=true;dropDraft();UI.closeSheet(true);if(type==='income'){EXA.st.txFilter.type='income';EXA.st.incomeMode='recurring';}EXA.go(type==='income'?'activity':'bills');return;
         }
-		const tx={type:T.type,amount,account:T.account,date:T.date,name:T.name.trim(),note:T.note.trim(),photo:T.photo||'',scannedReceipt:!!T.scannedReceipt,tags:T.tags||[]};
+		const tx={splits:T.type==='expense'?copy(T.splits||[]):[],reimbursement:T.type==='expense'&&T.reimbursement?copy(T.reimbursement):null,type:T.type,amount,account:T.account,date:T.date,name:T.name.trim(),note:T.note.trim(),photo:T.photo||'',scannedReceipt:!!T.scannedReceipt,tags:T.tags||[]};
 		if(T.type==='transfer'){
 		 if(!writable(T.toAccount)||T.toAccount===T.account){T.toWalletOpen=true;drawTx(true,false);return entryError('errTransferSame','[data-entry=to-wallet]');}
 		 if(!EX.sameScope(EX.account(T.account),EX.account(T.toAccount)))return entryError('errTransferSpace','[data-entry=to-wallet]');
@@ -732,7 +735,7 @@
 		const rows = [ [ t( 'dDate' ), dayName( x.date ) ], [ t( 'dWallet' ), x.type === 'transfer' ? `${ EXA.walletName( x.account ) } → ${ EXA.walletName( x.toAccount ) }` : EXA.walletName( x.account ) ], x.type === 'transfer' ? null : [ t( 'dCategory' ), info.name ], x.note ? [ t( 'dNote' ), x.note ] : null, x.billId ? [ t( 'dBill' ), ( S().bills.find( ( b ) => b.id === x.billId ) || {} ).name || '' ] : null, x.by && ( EX.account( x.account ) || {} ).space ? [ t( 'dAddedBy' ), EX.spaces.nameOf( x.by, EX.account( x.account ).space ) ] : null ].filter( Boolean );
 		return `<div class="detail"><div class="detail-top">${ UI.catCi( info.iconName ? info : EX.catInfo( x.category ), 64 ) }<h3>${ esc( x.name || info.name ) }</h3><div class="big ${ x.type }">${ sign }${ esc( money( Number( x.amount ), cur ) ) }</div></div>
 			<p class="entry-receipt" data-entry-status="${esc(x.id)}" role="status">${EXA.entryStatus(x.id)}</p>
-			${ EXA.tagsDisplay(x.tags) }${ EXA.photos.button( x.photo ) }<dl class="facts">${ rows.map( ( [ k, v ] ) => `<div><dt>${ esc( k ) }</dt><dd>${ esc( v ) }</dd></div>` ).join( '' ) }</dl>
+			${EXA.advancedDetail?.(x)||''}${ EXA.tagsDisplay(x.tags) }${ EXA.photos.button( x.photo ) }<dl class="facts">${ rows.map( ( [ k, v ] ) => `<div><dt>${ esc( k ) }</dt><dd>${ esc( v ) }</dd></div>` ).join( '' ) }</dl>
 			<div class="btn-row stack"><button type="button" class="btn btn-ghost" data-duplicate="tx" data-id="${esc(x.id)}">${UI.icon('copy',20)} ${esc(t('duplicateRecord'))}</button><button type="button" class="btn btn-ghost" data-reverse-tx="${esc(x.id)}">${UI.icon('refresh',20)} ${esc(EXA.label(x.billId ? 'unpaid' : x.incomeId ? 'unreceived' : 'reverse'))}</button><button type="button" class="btn btn-primary" data-act="edit-tx" data-id="${ esc( x.id ) }">${ UI.icon( 'pencil', 20 ) } ${ esc( t( 'actEdit' ) ) }</button><button type="button" class="btn btn-danger-ghost" data-act="del-tx" data-id="${ esc( x.id ) }">${ UI.icon( 'trash', 20 ) } ${ esc( t( 'actDelete' ) ) }</button></div></div>`;
 	}
 	function billDetailHtml( b ) {

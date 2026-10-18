@@ -31,7 +31,7 @@
 		return { start, end, ps, pe };
 	};
 	/** Spending in cents (main currency) in a date range, for one category or everything. Goal money is not spending. */
-	P.spent = ( category, from, to ) => S().txs.reduce( ( sum, x ) => {
+	P.spent = ( category, from, to ) => EX.reportTxs().reduce( ( sum, x ) => {
 		if ( x.type !== 'expense' || x.goalId || x.date < from || x.date > to || ( category !== 'all' && x.category !== category ) ) return sum;
 		const v = EX.convert( num( x.amount ), EX.txCurrency( x ), main() );
 		return v == null ? sum : sum + Math.round( v * 100 );
@@ -45,7 +45,7 @@
 		return { limit, carry, eff, spent, left: eff - spent, pct: eff ? Math.min( 999, Math.round( ( spent / eff ) * 100 ) ) : 0, daysLeft, perDay: Math.max( 0, Math.floor( ( eff - spent ) / daysLeft ) ), per };
 	};
 	/** Cents set aside for a goal so far (contributions minus withdrawals), in the main currency. */
-	P.saved = ( g ) => S().txs.reduce( ( sum, x ) => {
+	P.saved = ( g ) => EX.reportTxs().reduce( ( sum, x ) => {
 		if ( x.goalId !== g.id ) return sum;
 		const v = EX.convert( num( x.amount ), EX.txCurrency( x ), main() );
 		if ( v == null ) return sum;

@@ -22,7 +22,7 @@
 		return list.map( ( c ) => `<button type="button" class="cur${ c === S().settings.currency ? ' on' : '' }" data-fstep="cur" data-cur="${ c }" role="radio" aria-checked="${ c === S().settings.currency }"><b>${ esc( curSym( c ) ) }</b><span>${ c }</span><small>${ esc( curName( c ) ) }</small></button>` ).join( '' );
 	};
 	// The goal step only appears for people who said they want to save for something.
-	const steps = () => [ 'name', 'currency', 'aims' ].concat( ( S().settings.aims || [] ).includes( 'save' ) ? [ 'goal' ] : [] ).concat( [ 'plan', 'wallets' ] ).concat( EX.feature && EX.feature( 'daily' ) === false ? [] : [ 'target' ] ).concat( [ 'look', 'tour' ] ).concat( EX.feature && EX.feature( 'receipts' ) === false ? [] : [ 'scan' ] ).concat( [ 'quick', 'extras', 'help' ] ).concat( UI.isPhone() ? [ 'tips' ] : [] ).concat( [ 'done' ] );
+	const steps = () => [ 'name', 'currency', 'aims' ].concat( ( S().settings.aims || [] ).includes( 'save' ) ? [ 'goal' ] : [] ).concat( [ 'plan', 'wallets' ] ).concat( EX.feature && EX.feature( 'daily' ) === false ? [] : [ 'target' ] ).concat( [ 'look', 'tour' ] ).concat( EX.feature && EX.feature( 'receipts' ) === false ? [] : [ 'scan' ] ).concat(EX.feature&&EX.feature('splits')?['split']:[]).concat(EX.feature&&EX.feature('reimbursements')?['reimburse']:[]).concat( [ 'quick', 'extras', 'help' ] ).concat( UI.isPhone() ? [ 'tips' ] : [] ).concat( [ 'done' ] );
 	const GOAL_PRESETS = [ [ 'trip', 'plane' ], [ 'car', 'car' ], [ 'gift', 'gift' ], [ 'home', 'home' ], [ 'emergency', 'heart' ], [ 'other', 'target' ] ];
 
 	/* ------------------------------------------------------------------ Stage machine */
@@ -227,8 +227,8 @@
 		} else if ( id === 'tour' ) {
 			icon='sparkles';color='purple';title=t('tourTitle');text=t('tourText');
 			body=`<div class="tour-grid">${[['home','layout-dashboard','tourHome','tourHomeText'],['activity','arrows-sort','tourActivity','tourActivityText'],['plan','target','planTitle','tourPlanText'],['reports','chart-pie','tabReports','tourReportsText']].map(([id,ic,label,copy],i)=>`<article style="--tour-i:${i}">${UI.ci(ic,['teal','blue','pink','amber'][i],44)}<div><h2>${esc(t(label))}</h2><p>${esc(t(copy))}</p></div></article>`).join('')}</div>`;
-		} else if ( id === 'scan' || id === 'quick' ) {
-			icon = id === 'scan' ? 'receipt' : 'pencil'; color = id === 'scan' ? 'teal' : 'blue'; title = t( 'tut_' + id ); text = t( 'tutD_' + id );
+		} else if ( id === 'scan' || id === 'quick' || id === 'split' || id === 'reimburse' ) {
+			icon = id === 'scan' ? 'receipt' : id === 'split' ? 'category-2' : id === 'reimburse' ? 'users' : 'pencil'; color = id === 'scan' ? 'teal' : 'blue'; title = t( 'tut_' + id ); text = t( 'tutD_' + id );
 			body = EXA.tutorials.body( id );
 		} else if ( id === 'plan' ) {
 			icon = 'sparkles'; color = 'teal'; title = t( 'setupPlanTitle' ); text = t( 'setupPlanText' );

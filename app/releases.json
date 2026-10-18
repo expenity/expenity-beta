@@ -1,6 +1,16 @@
 {
-  "version": "0.29.0",
+  "version": "0.30.0",
   "releases": [
+    {
+      "version": "0.30.0",
+      "date": "2026-10-19",
+      "en": [
+        "Advanced now includes split expenses: one wallet payment with exact category allocations used by reports and budgets. Added reimbursements with person or organisation, expected amount, partial repayments, outstanding list and receipt history. Repayments reduce spending instead of inflating earnings. Includes English and Greek examples, animated tutorials, Advanced onboarding, help icons, documentation and metadata in exports. Existing accounting stays correct when features are switched off."
+      ],
+      "el": [
+        "Το Advanced περιλαμβάνει πλέον κατανομή εξόδων: μία πληρωμή με ακριβή ποσά ανά κατηγορία για αναφορές και προϋπολογισμούς. Προστέθηκαν επιστροφές χρημάτων από τρίτους, με πρόσωπο ή οργανισμό, αναμενόμενο ποσό, τμηματικές εισπράξεις, εκκρεμότητες και ιστορικό. Οι εισπράξεις μειώνουν τα έξοδα αντί να αυξάνουν το εισόδημα. Με παραδείγματα, κινούμενους οδηγούς, αρχική ρύθμιση Advanced, βοήθεια και πλήρη τεκμηρίωση στα ελληνικά και αγγλικά."
+      ]
+    },
     {
       "version": "0.29.0",
       "date": "2026-10-19",

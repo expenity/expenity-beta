@@ -41,7 +41,7 @@
 	/** Transactions in a range with the filters applied. Goal money only appears in the table. */
 	const pick = ( from, to, withGoals ) => {
 		const q = EX.fold( f().q || '' );
-		return S().txs.filter( ( x ) => x.date >= from && x.date <= to
+		return EX.reportTxs().filter( ( x ) => x.date >= from && x.date <= to
 			&& ( withGoals || ! x.goalId )
 			&& ( ! f().wallet || x.account === f().wallet || x.toAccount === f().wallet )
 			&& ( ! f().cat || x.category === f().cat )
@@ -63,18 +63,20 @@
 	const tile = ( label, value, extra = '' ) => `<div class="tile"><small>${ esc( label ) }</small><b>${ esc( value ) }</b><span>${ extra }</span></div>`;
 	const noData = () => `<p class="muted small center">${ esc( t( 'repNoData' ) ) }</p>`;
 	function donut( list, total, selected ) {
+        const netTotal=total;list=list.filter(([,v])=>v>0);total=list.reduce((n,[,v])=>n+v,0)||1;
 		const S0 = 180, r = 66, c = 2 * Math.PI * r, cx = S0 / 2;
 		let off = 0;
 		const arcs = list.slice( 0, 8 ).map( ( [ k, v ], i ) => { const len = ( v / total ) * c, el = `<circle cx="${ cx }" cy="${ cx }" r="${ r }" fill="none" stroke="${ colorOf( k, i ) }" stroke-width="${ selected === k ? 30 : 24 }" stroke-dasharray="${ Math.max( 0, len - 1.5 ) } ${ c }" stroke-dashoffset="${ -off }" transform="rotate(-90 ${ cx } ${ cx })" class="slice" data-rep="pick-cat" data-cat="${ esc( k ) }" tabindex="0" role="button" aria-label="${ esc( EX.catInfo( k ).name + ' ' + m$( v ) ) }"/>`; off += len; return el; } ).join( '' );
-		return `<svg class="donut-svg" viewBox="0 0 ${ S0 } ${ S0 }" role="img" aria-label="${ esc( t( 'ovTopCats' ) ) }"><circle cx="${ cx }" cy="${ cx }" r="${ r }" fill="none" stroke="var(--line)" stroke-width="24"/>${ arcs }<text x="${ cx }" y="${ cx - 2 }" text-anchor="middle" class="dn-v">${ esc( m$( total ) ) }</text><text x="${ cx }" y="${ cx + 16 }" text-anchor="middle" class="dn-l">${ esc( t( 'ovExpenses' ) ) }</text></svg>`;
+		return `<svg class="donut-svg" viewBox="0 0 ${ S0 } ${ S0 }" role="img" aria-label="${ esc( t( 'ovTopCats' ) ) }"><circle cx="${ cx }" cy="${ cx }" r="${ r }" fill="none" stroke="var(--line)" stroke-width="24"/>${ arcs }<text x="${ cx }" y="${ cx - 2 }" text-anchor="middle" class="dn-v">${ esc( m$( netTotal ) ) }</text><text x="${ cx }" y="${ cx + 16 }" text-anchor="middle" class="dn-l">${ esc( t( 'ovExpenses' ) ) }</text></svg>`;
 	}
-	const legend = ( list, total ) => `<ul class="legend2">${ list.slice( 0, 8 ).map( ( [ k, v ], i ) => `<li><button type="button" data-rep="pick-cat" data-cat="${ esc( k ) }" class="${ f().cat === k ? 'on' : '' }"><i style="background:${ colorOf( k, i ) }"></i><span>${ esc( EX.catInfo( k ).name ) }</span><b>${ esc( m$( v ) ) }</b><em>${ Math.round( ( v / total ) * 100 ) }%</em></button></li>` ).join( '' ) }</ul>`;
+	const legend = ( list, total ) => `<ul class="legend2">${ list.slice( 0, 8 ).map( ( [ k, v ], i ) => `<li><button type="button" data-rep="pick-cat" data-cat="${ esc( k ) }" class="${ f().cat === k ? 'on' : '' }"><i style="background:${ colorOf( k, i ) }"></i><span>${ esc( EX.catInfo( k ).name ) }</span><b>${ esc( m$( v ) ) }</b><em>${total>0&&v>=0?Math.round(v/Math.max(total,list.reduce((n,[,a])=>n+Math.max(0,a),0))*100)+'%':'—'}</em></button></li>` ).join( '' ) }</ul>`;
 	/** Grouped bars: series is [{label, a, b}] (income, expenses). */
-	function bars2( series ) {
-		const W = 320, H = 150, pad = 18, mx = Math.max( 1, ...series.map( ( s ) => Math.max( s.a, s.b ) ) ), bw = ( W - pad ) / series.length;
-		const g = series.map( ( s, i ) => { const x = pad + i * bw, hA = ( s.a / mx ) * ( H - 30 ), hB = ( s.b / mx ) * ( H - 30 ), w = Math.min( 16, bw / 2 - 2 ); return `<rect x="${ x + bw / 2 - w - 1 }" y="${ H - 18 - hA }" width="${ w }" height="${ hA }" rx="3" fill="var(--bar-in)" class="bar-a"/><rect x="${ x + bw / 2 + 1 }" y="${ H - 18 - hB }" width="${ w }" height="${ hB }" rx="3" fill="var(--bar-out)" class="bar-b"/><text x="${ x + bw / 2 }" y="${ H - 4 }" text-anchor="middle" class="ax">${ esc( s.label ) }</text>`; } ).join( '' );
-		return `<svg class="chart" viewBox="0 0 ${ W } ${ H }" role="img" aria-label="${ esc( t( 'cashFlow' ) ) }" preserveAspectRatio="xMidYMid meet">${ g }</svg>`;
-	}
+	function bars2(series){
+ const W=320,H=150,pad=18,lo=Math.min(0,...series.flatMap(s=>[s.a,s.b])),hi=Math.max(1,...series.flatMap(s=>[s.a,s.b])),span=hi-lo,bw=(W-pad)/Math.max(1,series.length),Y=v=>12+(hi-v)/span*(H-38),zero=Y(0);
+ const g=series.map((s,i)=>{const x=pad+i*bw,w=Math.min(16,bw/2-2);return [['a',s.a,x+bw/2-w-1,'var(--bar-in)'],['b',s.b,x+bw/2+1,'var(--bar-out)']].map(([key,v,left,color])=>`<rect x="${left}" y="${Math.min(zero,Y(v))}" width="${w}" height="${Math.abs(Y(v)-zero)}" rx="3" fill="${color}" class="bar-${key}"/>`).join('')+`<text x="${x+bw/2}" y="${H-4}" text-anchor="middle" class="ax">${esc(s.label)}</text>`;}).join('');
+ return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(t('cashFlow'))}"><path d="M${pad} ${zero}H${W}" stroke="var(--line)"/>${g}</svg>`;
+ }
+
 	/** A line with a soft area under it; points is [{x: label, y: cents}]. */
 	function line( points, opts = {} ) {
 		if ( points.length < 2 ) return noData();
@@ -88,12 +90,12 @@
 		return `<svg class="chart" viewBox="0 0 ${ W } ${ H }" role="img" aria-label="${ esc( opts.label || '' ) }"><path d="${ area }" class="area"/>${ zero }<path d="${ path }" class="ln"/>${ labels }</svg>`;
 	}
 	/** Stacked bars by month for the top categories. */
-	function stacked( months, cats ) {
-		const W = 320, H = 160, pad = 10, bw = ( W - pad ) / months.length;
-		const tot = months.map( ( m ) => cats.reduce( ( s, c ) => s + ( m.v[ c ] || 0 ), 0 ) ), mx = Math.max( 1, ...tot );
-		const g = months.map( ( m, i ) => { let y = H - 18; const x = pad + i * bw + 3, w = bw - 6; return cats.map( ( c, ci ) => { const h = ( ( m.v[ c ] || 0 ) / mx ) * ( H - 32 ); y -= h; return h > 0.5 ? `<rect x="${ x }" y="${ y }" width="${ w }" height="${ h }" fill="${ colorOf( c, ci ) }"/>` : ''; } ).join( '' ) + `<text x="${ x + w / 2 }" y="${ H - 4 }" text-anchor="middle" class="ax">${ esc( m.label ) }</text>`; } ).join( '' );
-		return `<svg class="chart" viewBox="0 0 ${ W } ${ H }" role="img" aria-label="${ esc( t( 'repTrends' ) ) }">${ g }</svg>`;
-	}
+	function stacked(months,cats){
+ const W=320,H=160,pad=10,bw=(W-pad)/Math.max(1,months.length),hi=Math.max(1,...months.map(m=>cats.reduce((n,c)=>n+Math.max(0,m.v[c]||0),0))),lo=Math.min(0,...months.map(m=>cats.reduce((n,c)=>n+Math.min(0,m.v[c]||0),0))),scale=(H-38)/(hi-lo),zero=12+hi*scale;
+ const g=months.map((m,i)=>{let pos=zero,neg=zero;const x=pad+i*bw+3,w=Math.max(1,bw-6);return cats.map((c,ci)=>{const value=m.v[c]||0,h=Math.abs(value)*scale,y=value>=0?(pos-=h):neg;if(value<0)neg+=h;return h>.1?`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${colorOf(c,ci)}"/>`:'';}).join('')+`<text x="${x+w/2}" y="${H-4}" text-anchor="middle" class="ax">${esc(m.label)}</text>`;}).join('');
+ return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(t('repTrends'))}"><path d="M${pad} ${zero}H${W}" stroke="var(--line)"/>${g}</svg>`+tableOf([t('fDate'),...cats.map(c=>c==='_other'?t('cat_other'):EX.catInfo(c).name)],months.map(m=>[m.label,...cats.map(c=>m$(m.v[c]||0))]));
+ }
+
 	const tableOf = ( head, rows ) => `<details class="tv"><summary>${ esc( t( 'repAsTable' ) ) }</summary><div class="tbl-wrap"><table class="tbl"><thead><tr>${ head.map( ( h ) => `<th>${ esc( h ) }</th>` ).join( '' ) }</tr></thead><tbody>${ rows.map( ( r ) => `<tr>${ r.map( ( c ) => `<td>${ esc( c ) }</td>` ).join( '' ) }</tr>` ).join( '' ) }</tbody></table></div></details>`;
 
 	/* ------------------------------------------------------------------ Filter bar */
@@ -172,7 +174,7 @@
 		S().bills.filter( ( b ) => ! b.done && b.next ).forEach( ( b ) => { EX.occurrences( b, to ).forEach( ( d ) => { if ( d >= td ) { const v = EX.convert( num( b.amount ), b.currency || main(), main() ); if ( v != null ) push( d, -Math.round( v * 100 ) ); } } ); } );
 		S().incomes.filter( ( i ) => ! i.done ).forEach( ( i ) => { let d = i.next, n = 0; while ( d && d <= to && n < 80 ) { if ( d >= td ) { const v = EX.convert( num( i.amount ), i.currency || main(), main() ); if ( v != null ) push( d, Math.round( v * 100 ) ); } d = EX.nextAfter( i, d ); n++; } } );
 		const since = addDays( td, -60 );
-		const typical = Math.round( S().txs.filter( ( x ) => x.type === 'expense' && ! x.billId && ! x.goalId && x.date >= since ).reduce( ( s, x ) => s + cents( x ), 0 ) / 60 );
+		const typical = Math.max(0,Math.round( EX.reportTxs().filter( ( x ) => x.type === 'expense' && ! x.billId && ! x.goalId && x.date >= since ).reduce( ( s, x ) => s + cents( x ), 0 ) / 60 ));
 		let bal = netWorth(); const pts = [ { d: td, y: bal, y0: bal } ]; let bal0 = bal;
 		for ( let i = 1; i <= days; i++ ) { const d = addDays( td, i ); bal += ( ev[ d ] || 0 ) - typical; bal0 += ev[ d ] || 0; pts.push( { d, y: bal, y0: bal0 } ); }
 		return { pts, typical, events: ev };
@@ -225,7 +227,7 @@
 		if ( ! S().bills.length && ! S().txs.length && ! S().incomes.length ) return `<div class="empty">${ UI.ci( 'chart-pie', 'purple', 80 ) }<h2>${ esc( t( 'tabReports' ) ) }</h2><p class="muted">${ esc( t( 'emptyIns' ) ) }</p></div>`;
 		const r = R.range(), list = pick( r.from, r.to );
 		const body = { all: () => all( r, list ), overview: () => overview( r, list ), spending: () => spending( r, list ), flow: () => flow( r, list ), trends: () => trends( r, list ), forecast: forecast, subs, table: () => table( r ) }[ f().tab ]();
-		return `${ filterBar() }<div class="rep-body" id="repBody">${ body }</div>`;
+		return `${ filterBar() }<p class="muted small">${esc(t('amAccounting'))}</p><div class="rep-body" id="repBody">${ body }</div>`;
 	};
 	const csvCell = ( v ) => `"${ String( v ).replace( /"/g, '""' ) }"`;
 	EXA.repClick = ( e ) => {
@@ -240,7 +242,7 @@
 		else if ( a === 'sort' ) { const k = el.dataset.k; if ( f().sort === k ) f().dir = -f().dir; else { f().sort = k; f().dir = k === 'date' || k === 'amount' ? -1 : 1; } }
 		else if ( a === 'group' ) f().group = el.dataset.g;
 		else if ( a === 'csv' ) {
-			const r = R.range(), rows = [ [ t( 'fDate' ), t( 'fName' ), t( 'fCategory' ), t( 'fWallet' ), t( 'fAmount' ), 'Currency' ] ].concat( pick( r.from, r.to, true ).sort( ( x, y ) => ( x.date < y.date ? 1 : -1 ) ).map( ( x ) => [ x.date, x.name || '', x.type === 'transfer' ? t( 'catTransfer' ) : EX.catInfo( x.category ).name, walletName( x.account ), ( x.type === 'income' ? '' : '-' ) + x.amount, EX.txCurrency( x ) ] ) );
+			const r = R.range(), rows = [ [ t( 'fDate' ), t( 'fName' ), t( 'fCategory' ), t( 'fWallet' ), t( 'fAmount' ), 'Currency' ] ].concat( pick( r.from, r.to, true ).sort( ( x, y ) => ( x.date < y.date ? 1 : -1 ) ).map( ( x ) => [ x.date, x.name || '', x.type === 'transfer' ? t( 'catTransfer' ) : EX.catInfo( x.category ).name, walletName( x.account ), String((x.type === 'income' ? 1 : -1)*Number(x.amount)), EX.txCurrency( x ) ] ) );
 			EXA.download( 'expenity-report.csv', '﻿' + rows.map( ( x ) => x.map( csvCell ).join( ',' ) ).join( '\n' ), 'text/csv;charset=utf-8' ); return true;
 		} else return false;
 		EXA.render();

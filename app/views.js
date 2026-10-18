@@ -46,14 +46,14 @@
 	function txItem( x ) {
 		const cur = EX.txCurrency( x );
 		const info = x.type === 'transfer' ? { iconName: 'arrows-exchange', color: 'blue', name: t( 'catTransfer' ) } : EX.catInfo( x.category );
-		const title = x.name || info.name;
+		const title = x.reimbursementOf?t('amReceipt')+' · '+(x.reimbursementWho||x.name||''):x.name || info.name;
 		const meta = [ x.type === 'transfer' ? `${ walletName( x.account ) } → ${ walletName( x.toAccount ) }` : walletName( x.account ), x.note ].filter( Boolean ).join( ' · ' );
 		const sign = x.type === 'income' ? '+' : x.type === 'expense' ? '−' : '';
 		return `<li class="sw" data-kind="tx" data-id="${ esc( x.id ) }">
 			<div class="sw-back"><div class="sw-l"></div><div class="sw-r">${ swBtn( 'edit', 'pencil', 'actEdit', 'edit' ) }${ swBtn( 'duplicate', 'copy', 'duplicateRecord', 'duplicate' ) }${ swBtn( 'del', 'trash', 'actDelete', 'del' ) }</div></div>
 			<button type="button" class="sw-front item" data-act="open-tx" data-id="${ esc( x.id ) }" aria-label="${ esc( title ) }, ${ esc( sign + money( Number( x.amount ), cur ) ) }">
 				${ UI.catCi( info.iconName ? info : EX.catInfo( x.category ) ) }
-				<span class="mid"><b>${ esc( title ) }${ x.scannedReceipt ? `<span class="scanned-receipt-badge" title="${esc(t('scanReceipt'))}" aria-label="${esc(t('scanReceipt'))}">${UI.icon('receipt',18)}</span>` : '' }${ x.photo ? `<span class="entry-photo-badge" title="${esc(t('entryPhoto'))}" aria-label="${esc(t('entryPhoto'))}">${UI.icon('photo',18)}</span>` : '' }</b><small>${ esc( meta || dayName( x.date ) ) }</small>${EXA.tagsInline(x.tags)}</span>
+				<span class="mid"><b>${ esc( title ) }${x.splits?.length?`<span class="am-badge" title="${esc(t('fx_splits'))}" aria-label="${esc(t('fx_splits'))}">${UI.icon('category-2',18)}</span>`:''}${x.reimbursement?`<span class="am-badge" title="${esc(t('fx_reimbursements'))}" aria-label="${esc(t('fx_reimbursements'))}">${UI.icon('users',18)}</span>`:''}${ x.scannedReceipt ? `<span class="scanned-receipt-badge" title="${esc(t('scanReceipt'))}" aria-label="${esc(t('scanReceipt'))}">${UI.icon('receipt',18)}</span>` : '' }${ x.photo ? `<span class="entry-photo-badge" title="${esc(t('entryPhoto'))}" aria-label="${esc(t('entryPhoto'))}">${UI.icon('photo',18)}</span>` : '' }</b><small>${ esc( meta || dayName( x.date ) ) }</small>${EXA.tagsInline(x.tags)}</span>
 				<span class="a ${ x.type }">${ sign }${ esc( money( Number( x.amount ), cur ) ) }</span>
 			</button></li>`;
 	}

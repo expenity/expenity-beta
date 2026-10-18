@@ -4,8 +4,8 @@
 const closeHead=label=>`<div class="sheet-head"><button class="ab-btn" data-close aria-label="${esc(t('close'))}">${UI.icon('x',24)}</button><h2>${esc(label)}</h2></div>`;
 // Reuse explicitly whitelisted fields. A new transaction never inherits payment links or evidence.
 A.duplicateRecord=(kind,id)=>{
- const x=(kind==='tx'?S().txs:kind==='income'?S().incomes:S().bills).find(x=>x.id===id);if(!x)return;
- const values={weekDays:copy(x.weekDays||[]),shortMonth:x.shortMonth,endMode:x.endMode,end:x.end,endCount:x.endCount,interval:x.interval,intervalUnit:x.intervalUnit,monthDays:copy(x.monthDays||[]),scheduleDates:copy((x.scheduleDates||[]).filter(d=>d>=EX.today())),name:x.name||'',amount:String(x.amount||''),account:EX.writableAccounts().some(a=>a.id===x.account)?x.account:'',category:x.category||'uncategorized',tags:copy(x.tags||[]),note:x.note||x.notes||'',photo:''};
+ const x=(kind==='tx'?S().txs:kind==='income'?S().incomes:S().bills).find(x=>x.id===id);if(!x)return;if(x.reimbursementOf){UI.closeSheet(true);return A.openDetail('tx',S().txs.some(p=>p.id===x.reimbursementOf)?x.reimbursementOf:x.id);}
+ const values={splits:copy(x.splits||[]),weekDays:copy(x.weekDays||[]),shortMonth:x.shortMonth,endMode:x.endMode,end:x.end,endCount:x.endCount,interval:x.interval,intervalUnit:x.intervalUnit,monthDays:copy(x.monthDays||[]),scheduleDates:copy((x.scheduleDates||[]).filter(d=>d>=EX.today())),name:x.name||'',amount:String(x.amount||''),account:EX.writableAccounts().some(a=>a.id===x.account)?x.account:'',category:x.category||'uncategorized',tags:copy(x.tags||[]),note:x.note||x.notes||'',photo:''};
  if(kind==='tx'){UI.closeSheet(true);A.openTx(null,{...values,type:x.type,date:EX.today(),repeat:'once',recoveryId:'duplicate-'+EX.uid(),...(x.type==='transfer'?{toAccount:EX.writableAccounts().some(a=>a.id===x.toAccount)?x.toAccount:'',toAmount:x.toAmount||''}:{})});}
  else if(kind==='income')A.openIncome(null,{...values,repeat:x.repeat||'monthly',next:EX.today()});
  else A.openBill(null,{...values,notes:values.note,repeat:x.repeat||'monthly',next:EX.today(),lead:x.lead??null,variable:!!x.variable,autopay:!!x.autopay});

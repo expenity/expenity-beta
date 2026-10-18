@@ -20,7 +20,7 @@
 	EXA.dupWarn = ( dup ) => EXA.confirm( { title: t( 'dupTitle' ), text: t( 'dupText', { what: ( dup.name || EX.catInfo( dup.category ).name ) + ' · ' + EX.money( Number( dup.amount ), EX.txCurrency( dup ) ), when: EX.dayName( dup.date ) } ), confirm: t( 'dupAdd' ), danger: false } );
 
 	/* ------------------------------------------------------------------ 2. Daily number */
-	const spentOn = ( d ) => S().txs.filter( ( x ) => x.type === 'expense' && ! x.goalId && x.date === d ).reduce( ( n, x ) => n + cents( x ), 0 );
+	const spentOn = ( d ) => EX.reportTxs().filter( ( x ) => x.type === 'expense' && ! x.goalId && x.date === d ).reduce( ( n, x ) => n + cents( x ), 0 );
 	/* Targets: the automatic figure, or the person's own spending target (day, week or month) and an optional income target. */
 	const tg = () => { const x = S().settings.targets; return { spend: Object.assign( { period: 'auto', amount: '' }, x && x.spend ), income: Object.assign( { period: 'off', amount: '' }, x && x.income ) }; };
 	const range = ( period, ref = today() ) => {
@@ -28,7 +28,7 @@
 		if ( period === 'month' ) { const d = EX.parse( ref ); return { from: EX.iso( new Date( d.getFullYear(), d.getMonth(), 1 ) ), to: EX.iso( new Date( d.getFullYear(), d.getMonth() + 1, 0 ) ) }; }
 		return { from: ref, to: ref };
 	};
-	const sumIn = ( type, r ) => S().txs.filter( ( x ) => x.type === type && ! x.goalId && x.date >= r.from && x.date <= r.to ).reduce( ( n, x ) => n + cents( x ), 0 );
+	const sumIn = ( type, r ) => EX.reportTxs().filter( ( x ) => x.type === type && ! x.goalId && x.date >= r.from && x.date <= r.to ).reduce( ( n, x ) => n + cents( x ), 0 );
 	const ringSvg = ( share ) => `<svg class="daily-ring" viewBox="0 0 36 36" aria-hidden="true"><circle cx="18" cy="18" r="15" fill="none" stroke="currentColor" stroke-opacity=".18" stroke-width="3.5"/><circle class="daily-arc" cx="18" cy="18" r="15" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="94.2" stroke-dashoffset="${ ( 94.2 * ( 1 - share ) ).toFixed( 1 ) }" transform="rotate(-90 18 18)"/></svg>`;
 	const editBtn = `<button type="button" class="ab-btn daily-edit" data-target-edit aria-label="${ esc( t( 'targetEdit' ) ) }" title="${ esc( t( 'targetEdit' ) ) }">${ UI.icon( 'pencil', 20 ) }</button>`;
 	const spendCard = () => {
@@ -121,7 +121,7 @@
 	const dim = ( d ) => new Date( EX.parse( d ).getFullYear(), EX.parse( d ).getMonth() + 1, 0 ).getDate();
 	const limitFor = ( d ) => { let all = 0, cat = 0; for ( const b of S().budgets ) { const a = Math.round( ( Number( b.amount ) || 0 ) * 100 ), days = b.period === 'weekly' ? 7 : b.period === 'yearly' ? 365 : dim( d ), per = a / days; if ( b.category === 'all' ) all += per; else cat += per; } return Math.floor( Math.max( all, cat ) ); };
 	EXA.streak = () => {
-		const txs = S().txs.filter( ( x ) => x.type === 'expense' && ! x.goalId ), by = new Map();
+		const txs = EX.reportTxs().filter( ( x ) => x.type === 'expense' && ! x.goalId ), by = new Map();
 		txs.forEach( ( x ) => by.set( x.date, ( by.get( x.date ) || 0 ) + cents( x ) ) );
 		const dates = S().txs.map( ( x ) => x.date ).sort(), first = dates[ 0 ], td = today();
 		if ( ! first ) return { cur: 0, best: 0, week: [], noSpend: 0, mode: 'nospend' };

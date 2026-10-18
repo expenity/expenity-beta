@@ -15,6 +15,7 @@
 	H.forSheet = () => {
 		const sh = document.getElementById( 'sheet' ); if ( ! sh || ! sh.open ) return '';
 		const q = ( s ) => !! sh.querySelector( s );
+		if(q('[data-advanced-group="splits"][open]'))return live('split');if(q('[data-advanced-group="reimbursement"][open],#amPayment'))return live('reimburse');
 		if ( sh.classList.contains( 'entry-composer' ) ) return live( q( '[data-entry=schedule-back]' ) ? 'recurring' : 'quick' );
 		if ( q( '#billForm' ) ) return live( 'bills' ); if ( q( '#walletForm' ) ) return live( 'wallets' );
 		if ( q( '#budgetForm,#goalForm,#contribForm' ) ) return live( 'budgets' ); if ( q( '#incomeForm' ) ) return live( 'recurring' );
@@ -45,6 +46,7 @@
 	const body = () => document.querySelector( '#sheet .sheet-body' );
 	const watch = () => { const b = body(); if ( ! b ) return setTimeout( watch, 400 ); new MutationObserver( () => { if ( queued ) return; queued = true; requestAnimationFrame( () => { queued = false; place(); } ); } ).observe( b, { childList: true, subtree: true } ); };
 	watch();
+	document.addEventListener('toggle',e=>{if(e.target.matches?.('[data-advanced-group]'))requestAnimationFrame(place);},true);
 
 	/* The popup: its own dialog above the current sheet. It never navigates. */
 	let pop = null;

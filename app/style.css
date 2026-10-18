@@ -821,3 +821,12 @@ button, a, input, select, textarea, label, summary { touch-action: manipulation;
 #view:has(.dash-editbar) { overflow-anchor: none; }
 
 .release-prompt{position:fixed;z-index:90;left:50%;transform:translateX(-50%);bottom:calc(90px + env(safe-area-inset-bottom));width:min(420px,calc(100% - 32px));box-shadow:var(--shadow)}.release-prompt .btn-row{margin-top:12px}
+
+.am-allocation{display:grid;grid-template-columns:minmax(0,1fr) minmax(80px,.55fr) 44px;gap:8px;align-items:end;margin-bottom:12px}.am-allocation .f{margin:0;min-width:0}.am-allocation select,.am-allocation input{width:100%;min-width:0;min-height:48px}.advanced-entry>summary{display:flex;align-items:center;gap:10px}.advanced-entry>summary>span{flex:1;min-width:0;display:grid;gap:3px}.advanced-entry>summary small{font-size:12px;color:var(--muted)}.advanced-entry .btn{white-space:normal;min-height:48px}.am-badge{display:inline-flex;vertical-align:middle;margin-inline-start:5px;color:var(--accent-2)}.am-demo-total{text-align:center;font-size:36px;font-weight:800;margin:24px 0}.am-demo-part{display:flex;align-items:center;gap:12px;margin:14px;padding:16px;background:var(--accent-soft);border-radius:12px;animation:am-part 5s infinite both}.am-demo-part.b{animation-delay:.8s}.am-demo-part i{height:12px;flex:1;background:var(--accent);border-radius:6px}.am-demo-part.b i{background:var(--warn)}.am-demo-result{text-align:center;font-weight:700;animation:am-result 5s infinite both}
+@keyframes am-part{0%,10%{opacity:0;translate:0 12px}25%,85%{opacity:1;translate:0 0}100%{opacity:0;translate:0 0}}@keyframes am-result{0%,40%{opacity:0}55%,85%{opacity:1}100%{opacity:0}}
+@media(max-width:360px){.am-allocation{grid-template-columns:minmax(0,1fr) 44px}.am-allocation .f:first-child{grid-column:1/-1}}
+:root[data-motion=off] .am-demo-part,:root[data-motion=reduced] .am-demo-part,:root[data-motion=off] .am-demo-result,:root[data-motion=reduced] .am-demo-result{animation:none!important;opacity:1}
+@media(prefers-reduced-motion:reduce){:root:not([data-motion=full]) .am-demo-part,:root:not([data-motion=full]) .am-demo-result{animation:none!important;opacity:1}}
+
+/* Keep both repayments and the arithmetic visible inside the tutorial phone. */
+.am-demo-total{font-size:30px;margin:12px 0}.am-demo-part{margin:10px;padding:12px}.am-demo-result{font-size:12px;padding:4px}

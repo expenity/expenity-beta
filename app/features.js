@@ -13,7 +13,7 @@
 		[ 'recurring', 'pro', 'repeat' ], [ 'plan', 'pro', 'target' ], [ 'tags', 'pro', 'tag' ], [ 'presets', 'pro', 'pin' ],
 		[ 'photos', 'pro', 'photo' ], [ 'avatar', 'pro', 'mood-smile' ], [ 'push', 'pro', 'bell' ], [ 'shared', 'pro', 'users' ],
 		[ 'drafts', 'pro', 'pencil' ], [ 'dupGuard', 'pro', 'copy' ], [ 'daily', 'pro', 'sun' ], [ 'filters', 'pro', 'adjustments-horizontal' ], [ 'trash', 'pro', 'trash' ], [ 'priceAlert', 'pro', 'trending-up' ],
-		[ 'receipts', 'advanced', 'receipt' ], [ 'streaks', 'advanced', 'flame' ], [ 'insights', 'advanced', 'bulb' ], [ 'forecast', 'advanced', 'wallet' ],
+		[ 'splits', 'advanced', 'category-2' ], [ 'reimbursements', 'advanced', 'users' ], [ 'receipts', 'advanced', 'receipt' ], [ 'streaks', 'advanced', 'flame' ], [ 'insights', 'advanced', 'bulb' ], [ 'forecast', 'advanced', 'wallet' ],
 		[ 'sounds', 'advanced', 'music' ], [ 'homeEdit', 'advanced', 'layout-dashboard' ], [ 'themeEdit', 'advanced', 'pencil' ],
 	].map( ( [ id, tier, icon ] ) => ( { id, tier, icon } ) );
 	const CORE = [ 'wallets', 'entries', 'categories', 'bills', 'activity', 'reports', 'themes', 'backup' ];

@@ -286,7 +286,7 @@
 	/** Income, expense and net totals of a list of transactions, per currency. Transfers are neither. */
 	EX.flow = ( txs ) => {
 		const f = { income: [], expense: [] };
-		txs.forEach( ( x ) => { if ( ! x.goalId && ( x.type === 'income' || x.type === 'expense' ) ) f[ x.type ].push( { currency: EX.txCurrency( x ), amount: x.amount } ); } );
+		(EX.reportTxs?EX.reportTxs(txs):txs).forEach( ( x ) => { if ( ! x.goalId && ( x.type === 'income' || x.type === 'expense' ) ) f[ x.type ].push( { currency: EX.txCurrency( x ), amount: x.amount } ); } );
 		return f;
 	};
 

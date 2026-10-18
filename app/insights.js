@@ -38,7 +38,7 @@
 		const pct = Math.min( 100, Math.round( ( yearly / g.i.remaining ) * 100 ) );
 		return ' ' + t( 'ideaGoalLine', { pct, name: g.x.name } );
 	};
-	const sumRange = ( from, to, test ) => S().txs.reduce( ( s, x ) => ( x.type === 'expense' && ! x.goalId && x.date >= from && x.date <= to && test( x ) ? s + cents( x ) : s ), 0 );
+	const sumRange = ( from, to, test ) => EX.reportTxs().reduce( ( s, x ) => ( x.type === 'expense' && ! x.goalId && x.date >= from && x.date <= to && test( x ) ? s + cents( x ) : s ), 0 );
 
 	/** All current ideas, best first. */
 	I.list = () => {
@@ -63,7 +63,7 @@
 
 		// 3. A category that grew compared with the 30 days before
 		const prevFrom = addDays( td, -59 ), prevTo = addDays( td, -30 ), seen = {};
-		S().txs.filter( ( x ) => x.type === 'expense' && ! x.goalId && x.date >= from30 ).forEach( ( x ) => { seen[ x.category ] = 1; } );
+		EX.reportTxs().filter( ( x ) => x.type === 'expense' && ! x.goalId && x.date >= from30 ).forEach( ( x ) => { seen[ x.category ] = 1; } );
 		Object.keys( seen ).forEach( ( cat ) => {
 			if ( cat === 'housing' || cat === 'taxes' || cat === 'loans' ) return;
 			const now = sumRange( from30, td, ( x ) => x.category === cat ), before = sumRange( prevFrom, prevTo, ( x ) => x.category === cat );
@@ -74,7 +74,7 @@
 		S().budgets.forEach( ( b ) => { const s = EX.plan.budget( b ); if ( s.pct >= 80 ) add( { id: 'budget:' + b.id + ':' + s.per.start, icon: 'chart-donut', color: s.pct >= 100 ? 'red' : 'amber', score: 80 + Math.min( 15, s.pct - 80 ), title: t( s.pct >= 100 ? 'ideaBudgetOver' : 'ideaBudgetNear', { name: b.category === 'all' ? t( 'budgetAll' ) : EX.catInfo( b.category ).name, p: s.pct } ), text: t( 'ideaBudgetText', { a: m$( Math.max( 0, s.left ) ), n: s.daysLeft } ), go: 'plan' } ); } );
 
 		// 5. Savings rate over the last 30 days
-		const inc = S().txs.reduce( ( s, x ) => ( x.type === 'income' && ! x.goalId && x.date >= from30 && x.date <= td ? s + cents( x ) : s ), 0 ), spent = sumRange( from30, td, () => true );
+		const inc = EX.reportTxs().reduce( ( s, x ) => ( x.type === 'income' && ! x.goalId && x.date >= from30 && x.date <= td ? s + cents( x ) : s ), 0 ), spent = sumRange( from30, td, () => true );
 		if ( inc > 0 && spent > 0 && ( inc - spent ) / inc < 0.1 && hasData ) { const tenth = Math.round( inc * 0.1 ); add( { id: 'rate', icon: 'pig-money', color: 'green', score: 40 + ( wants( 'future', 'save' ) ? 30 : 0 ), title: t( 'ideaRateTitle', { p: Math.max( 0, Math.round( ( ( inc - spent ) / inc ) * 100 ) ) } ), text: t( 'ideaRateText', { a: m$( tenth ), y: m$( tenth * 12 ) } ), go: 'plan' } ); }
 
 		// 6. Setting things up

@@ -52,7 +52,7 @@
    for(const b of S().budgets){const limit=amount(b.amount);if(limit==null){issues.add('safeBudgetUnknown');continue;}let cursor=ref,guard=0;
     while(cursor<=end&&guard++<95){const p=EX.plan.period(b,cursor);if(!validDate(p.end)||p.end<cursor){issues.add('safeBudgetUnknown');break;}
      const current=p.start<=ref&&p.end>=ref;
-     const spent=current?S().txs.filter(x=>x.type==='expense'&&!x.goalId&&x.date>=p.start&&x.date<=ref&&(b.category==='all'||x.category===b.category)).reduce((n,x)=>n+convert(Number(x.amount),EX.txCurrency(x)),0):0;
+     const spent=current?EX.reportTxs().filter(x=>x.type==='expense'&&!x.goalId&&x.date>=p.start&&x.date<=ref&&(b.category==='all'||x.category===b.category)).reduce((n,x)=>n+convert(Number(x.amount),EX.txCurrency(x)),0):0;
      const eff=current?EX.plan.budget(b).eff:Math.round(limit*100);if(!Number.isFinite(eff)){issues.add('safeBudgetUnknown');break;}
      const per=Math.max(0,eff-spent)/days(cursor,p.end),stop=p.end<end?p.end:end;
      for(let date=cursor;date<=stop;date=addDays(date,1)){const key=date+'|'+(b.category||'all');daily.set(key,Math.max(daily.get(key)||0,per));}
