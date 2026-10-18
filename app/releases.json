@@ -1,6 +1,20 @@
 {
-  "version": "0.24.0",
+  "version": "0.24.1",
   "releases": [
+    {
+      "version": "0.24.1",
+      "date": "2026-10-18",
+      "en": [
+        "Help icons can be dismissed one screen at a time: open the popup and choose “Never show this help icon again”. Other screens keep their icon.",
+        "More → Help & about → Help icons: one switch for all help icons, one per screen, and a button to bring them all back.",
+        "First-time setup has a new “handy extras” step with animated slides for the daily number, streaks, duplicate guard, filters, recently deleted and price alerts."
+      ],
+      "el": [
+        "Τα εικονίδια βοήθειας κρύβονται ανά οθόνη: άνοιξε το παράθυρο και διάλεξε «Να μην εμφανιστεί ξανά αυτό το εικονίδιο βοήθειας». Οι άλλες οθόνες κρατούν το δικό τους.",
+        "Περισσότερα → Βοήθεια → Εικονίδια βοήθειας: ένας διακόπτης για όλα, ένας ανά οθόνη και κουμπί για να επανέλθουν όλα.",
+        "Η πρώτη ρύθμιση έχει νέο βήμα «χρήσιμα extra» με κινούμενες διαφάνειες για το ημερήσιο ποσό, τα σερί, τον φρουρό διπλότυπων, τα φίλτρα, τα πρόσφατα διαγραμμένα και τις ειδοποιήσεις τιμής."
+      ]
+    },
     {
       "version": "0.24.0",
       "date": "2026-10-18",

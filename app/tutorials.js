@@ -54,6 +54,16 @@
 	const body = ( id ) => `<div class="tt-phone${ isNew( id ) ? ' fancy' : '' }" aria-hidden="true">${ DEMOS[ id ]() }</div><ol class="tt-steps">${ [ 1, 2, 3 ].map( ( n ) => `<li>${ esc( t( `tut_${ id }_${ n }` ) ) }</li>` ).join( '' ) }</ol>`;
 	const head = ( title, close = true ) => `<div class="sheet-head">${ close ? `<button class="ab-btn" data-close aria-label="${ esc( t( 'close' ) ) }">${ UI.icon( 'x', 24 ) }</button>` : '' }<h2>${ esc( title ) }</h2></div>`;
 	T.body = body;
+	/** A few of the newer helpers, one animated slide at a time (used in first-time setup). */
+	T.carousel = () => {
+		const ids = [ 'daily', 'streak', 'dup', 'filters', 'trash', 'price' ].filter( ( id ) => T.list().some( ( x ) => x.id === id ) ); if ( ! ids.length ) return '';
+		return `<div class="tt-car" data-car="0"><div class="tt-car-slides">${ ids.map( ( id, i ) => `<div class="tt-slide${ i ? '' : ' on' }" data-slide="${ i }"><div class="tt-phone fancy" aria-hidden="true">${ DEMOS[ id ]() }</div><h3>${ esc( t( 'tut_' + id ) ) }</h3><p>${ esc( t( 'tutD_' + id ) ) }</p></div>` ).join( '' ) }</div><div class="tt-navbar"><button type="button" class="btn btn-ghost tt-nav" data-car-nav="-1" aria-label="${ esc( t( 'tutPrev' ) ) }">${ UI.icon( 'chevron-left', 22 ) }</button><span class="tt-pos"><b data-car-pos>1</b> / ${ ids.length }</span><button type="button" class="btn btn-ghost tt-nav" data-car-nav="1" aria-label="${ esc( t( 'tutNext' ) ) }">${ UI.icon( 'chevron-right', 22 ) }</button></div></div>`;
+	};
+	document.addEventListener( 'click', ( e ) => {
+		const b = e.target.closest( '[data-car-nav]' ); if ( ! b ) return; e.preventDefault(); e.stopImmediatePropagation();
+		const car = b.closest( '[data-car]' ), slides = [ ...car.querySelectorAll( '.tt-slide' ) ], cur = slides.findIndex( ( s ) => s.classList.contains( 'on' ) ), next = Math.max( 0, Math.min( slides.length - 1, cur + Number( b.dataset.carNav ) ) );
+		slides.forEach( ( s, i ) => s.classList.toggle( 'on', i === next ) ); car.querySelector( '[data-car-pos]' ).textContent = String( next + 1 );
+	}, true );
 	T.view = () => `<section class="card"><p class="muted small">${ esc( t( 'tutIntro' ) ) }</p><div class="list mlist">${ T.list().map( ( x ) => `<button type="button" class="mrow" data-tut="${ x.id }">${ UI.ci( x.icon, 'teal', 36 ) }<span class="mid"><b>${ esc( t( 'tut_' + x.id ) ) }${ x.fresh ? `<span class="tut-new">${ esc( t( 'tutNew' ) ) }</span>` : '' }</b><small>${ esc( t( 'tutD_' + x.id ) ) }</small></span>${ UI.icon( 'chevron-right', 18 ) }</button>` ).join( '' ) }</div><div class="btn-row"><button type="button" class="btn btn-ghost" data-tour="start">${ UI.icon( 'refresh', 20 ) } ${ esc( t( 'tourReplay' ) ) }</button></div></section>`;
 	T.open = ( id ) => {
 		const ids = T.list().map( ( x ) => x.id ), i = ids.indexOf( id );

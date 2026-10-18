@@ -16,7 +16,7 @@
 	let platform = null, busy = false;
 	const W = { step: 0, wallets: null, curQuery: '' };
 	// The goal step only appears for people who said they want to save for something.
-	const steps = () => [ 'name', 'currency', 'aims' ].concat( ( S().settings.aims || [] ).includes( 'save' ) ? [ 'goal' ] : [] ).concat( [ 'wallets', 'look', 'tour' ] ).concat( EX.feature && EX.feature( 'receipts' ) === false ? [] : [ 'scan' ] ).concat( [ 'quick', 'help' ] ).concat( UI.isPhone() ? [ 'tips' ] : [] ).concat( [ 'done' ] );
+	const steps = () => [ 'name', 'currency', 'aims' ].concat( ( S().settings.aims || [] ).includes( 'save' ) ? [ 'goal' ] : [] ).concat( [ 'wallets', 'look', 'tour' ] ).concat( EX.feature && EX.feature( 'receipts' ) === false ? [] : [ 'scan' ] ).concat( [ 'quick', 'extras', 'help' ] ).concat( UI.isPhone() ? [ 'tips' ] : [] ).concat( [ 'done' ] );
 	const GOAL_PRESETS = [ [ 'trip', 'plane' ], [ 'car', 'car' ], [ 'gift', 'gift' ], [ 'home', 'home' ], [ 'emergency', 'heart' ], [ 'other', 'target' ] ];
 
 	/* ------------------------------------------------------------------ Stage machine */
@@ -226,6 +226,9 @@
 		} else if ( id === 'scan' || id === 'quick' ) {
 			icon = id === 'scan' ? 'receipt' : 'pencil'; color = id === 'scan' ? 'teal' : 'blue'; title = t( 'tut_' + id ); text = t( 'tutD_' + id );
 			body = EXA.tutorials.body( id );
+		} else if ( id === 'extras' ) {
+			icon = 'sparkles'; color = 'purple'; title = t( 'setupExtrasTitle' ); text = t( 'setupExtrasText' );
+			body = EXA.tutorials.carousel();
 		} else if ( id === 'help' ) {
 			icon = 'help-circle'; color = 'amber'; title = t( 'setupHelpTitle' ); text = t( 'setupHelpText' );
 			body = `<div class="help-demo" aria-hidden="true"><div class="hd-bar"><i></i><span class="help-ic demo">${ UI.icon( 'help-circle', 26 ) }</span><s class="hd-av"></s></div><div class="hd-screen"><div class="hd-row"></div><div class="hd-row"></div><div class="hd-pop"><b></b><u></u><u></u></div></div></div>
