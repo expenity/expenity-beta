@@ -1,6 +1,16 @@
 {
-  "version": "0.19.1",
+  "version": "0.19.2",
   "releases": [
+    {
+      "version": "0.19.2",
+      "date": "2026-10-18",
+      "en": [
+        "Profile picture: choices are a preview until you press Save, and there is a Cancel button."
+      ],
+      "el": [
+        "Εικόνα προφίλ: οι επιλογές είναι προεπισκόπηση μέχρι να πατήσεις Αποθήκευση, και υπάρχει κουμπί Ακύρωσης."
+      ]
+    },
     {
       "version": "0.19.1",
       "date": "2026-10-18",
