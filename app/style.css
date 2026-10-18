@@ -567,3 +567,19 @@ body, .card, .list, .hero, .wc, .promo, .tabbar, .appbar, .rail, .chip, .theme-c
 @media(prefers-reduced-motion:reduce){:root:not([data-motion=full]) .bill-attention .sw,:root:not([data-motion=full]) .bill-attention .sw-front{animation:none!important}}
 
 .entry-photo-badge{display:inline-flex;vertical-align:middle;margin-inline-start:6px;color:var(--accent-2);padding:3px;border-radius:6px;background:var(--accent-soft)}
+
+/* Profile picture */
+.avatar { overflow: hidden; } .avatar .av-art, .avatar .av-photo { width: 100%; height: 100%; display: block; object-fit: cover; border-radius: 50%; }
+.avatar .dot { z-index: 2; } .avatar.pic .dot { box-shadow: 0 0 0 2px var(--bg); }
+.avatar { overflow: visible; } .avatar .av-art, .avatar .av-photo { position: absolute; inset: 0; }
+.av-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin: 4px 0 14px; } .av-pick { width: 100%; height: auto; aspect-ratio: 1; padding: 0; }
+.av-pick.sel { outline: 3px solid var(--accent); outline-offset: 2px; }
+.av-art.av-bob .av-body { animation: avBob 3.2s ease-in-out infinite; transform-origin: 50% 80%; } .av-art.av-float .av-body { animation: avFloat 3.6s ease-in-out infinite; }
+.av-art.av-hop .av-body { animation: avHop 2.8s ease-in-out infinite; transform-origin: 50% 90%; } .av-art.av-spin .av-rays, .av-art.av-spin .av-body { transform-origin: 24px 24px; }
+.av-art.av-spin .av-rays { animation: avSpin 14s linear infinite; }
+.av-art .av-eyes { animation: avBlink 5s infinite; transform-box: fill-box; transform-origin: center; } .av-art .av-led { animation: avBlink 1.6s infinite; }
+@keyframes avBob { 50% { transform: rotate(-3deg) translateY(-1px); } } @keyframes avFloat { 50% { transform: translateY(-2px); } } @keyframes avHop { 45%, 55% { transform: translateY(-2.5px); } }
+@keyframes avSpin { to { transform: rotate(360deg); } } @keyframes avBlink { 0%, 92%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.1); } }
+.avatar.offline::before { content: ""; position: absolute; inset: -3px; border-radius: 50%; border: 2px solid var(--muted, #94a3b8); opacity: .0; animation: avOffline 2.6s ease-in-out infinite; pointer-events: none; }
+.avatar.offline::after { content: ""; position: absolute; left: -2px; bottom: -2px; width: 14px; height: 14px; border-radius: 50%; background: var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.4' stroke-linecap='round'%3E%3Cpath d='M3 3l18 18M9.5 5.5A6 6 0 0 1 18 9a4 4 0 0 1 3 6.5M6 18a4 4 0 0 1-.5-8'/%3E%3C/svg%3E") center/10px no-repeat; box-shadow: 0 0 0 1.5px var(--bg); z-index: 2; }
+@keyframes avOffline { 0%, 100% { opacity: 0; transform: scale(.96); } 50% { opacity: .75; transform: scale(1.06); } }

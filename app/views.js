@@ -83,9 +83,9 @@
 	function avatar() {
 		if ( EX.auth.isSignedIn() ) {
 			const u = EX.auth.user() || {};
-			return `<button type="button" class="avatar on" data-go="more" aria-label="${ esc( t( 'accountMenu' ) ) }"><span class="who">${ esc( ( u.email || '?' ).charAt( 0 ).toUpperCase() ) }</span><span class="dot ${ EX.sync.status }"></span></button>`;
+			return `<button type="button" class="avatar on${ EXA.avatar.has() ? ' pic' : '' }${ EXA.avatar.offline() ? ' offline' : '' }" data-go="more" aria-label="${ esc( t( 'accountMenu' ) ) }">${ EXA.avatar.inner( `<span class="who">${ esc( ( u.email || '?' ).charAt( 0 ).toUpperCase() ) }</span>` ) }<span class="dot ${ EX.sync.status }"></span></button>`;
 		}
-		return `<button type="button" class="avatar" data-go="more" aria-label="${ esc( t( 'accountMenu' ) ) }">${ UI.icon( 'user-circle', 26 ) }</button>`;
+		return `<button type="button" class="avatar${ EXA.avatar.has() ? ' pic' : '' }${ EXA.avatar.offline() ? ' offline' : '' }" data-go="more" aria-label="${ esc( t( 'accountMenu' ) ) }">${ EXA.avatar.inner( UI.icon( 'user-circle', 26 ) ) }</button>`;
 	}
 	EXA.appbar = () => {
 		const v = st.view;
@@ -387,7 +387,8 @@
 		if ( sub === 'about' ) return aboutView();
 		const u = EX.auth.user() || {};
 		const signed = EX.auth.isSignedIn();
-		return `<button type="button" class="profile" data-more="account"><span class="avatar big${ signed ? ' on' : '' }">${ signed ? `<span class="who">${ esc( ( u.email || '?' ).charAt( 0 ).toUpperCase() ) }</span>` : UI.icon( 'user-circle', 40 ) }</span><span class="mid"><b>${ esc( signed ? u.email : t( 'signIn' ) ) }</b><small>${ signed ? syncLine() : esc( t( 'rowAccountGuest' ) ) }</small></span>${ chev }</button>
+		return `<button type="button" class="profile" data-more="account"><span class="avatar big${ signed ? ' on' : '' }${ EXA.avatar.has() ? ' pic' : '' }${ EXA.avatar.offline() ? ' offline' : '' }">${ EXA.avatar.inner( signed ? `<span class="who">${ esc( ( u.email || '?' ).charAt( 0 ).toUpperCase() ) }</span>` : UI.icon( 'user-circle', 40 ) ) }</span><span class="mid"><b>${ esc( signed ? u.email : t( 'signIn' ) ) }</b><small>${ signed ? syncLine() : esc( t( 'rowAccountGuest' ) ) }</small></span>${ chev }</button>
+			<button type="button" class="mrow" data-avatar-open>${ UI.ci( 'mood-smile', 'pink', 40 ) }<span class="mid"><b>${ esc( t( 'avatarTitle' ) ) }</b><small>${ esc( t( 'avatarSub' ) ) }</small></span>${ chev }</button>
 			<section class="card receipt-setting"><label class="entry-check"><input type="checkbox" role="switch" data-receipt-enabled${S().settings.receiptScanner!==false?' checked':''}>${esc(t('receiptScannerSetting'))}</label><p class="muted small">${esc(t('receiptScannerSettingHelp'))}</p></section>
             <div class="list mlist">${ row( 'wallets', 'wallet', 'teal', t( 'walletsTitle' ), t( 'ovManage' ) ) }<button type="button" class="mrow" data-go="plan">${ UI.ci( 'target', 'pink', 40 ) }<span class="mid"><b>${ esc( t( 'planTitle' ) ) }${ EXA.goalsDiscovery() }</b><small>${ esc( t( 'planMoreSub' ) ) }</small></span>${ UI.icon( 'chevron-right', 18 ) }</button>${ row( 'tags', 'tag', 'teal', EXA.label('tags') ) }${ row( 'categories', 'tag', 'purple', t( 'catsTitle' ) ) }${ row( 'reminders', 'bell', 'amber', t( 'rowReminders' ) ) }${ row( 'data', 'database-export', 'blue', t( 'rowData' ) ) }<button type="button" class="mrow" data-home-settings>${UI.ci('layout-dashboard','blue',40)}<span class="mid"><b>${esc(EXA.label('editHome'))}</b><small>${esc(EXA.label('editSizeHint'))}</small></span>${chev}</button>${ row( 'appearance', 'palette', 'pink', t( 'rowAppearance' ) ) }${ UI.isStandalone() ? '' : row( 'install', 'device-mobile', 'green', t( 'rowInstall' ) ) }${ row( 'about', 'info-circle', 'gray', t( 'rowAbout' ) ) }</div>`;
 	};
