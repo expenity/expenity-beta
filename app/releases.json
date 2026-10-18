@@ -1,6 +1,18 @@
 {
-  "version": "0.23.0",
+  "version": "0.23.1",
   "releases": [
+    {
+      "version": "0.23.1",
+      "date": "2026-10-18",
+      "en": [
+        "The help icon is now a filled, pulsing button that rings like a bell every few seconds, so it is easy to spot.",
+        "First-time setup has a new step explaining that the help icon is always there if you get stuck."
+      ],
+      "el": [
+        "Το εικονίδιο βοήθειας είναι πλέον γεμάτο, παλλόμενο κουμπί που κουνιέται σαν καμπανάκι κάθε λίγα δευτερόλεπτα, ώστε να φαίνεται εύκολα.",
+        "Η πρώτη ρύθμιση έχει νέο βήμα που εξηγεί ότι το εικονίδιο βοήθειας είναι πάντα εκεί αν κολλήσεις."
+      ]
+    },
     {
       "version": "0.23.0",
       "date": "2026-10-18",
