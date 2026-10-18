@@ -1,6 +1,16 @@
 {
-  "version": "0.16.5",
+  "version": "0.16.6",
   "releases": [
+    {
+      "version": "0.16.6",
+      "date": "2026-10-18",
+      "en": [
+        "Entry indicators are independent: scanned entries with an attached image show both receipt and photo icons."
+      ],
+      "el": [
+        "Οι ενδείξεις εγγραφών εμφανίζονται ανεξάρτητα: οι σαρωμένες εγγραφές με συνημμένη εικόνα δείχνουν εικονίδιο απόδειξης και φωτογραφίας."
+      ]
+    },
     {
       "version": "0.16.5",
       "date": "2026-10-18",

@@ -565,3 +565,5 @@ body, .card, .list, .hero, .wc, .promo, .tabbar, .appbar, .rail, .chip, .theme-c
 .bill-attention .sw.late>.sw-front{animation:bill-overdue-pulse 1s 3;animation-delay:var(--bill-attention-elapsed,0s)}
 :root[data-motion=off] .bill-attention .sw,:root[data-motion=reduced] .bill-attention .sw,:root[data-motion=off] .bill-attention .sw-front,:root[data-motion=reduced] .bill-attention .sw-front,.dashboard-editing .due-soon-attention,.dashboard-editing .sw.late>.sw-front{animation:none!important}
 @media(prefers-reduced-motion:reduce){:root:not([data-motion=full]) .bill-attention .sw,:root:not([data-motion=full]) .bill-attention .sw-front{animation:none!important}}
+
+.entry-photo-badge{display:inline-flex;vertical-align:middle;margin-inline-start:6px;color:var(--accent-2);padding:3px;border-radius:6px;background:var(--accent-soft)}
