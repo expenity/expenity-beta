@@ -620,3 +620,15 @@ html[data-off~=themeEdit] .tc-edit { display: none !important; }
 html[lang=el] body, html[lang=el] body * { letter-spacing: normal !important; }
 .theme-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } @media (min-width: 600px) { .theme-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 .theme-cell { min-width: 0; } .theme-card { min-width: 0; overflow-wrap: anywhere; } .theme-card .tc-name { min-width: 0; flex-wrap: wrap; }
+
+/* Press-and-hold menu */
+.sw { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+.rm-list { display: grid; gap: 8px; } .rm-act { display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 0 16px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); color: var(--ink); font: 700 16px var(--font); text-align: left; }
+.rm-act.danger { color: var(--bad, #c0392b); } .rm-act.ok { color: var(--accent-2); }
+.rm-tip { margin-top: 18px; padding: 14px; border-radius: 16px; background: var(--accent-soft); text-align: center; } .rm-tip p { margin: 10px 0 0; font-size: 13.5px; color: var(--ink-2); line-height: 1.4; }
+.rm-demo { position: relative; height: 46px; max-width: 260px; margin: 0 auto; border-radius: 12px; overflow: hidden; background: var(--line); }
+.rm-back { position: absolute; top: 0; bottom: 0; width: 50%; } .rm-back.l { left: 0; background: #34c07a; } .rm-back.r { right: 0; background: #e5534b; }
+.rm-front { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; gap: 6px; padding: 0 12px; background: var(--surface); border-radius: 12px; animation: rmSlide 3.6s ease-in-out infinite; } .rm-front span { height: 7px; border-radius: 4px; background: var(--line); width: 70%; } .rm-front span + span { width: 40%; }
+.rm-finger { position: absolute; top: 20px; left: 50%; width: 18px; height: 18px; margin-left: -9px; border-radius: 50%; background: var(--ink); opacity: .35; animation: rmFinger 3.6s ease-in-out infinite; }
+@keyframes rmSlide { 0%, 8%, 100% { transform: translateX(0); } 28%, 40% { transform: translateX(-34%); } 52%, 56% { transform: translateX(0); } 74%, 86% { transform: translateX(34%); } }
+@keyframes rmFinger { 0%, 8%, 100% { transform: translateX(0); } 28%, 40% { transform: translateX(-60px); } 52%, 56% { transform: translateX(0); } 74%, 86% { transform: translateX(60px); } }

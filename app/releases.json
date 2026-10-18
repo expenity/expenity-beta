@@ -1,6 +1,16 @@
 {
-  "version": "0.18.1",
+  "version": "0.19.0",
   "releases": [
+    {
+      "version": "0.19.0",
+      "date": "2026-10-18",
+      "en": [
+        "Press and hold an entry or bill to open a menu with Edit, Duplicate and Delete (and Paid for bills). The menu also shows a small animation: no need to hold, just drag the entry sideways."
+      ],
+      "el": [
+        "Κράτα πατημένη μια εγγραφή ή έναν λογαριασμό για να ανοίξει μενού με Επεξεργασία, Αντίγραφο και Διαγραφή (και Πληρώθηκε για λογαριασμούς). Το μενού δείχνει και μια μικρή κινούμενη εικόνα: δεν χρειάζεται να κρατάς, απλώς σύρε την εγγραφή στο πλάι."
+      ]
+    },
     {
       "version": "0.18.1",
       "date": "2026-10-18",
