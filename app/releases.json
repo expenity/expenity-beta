@@ -1,6 +1,16 @@
 {
-  "version": "0.21.2",
+  "version": "0.22.0",
   "releases": [
+    {
+      "version": "0.22.0",
+      "date": "2026-10-18",
+      "en": [
+        "Contact us (More → Help & about): send feedback, a problem report, an idea or a question, with simple formatting and up to four photos that are shrunk on your device."
+      ],
+      "el": [
+        "Επικοινωνία (Περισσότερα → Βοήθεια): στείλε σχόλια, αναφορά προβλήματος, ιδέα ή ερώτηση, με απλή μορφοποίηση και έως τέσσερις φωτογραφίες που μικραίνουν στη συσκευή σου."
+      ]
+    },
     {
       "version": "0.21.2",
       "date": "2026-10-18",
