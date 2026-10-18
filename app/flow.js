@@ -55,6 +55,7 @@
 		if ( S().settings.setupDone ) return finish();
 		return startSetup();
 	};
+	flow.restart = () => startSetup();
 	const startSetup = () => { W.step = Math.min( D().setupStep || 0, steps().length - 1 ); W.wallets = null; setStage( 'setup' ); };
 	function finish() {
 		const d = D();
@@ -64,6 +65,7 @@
 		EX.save();
 		flow.show();
 		EXA.go( 'home' );
+		setTimeout( () => EXA.tutorials && EXA.tutorials.maybeStart(), 700 );
 		if ( EXA.tryJoin ) EXA.tryJoin();
 	}
 

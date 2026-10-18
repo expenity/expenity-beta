@@ -90,7 +90,7 @@
 	EXA.appbar = () => {
 		const v = st.view;
 		if ( v === 'more' && st.more !== 'root' ) {
-			const titles = { features:'fxTitle', sounds:'soundsTitle', updates:'updatesTitle', account: 'rowAccount', wallets: 'walletsTitle', categories: 'catsTitle', tags: 'tags', reminders: 'rowReminders', data: 'rowData', appearance: 'rowAppearance', install: 'rowInstall', about: 'rowAbout' };
+			const titles = { tutorials:'tutTitle', features:'fxTitle', sounds:'soundsTitle', updates:'updatesTitle', account: 'rowAccount', wallets: 'walletsTitle', categories: 'catsTitle', tags: 'tags', reminders: 'rowReminders', data: 'rowData', appearance: 'rowAppearance', install: 'rowInstall', about: 'rowAbout' };
 			return `<button type="button" class="ab-btn" data-act="more-back" aria-label="${ esc( t( 'back' ) ) }">${ UI.icon( 'arrow-left', 24 ) }</button><h1 class="ab-title">${ esc( t( titles[ st.more ] ) ) }</h1>`;
 		}
 		const title = { home: null, activity: t( 'tabActivity' ), bills: t( 'tabBills' ), plan: t( 'planTitle' ), reports: t( 'tabReports' ), more: t( 'moreTitle' ) }[ v ];
@@ -325,7 +325,7 @@
 	const updateCard = () => `<section class="card"><h2>${ esc( t( 'updTitle' ) ) }</h2><p class="muted small" id="updLine">${ esc( t( 'aboutVersion', { v: window.EXPENITY_VERSION || '0.4' } ) ) }</p><div class="btn-row"><button type="button" class="btn btn-ghost" id="updBtn" data-act="check-update">${ UI.icon( 'refresh', 20 ) } ${ esc( t( 'updCheck' ) ) }</button><button type="button" class="ab-btn" data-release-notes aria-label="${esc(EXA.label('changelog'))}" title="${esc(EXA.label('changelog'))}">${UI.icon('notes',22)}</button></div></section>`;
 	function accountView() {
 		if ( ! EX.auth.isSignedIn() ) {
-			return `<section class="card"><p class="muted">${ esc( t( 'acctGuest' ) ) }</p><div class="btn-row stack"><button type="button" class="btn btn-primary" data-act="auth-create">${ esc( t( 'createAccount' ) ) }</button><button type="button" class="btn btn-ghost" data-act="auth-signin">${ esc( t( 'signIn' ) ) }</button></div></section>`;
+			return `<section class="card"><p class="muted">${ esc( t( 'acctGuest' ) ) }</p><div class="btn-row stack"><button type="button" class="btn btn-primary" data-act="auth-create">${ esc( t( 'createAccount' ) ) }</button><button type="button" class="btn btn-ghost" data-act="auth-signin">${ esc( t( 'signIn' ) ) }</button></div></section><section class="card danger"><h2>${ esc( t( 'freshTitle' ) ) }</h2><p class="muted small">${ esc( t( 'freshText' ) ) }</p><div class="btn-row"><button type="button" class="btn btn-danger" data-fresh>${ esc( t( 'freshBtn' ) ) }</button></div></section>`;
 		}
 		const u = EX.auth.user() || {}, d = st.devCache, pk = d ? d.passkeys : [], ss = d ? d.sessions : [], left = EX.auth.codesLeft();
 		return `<section class="card"><p><b>${ esc( t( 'acctSignedIn', { email: u.email || '' } ) ) }</b></p></section>
@@ -334,6 +334,7 @@
 			<section class="card"><h2>${ esc( t( 'devCodes' ) ) }</h2><p class="muted small">${ left == null ? '' : esc( t( 'codesLeft', { n: left } ) ) }</p><div class="btn-row"><button type="button" class="btn btn-ghost" data-act="new-codes">${ esc( t( 'devCodesBtn' ) ) }</button></div></section>
 			<section class="card"><div class="btn-row"><button type="button" class="btn btn-ghost" data-act="sign-out">${ UI.icon( 'logout', 20 ) } ${ esc( t( 'signOut' ) ) }</button></div></section>
 
+			<section class="card danger"><h2>${ esc( t( 'freshTitle' ) ) }</h2><p class="muted small">${ esc( t( 'freshText' ) ) }</p><div class="btn-row"><button type="button" class="btn btn-danger" data-fresh>${ esc( t( 'freshBtn' ) ) }</button></div></section>
 			<section class="card danger"><h2>${ esc( t( 'devDelete' ) ) }</h2><p class="muted small">${ esc( t( 'devDeleteText' ) ) }</p><div class="btn-row"><button type="button" class="btn btn-danger" data-act="delete-account">${ esc( t( 'devDelete' ) ) }</button></div></section>
 			`;
 	}
@@ -377,6 +378,7 @@
 		const sub = st.more;
 		if(sub==='sounds')return EXA.soundSettings();
         if(sub==='updates')return updateCard()+`<section class="card"><h2>${esc(t('syncDetails'))}</h2><p id="syncLine">${syncLine()}</p>${EX.auth.isSignedIn()?`<button type="button" class="btn btn-ghost" data-act="sync-now">${UI.icon('refresh',20)} ${esc(t('syncNow'))}</button>`:''}</section>`;
+        if ( sub === 'tutorials' ) return EXA.tutorials.view();
         if ( sub === 'features' ) return EXA.features.view();
         if ( sub === 'account' ) return accountView();
 		if ( sub === 'wallets' ) return walletsView();
