@@ -94,7 +94,9 @@
 	EXA.txOpen = () => !! T && UI.sheetOpen();
 	const decimalMark = () => ( EX.lang() === 'el' ? ',' : '.' );
 	const curSymbol = ( cur ) => { try { return ( new Intl.NumberFormat( EX.loc(), { style: 'currency', currency: cur } ).formatToParts( 0 ).find( ( p ) => p.type === 'currency' ) || {} ).value || cur; } catch ( e ) { return cur; } };
-	const showAmt = ( s ) => ( s === '' ? '0' : s.replace( '.', decimalMark() ) );
+	const groupMark = () => ( decimalMark() === ',' ? '.' : ',' );
+	// Thousands are grouped for reading (20000 shows as 20.000 in Greek and 20,000 in English); the stored value stays plain.
+	const showAmt = ( s ) => { if ( s === '' ) return '0'; const [ whole, frac ] = s.split( '.' ); return whole.replace( /\B(?=(\d{3})+(?!\d))/g, groupMark() ) + ( frac !== undefined ? decimalMark() + frac : '' ); };
 	const walletCur = ( id ) => ( EX.account( id ) || {} ).currency || S().settings.currency;
 
 	const GUESS = {
@@ -319,7 +321,7 @@
           const target=T.editScheduleId?list.find(x=>x.id===T.editScheduleId):null;if(T.editScheduleId&&(!target||contentStamp(target)!==T.sourceStamp))return entryError('entryChanged');if(!target&&list.some(x=>x.id===T.id))return;
           const schedule={...EXA.scheduleData(T),...EXA.readSchedule($('#sheet'))},scheduleError=EXA.scheduleError({...T,...schedule});if(scheduleError)return entryError(scheduleError);Object.assign(T,schedule);const prepared=target&&!T.scheduleTouched&&T.date===target.next?{...schedule,next:target.next,day:target.day,scheduleEnd:target.scheduleEnd}:EX.prepareSchedule({repeat:T.repeat||'once',...schedule,day:target&&target.next===T.date?target.day:parse(T.date).getDate()},T.date),next=prepared.next;if(!next)return entryError(prepared.endMode==='date'?'scheduleEndError':'schedulePickDates','#entryRepeat');
           if(T.scheduleKind==='bill'&&T.payUrl&&!/^https?:\/\//i.test(T.payUrl))return entryError('errUrl');const record={...prepared,id:target?.id||T.id,name:T.name.trim(),amount,account:T.account,currency:walletCur(T.account),category:T.category,tags:copy(T.tags),photo:T.photo||'',scannedReceipt:!!T.scannedReceipt,repeat:T.repeat||'once',next,day:prepared.day||parse(T.date).getDate(),...(T.type==='income'?{note:T.note.trim()}:{notes:T.note.trim(),lead:T.lead??null,variable:!!T.variable,autopay:!!T.autopay,reference:T.reference||'',payUrl:T.payUrl||''})};
-          T.saving=true;const old=target?copy(target):null;if(target){Object.assign(target,record);delete target.done;}else list.push(record);if(!EX.save()){if(target){Object.keys(target).forEach(k=>delete target[k]);Object.assign(target,old);}else list.splice(list.indexOf(record),1);T.saving=false;return entryError('tSaveFail');}
+          T.saving=true;const old=target?copy(target):null;if(target){Object.assign(target,record);delete target.done;}else{list.push(record);if(T.type==='income')EXA.settleIncome?.(record);}if(!EX.save()){if(target){Object.keys(target).forEach(k=>delete target[k]);Object.assign(target,old);}else list.splice(list.indexOf(record),1);T.saving=false;return entryError('tSaveFail');}
           const type=T.type;EXA.playSound?.('success');T.committed=true;dropDraft();UI.closeSheet(true);if(type==='income'){EXA.st.txFilter.type='income';EXA.st.incomeMode='recurring';}EXA.go(type==='income'?'activity':'bills');return;
         }
 		const tx={type:T.type,amount,account:T.account,date:T.date,name:T.name.trim(),note:T.note.trim(),photo:T.photo||'',scannedReceipt:!!T.scannedReceipt,tags:T.tags||[]};

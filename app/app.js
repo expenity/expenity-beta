@@ -12,7 +12,7 @@
 	const $ = ( s, r = document ) => r.querySelector( s );
 	const $$ = ( s, r = document ) => [ ...r.querySelectorAll( s ) ];
 	const toast = UI.toast;
-	window.EXPENITY_VERSION = '0.18.0';
+	window.EXPENITY_VERSION = '0.18.1';
 
  const seenCharacters=new Set();try{for(const skin of JSON.parse(sessionStorage.getItem('expenity.charactersSeen')||'[]'))seenCharacters.add(skin);}catch(_){}
  const characterSeen=skin=>seenCharacters.has(skin);
@@ -56,6 +56,7 @@
 	EXA.applyMotion = () => { const m = S().device.motion || 'auto'; if ( m === 'auto' ) delete document.documentElement.dataset.motion; else document.documentElement.dataset.motion = m; try { if ( m === 'auto' ) localStorage.removeItem( 'expenity.motion' ); else localStorage.setItem( 'expenity.motion', m ); } catch ( e ) { /* ignore */ } };
 	function go( view, more = 'root' ) {
 		if(view==='home'&&st.view!=='home'){clearTimeout(st.characterCollapseTimer);st.characterRetreated=characterSeen(EXA.skin());st.characterCollapsed=st.characterRetreated;}
+		if ( view !== st.view ) st.prev = { view: st.view, more: st.more };
 		st.view = view; st.more = more; st.sel = null;
 		if ( view === 'plan' ) { S().device.goalsDiscovered = true; EX.persist(); }
 		if ( view !== 'activity' ) { st.searchOpen = false; st.txFilter.q = ''; }
@@ -192,6 +193,7 @@
 			case 'dismiss-install': S().device.installDismissed = true; EX.persist(); render(); break;
 			case 'install': if ( EXA.installEvent ) { EXA.installEvent.prompt(); try { await EXA.installEvent.userChoice; } catch ( e ) { /* ignore */ } EXA.installEvent = null; render(); } break;
 			case 'sample': { const s = SAMPLE(); S().bills.push( ...s.bills ); S().txs.push( ...s.txs ); EX.save(); toast( t( 'tSample' ) ); break; }
+			case 'plan-back': { const p = st.prev && st.prev.view !== 'plan' ? st.prev : { view: 'home', more: 'root' }; go( p.view, p.more ); break; }
 			case 'more-back': st.more = 'root'; render(); $( '#view' ).scrollTop = 0; break;
 			case 'auth-create': case 'auth-signin': case 'auth-back': EXA.openAuth( 'start' ); break;
 			case 'auth-recover': EXA.openAuth( 'recover' ); break;

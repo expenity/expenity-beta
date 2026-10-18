@@ -7,7 +7,7 @@
 	--shadow: 0 1px 2px rgba(15, 31, 26, 0.05), 0 8px 24px -14px rgba(15, 31, 26, 0.3);
 	--radius: calc(20px * var(--rk)); --tab-h: 64px;
 	--safe-t: env(safe-area-inset-top, 0px); --safe-b: env(safe-area-inset-bottom, 0px);
-	--font: ui-sans-serif, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+	--font: "Noto Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
 	--tbg: #eceff1; --tfg: #475569;
 	--rk: 1; --font-head: var(--font); --bw: 0px; --card-line: transparent; --glow: none; --anim-deco: none;
 	--brand: linear-gradient(180deg, #0e9a73, #077f5f); --brand-ink: #fff; --brand-glow: 0 8px 18px -10px rgba(7, 127, 95, 0.9);
@@ -609,3 +609,14 @@ html[data-off~=themeEdit] .tc-edit { display: none !important; }
 .fx-table-wrap { overflow-x: auto; } .fx-table { width: 100%; border-collapse: collapse; font-size: 14px; } .fx-table th, .fx-table td { padding: 8px 6px; border-bottom: 1px solid var(--line); text-align: center; } .fx-table th[scope=row] { text-align: left; font-weight: 600; } .fx-table thead th { font-size: 12px; color: var(--muted); }
 .fx-yes { color: var(--accent); display: inline-grid; } .fx-no { color: var(--muted); }
 .fx-rows { display: grid; gap: 4px; } .fx-row { display: flex; align-items: center; gap: 12px; padding: 8px 0; } .fx-row .mid { flex: 1; min-width: 0; } .fx-row small { display: block; color: var(--muted); font-size: 12.5px; }
+
+/* First-run flow: still and calm. No aurora, no arrival animation, no blur; the action bar scrolls with the form so a keyboard never covers a field. */
+.flow::before, .flow::after { display: none !important; } .flow .flow-body, .flow .flow-card { animation: none !important; }
+.flow-card { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+.flow-actions { position: static; background: none; margin-top: auto; padding-top: 16px; } .flow-body input { scroll-margin-bottom: 140px; }
+/* Narrow phones (Android): text wraps instead of pushing controls off screen; Greek is never letter-spaced. */
+.fx-row { min-width: 0; } .fx-row .mid b, .fx-row .mid small { white-space: normal; overflow: visible; text-overflow: clip; overflow-wrap: anywhere; } .fx-row input[type=checkbox] { flex: none; width: 24px; height: 24px; }
+.account-section > div, .more-group > div { min-width: 0; max-width: 100%; } .account-section summary { overflow-wrap: anywhere; }
+html[lang=el] body, html[lang=el] body * { letter-spacing: normal !important; }
+.theme-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } @media (min-width: 600px) { .theme-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.theme-cell { min-width: 0; } .theme-card { min-width: 0; overflow-wrap: anywhere; } .theme-card .tc-name { min-width: 0; flex-wrap: wrap; }

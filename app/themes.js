@@ -43,7 +43,7 @@
 	EXA.setSkin = ( id ) => {
 		if ( ! THEMES.some( ( x ) => x.id === id ) ) return;
 		if ( id === 'emerald' ) delete root.dataset.skin; else root.dataset.skin = id;
-		store( 'expenity.skin', id === 'emerald' ? null : id );
+		store( 'expenity.skin', id );
 		EXA.applyCustomTheme(); EXA.updateTrails();
 		const m = document.querySelector( 'meta[name=theme-color]' );
 		if ( m ) m.content = id === 'custom' ? EXA.customPalette().accent : THEMES.find( ( x ) => x.id === id ).sw[ 2 ];

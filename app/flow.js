@@ -270,4 +270,6 @@
 	function loading() {
 		$( '#flow' ).innerHTML = `<div class="flow-card"><div class="flow-body center"><div class="spinner" aria-hidden="true"></div><h1>${ esc( t( 'flowLoading' ) ) }</h1></div></div>`;
 	}
+	// A field that gets the keyboard is brought to the middle of the view, so nothing sits on top of it.
+	document.addEventListener( 'focusin', ( e ) => { if ( e.target.matches( '#flow input, #flow textarea, #flow select' ) ) setTimeout( () => { try { e.target.scrollIntoView( { block: 'center' } ); } catch ( err ) { /* ignore */ } }, 300 ); } );
 }() );

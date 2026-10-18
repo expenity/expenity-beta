@@ -187,6 +187,8 @@
 			const r = await api( 'DELETE', '/api/account', undefined, { stepUp: s.token } );
 			if ( ! r.ok ) return { error: r.error || 'generic' };
 			wipeLocal();
+			try { localStorage.removeItem( 'expenity.skin' ); localStorage.removeItem( 'expenity.custom' ); } catch ( e ) { /* ignore */ }
+			window.EXA && window.EXA.setSkin && window.EXA.setSkin( 'sunset' );
 			return { ok: true };
 		},
 	} );

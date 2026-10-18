@@ -94,7 +94,8 @@
 			return `<button type="button" class="ab-btn" data-act="more-back" aria-label="${ esc( t( 'back' ) ) }">${ UI.icon( 'arrow-left', 24 ) }</button><h1 class="ab-title">${ esc( t( titles[ st.more ] ) ) }</h1>`;
 		}
 		const title = { home: null, activity: t( 'tabActivity' ), bills: t( 'tabBills' ), plan: t( 'planTitle' ), reports: t( 'tabReports' ), more: t( 'moreTitle' ) }[ v ];
-		const left = v === 'home' ? `<div class="ab-title home"><small>${ esc( greeting() ) }</small><b>Expen<i>ity</i></b></div>` : `<h1 class="ab-title">${ esc( title ) }</h1>`;
+		const backBtn = v === 'plan' ? `<button type="button" class="ab-btn" data-act="plan-back" aria-label="${ esc( t( 'back' ) ) }">${ UI.icon( 'arrow-left', 24 ) }</button>` : '';
+		const left = backBtn + ( v === 'home' ? `<div class="ab-title home"><small>${ esc( greeting() ) }</small><b>Expen<i>ity</i></b></div>` : `<h1 class="ab-title">${ esc( title ) }</h1>` );
 		const right = v === 'activity' ? `<button type="button" class="ab-btn" data-act="toggle-search" aria-label="${ esc( t( st.searchOpen ? 'searchClose' : 'searchOpen' ) ) }">${ UI.icon( st.searchOpen ? 'x' : 'search', 24 ) }</button>` : '';
 		return `${ left }<span class="sp"></span>${ right }${ v === 'more' ? '' : `<span class="ab-avatar">${ avatar() }</span>` }`;
 	};

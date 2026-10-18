@@ -1,6 +1,26 @@
 {
-  "version": "0.18.0",
+  "version": "0.18.1",
   "releases": [
+    {
+      "version": "0.18.1",
+      "date": "2026-10-18",
+      "en": [
+        "Income that is already due (today or earlier) is now recorded as received straight away; you no longer have to confirm it.",
+        "Amounts are grouped for reading while typing: 20000 shows as 20,000 (English) or 20.000 (Greek).",
+        "First-run setup is calm: no flashing background, and the keyboard no longer hides the name field. New installs start with the Sunset theme.",
+        "Plan (budgets and goals) has a back button.",
+        "Fonts are bundled for every device, with full Greek support; Greek text is no longer letter-spaced.",
+        "Fixed layouts that overflowed on narrow Android phones (Features and Appearance pages)."
+      ],
+      "el": [
+        "Τα έσοδα που έχουν ήδη λήξει (σήμερα ή νωρίτερα) καταγράφονται αμέσως ως εισπραγμένα· δεν χρειάζεται πια επιβεβαίωση.",
+        "Τα ποσά ομαδοποιούνται για ευανάγνωστη εμφάνιση: το 20000 εμφανίζεται ως 20.000 (Ελληνικά) ή 20,000 (Αγγλικά).",
+        "Η αρχική ρύθμιση είναι ήρεμη: χωρίς αναβοσβήσιμο φόντο, και το πληκτρολόγιο δεν κρύβει πια το πεδίο ονόματος. Οι νέες εγκαταστάσεις ξεκινούν με το θέμα Sunset.",
+        "Το Πλάνο (προϋπολογισμοί και στόχοι) έχει κουμπί επιστροφής.",
+        "Οι γραμματοσειρές συνοδεύουν την εφαρμογή για κάθε συσκευή, με πλήρη υποστήριξη ελληνικών· τα ελληνικά δεν έχουν πια αραίωση γραμμάτων.",
+        "Διορθώθηκαν διατάξεις που ξεχείλιζαν σε στενά κινητά Android (σελίδες Λειτουργίες και Εμφάνιση)."
+      ]
+    },
     {
       "version": "0.18.0",
       "date": "2026-10-18",

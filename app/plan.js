@@ -79,6 +79,16 @@
 		EX.save(); UI.haptic(); EXA.playSound?.('success');
 		toast( t( 'tIncReceived', { name: inc.name } ), () => { S().txs = S().txs.filter( ( x ) => x.id !== tx.id ); Object.keys( inc ).forEach( ( k ) => { delete inc[ k ]; } ); Object.assign( inc, before ); EX.save(); } );
 	};
+	/** A new income that is already due (today or earlier) has happened: record each past payment instead of waiting for a confirmation. */
+	EXA.settleIncome = ( inc ) => {
+		let n = 0;
+		while ( inc.next && inc.next <= today() && n < 60 ) {
+			S().txs.push( { id: uid(), type: 'income', amount: String( inc.amount ), account: inc.account, category: inc.category || 'salary', date: inc.next, name: inc.name, note: inc.note || '', incomeId: inc.id, due: inc.next, photo: '', tags: inc.tags || [] } );
+			const nx = EX.nextAfter( inc, inc.next ); n++;
+			if ( nx && nx > inc.next ) inc.next = nx; else { inc.done = true; break; }
+		}
+		return n;
+	};
 	/** Income expected in the next `days` days, in cents of the main currency. */
 	P.expectedIncome = ( days ) => {
 		const to = addDays( today(), days );
@@ -272,7 +282,7 @@
 			if(!acc||!wallets().some(a=>a.id===acc.id))return err('entryWalletGone');
 			const schedule=EXA.readSchedule(f),scheduleError=EXA.scheduleError({repeat:el.repeat.value,...schedule,next:el.next.value});if(scheduleError)return err(scheduleError);const prepared=EX.prepareSchedule({repeat:el.repeat.value,...schedule,day:editing&&editing.next===el.next.value?editing.day:parse(el.next.value).getDate()},el.next.value),next=prepared.next;if(!next)return err(prepared.endMode==='date'?'scheduleEndError':'schedulePickDates');
             const v = { ...prepared,tags: EXA.readTags(f), photo: el.photo.value, name, amount, account: el.account.value, currency: acc.currency || main(), repeat: el.repeat.value, next, day: editing&&editing.next===next&&editing.day?editing.day:parse(next).getDate(), category: el.incomeCategory.value||'salary', note:el.incomeNote.value.trim() };
-			if ( editing ) { Object.assign( editing, v ); delete editing.done; } else S().incomes.push( Object.assign( { id: uid() }, v ) );
+			if ( editing ) { Object.assign( editing, v ); delete editing.done; } else { const fresh = Object.assign( { id: uid() }, v ); S().incomes.push( fresh ); if ( EXA.settleIncome( fresh ) ) toast( t( 'tIncReceived', { name: fresh.name } ) ); }
 		} else return false;
 		UI.closeSheet(); EX.save();
 		return true;
