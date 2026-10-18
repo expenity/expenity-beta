@@ -53,7 +53,7 @@
 			<div class="sw-back"><div class="sw-l"></div><div class="sw-r">${ swBtn( 'edit', 'pencil', 'actEdit', 'edit' ) }${ swBtn( 'duplicate', 'copy', 'duplicateRecord', 'duplicate' ) }${ swBtn( 'del', 'trash', 'actDelete', 'del' ) }</div></div>
 			<button type="button" class="sw-front item" data-act="open-tx" data-id="${ esc( x.id ) }" aria-label="${ esc( title ) }, ${ esc( sign + money( Number( x.amount ), cur ) ) }">
 				${ UI.catCi( info.iconName ? info : EX.catInfo( x.category ) ) }
-				<span class="mid"><b>${ esc( title ) }${ x.photo ? UI.icon( 'paperclip', 14 ) : '' }</b><small>${ esc( meta || dayName( x.date ) ) }</small>${EXA.tagsInline(x.tags)}</span>
+				<span class="mid"><b>${ esc( title ) }${ x.scannedReceipt ? `<span class="scanned-receipt-badge" title="${esc(t('scanReceipt'))}" aria-label="${esc(t('scanReceipt'))}">${UI.icon('receipt',18)}</span>` : x.photo ? UI.icon( 'paperclip', 14 ) : '' }</b><small>${ esc( meta || dayName( x.date ) ) }</small>${EXA.tagsInline(x.tags)}</span>
 				<span class="a ${ x.type }">${ sign }${ esc( money( Number( x.amount ), cur ) ) }</span>
 			</button></li>`;
 	}

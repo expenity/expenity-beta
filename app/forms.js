@@ -231,7 +231,7 @@
 	EXA.applyReceipt=data=>{if(!T||T.type!=='expense'||T.id!==data.id||T.committed)return false;readTxFields();
 	 if(data.name!==undefined)T.name=data.name.slice(0,80);if(data.amount!==undefined){T.amount=data.amount;if(data.currency&&(!T.account||data.currency!==walletCur(T.account))){T.sourceCurrency=data.currency;T.currencyReview=true;}}
 	 if(data.date!==undefined){T.date=data.date;T.dateMode=data.date===today()?'today':data.date===addDays(today(),-1)?'yesterday':'other';if(data.date>today()){T.notice='entryFuture';T.moreOpen=true;}}
-	 if(data.photo)T.photo=data.photo;drawTx(true,false);storeDraft();return true;
+	 T.scannedReceipt=true;if(data.photo)T.photo=data.photo;drawTx(true,false);storeDraft();return true;
 	};
 
 	const pressKey = ( k ) => {
@@ -318,11 +318,11 @@
           const list=T.type==='income'?S().incomes:S().bills;
           const target=T.editScheduleId?list.find(x=>x.id===T.editScheduleId):null;if(T.editScheduleId&&(!target||contentStamp(target)!==T.sourceStamp))return entryError('entryChanged');if(!target&&list.some(x=>x.id===T.id))return;
           const schedule={...EXA.scheduleData(T),...EXA.readSchedule($('#sheet'))},scheduleError=EXA.scheduleError({...T,...schedule});if(scheduleError)return entryError(scheduleError);Object.assign(T,schedule);const prepared=target&&!T.scheduleTouched&&T.date===target.next?{...schedule,next:target.next,day:target.day,scheduleEnd:target.scheduleEnd}:EX.prepareSchedule({repeat:T.repeat||'once',...schedule,day:target&&target.next===T.date?target.day:parse(T.date).getDate()},T.date),next=prepared.next;if(!next)return entryError(prepared.endMode==='date'?'scheduleEndError':'schedulePickDates','#entryRepeat');
-          if(T.scheduleKind==='bill'&&T.payUrl&&!/^https?:\/\//i.test(T.payUrl))return entryError('errUrl');const record={...prepared,id:target?.id||T.id,name:T.name.trim(),amount,account:T.account,currency:walletCur(T.account),category:T.category,tags:copy(T.tags),photo:T.photo||'',repeat:T.repeat||'once',next,day:prepared.day||parse(T.date).getDate(),...(T.type==='income'?{note:T.note.trim()}:{notes:T.note.trim(),lead:T.lead??null,variable:!!T.variable,autopay:!!T.autopay,reference:T.reference||'',payUrl:T.payUrl||''})};
+          if(T.scheduleKind==='bill'&&T.payUrl&&!/^https?:\/\//i.test(T.payUrl))return entryError('errUrl');const record={...prepared,id:target?.id||T.id,name:T.name.trim(),amount,account:T.account,currency:walletCur(T.account),category:T.category,tags:copy(T.tags),photo:T.photo||'',scannedReceipt:!!T.scannedReceipt,repeat:T.repeat||'once',next,day:prepared.day||parse(T.date).getDate(),...(T.type==='income'?{note:T.note.trim()}:{notes:T.note.trim(),lead:T.lead??null,variable:!!T.variable,autopay:!!T.autopay,reference:T.reference||'',payUrl:T.payUrl||''})};
           T.saving=true;const old=target?copy(target):null;if(target){Object.assign(target,record);delete target.done;}else list.push(record);if(!EX.save()){if(target){Object.keys(target).forEach(k=>delete target[k]);Object.assign(target,old);}else list.splice(list.indexOf(record),1);T.saving=false;return entryError('tSaveFail');}
           const type=T.type;EXA.playSound?.('success');T.committed=true;dropDraft();UI.closeSheet(true);if(type==='income'){EXA.st.txFilter.type='income';EXA.st.incomeMode='recurring';}EXA.go(type==='income'?'activity':'bills');return;
         }
-		const tx={type:T.type,amount,account:T.account,date:T.date,name:T.name.trim(),note:T.note.trim(),photo:T.photo||'',tags:T.tags||[]};
+		const tx={type:T.type,amount,account:T.account,date:T.date,name:T.name.trim(),note:T.note.trim(),photo:T.photo||'',scannedReceipt:!!T.scannedReceipt,tags:T.tags||[]};
 		if(T.type==='transfer'){
 		 if(!writable(T.toAccount)||T.toAccount===T.account){T.toWalletOpen=true;drawTx(true,false);return entryError('errTransferSame','[data-entry=to-wallet]');}
 		 if(!EX.sameScope(EX.account(T.account),EX.account(T.toAccount)))return entryError('errTransferSpace','[data-entry=to-wallet]');

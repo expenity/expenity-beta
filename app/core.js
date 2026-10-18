@@ -292,7 +292,7 @@
 
 	/** Records a payment of a bill as an expense transaction. */
 	EX.payBill = ( bill, { amount, date, account } ) => {
-		const tx = { id: EX.uid(), type: 'expense', amount: String( amount ), account: account || bill.account || ( EX.activeAccounts()[ 0 ] || {} ).id, category: bill.category, date, name: bill.name, billId: bill.id, due: bill.next, photo: bill.photo || '', tags: bill.tags || [] };
+		const tx = { id: EX.uid(), type: 'expense', amount: String( amount ), account: account || bill.account || ( EX.activeAccounts()[ 0 ] || {} ).id, category: bill.category, date, name: bill.name, billId: bill.id, due: bill.next, photo: bill.photo || '', scannedReceipt: !!bill.scannedReceipt, tags: bill.tags || [] };
 		S.txs.push( tx );
 		return tx;
 	};

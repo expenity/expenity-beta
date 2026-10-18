@@ -1,6 +1,16 @@
 {
-  "version": "0.16.1",
+  "version": "0.16.2",
   "releases": [
+    {
+      "version": "0.16.2",
+      "date": "2026-10-18",
+      "en": [
+        "Scanned expenses now show a dedicated receipt badge, distinct from photo attachments. The badge follows a scanned scheduled expense into payment history."
+      ],
+      "el": [
+        "Τα σαρωμένα έξοδα εμφανίζουν ειδικό εικονίδιο απόδειξης, διαφορετικό από τις φωτογραφίες. Το εικονίδιο διατηρείται και στο ιστορικό πληρωμών."
+      ]
+    },
     {
       "version": "0.16.1",
       "date": "2026-10-18",
