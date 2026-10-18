@@ -224,7 +224,7 @@
 		if(T&&UI.sheetOpen()&&!T.committed){if(meaningful()){UI.closeSheet();return;}UI.closeSheet(true);}
 		EX.ensureWallet();const ws=EX.writableAccounts(),def=ws.find(a=>a.id===S().settings.defaultAccount),account=def?.id||(ws.length===1?ws[0].id:'');
 		const v={type:'expense',repeat:'once',date:today(),account,amount:'',toAmount:'',name:'',note:'',category:null,...(tx||preset)};
-		T={...v,tags:copy(v.tags||[]),photo:v.photo||'',id:tx?.id||uid(),editId:tx?.id||null,target:'amount',keypadOpen:false,editingField:false,rememberName:false,rememberWallet:false,rememberAmount:false,quick:false,quickText:'',noteOpen:false,makeDefault:false,original:tx?contentStamp(tx):null};
+		T={...v,splits:copy(v.splits||[]),reimbursement:v.reimbursement?copy(v.reimbursement):null,tags:copy(v.tags||[]),photo:v.photo||'',id:tx?.id||uid(),editId:tx?.id||null,target:'amount',keypadOpen:false,editingField:false,rememberName:false,rememberWallet:false,rememberAmount:false,quick:false,quickText:'',noteOpen:false,makeDefault:false,original:tx?contentStamp(tx):null};
 		if(T.type==='transfer'&&!T.toAccount)T.toAccount=EX.peerAccount(T.account)?.id||'';
 		T.baseline=JSON.stringify(draftValue());const restored=restoreDraft(T.type,T.editId,T.recoveryId);if(restored){T={...restored,keypadOpen:false,editingField:false,saving:false,committed:false,discard:false,resumed:true,pendingSchedule:false,pendingShortcut:undefined};}
 		draftOwner=owner();T.dateMode=T.date===today()?'today':T.date===addDays(today(),-1)?'yesterday':'other';

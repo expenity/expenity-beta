@@ -1,14 +1,32 @@
 {
-  "version": "0.30.0",
+  "version": "0.30.1",
   "releases": [
+    {
+      "version": "0.30.1",
+      "date": "2026-10-19",
+      "en": [
+        "Largest-expense rankings keep split payments together, while category reports retain their allocations. Split and reimbursement edit drafts are isolated from saved records until confirmed."
+      ],
+      "el": [
+        "Η κατάταξη μεγαλύτερων εξόδων διατηρεί ολόκληρη την πληρωμή, ενώ οι αναφορές κατηγοριών κρατούν την κατανομή. Τα πρόχειρα κατανομών και επιστροφών χρημάτων δεν αλλάζουν τις αποθηκευμένες εγγραφές πριν την επιβεβαίωση."
+      ]
+    },
     {
       "version": "0.30.0",
       "date": "2026-10-19",
       "en": [
-        "Advanced now includes split expenses: one wallet payment with exact category allocations used by reports and budgets. Added reimbursements with person or organisation, expected amount, partial repayments, outstanding list and receipt history. Repayments reduce spending instead of inflating earnings. Includes English and Greek examples, animated tutorials, Advanced onboarding, help icons, documentation and metadata in exports. Existing accounting stays correct when features are switched off."
+        "Advanced: split a recorded expense between categories, with exact totals and one wallet payment.",
+        "Advanced: track money owed by a person or organisation, record partial repayments, and review outstanding amounts and receipt history.",
+        "Reports and budgets use split category amounts. Repayments reduce spending on receipt dates rather than inflating earnings; unpaid expectations never increase balances.",
+        "Added English and Greek worked examples, unsaved example drafts, animated tutorials, Advanced onboarding steps and contextual help.",
+        "Updated website, English and Greek documentation, screenshots, README and blog. JSON backups retain the full records; CSV includes allocation and reimbursement metadata."
       ],
       "el": [
-        "Το Advanced περιλαμβάνει πλέον κατανομή εξόδων: μία πληρωμή με ακριβή ποσά ανά κατηγορία για αναφορές και προϋπολογισμούς. Προστέθηκαν επιστροφές χρημάτων από τρίτους, με πρόσωπο ή οργανισμό, αναμενόμενο ποσό, τμηματικές εισπράξεις, εκκρεμότητες και ιστορικό. Οι εισπράξεις μειώνουν τα έξοδα αντί να αυξάνουν το εισόδημα. Με παραδείγματα, κινούμενους οδηγούς, αρχική ρύθμιση Advanced, βοήθεια και πλήρη τεκμηρίωση στα ελληνικά και αγγλικά."
+        "Advanced: κατανομή καταχωρισμένου εξόδου σε κατηγορίες, με ακριβές άθροισμα και μία χρέωση πορτοφολιού.",
+        "Advanced: παρακολούθηση ποσών που σας οφείλει πρόσωπο ή οργανισμός, τμηματικές εισπράξεις, εκκρεμότητες και ιστορικό.",
+        "Αναφορές και προϋπολογισμοί χρησιμοποιούν τα επιμέρους ποσά. Οι εισπράξεις μειώνουν τα έξοδα αντί να αυξάνουν το εισόδημα. Τα αναμενόμενα χρήματα δεν προστίθενται στο υπόλοιπο.",
+        "Προστέθηκαν αναλυτικά παραδείγματα, δοκιμαστικά πρόχειρα, κινούμενοι οδηγοί, βήματα αρχικής ρύθμισης Advanced και βοήθεια στα ελληνικά και αγγλικά.",
+        "Ενημερώθηκαν ιστοσελίδα, τεκμηρίωση, στιγμιότυπα, README και άρθρο. Τα αντίγραφα JSON διατηρούν όλες τις εγγραφές και το CSV περιλαμβάνει στοιχεία κατανομής και επιστροφών χρημάτων."
       ]
     },
     {

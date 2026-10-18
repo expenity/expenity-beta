@@ -49,6 +49,7 @@
 			&& ( ! q || EX.fold( ( x.name || '' ) + ' ' + ( x.note || '' ) + ' ' + EX.catInfo( x.category ).name ).includes( q ) ) );
 	};
 	const sum = ( list, type ) => list.reduce( ( s, x ) => ( x.type === type ? s + cents( x ) : s ), 0 );
+	const expensePayments=list=>{const map=new Map();for(const x of list){if(x.type!=='expense'||x.reimbursementOf)continue;const prev=map.get(x.id);if(prev)prev.amount=((EX.cents(prev.amount)+EX.cents(x.amount))/100).toFixed(2);else map.set(x.id,{...x});}return [...map.values()];};
 	const byCat = ( list ) => { const m = {}; list.filter( ( x ) => x.type === 'expense' ).forEach( ( x ) => { m[ x.category ] = ( m[ x.category ] || 0 ) + cents( x ); } ); return Object.entries( m ).sort( ( a, b ) => b[ 1 ] - a[ 1 ] ); };
 	const monthsIn = ( from, to ) => { const out = []; let y = Number( from.slice( 0, 4 ) ), m = Number( from.slice( 5, 7 ) ) - 1; const ey = Number( to.slice( 0, 4 ) ), em = Number( to.slice( 5, 7 ) ) - 1; while ( y < ey || ( y === ey && m <= em ) ) { out.push( `${ y }-${ String( m + 1 ).padStart( 2, '0' ) }` ); m++; if ( m > 11 ) { m = 0; y++; } } return out; };
 	const netWorth = () => EX.mainCents( EX.activeAccounts().map( ( a ) => ( { amount: EX.balance( a ) / 100, currency: a.currency } ) ) );
@@ -127,7 +128,7 @@
 		const len = dayDiff( r.to, r.from ) + 1, pto = addDays( r.from, -1 ), pfrom = addDays( pto, -( len - 1 ) ), prev = pick( pfrom, pto );
 		const inc = sum( list, 'income' ), exp = sum( list, 'expense' ), pinc = sum( prev, 'income' ), pexp = sum( prev, 'expense' );
 		const rate = inc ? Math.round( ( ( inc - exp ) / inc ) * 100 ) : null, prate = pinc ? Math.round( ( ( pinc - pexp ) / pinc ) * 100 ) : null;
-		const cats = byCat( list ), total = cats.reduce( ( s, x ) => s + x[ 1 ], 0 ), biggest = list.filter( ( x ) => x.type === 'expense' ).sort( ( a, b ) => cents( b ) - cents( a ) )[ 0 ];
+		const cats = byCat( list ), total = cats.reduce( ( s, x ) => s + x[ 1 ], 0 ), biggest = expensePayments(list).sort( ( a, b ) => cents( b ) - cents( a ) )[ 0 ];
 		return `<div class="tiles">${ tile( t( 'repNetWorth' ), m$( netWorth() ) ) }${ tile( t( 'ovNet' ), m$( inc - exp ), delta( inc - exp, pinc - pexp, true ) ) }</div>
 			<div class="tiles">${ tile( t( 'ovIncome' ), m$( inc ), delta( inc, pinc, true ) ) }${ tile( t( 'ovExpenses' ), m$( exp ), delta( exp, pexp, false ) ) }</div>
 			<div class="tiles">${ tile( t( 'repSavingsRate' ), rate == null ? '—' : rate + '%', prate == null || rate == null ? '' : delta( rate, prate, true ) ) }${ tile( t( 'repPerDay' ), m$( Math.round( exp / len ) ) ) }</div>
@@ -143,7 +144,7 @@
 		const names = [ 1, 2, 3, 4, 5, 6, 7 ].map( ( d ) => new Date( 2024, 0, d ).toLocaleDateString( EX.loc(), { weekday: 'short' } ) );
 		const merch = {}; list.filter( ( x ) => x.type === 'expense' && ( x.name || '' ).trim() ).forEach( ( x ) => { const k = x.name.trim(); merch[ k ] = ( merch[ k ] || 0 ) + cents( x ); } );
 		const top = Object.entries( merch ).sort( ( a, b ) => b[ 1 ] - a[ 1 ] ).slice( 0, 6 );
-		const big = list.filter( ( x ) => x.type === 'expense' ).sort( ( a, b ) => cents( b ) - cents( a ) ).slice( 0, 5 );
+		const big = expensePayments(list).sort( ( a, b ) => cents( b ) - cents( a ) ).slice( 0, 5 );
 		const drill = f().cat ? list.filter( ( x ) => x.category === f().cat ).sort( ( a, b ) => ( a.date < b.date ? 1 : -1 ) ).slice( 0, 8 ) : [];
 		return `<section class="card"><h2>${ esc( t( 'ovTopCats' ) ) }</h2>${ total ? `<div class="donut-wrap2">${ donut( cats, total, f().cat ) }${ legend( cats, total ) }</div>${ tableOf( [ t( 'fCategory' ), t( 'fAmount' ) ], cats.map( ( [ k, v ] ) => [ EX.catInfo( k ).name, m$( v ) ] ) ) }` : noData() }</section>
 			${ drill.length ? `<section class="card"><h2>${ esc( EX.catInfo( f().cat ).name ) }</h2><ul class="plain">${ drill.map( ( x ) => `<li>${ esc( short( x.date ) ) } · ${ esc( x.name || EX.catInfo( x.category ).name ) } · <b>${ esc( m$( cents( x ) ) ) }</b></li>` ).join( '' ) }</ul></section>` : '' }
