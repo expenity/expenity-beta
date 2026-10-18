@@ -1,6 +1,24 @@
 {
-  "version": "0.16.6",
+  "version": "0.17.0",
   "releases": [
+    {
+      "version": "0.17.0",
+      "date": "2026-10-18",
+      "en": [
+        "Profile picture: pick one of 20 characters (funny, animated or minimal) or use your own photo. It shows a soft pulse when you are offline.",
+        "A checkmark confirms when a photo is attached, receipt details are added or a picture is saved.",
+        "Re-scan a receipt from an entry that was already scanned.",
+        "Photos are stored smaller to save space.",
+        "The New wallet tile is gone from Home; add wallets from More → Wallets."
+      ],
+      "el": [
+        "Εικόνα προφίλ: διάλεξε έναν από 20 χαρακτήρες (αστείους, κινούμενους ή μινιμαλιστικούς) ή τη φωτογραφία σου. Εμφανίζει απαλό παλμό όταν είσαι εκτός σύνδεσης.",
+        "Ένα σημάδι επιβεβαίωσης εμφανίζεται όταν επισυνάπτεται φωτογραφία, προστίθενται στοιχεία απόδειξης ή αποθηκεύεται εικόνα.",
+        "Νέα σάρωση απόδειξης από εγγραφή που έχει ήδη σαρωθεί.",
+        "Οι φωτογραφίες αποθηκεύονται σε μικρότερο μέγεθος για εξοικονόμηση χώρου.",
+        "Το κουμπί «Νέο πορτοφόλι» αφαιρέθηκε από την Αρχική· πρόσθεσε πορτοφόλια από Περισσότερα → Πορτοφόλια."
+      ]
+    },
     {
       "version": "0.16.6",
       "date": "2026-10-18",
