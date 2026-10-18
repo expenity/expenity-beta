@@ -1,6 +1,16 @@
 {
-  "version": "0.16.2",
+  "version": "0.16.3",
   "releases": [
+    {
+      "version": "0.16.3",
+      "date": "2026-10-18",
+      "en": [
+        "Expandable sections now act as an accordion: opening another section closes its peers while retaining parent sections."
+      ],
+      "el": [
+        "Οι αναπτυσσόμενες ενότητες κλείνουν τις προηγούμενες όταν ανοίγει άλλη, διατηρώντας την γονική ενότητα ανοιχτή."
+      ]
+    },
     {
       "version": "0.16.2",
       "date": "2026-10-18",

@@ -175,3 +175,11 @@
 		scroller.addEventListener( 'touchend', end ); scroller.addEventListener( 'touchcancel', end );
 	};
 }() );
+
+/* One expanded sibling group at a time; nested groups retain their parent. */
+document.addEventListener('toggle',event=>{
+ const current=event.target;if(!(current instanceof HTMLDetailsElement)||!current.open)return;
+ const parent=current.parentElement.closest('details');
+ const scope=parent||current.closest('dialog,#view')||current.parentElement;
+ scope.querySelectorAll('details[open]').forEach(other=>{if(other!==current&&!other.contains(current)&&other.parentElement.closest('details')===parent)other.open=false;});
+},true);
