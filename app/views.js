@@ -360,9 +360,9 @@
 			${ EX.auth.isSignedIn() ? '' : `<section class="card danger"><h2>${ esc( t( 'sDanger' ) ) }</h2><p class="muted small">${ esc( t( 'sDangerDesc' ) ) }</p><div class="btn-row"><button type="button" class="btn btn-danger" id="wipeBtn">${ esc( t( 'wipe' ) ) }</button></div></section>` }`;
 	}
 	function appearanceView() {
-		return `<section class="card"><h2>${ esc( t( 'themesTitle' ) ) }</h2>${ EXA.themePicker() }</section>
-			<section class="card"><h2>${ esc( t( 'setupMotion' ) ) }</h2><div class="chips wrap">${ [ 'auto', 'full', 'reduced', 'off' ].map( ( m ) => `<button type="button" class="chip big${ ( S().device.motion || 'auto' ) === m ? ' on' : '' }" data-motion-set="${ m }">${ esc( t( 'motion' + m.charAt( 0 ).toUpperCase() + m.slice( 1 ) ) ) }</button>` ).join( '' ) }</div><p class="muted small">${ esc( t( 'motionHint' ) ) }</p></section>
-			<section class="card"><h2>${ esc( t( 'sLanguage' ) ) }</h2><div class="chips wrap">${ Object.keys( EX.I18N.langs ).map( ( k ) => `<button type="button" class="chip big${ k === EX.lang() ? ' on' : '' }" data-lang="${ k }" lang="${ k }">${ UI.icon( 'language', 20 ) } ${ esc( EX.I18N.langs[ k ].langName ) }</button>` ).join( '' ) }</div></section>`;
+		return `<section class="card"><h2>${ esc( t( 'sLanguage' ) ) }</h2><div class="chips wrap">${ Object.keys( EX.I18N.langs ).map( ( k ) => `<button type="button" class="chip big${ k === EX.lang() ? ' on' : '' }" data-lang="${ k }" lang="${ k }">${ UI.icon( 'language', 20 ) } ${ esc( EX.I18N.langs[ k ].langName ) }</button>` ).join( '' ) }</div></section>
+			<section class="card"><h2>${ esc( t( 'themesTitle' ) ) }</h2>${ EXA.themePicker() }</section>
+			<section class="card"><h2>${ esc( t( 'setupMotion' ) ) }</h2><div class="chips wrap">${ [ 'auto', 'full', 'reduced', 'off' ].map( ( m ) => `<button type="button" class="chip big${ ( S().device.motion || 'auto' ) === m ? ' on' : '' }" data-motion-set="${ m }">${ esc( t( 'motion' + m.charAt( 0 ).toUpperCase() + m.slice( 1 ) ) ) }</button>` ).join( '' ) }</div><p class="muted small">${ esc( t( 'motionHint' ) ) }</p></section>`;
 	}
 	function installView() {
 		const installed=UI.isStandalone()?`<p>${esc(t('installDone'))}</p>`:'';

@@ -43,6 +43,7 @@
 	const touch = () => UI.isPhone();
 	const body = ( id ) => `<div class="tt-phone" aria-hidden="true">${ DEMOS[ id ]() }</div><ol class="tt-steps">${ [ 1, 2, 3 ].map( ( n ) => `<li>${ esc( t( `tut_${ id }_${ n }` ) ) }</li>` ).join( '' ) }</ol>`;
 	const head = ( title, close = true ) => `<div class="sheet-head">${ close ? `<button class="ab-btn" data-close aria-label="${ esc( t( 'close' ) ) }">${ UI.icon( 'x', 24 ) }</button>` : '' }<h2>${ esc( title ) }</h2></div>`;
+	T.body = body;
 	T.view = () => `<section class="card"><p class="muted small">${ esc( t( 'tutIntro' ) ) }</p><div class="list mlist">${ T.list().map( ( x ) => `<button type="button" class="mrow" data-tut="${ x.id }">${ UI.ci( x.icon, 'teal', 36 ) }<span class="mid"><b>${ esc( t( 'tut_' + x.id ) ) }</b><small>${ esc( t( 'tutD_' + x.id ) ) }</small></span>${ UI.icon( 'chevron-right', 18 ) }</button>` ).join( '' ) }</div><div class="btn-row"><button type="button" class="btn btn-ghost" data-tour="start">${ UI.icon( 'refresh', 20 ) } ${ esc( t( 'tourReplay' ) ) }</button></div></section>`;
 	T.open = ( id ) => UI.openSheet( head( t( 'tut_' + id ) ) + `<div class="sheet-pad tt">${ body( id ) }<div class="btn-row"><button type="button" class="btn btn-primary" data-close>${ esc( t( 'tutDone' ) ) }</button></div></div>`, { tall: true } );
 

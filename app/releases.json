@@ -1,6 +1,20 @@
 {
-  "version": "0.20.0",
+  "version": "0.20.1",
   "releases": [
+    {
+      "version": "0.20.1",
+      "date": "2026-10-18",
+      "en": [
+        "Language is now the first card in Appearance.",
+        "First-time setup briefly flips the language to the other one and back, locked for about a second, to draw attention to the language buttons.",
+        "Setup now includes animated steps for scanning a receipt and for adding an entry in one sentence."
+      ],
+      "el": [
+        "Η γλώσσα είναι πλέον η πρώτη κάρτα στην Εμφάνιση.",
+        "Η πρώτη ρύθμιση εναλλάσσει σύντομα τη γλώσσα στην άλλη και πίσω, με κλειδωμένη οθόνη για ένα δευτερόλεπτο, για να τραβήξει την προσοχή στα κουμπιά γλώσσας.",
+        "Η ρύθμιση περιλαμβάνει πλέον κινούμενα βήματα για τη σάρωση απόδειξης και για την προσθήκη εγγραφής με μία πρόταση."
+      ]
+    },
     {
       "version": "0.20.0",
       "date": "2026-10-18",

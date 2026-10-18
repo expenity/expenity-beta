@@ -16,7 +16,7 @@
 	let platform = null, busy = false;
 	const W = { step: 0, wallets: null, curQuery: '' };
 	// The goal step only appears for people who said they want to save for something.
-	const steps = () => [ 'name', 'currency', 'aims' ].concat( ( S().settings.aims || [] ).includes( 'save' ) ? [ 'goal' ] : [] ).concat( [ 'wallets', 'look', 'tour' ] ).concat( UI.isPhone() ? [ 'tips' ] : [] ).concat( [ 'done' ] );
+	const steps = () => [ 'name', 'currency', 'aims' ].concat( ( S().settings.aims || [] ).includes( 'save' ) ? [ 'goal' ] : [] ).concat( [ 'wallets', 'look', 'tour' ] ).concat( EX.feature && EX.feature( 'receipts' ) === false ? [] : [ 'scan' ] ).concat( [ 'quick' ] ).concat( UI.isPhone() ? [ 'tips' ] : [] ).concat( [ 'done' ] );
 	const GOAL_PRESETS = [ [ 'trip', 'plane' ], [ 'car', 'car' ], [ 'gift', 'gift' ], [ 'home', 'home' ], [ 'emergency', 'heart' ], [ 'other', 'target' ] ];
 
 	/* ------------------------------------------------------------------ Stage machine */
@@ -74,7 +74,17 @@
 	const langChips = () => `<div class="flow-lang" role="group">${ Object.keys( EX.I18N.langs ).map( ( k ) => `<button type="button" class="chip${ k === EX.lang() ? ' on' : '' }" data-lang="${ k }" lang="${ k }">${ esc( EX.I18N.langs[ k ].langName ) }</button>` ).join( '' ) }</div>`;
 	const moneyScene = () => `<div class="money-scene" aria-hidden="true"><span class="scene-glow"></span><div class="scene-balance"><small>${esc(t('ovBalance'))}</small><b>${esc(EX.money(1240,'EUR'))}</b><div class="scene-bars"><i></i><i></i><i></i><i></i><i></i><i></i></div></div><div class="scene-expense">${UI.ci('coffee','amber',36)}<span>${esc(t('tourSampleName'))}<b>−${esc(EX.money(3.5,'EUR'))}</b></span>${UI.icon('check',18)}</div><div class="scene-goal">${UI.ci('target','pink',36)}<span>${esc(t('planGoals'))}<b>64%</b><i></i></span></div></div>`;
 
+	/** First time only: for about a second the screen is locked and the language flips to the other one and back, to draw the eye to the language buttons. */
+	function langAttention() {
+		const d = D(); if ( d.langHinted ) return; d.langHinted = true; EX.persist();
+		const keys = Object.keys( EX.I18N.langs ), orig = EX.lang(), other = keys.find( ( k ) => k !== orig ); if ( ! other ) return;
+		const f = $( '#flow' ); f.classList.add( 'lang-attn' );
+		setTimeout( () => EX.setLang( other ), 250 );
+		setTimeout( () => EX.setLang( orig ), 850 );
+		setTimeout( () => f.classList.remove( 'lang-attn' ), 1150 );
+	}
 	function welcome() {
+		const first = ! D().langHinted;
 		$( '#flow' ).innerHTML = `<div class="flow-card welcome">
 			<div class="flow-top"><span class="brand-row"><span id="flowLogo"></span><b class="brand-name">Expen<i>ity</i></b></span>${ langChips() }</div>
 			<div class="flow-body">
@@ -88,6 +98,7 @@
 				<p class="muted small center trust">${ esc( t( 'flowTrust' ) ) }</p>
 			</div>
 			<div class="flow-foot"><button type="button" class="link" data-flow="recover">${ esc( t( 'flowLost' ) ) }</button><button type="button" class="link" data-flow="guest">${ esc( t( 'flowGuest' ) ) }</button></div></div>`;
+		if ( first ) langAttention();
 	}
 	const flowErr = ( code ) => { const e = $( '#flowErr' ); if ( e ) { e.textContent = EXA.errText( code ); e.hidden = false; } else UI.toast( EXA.errText( code ) ); };
 	async function guarded( fn ) {
@@ -212,6 +223,9 @@
 		} else if ( id === 'tour' ) {
 			icon='sparkles';color='purple';title=t('tourTitle');text=t('tourText');
 			body=`<div class="tour-grid">${[['home','layout-dashboard','tourHome','tourHomeText'],['activity','arrows-sort','tourActivity','tourActivityText'],['plan','target','planTitle','tourPlanText'],['reports','chart-pie','tabReports','tourReportsText']].map(([id,ic,label,copy],i)=>`<article style="--tour-i:${i}">${UI.ci(ic,['teal','blue','pink','amber'][i],44)}<div><h2>${esc(t(label))}</h2><p>${esc(t(copy))}</p></div></article>`).join('')}</div>`;
+		} else if ( id === 'scan' || id === 'quick' ) {
+			icon = id === 'scan' ? 'receipt' : 'pencil'; color = id === 'scan' ? 'teal' : 'blue'; title = t( 'tut_' + id ); text = t( 'tutD_' + id );
+			body = EXA.tutorials.body( id );
 		} else if ( id === 'tips' ) {
 			icon = 'arrows-exchange'; color = 'blue'; title = t( 'setupTipsTitle' ); text = t( 'setupTipsText' );
 			const row = ( cls, ic, tint, name, amt ) => `<div class="mock-sw ${ cls }"><div class="mb"><div class="l"><span class="mact paid">${ UI.icon( 'check', 20 ) }<b>${ esc( t( 'actPaid' ) ) }</b></span></div><div class="r"><span class="mact edit">${ UI.icon( 'pencil', 20 ) }<b>${ esc( t( 'actEdit' ) ) }</b></span><span class="mact del">${ UI.icon( 'trash', 20 ) }<b>${ esc( t( 'actDelete' ) ) }</b></span></div></div><div class="front">${ UI.ci( ic, tint, 40 ) }<span class="mid"><b>${ esc( name ) }</b><small>${ esc( t( 'relTomorrow' ) ) }</small></span><span class="a">${ amt }</span></div></div>`;
