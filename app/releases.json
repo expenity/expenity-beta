@@ -1,6 +1,20 @@
 {
-  "version": "0.22.0",
+  "version": "0.23.0",
   "releases": [
+    {
+      "version": "0.23.0",
+      "date": "2026-10-18",
+      "en": [
+        "Help while you work: a small help icon on screens that have a tutorial (adding an entry, bills, wallets, budgets, Activity, Reports and more). It opens the animated tutorial in a popup, so you never lose what you were doing, with All tutorials at the bottom. Turn the icons off on the Tutorials page.",
+        "Drafts: an entry you started but did not save is kept for 24 hours. Home points it out when you open the app, and More → Drafts lists them so you can continue or dismiss each one.",
+        "Two new tutorials: Wallets, and Photos on entries."
+      ],
+      "el": [
+        "Βοήθεια την ώρα που δουλεύεις: ένα μικρό εικονίδιο βοήθειας στις οθόνες που έχουν οδηγό (προσθήκη εγγραφής, λογαριασμοί, πορτοφόλια, προϋπολογισμοί, Κινήσεις, Αναφορές και άλλα). Ανοίγει τον κινούμενο οδηγό σε αναδυόμενο παράθυρο, ώστε να μη χάνεις ό,τι έκανες, με Όλοι οι οδηγοί στο κάτω μέρος. Απενεργοποίησε τα εικονίδια από τη σελίδα Οδηγοί.",
+        "Πρόχειρα: μια εγγραφή που ξεκίνησες αλλά δεν αποθήκευσες φυλάσσεται για 24 ώρες. Η Αρχική την επισημαίνει όταν ανοίγεις την εφαρμογή και το Περισσότερα → Πρόχειρα τα απαριθμεί ώστε να συνεχίσεις ή να απορρίψεις το καθένα.",
+        "Δύο νέοι οδηγοί: Πορτοφόλια και Φωτογραφίες σε εγγραφές."
+      ]
+    },
     {
       "version": "0.22.0",
       "date": "2026-10-18",
