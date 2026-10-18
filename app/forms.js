@@ -603,6 +603,7 @@
 			<label class="f"><span>${ esc( t( 'wName' ) ) }</span><input name="name" required maxlength="40" autocomplete="off" value="${ esc( EX.accountName(v) ) }" autofocus></label>
 			<div class="lbl">${ esc( t( 'wType' ) ) }</div><div class="chip-scroll" id="wTypes">${ EX.WALLET_TYPES.map( ( w ) => `<button type="button" class="chip big${ v.type === w[ 0 ] ? ' on' : '' }" data-wtype="${ w[ 0 ] }">${ UI.icon( EX.WALLET_ICON[ w[ 0 ] ], 20 ) } ${ esc( t( 'wt' + w[ 0 ].charAt( 0 ).toUpperCase() + w[ 0 ].slice( 1 ) ) ) }</button>` ).join( '' ) }</div><input type="hidden" name="type" value="${ esc( v.type ) }">
 			<div class="grid2"><label class="f"><span>${ esc( t( 'wCurrency' ) ) }</span><input name="currency" list="curList" maxlength="3" autocomplete="off" value="${ esc( v.currency ) }"></label><label class="f"><span>${ esc( t( 'wOpening' ) ) }</span><input name="opening" inputmode="decimal" placeholder="0.00" autocomplete="off" value="${ esc( v.opening === '0' ? '' : v.opening ) }"></label></div>
+			${ EXA.walletColorField ? EXA.walletColorField( v ) : '' }
 			<label class="f chk"><input type="checkbox" name="archived"${ v.archived ? ' checked' : '' }> <span>${ esc( t( 'wArchived' ) ) }</span></label>
 			${ a ? EXA.shareRow( a ) : '' }
 			${ EXA.tagsField(v.tags) }${ EXA.photos.slot( v.photo ) }<p class="err" id="walletErr" role="alert" hidden></p>
@@ -634,8 +635,9 @@
 		if ( ! name ) return err( 'errNameReq' );
 		if ( ! /^[A-Z]{3}$/.test( cur ) ) return err( 'errCur' );
 		if ( ! /^-?\d+(\.\d{1,2})?$/.test( opening ) ) return err( 'errAmount' );
-		const v = { name, type: f.type.value, currency: cur, opening, archived: f.archived.checked, photo: f.photo.value, tags: EXA.readTags(document.querySelector('#walletForm')) };
-		if ( editingWallet ) { Object.assign( editingWallet, v ); delete editingWallet.auto; } else S().accounts.push( Object.assign( { id: uid() }, v ) );
+		const v = { name, type: f.type.value, currency: cur, opening, archived: f.archived.checked, color: f.color ? f.color.value : '', photo: f.photo.value, tags: EXA.readTags(document.querySelector('#walletForm')) };
+		if ( ! v.color ) delete v.color;
+		if ( editingWallet ) { Object.assign( editingWallet, v ); if ( ! v.color ) delete editingWallet.color; delete editingWallet.auto; } else S().accounts.push( Object.assign( { id: uid() }, v ) );
 		EX.repairCurrencies();
 		UI.closeSheet(); EX.save(); toast( t( 'tWalletSaved' ) );
 	};

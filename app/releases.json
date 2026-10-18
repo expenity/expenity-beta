@@ -1,6 +1,20 @@
 {
-  "version": "0.26.0",
+  "version": "0.27.0",
   "releases": [
+    {
+      "version": "0.27.0",
+      "date": "2026-10-18",
+      "en": [
+        "Pinch and double-tap zoom are turned off everywhere in the app.",
+        "Wallet colors: every wallet gets a color that follows your theme, and you can choose your own for any wallet.",
+        "Anonymous usage statistics (once a day, no account, email, IP address or money data) help improve the app. You can switch them off in More, Account, Usage statistics."
+      ],
+      "el": [
+        "Το ζουμ με τσίμπημα και διπλό πάτημα είναι απενεργοποιημένο παντού στην εφαρμογή.",
+        "Χρώματα πορτοφολιών: κάθε πορτοφόλι παίρνει χρώμα που ακολουθεί το θέμα σας και μπορείτε να διαλέξετε δικό σας για οποιοδήποτε πορτοφόλι.",
+        "Ανώνυμα στατιστικά χρήσης (μία φορά την ημέρα, χωρίς λογαριασμό, email, διεύθυνση IP ή δεδομένα χρημάτων) βοηθούν να βελτιώνεται η εφαρμογή. Μπορείτε να τα απενεργοποιήσετε στο Περισσότερα, Λογαριασμός, Στατιστικά χρήσης."
+      ]
+    },
     {
       "version": "0.26.0",
       "date": "2026-10-18",
