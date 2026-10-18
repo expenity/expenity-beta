@@ -1,6 +1,18 @@
 {
-  "version": "0.23.1",
+  "version": "0.24.0",
   "releases": [
+    {
+      "version": "0.24.0",
+      "date": "2026-10-18",
+      "en": [
+        "Your own targets: on the daily card, tap the pencil to keep the automatic figure or set a daily, weekly or monthly spending target (it shows what is left, or how far over you are), plus an optional daily, weekly or monthly income target with a progress bar.",
+        "Fixed streaks and the daily figure not counting some spending correctly."
+      ],
+      "el": [
+        "Δικοί σου στόχοι: στην ημερήσια κάρτα, πάτησε το μολύβι για να κρατήσεις το αυτόματο ποσό ή να ορίσεις ημερήσιο, εβδομαδιαίο ή μηνιαίο στόχο δαπανών (δείχνει πόσα απομένουν ή πόσο το ξεπέρασες), καθώς και προαιρετικό ημερήσιο, εβδομαδιαίο ή μηνιαίο στόχο εσόδων με μπάρα προόδου.",
+        "Διορθώθηκαν τα σερί και το ημερήσιο ποσό που δεν μετρούσαν σωστά κάποια έξοδα."
+      ]
+    },
     {
       "version": "0.23.1",
       "date": "2026-10-18",

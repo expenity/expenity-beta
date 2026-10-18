@@ -8,7 +8,7 @@
 	const S = () => EX.state(), today = () => EX.today(), main = () => S().settings.currency;
 	const on = ( id ) => ! EX.feature || EX.feature( id ) !== false;
 	const money = ( cents, cur = main() ) => EX.money( cents / 100, cur );
-	const cents = ( x ) => EX.mainCents( [ x ] );
+	const cents = ( x ) => EX.mainCents( [ { amount: x.amount, currency: EX.txCurrency( x ) } ] );
 
 	/* ------------------------------------------------------------------ 1. Duplicate guard */
 	EXA.dupFind = ( tx ) => {
@@ -21,13 +21,59 @@
 
 	/* ------------------------------------------------------------------ 2. Daily number */
 	const spentOn = ( d ) => S().txs.filter( ( x ) => x.type === 'expense' && ! x.goalId && x.date === d ).reduce( ( n, x ) => n + cents( x ), 0 );
-	EXA.dailyHome = () => {
-		if ( ! on( 'daily' ) || ! EX.safeSpend ) return '';
-		const r = EX.safeSpend.calculate(); if ( ! r.valid || ! Number.isFinite( r.daily ) ) return '';
-		const left = Math.max( 0, r.daily ), spent = spentOn( today() ), share = left + spent ? Math.max( 0, Math.min( 1, left / ( left + spent ) ) ) : 1, over = r.shortfall > 0 && left === 0;
-		return `<div class="daily-card${ over ? ' over' : '' }"><svg class="daily-ring" viewBox="0 0 36 36" aria-hidden="true"><circle cx="18" cy="18" r="15" fill="none" stroke="currentColor" stroke-opacity=".18" stroke-width="3.5"/><circle class="daily-arc" cx="18" cy="18" r="15" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="94.2" stroke-dashoffset="${ ( 94.2 * ( 1 - share ) ).toFixed( 1 ) }" transform="rotate(-90 18 18)"/></svg>
-			<div class="daily-copy"><small>${ esc( t( over ? 'dailyOver' : 'dailyTitle' ) ) }</small><strong>${ esc( money( over ? r.shortfall : Math.floor( left ) ) ) }</strong><span>${ esc( t( 'dailyUntil', { date: EX.dayName( r.end ) } ) ) }</span></div><button type="button" class="link" data-safe="details" aria-label="${ esc( t( 'safeOpen' ) ) }">${ UI.icon( 'chevron-right', 20 ) }</button></div>`;
+	/* Targets: the automatic figure, or the person's own spending target (day, week or month) and an optional income target. */
+	const tg = () => { const x = S().settings.targets; return { spend: Object.assign( { period: 'auto', amount: '' }, x && x.spend ), income: Object.assign( { period: 'off', amount: '' }, x && x.income ) }; };
+	const range = ( period, ref = today() ) => {
+		if ( period === 'week' ) { const d = EX.parse( ref ), from = EX.addDays( ref, -( ( d.getDay() + 6 ) % 7 ) ); return { from, to: EX.addDays( from, 6 ) }; }
+		if ( period === 'month' ) { const d = EX.parse( ref ); return { from: EX.iso( new Date( d.getFullYear(), d.getMonth(), 1 ) ), to: EX.iso( new Date( d.getFullYear(), d.getMonth() + 1, 0 ) ) }; }
+		return { from: ref, to: ref };
 	};
+	const sumIn = ( type, r ) => S().txs.filter( ( x ) => x.type === type && ! x.goalId && x.date >= r.from && x.date <= r.to ).reduce( ( n, x ) => n + cents( x ), 0 );
+	const ringSvg = ( share ) => `<svg class="daily-ring" viewBox="0 0 36 36" aria-hidden="true"><circle cx="18" cy="18" r="15" fill="none" stroke="currentColor" stroke-opacity=".18" stroke-width="3.5"/><circle class="daily-arc" cx="18" cy="18" r="15" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="94.2" stroke-dashoffset="${ ( 94.2 * ( 1 - share ) ).toFixed( 1 ) }" transform="rotate(-90 18 18)"/></svg>`;
+	const editBtn = `<button type="button" class="ab-btn daily-edit" data-target-edit aria-label="${ esc( t( 'targetEdit' ) ) }" title="${ esc( t( 'targetEdit' ) ) }">${ UI.icon( 'pencil', 20 ) }</button>`;
+	const spendCard = () => {
+		const c = tg().spend, amt = Math.round( ( parseFloat( String( c.amount ).replace( ',', '.' ) ) || 0 ) * 100 );
+		if ( c.period !== 'auto' && amt > 0 ) {
+			const r = range( c.period ), spent = sumIn( 'expense', r ), left = amt - spent, over = left < 0, share = Math.max( 0, Math.min( 1, left / amt ) );
+			return `<div class="daily-card${ over ? ' over' : '' }">${ ringSvg( share ) }<div class="daily-copy"><small>${ esc( t( over ? 'targetOver_' + c.period : 'targetLeft_' + c.period ) ) }</small><strong>${ esc( money( Math.abs( left ) ) ) }</strong><span>${ esc( t( 'targetOf_' + c.period, { amount: money( amt ), date: EX.dayName( r.to ) } ) ) }</span></div>${ editBtn }</div>`;
+		}
+		if ( ! EX.safeSpend ) return '';
+		const r = EX.safeSpend.calculate(); if ( ! r.valid || ! Number.isFinite( r.daily ) ) return '';
+		const left = Math.max( 0, r.daily ), spent = sumIn( 'expense', range( 'day' ) ), share = left + spent ? Math.max( 0, Math.min( 1, left / ( left + spent ) ) ) : 1, over = r.shortfall > 0 && left === 0;
+		return `<div class="daily-card${ over ? ' over' : '' }">${ ringSvg( share ) }<div class="daily-copy"><small>${ esc( t( over ? 'dailyOver' : 'dailyTitle' ) ) }</small><strong>${ esc( money( over ? r.shortfall : Math.floor( left ) ) ) }</strong><span>${ esc( t( 'dailyUntil', { date: EX.dayName( r.end ) } ) ) }</span></div>${ editBtn }<button type="button" class="link" data-safe="details" aria-label="${ esc( t( 'safeOpen' ) ) }">${ UI.icon( 'chevron-right', 20 ) }</button></div>`;
+	};
+	const incomeCard = () => {
+		const c = tg().income, amt = Math.round( ( parseFloat( String( c.amount ).replace( ',', '.' ) ) || 0 ) * 100 ); if ( c.period === 'off' || amt <= 0 ) return '';
+		const r = range( c.period ), got = sumIn( 'income', r ), share = Math.max( 0, Math.min( 1, got / amt ) ), done = got >= amt;
+		return `<div class="income-target${ done ? ' done' : '' }"><div class="it-top"><span>${ UI.icon( 'trending-up', 20 ) } ${ esc( t( 'targetEarned_' + c.period ) ) }</span><b>${ esc( money( got ) ) }</b></div><div class="it-bar"><i style="width:${ ( share * 100 ).toFixed( 1 ) }%"></i></div><small>${ esc( done ? t( 'targetReached' ) : t( 'targetToGo', { amount: money( amt - got ), total: money( amt ) } ) ) }</small></div>`;
+	};
+	EXA.dailyHome = () => { if ( ! on( 'daily' ) ) return ''; const a = spendCard(), b = incomeCard(); return a || b ? a + b : ''; };
+	EXA.targetSheet = () => {
+		const c = tg(), chip = ( group, v, label, cur ) => `<button type="button" class="chip${ cur === v ? ' on' : '' }" role="radio" aria-checked="${ cur === v }" data-tg="${ group }:${ v }">${ esc( t( label ) ) }</button>`;
+		UI.openSheet( `<div class="sheet-head"><button class="ab-btn" data-close aria-label="${ esc( t( 'close' ) ) }">${ UI.icon( 'x', 24 ) }</button><h2>${ esc( t( 'targetTitle' ) ) }</h2></div><form class="sheet-pad" id="targetForm" novalidate>
+			<p class="muted small">${ esc( t( 'targetHelp' ) ) }</p>
+			<h3>${ esc( t( 'targetSpend' ) ) }</h3><div class="chips wrap" role="radiogroup" id="tgSpend">${ chip( 'spend', 'auto', 'targetAuto', c.spend.period ) }${ chip( 'spend', 'day', 'targetDay', c.spend.period ) }${ chip( 'spend', 'week', 'targetWeek', c.spend.period ) }${ chip( 'spend', 'month', 'targetMonth', c.spend.period ) }</div>
+			<label class="f" id="tgSpendAmt"${ c.spend.period === 'auto' ? ' hidden' : '' }><span>${ esc( t( 'targetAmount', { cur: main() } ) ) }</span><input name="spend" inputmode="decimal" value="${ esc( c.spend.amount ) }" placeholder="0"></label>
+			<h3>${ esc( t( 'targetIncome' ) ) }</h3><div class="chips wrap" role="radiogroup" id="tgIncome">${ chip( 'income', 'off', 'targetOff', c.income.period ) }${ chip( 'income', 'day', 'targetDay', c.income.period ) }${ chip( 'income', 'week', 'targetWeek', c.income.period ) }${ chip( 'income', 'month', 'targetMonth', c.income.period ) }</div>
+			<label class="f" id="tgIncomeAmt"${ c.income.period === 'off' ? ' hidden' : '' }><span>${ esc( t( 'targetAmount', { cur: main() } ) ) }</span><input name="income" inputmode="decimal" value="${ esc( c.income.amount ) }" placeholder="0"></label>
+			<p class="err" id="tgErr" role="alert" hidden></p><div class="btn-row"><button type="button" class="btn btn-ghost" data-close>${ esc( t( 'cancel' ) ) }</button><button type="submit" class="btn btn-primary">${ esc( t( 'saveTx' ) ) }</button></div></form>`, { tall: true } );
+	};
+	let pick = null;
+	document.addEventListener( 'click', ( e ) => {
+		if ( e.target.closest( '[data-target-edit]' ) ) { e.preventDefault(); e.stopImmediatePropagation(); pick = null; EXA.targetSheet(); return; }
+		const b = e.target.closest( '[data-tg]' ); if ( ! b ) return; e.preventDefault();
+		const [ g, v ] = b.dataset.tg.split( ':' ); ( pick = pick || {} )[ g ] = v;
+		b.parentElement.querySelectorAll( '[data-tg]' ).forEach( ( x ) => { x.classList.toggle( 'on', x === b ); x.setAttribute( 'aria-checked', String( x === b ) ); } );
+		const amt = document.getElementById( g === 'spend' ? 'tgSpendAmt' : 'tgIncomeAmt' ); if ( amt ) amt.hidden = v === 'auto' || v === 'off';
+	} );
+	document.addEventListener( 'submit', ( e ) => {
+		if ( e.target.id !== 'targetForm' ) return; e.preventDefault(); e.stopImmediatePropagation();
+		const f = e.target.elements, cur = tg(), sp = ( pick && pick.spend ) || cur.spend.period, ip = ( pick && pick.income ) || cur.income.period, err = document.getElementById( 'tgErr' );
+		const ok = ( v ) => /^\d{1,9}([.,]\d{1,2})?$/.test( String( v ).trim() ) && parseFloat( String( v ).replace( ',', '.' ) ) > 0;
+		if ( ( sp !== 'auto' && ! ok( f.spend.value ) ) || ( ip !== 'off' && ! ok( f.income.value ) ) ) { err.textContent = t( 'targetBad' ); err.hidden = false; return; }
+		const s = S().settings; s.targets = { spend: { period: sp, amount: sp === 'auto' ? '' : f.spend.value.trim().replace( ',', '.' ) }, income: { period: ip, amount: ip === 'off' ? '' : f.income.value.trim().replace( ',', '.' ) } }; s.u = Date.now();
+		EX.save(); pick = null; UI.closeSheet( true ); UI.done( t( 'tSaved' ) ); EXA.render();
+	}, true );
 
 	/* ------------------------------------------------------------------ 3. Filters */
 	const fl = () => EXA.st.txFilter;
