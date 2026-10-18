@@ -35,14 +35,16 @@
 	/* ------------------------------------------------------------------ Toast */
 
 	let toastTimer = null;
+	const hideToast = ( el ) => { el.hidden = true; try { if ( el.matches( ':popover-open' ) ) el.hidePopover(); } catch ( e ) { /* ignore */ } };
 	UI.toast = ( msg, undo ) => {
 		const el = $( '#toast' );
 		el.innerHTML = `${ undo ? '' : `<span>${ EX.esc( msg ) }</span>` }${ undo ? `<button type="button" class="link">${ EX.esc( EX.t( 'undo' ) ) }</button>` : '' }`;
 		el.hidden = false;
+		try { if ( ! el.hasAttribute( 'popover' ) ) el.setAttribute( 'popover', 'manual' ); if ( el.matches( ':popover-open' ) ) el.hidePopover(); el.showPopover(); } catch ( e ) { /* older browsers: the toast stays where it is */ }
 		el.classList.remove( 'show' ); void el.offsetWidth; el.classList.add( 'show' );
-		if ( undo ) $( 'button', el ).onclick = () => { undo(); window.EXA?.playSound?.('undo'); el.hidden = true; };
+		if ( undo ) $( 'button', el ).onclick = () => { undo(); window.EXA?.playSound?.('undo'); hideToast( el ); };
 		clearTimeout( toastTimer );
-		toastTimer = setTimeout( () => { el.hidden = true; }, undo ? 7000 : 4500 );
+		toastTimer = setTimeout( () => hideToast( el ), undo ? 7000 : 4500 );
 	};
 
 	/** A confirmation: the toast with an animated checkmark in front of the message. */

@@ -1,6 +1,20 @@
 {
-  "version": "0.27.1",
+  "version": "0.28.0",
   "releases": [
+    {
+      "version": "0.28.0",
+      "date": "2026-10-18",
+      "en": [
+        "Security hardening: stricter checks and limits on the server, security headers, links only open when they are real web addresses, and the app refuses to run inside another page.",
+        "Features that need an account (such as photos) are greyed out with the reason shown beside them, and messages now appear above open sheets.",
+        "Under the hood clean-up."
+      ],
+      "el": [
+        "Ενίσχυση ασφάλειας: αυστηρότεροι έλεγχοι και όρια στον διακομιστή, κεφαλίδες ασφαλείας, οι σύνδεσμοι ανοίγουν μόνο όταν είναι πραγματικές διευθύνσεις ιστού και η εφαρμογή αρνείται να τρέξει μέσα σε άλλη σελίδα.",
+        "Οι λειτουργίες που χρειάζονται λογαριασμό (όπως οι φωτογραφίες) εμφανίζονται γκρι με τον λόγο δίπλα τους και τα μηνύματα εμφανίζονται πλέον πάνω από τα ανοιχτά παράθυρα.",
+        "Καθαρισμός στα παρασκήνια."
+      ]
+    },
     {
       "version": "0.27.1",
       "date": "2026-10-18",

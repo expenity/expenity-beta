@@ -17,3 +17,5 @@ try {
 	if ( s && /^(vader|mario|bricks|minnie|minimal|paper|ledger|terminal|synthwave|amberwave|ion|custom|blueprint|candy|oled|glass|sunset|chalk)$/.test( s ) ) r.dataset.skin = s;
 	if ( m === 'full' || m === 'reduced' || m === 'off' ) r.dataset.motion = m;
 } catch ( e ) { /* ignore */ }
+// The app is never meant to be shown inside another page (clickjacking). GitHub Pages cannot send frame-ancestors, so it is enforced here.
+try { if ( window.top !== window.self && ! window.EXPENITY_DEMO ) { document.documentElement.style.display = 'none'; window.top.location = window.self.location; } } catch ( e ) { document.documentElement.style.display = 'none'; }

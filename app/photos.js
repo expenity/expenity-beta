@@ -4,7 +4,7 @@
  const {EX,EXA,UI}=window, {t,esc}=EX;
  const P=EXA.photos={busy:0};
  const valid=id=>/^ph_[A-Za-z0-9_-]{24}$/.test(id||'');
- P.slot=(id='')=>`<div class="photo-slot"><input type="hidden" name="photo" value="${valid(id)?id:''}"><input class="photo-file" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" hidden><div class="btn-row action-stack"><button type="button" class="btn btn-ghost" data-photo-add>${UI.icon('photo',20)} ${esc(t(id?'photoReplace':'photoAdd'))}</button>${valid(id)?`<button type="button" class="btn btn-ghost" data-photo-view="${id}">${UI.icon('paperclip',20)} ${esc(t('photoView'))}</button><button type="button" class="btn btn-ghost" data-photo-remove>${esc(t('photoRemove'))}</button>`:''}</div><small class="muted">${esc(t('photoHint'))}</small><p class="photo-status" role="status"></p></div>`;
+ P.slot=(id='')=>!EX.auth.isSignedIn()&&!valid(id)?`<div class="photo-slot need-account"><div class="btn-row action-stack"><button type="button" class="btn btn-ghost" disabled aria-disabled="true">${UI.icon('photo',20)} ${esc(t('photoAdd'))}</button></div><p class="account-note" role="note">${UI.icon('lock',16)} ${esc(t('photoSignIn'))}</p></div>`:`<div class="photo-slot"><input type="hidden" name="photo" value="${valid(id)?id:''}"><input class="photo-file" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" hidden><div class="btn-row action-stack"><button type="button" class="btn btn-ghost" data-photo-add>${UI.icon('photo',20)} ${esc(t(id?'photoReplace':'photoAdd'))}</button>${valid(id)?`<button type="button" class="btn btn-ghost" data-photo-view="${id}">${UI.icon('paperclip',20)} ${esc(t('photoView'))}</button><button type="button" class="btn btn-ghost" data-photo-remove>${esc(t('photoRemove'))}</button>`:''}</div><small class="muted">${esc(t('photoHint'))}</small><p class="photo-status" role="status"></p></div>`;
  P.value=host=>host.querySelector('[name=photo]')?.value||'';
  P.button=id=>valid(id)?`<button type="button" class="btn btn-ghost" data-photo-view="${id}">${UI.icon('paperclip',20)} ${esc(t('photoView'))}</button>`:'';
  P.compress=async file=>{
@@ -42,7 +42,7 @@
  document.addEventListener('click',e=>{
   const b=e.target.closest('[data-photo-add],[data-photo-remove],[data-photo-view]');if(!b)return;e.preventDefault();e.stopImmediatePropagation();
   const slot=b.closest('.photo-slot');
-  if(b.hasAttribute('data-photo-add')){if(!EX.auth.isSignedIn()){UI.toast(t('photoSignIn'));return;}slot.querySelector('input[type=file]').click();}
+  if(b.hasAttribute('data-photo-add')){if(!EX.auth.isSignedIn())return;slot.querySelector('input[type=file]').click();}
   else if(b.hasAttribute('data-photo-remove')){if(slot.dataset.busy)return;slot.outerHTML=P.slot();EX.emit('photochange');}
   else view(b.dataset.photoView);
  },true);
