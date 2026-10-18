@@ -296,6 +296,16 @@
 	function saveTx(){
 		if(!T||T.saving||T.committed)return;if(EXA.photos.busy)return toast(t('photoWorking'));readTxFields();
 		const amount=T.amount.replace(/\.$/,'');
+        const failures=[];
+        if(!(T.scheduleKind==='bill'&&amount==='')&&(!/^\d{1,9}(\.\d{1,2})?$/.test(amount)||EX.cents(amount)<=0))failures.push(['errAmountReq','[data-tx=target-amount]']);
+        if(!writable(T.account))failures.push(['entryWalletGone','[data-entry=wallet]']);
+        if(T.type!=='transfer'&&(!T.category||(!EX.catList(T.type).some(c=>c.key===T.category)&&T.category!=='uncategorized')))failures.push(['entryCategoryError','[data-entry-group=category]>summary']);
+        if(!T.editId&&T.type!=='transfer'&&(T.scheduleKind||(T.repeat||'once')!=='once'||T.date>today())&&!T.name.trim())failures.push(['errNameReq','#txDesc']);
+        if(!T.date||!/^\d{4}-\d{2}-\d{2}$/.test(T.date))failures.push(['errDate','[data-entry=date]']);
+        if(T.type==='transfer'&&(!writable(T.toAccount)||T.toAccount===T.account))failures.push(['errTransferSame','[data-entry=to-wallet]']);
+        $('#sheet').querySelectorAll('[aria-invalid]').forEach(el=>el.removeAttribute('aria-invalid'));
+        if(failures.length){const err=$('#txErr');err.textContent=failures.map(([key])=>t(key)).join(' · ');err.hidden=false;for(const [,selector] of failures){const field=$(selector);field?.setAttribute('aria-invalid','true');field?.setAttribute('aria-describedby','txErr');}const first=$(failures[0][1]);first?.scrollIntoView({block:'center',behavior:'smooth'});first?.focus({preventScroll:true});EXA.playSound?.('error');return;}
+
 		if(!(T.scheduleKind==='bill'&&amount==='')&&(!/^\d{1,9}(\.\d{1,2})?$/.test(amount)||EX.cents(amount)<=0))return entryError('errAmountReq','[data-tx=target-amount]');
 		if(!T.date||!/^\d{4}-\d{2}-\d{2}$/.test(T.date))return entryError('errDate','#txDate');
 		if(T.date>today()&&(T.editId||T.type==='transfer'))return entryError('entryFuture','#txDate');

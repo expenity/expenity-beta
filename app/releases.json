@@ -1,6 +1,16 @@
 {
-  "version": "0.16.0",
+  "version": "0.16.1",
   "releases": [
+    {
+      "version": "0.16.1",
+      "date": "2026-10-18",
+      "en": [
+        "Submission highlights all missing required entry fields in red and moves to the first one, with a combined error message."
+      ],
+      "el": [
+        "Κατά την αποθήκευση επισημαίνονται με κόκκινο όλα τα υποχρεωτικά πεδία που λείπουν και προβάλλεται το πρώτο, με συγκεντρωτικό μήνυμα."
+      ]
+    },
     {
       "version": "0.16.0",
       "date": "2026-10-17",

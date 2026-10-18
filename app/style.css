@@ -553,3 +553,5 @@ body, .card, .list, .hero, .wc, .promo, .tabbar, .appbar, .rail, .chip, .theme-c
 
 /* Longer schedule choices keep whole words and a full touch target. */
 .schedule-frequency .btn span{overflow-wrap:normal;word-break:normal}.schedule-frequency [data-repeat="dates"],.schedule-frequency [data-repeat="custom"]{grid-column:1/-1}
+
+[aria-invalid="true"]{outline:2px solid #d32f40!important;outline-offset:3px;background-color:color-mix(in srgb,#d32f40 9%,var(--surface))!important}.entry-error{scroll-margin:24px}
