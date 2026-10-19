@@ -1,6 +1,18 @@
 {
-  "version": "0.34.0",
+  "version": "0.35.0",
   "releases": [
+    {
+      "version": "0.35.0",
+      "date": "2026-10-20",
+      "en": [
+        "A new Expenity logo, and a lively start screen with a short animation each time you open the app.",
+        "Right-click menu on a computer: right-click an entry or a bill for quick actions, or empty space to add something. You can turn it off in Features."
+      ],
+      "el": [
+        "Νέο λογότυπο για το Expenity και μια ζωντανή οθόνη εκκίνησης με σύντομη κίνηση κάθε φορά που ανοίγετε την εφαρμογή.",
+        "Μενού δεξιού κλικ σε υπολογιστή: κάντε δεξί κλικ σε μια εγγραφή ή σε έναν λογαριασμό για γρήγορες ενέργειες, ή σε κενό χώρο για να προσθέσετε κάτι. Μπορείτε να το απενεργοποιήσετε από τις Λειτουργίες."
+      ]
+    },
     {
       "version": "0.34.0",
       "date": "2026-10-19",

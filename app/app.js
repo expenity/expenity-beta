@@ -12,7 +12,7 @@
 	const $ = ( s, r = document ) => r.querySelector( s );
 	const $$ = ( s, r = document ) => [ ...r.querySelectorAll( s ) ];
 	const toast = UI.toast;
-	window.EXPENITY_VERSION = '0.34.0';
+	window.EXPENITY_VERSION = '0.35.0';
 
  const seenCharacters=new Set();try{for(const skin of JSON.parse(sessionStorage.getItem('expenity.charactersSeen')||'[]'))seenCharacters.add(skin);}catch(_){}
  const characterSeen=skin=>seenCharacters.has(skin);
@@ -259,6 +259,7 @@
 		EXA.push.check();
 		checkNotifications();
 		setInterval( checkNotifications, 60000 );
+		requestAnimationFrame( () => window.EXSplashDone && window.EXSplashDone() ); // the app has drawn its first screen
 
 		EX.on( 'change', render );
 		EX.on( 'remote', () => { if ( ! S().device.stage ) EXA.flow.init(); render(); } );
