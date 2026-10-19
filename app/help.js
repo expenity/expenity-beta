@@ -16,7 +16,7 @@
 		const sh = document.getElementById( 'sheet' ); if ( ! sh || ! sh.open ) return '';
 		const q = ( s ) => !! sh.querySelector( s );
 		if(q('[data-advanced-group="splits"][open]'))return live('split');if(q('[data-advanced-group="reimbursement"][open],#amPayment'))return live('reimburse');
-		if ( sh.classList.contains( 'entry-composer' ) ) return live( q( '[data-entry=schedule-back]' ) ? 'recurring' : 'quick' );
+		if ( sh.classList.contains( 'entry-composer' ) ) return live( q( '[data-entry=schedule-back]' ) ? 'recurring' : q( '#txQuick' ) ? 'quick' : ( live( 'smart' ) || 'quick' ) );
 		if ( q( '#billForm' ) ) return live( 'bills' ); if ( q( '#walletForm' ) ) return live( 'wallets' );
 		if ( q( '#budgetForm,#goalForm,#contribForm' ) ) return live( 'budgets' ); if ( q( '#incomeForm' ) ) return live( 'recurring' );
 		if ( q( '#customThemeForm' ) ) return live( 'themes' ); if ( q( '.safe-details' ) ) return live( 'daily' );
@@ -27,6 +27,7 @@
 		const s = EXA.st, v = s.view, m = s.more;
 		const map = { activity: 'filters', reports: 'reports', plan: 'budgets', bills: 'bills', home: 'home' };
 		const sub = { features: 'features', reminders: 'notify', trash: 'trash', appearance: 'themes', data: 'backup', account: 'sync', wallets: 'wallets', tutorials: '', drafts: 'quick' };
+		if ( v === 'home' && EXA.dashboardEditing && EXA.dashboardEditing() ) return live( 'homereports' ) || live( 'home' );
 		return live( v === 'more' ? ( m === 'root' ? '' : sub[ m ] || '' ) : map[ v ] || '' );
 	};
 	const btn = ( id ) => `<button type="button" class="ab-btn help-ic" data-help="${ id }" aria-label="${ esc( t( 'helpIcon' ) ) }" title="${ esc( t( 'helpIcon' ) ) }">${ UI.icon( 'help-circle', 24 ) }</button>`;

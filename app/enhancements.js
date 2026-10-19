@@ -97,6 +97,26 @@
   try{releasePromise=null;const data=await getReleases();if(data.version!==window.EXPENITY_VERSION){await downloadRelease();say(A.label('releaseReady'));if(b){b.dataset.act='apply-update';b.innerHTML=`${UI.icon('download',20)} ${esc(EX.t('updNow'))}`;}}else say(EX.t('updLatest',{v:window.EXPENITY_VERSION}));}catch(e){say(A.label('releaseFail'));}finally{if(b)b.disabled=false;}
  };
  A.applyRelease=async()=>{try{if(!updateRegistration)await downloadRelease();try{localStorage.setItem('expenity.showRelease','1');}catch(e){}location.reload();}catch(e){UI.toast(A.label('releaseFail'));}};
+ // The "What's new" notice: a dialog in the top layer (nothing can cover it or move it), centred, over a grey backdrop.
+ async function showWhatsNew(done){
+  let data;try{data=await getReleases();}catch(err){done();return;}
+  const running=window.EXPENITY_VERSION,lang=EX.lang();let seen;try{seen=localStorage.getItem('expenity.releaseSeen');}catch(err){}
+  const cmp=(x,y)=>{const p=String(x).split('.').map(Number),q=String(y).split('.').map(Number);for(let i=0;i<3;i++){if((p[i]||0)!==(q[i]||0))return(p[i]||0)-(q[i]||0);}return 0;};
+  let list=data.releases.filter(r=>cmp(r.version,running)<=0&&(!seen||cmp(r.version,seen)>0)).slice(0,3);
+  if(!list.length)list=data.releases.filter(r=>r.version===running).slice(0,1);
+  if(!list.length){done();return;}
+  const notes=list.flatMap(r=>r[lang]||r.en).slice(0,3);
+  document.querySelector('dialog.whatsnew')?.remove();
+  const dlg=document.createElement('dialog');dlg.className='whatsnew';dlg.setAttribute('aria-labelledby','wnTitle');
+  dlg.innerHTML=`<div class="whatsnew-card"><div class="wn-head"><span class="wn-ic" aria-hidden="true">${UI.icon('sparkles',26)}</span><div><h2 id="wnTitle">${L('changelog')}</h2><small>${esc(running)}</small></div></div><ul class="wn-list">${notes.map(x=>`<li>${UI.icon('check',18)}<span>${esc(x)}</span></li>`).join('')}</ul><div class="btn-row"><button type="button" class="btn btn-primary" data-wn-ok>${esc(EX.t('tutDone'))}</button><button type="button" class="btn btn-ghost" data-wn-all>${esc(lang==='el'?'Δείτε τις αλλαγές':'View changes')}</button></div></div>`;
+  document.body.append(dlg);
+  const close=all=>{try{localStorage.setItem('expenity.releaseSeen',running);}catch(err){}if(dlg.open)dlg.close();dlg.remove();done();if(all)A.showReleases(true);};
+  dlg.querySelector('[data-wn-ok]').onclick=()=>close(false);
+  dlg.querySelector('[data-wn-all]').onclick=()=>close(true);
+  dlg.addEventListener('cancel',ev=>{ev.preventDefault();close(false);});
+  dlg.addEventListener('click',ev=>{if(ev.target===dlg)close(false);});
+  dlg.showModal();dlg.querySelector('[data-wn-ok]').focus();
+ }
  A.enhancementsInit=()=>{
   let notifying=false;
   // Show once on upgraded installs; new accounts can open it from the icon instead.
@@ -108,7 +128,7 @@
    if(seen===window.EXPENITY_VERSION&&!forced)return;
    if(!forced&&!seen&&!S().device.onboarded){try{localStorage.setItem('expenity.releaseSeen',window.EXPENITY_VERSION);}catch(e){}return;}
    try{localStorage.removeItem('expenity.showRelease');}catch(e){}
-   notifying=true;const prompt=document.createElement('aside');prompt.className='release-prompt card';prompt.setAttribute('role','status');prompt.innerHTML=`<b>${esc(A.label('changelog'))} · ${esc(window.EXPENITY_VERSION)}</b><div class="btn-row"><button type="button" class="btn btn-primary" data-release-open>${esc(EX.lang()==='el'?'Δείτε τις αλλαγές':'View changes')}</button><button type="button" class="btn btn-ghost" data-release-later>${esc(EX.lang()==='el'?'Όχι τώρα':'Not now')}</button></div>`;document.body.append(prompt);const dismiss=()=>{prompt.remove();notifying=false;try{localStorage.setItem('expenity.releaseSeen',window.EXPENITY_VERSION);}catch{}};prompt.querySelector('[data-release-open]').onclick=()=>{prompt.remove();A.showReleases(true).finally(()=>{notifying=false;});};prompt.querySelector('[data-release-later]').onclick=dismiss;
+   notifying=true;showWhatsNew(()=>{notifying=false;});
   };
   setTimeout(notify,1600);document.addEventListener('visibilitychange',notify);
   EX.on('change',()=>{if(!A.flow.active())setTimeout(notify,300);});

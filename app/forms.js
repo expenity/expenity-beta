@@ -74,11 +74,14 @@
 
 	/* ------------------------------------------------------------------ Confirm */
 
-	EXA.confirm = ( { title, text, confirm, danger = true } ) => new Promise( ( resolve ) => {
+	// Optional `word`: the person must type it before the button works (RESET, DELETE). The word stays in English in every language.
+	EXA.confirm = ( { title, text, confirm, danger = true, word = '' } ) => new Promise( ( resolve ) => {
 		let done = false;
 		const finish = ( v ) => { if ( done ) return; done = true; resolve( v ); };
-		UI.openSheet( `${ head( title ) }<div class="sheet-pad"><p class="muted">${ esc( text || '' ) }</p><div class="btn-row stack"><button type="button" class="btn ${ danger ? 'btn-danger' : 'btn-primary' }" id="confirmYes">${ esc( confirm ) }</button><button type="button" class="btn btn-ghost" data-close>${ esc( t( 'cancel' ) ) }</button></div></div>`, { cls: 'small', onClose: () => finish( false ) } );
-		$( '#confirmYes' ).onclick = () => { finish( true ); UI.closeSheet(); };
+		const typed = word ? `<label class="f confirm-word"><span>${ esc( t( 'typeToConfirm', { word } ) ) }</span><input id="confirmWord" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="${ esc( word ) }"></label>` : '';
+		UI.openSheet( `${ head( title ) }<div class="sheet-pad"><p class="muted">${ esc( text || '' ) }</p>${ typed }<div class="btn-row stack"><button type="button" class="btn ${ danger ? 'btn-danger' : 'btn-primary' }" id="confirmYes"${ word ? ' disabled' : '' }>${ esc( confirm ) }</button><button type="button" class="btn btn-ghost" data-close>${ esc( t( 'cancel' ) ) }</button></div></div>`, { cls: 'small', onClose: () => finish( false ) } );
+		if ( word ) $( '#confirmWord' ).addEventListener( 'input', ( e ) => { $( '#confirmYes' ).disabled = e.target.value.trim().toUpperCase() !== word; } );
+		$( '#confirmYes' ).onclick = () => { if ( word && $( '#confirmWord' ).value.trim().toUpperCase() !== word ) return; finish( true ); UI.closeSheet(); };
 	} );
 
 	/* ------------------------------------------------------------------ The + sheet */
@@ -214,7 +217,7 @@
 		const n=$('#txNote');if(n)T.note=n.value;const q=$('#txQuick');if(q)T.quickText=q.value;const dt=$('#txDate');if(dt?.value)T.date=dt.value;
 	}
 	function drawTx(keepScroll,read=true){
-		if(read)readTxFields();T.editingField=false;T.keypadOpen=false;const sc=$('.tx-scroll'),top=sc?.scrollTop||0;$('.sheet-body').innerHTML=txBody();if(keepScroll)$('.tx-scroll').scrollTop=top;
+		if(read)readTxFields();T.editingField=false;T.keypadOpen=false;const sc=$('.tx-scroll'),top=sc?.scrollTop||0;$('.sheet-body').innerHTML=txBody();if(keepScroll)$('.tx-scroll').scrollTop=top;if(T.missing?.length)guideNext();
 	}
 	function guardEntryClose(){
 		if(!T||T.committed)return true;if(T.screen==='schedule'){readTxFields();T.scheduleTouched=true;T.screen='main';drawTx(false,false);return false;}readTxFields();if(EXA.photos.busy){toast(t('photoWorking'));return false;}
@@ -250,6 +253,7 @@
 		UI.haptic( 6 );
 		const el = $( key === 'toAmount' ? '#toAmtVal' : '#amtVal' );
 		if ( el ) { el.textContent = showAmt( s ); el.classList.toggle( 'zero', s === '' ); }
+		if ( T.missing?.length ) paintMissing();
 	};
 	function setKeypad( open, target = T.target ) {
 		readTxFields();
@@ -293,6 +297,7 @@
         if(p.repeat)T.repeat=p.repeat;
 		if ( p.date ) { T.date = p.date; T.dateMode = p.date === today() ? 'today' : p.date === addDays( today(), -1 ) ? 'yesterday' : 'other'; }
 		if ( T.type !== 'transfer' ) { const c = guessCategory( p.name, T.type ); const list = EX.catList( T.type === 'income' ? 'income' : 'expense' ).map( ( x ) => x.key ); if(T.category&&!list.includes(T.category)&&T.category!=='uncategorized')T.category=null; }
+		smartFill();
 		// Update only the preview while typing. Rebuilding the whole sheet on every key made the buttons below flicker (Android most of all, where the
 		// keyboard and the sheet re-lay out each time) and could interrupt the keyboard's own text suggestions.
 		if ( T.type === typeBefore && paintQuickPreview() ) return;
@@ -302,24 +307,76 @@
 	}
 	function paintQuickPreview() {
 		const pv = $( '.sentence-preview' ); if ( ! pv ) return false;
-		pv.innerHTML = `<b>${ esc( T.name || '\u2014' ) }</b><span>${ esc( EX.money( T.amount || 0, walletCur( T.account ) ) ) }</span><small>${ esc( EX.dayName( T.date ) ) } \u00b7 ${ esc( EX.scheduleLabel( T ) ) }</small>`;
+		pv.innerHTML = `<b>${ esc( T.name || '\u2014' ) }</b><span>${ esc( EX.money( T.amount || 0, walletCur( T.account ) ) ) }</span><small>${ esc( EX.dayName( T.date ) ) } \u00b7 ${ esc( EX.scheduleLabel( T ) ) }${ T.category ? ' \u00b7 ' + esc( EX.catInfo( T.category ).name ) : '' }${ ( T.tags || [] ).length ? ' \u00b7 ' + esc( T.tags.map( ( x ) => '#' + x ).join( ' ' ) ) : '' }</small>`;
 		const h = $( '#sheetTitle' ); if ( h ) h.textContent = t( titleKey() );
 		return true;
+	}
+	// What is still missing, in the order the fields appear on the form: [id, message key, selector].
+	function missingList(){
+		const amount=T.amount.replace(/\.$/,''),m=[];
+		if(!(T.scheduleKind==='bill'&&amount==='')&&(!/^\d{1,9}(\.\d{1,2})?$/.test(amount)||EX.cents(amount)<=0))m.push(['amount','errAmountReq','[data-tx=target-amount]']);
+		if(!writable(T.account))m.push(['wallet','entryWalletGone','[data-entry=wallet]']);
+		if(T.type==='transfer'&&(!writable(T.toAccount)||T.toAccount===T.account))m.push(['transfer','errTransferSame','[data-entry=to-wallet]']);
+		if(T.type!=='transfer'&&(!T.category||(!EX.catList(T.type).some(c=>c.key===T.category)&&T.category!=='uncategorized')))m.push(['category','entryCategoryError','[data-entry-group=category]>summary']);
+		if(!T.editId&&T.type!=='transfer'&&(T.scheduleKind||(T.repeat||'once')!=='once'||T.date>today())&&!T.name.trim())m.push(['name','errNameReq','#txDesc']);
+		if(!T.date||!/^\d{4}-\d{2}-\d{2}$/.test(T.date))m.push(['date','errDate','[data-entry=date]']);
+		return m;
+	}
+	// After a failed save the red outlines stay on every field that is still missing, and each one clears when it is filled in.
+	function paintMissing(){
+		if(!T)return;const err=$('#txErr');
+		if(!T.missing?.length){if(err&&T.missing)err.hidden=true;return;}
+		const list=missingList().filter(x=>T.missing.includes(x[0]));T.missing=list.map(x=>x[0]);
+		$('#sheet').querySelectorAll('[aria-invalid]').forEach(el=>el.removeAttribute('aria-invalid'));
+		list.forEach(([,,sel])=>{const el=$(sel);el?.setAttribute('aria-invalid','true');el?.setAttribute('aria-describedby','txErr');});
+		if(err){if(list.length){err.textContent=list.map(x=>t(x[1])).join(' \u00b7 ');err.hidden=false;}else err.hidden=true;}
+	}
+	// When a missing field has just been filled in, take the person to the next one that is still missing, top to bottom.
+	function guideNext(){
+		if(!T||!T.missing?.length)return;const head=T.guideHead;paintMissing();
+		if(!T.missing.length){T.guideHead=null;return;}
+		const list=missingList().filter(x=>T.missing.includes(x[0]));
+		if(head&&T.missing.includes(head))return;   // the field we pointed to is still missing: stay
+		T.guideHead=list[0][0];
+		const next=$(list[0][2]);
+		if(next){const g=next.closest('[data-entry-group]');if(g&&g.tagName==='DETAILS')g.open=true;next.scrollIntoView({block:'center',behavior:'smooth'});next.focus({preventScroll:true});}
+	}
+	// Smart detection (Advanced): from the description, fill what has not been chosen by hand. Nothing is ever overwritten that the person set.
+	let smartTimer=0;
+	const scheduleSmart=()=>{clearTimeout(smartTimer);smartTimer=setTimeout(smartFill,450);};
+	function smartFill(){
+		clearTimeout(smartTimer);
+		if(!T||T.editId||T.smartOff||T.screen==='schedule'||T.type==='transfer'||!EXA.smart||!EXA.smart.enabled())return;
+		const name=String(T.name||'').trim();if(name.length<3)return;
+		const d=EXA.smart.detect(name,{type:T.type,keepType:true}),sm=T.smart||(T.smart={prev:{},tags:[]}),changed=[];let redraw=false;
+		if(d.category&&T.category!==d.category&&(!T.category||sm.category===T.category)){if(!('category' in sm.prev))sm.prev.category=T.category||null;T.category=d.category;sm.category=d.category;changed.push(EX.catInfo(d.category).name);}
+		const input=$('input[name=tags]',$('#sheet')),cur=input?EXA.readTags($('#sheet')):copy(T.tags||[]),mine=cur.filter(x=>!sm.tags.includes(x));
+		const next=[...mine,...d.tags.filter(x=>!mine.some(m=>m.toLocaleLowerCase()===x.toLocaleLowerCase()))].slice(0,4);
+		if(JSON.stringify(next)!==JSON.stringify(cur)){if(!('tags' in sm.prev))sm.prev.tags=copy(cur);T.tags=next;if(input)input.value=next.join(', ');sm.tags=next.filter(x=>!mine.includes(x));d.tags.forEach(x=>{if(next.includes(x)&&!cur.includes(x))changed.push('#'+x);});}
+		if(d.account&&d.account!==T.account&&!T.walletTouched&&writable(d.account)){if(!('account' in sm.prev))sm.prev.account=T.account;T.account=d.account;changed.push(EX.accountName?EX.accountName(EX.account(d.account)):'');redraw=true;}
+		if(!changed.length)return;
+		if(T.quick){paintQuickPreview();return;}
+		if(redraw){const had=document.activeElement&&document.activeElement.id==='txDesc',pos=had?document.activeElement.selectionStart:0;drawTx(true,false);if(had){const n=$('#txDesc');n?.focus();try{n?.setSelectionRange(pos,pos);}catch(err){/* no caret */}}}
+		else{const cat=$('#entryCategory');if(cat)cat.innerHTML=entryCategories();const summary=$('[data-group-summary=category]');if(summary)summary.textContent=[T.category?EX.catInfo(T.category).name:t('entryChooseCat'),...T.tags].join(' \u00b7 ');}
+		let note=$('#smartNote');
+		if(!note){const host=$('#txDesc')?.closest('label')||$('#txDesc')?.parentElement;if(host){note=document.createElement('p');note.id='smartNote';note.className='muted small smart-note';note.setAttribute('role','status');host.insertAdjacentElement('afterend',note);}}
+		if(note)note.innerHTML=`${esc(t('smartFilled',{list:changed.join(' \u00b7 ')}))} <button type="button" class="link" data-smart-undo>${esc(t('smartUndo'))}</button>`;
+	}
+	function smartUndo(){
+		const sm=T&&T.smart;if(!sm)return;
+		if('category' in sm.prev)T.category=sm.prev.category;
+		if('tags' in sm.prev){T.tags=copy(sm.prev.tags);const input=$('input[name=tags]',$('#sheet'));if(input)input.value=T.tags.join(', ');}
+		if('account' in sm.prev)T.account=sm.prev.account;
+		T.smartOff=true;delete T.smart;drawTx(true,false);storeDraft();
 	}
 	function entryError(key,selector){EXA.playSound?.('error');const e=$('#txErr');e.textContent=t(key);e.hidden=false;const field=$(selector||'[data-tx=save]');const group=field?.closest('[data-entry-group]');if(group){group.open=true;T.entryGroup=group.dataset.entryGroup;}field?.setAttribute('aria-invalid','true');field?.setAttribute('aria-describedby','txErr');field?.scrollIntoView({block:'center'});field?.focus({preventScroll:true});}
 	function saveTx(){
 		if(!T||T.saving||T.committed)return;if(EXA.photos.busy)return toast(t('photoWorking'));readTxFields();
 		const amount=T.amount.replace(/\.$/,'');
         const advancedError=EXA.validateAdvanced?.(T);if(advancedError){const group=$('[data-advanced-group="'+(advancedError==='amSplitError'?'splits':'reimbursement')+'"]');if(group)group.open=true;return entryError(advancedError,advancedError==='amSplitError'?'[data-am-amount]':'[data-am-expected]');}
-        const failures=[];
-        if(!(T.scheduleKind==='bill'&&amount==='')&&(!/^\d{1,9}(\.\d{1,2})?$/.test(amount)||EX.cents(amount)<=0))failures.push(['errAmountReq','[data-tx=target-amount]']);
-        if(!writable(T.account))failures.push(['entryWalletGone','[data-entry=wallet]']);
-        if(T.type!=='transfer'&&(!T.category||(!EX.catList(T.type).some(c=>c.key===T.category)&&T.category!=='uncategorized')))failures.push(['entryCategoryError','[data-entry-group=category]>summary']);
-        if(!T.editId&&T.type!=='transfer'&&(T.scheduleKind||(T.repeat||'once')!=='once'||T.date>today())&&!T.name.trim())failures.push(['errNameReq','#txDesc']);
-        if(!T.date||!/^\d{4}-\d{2}-\d{2}$/.test(T.date))failures.push(['errDate','[data-entry=date]']);
-        if(T.type==='transfer'&&(!writable(T.toAccount)||T.toAccount===T.account))failures.push(['errTransferSame','[data-entry=to-wallet]']);
+        const failures=missingList();T.missing=failures.map(x=>x[0]);T.guideHead=failures.length?failures[0][0]:null;
         $('#sheet').querySelectorAll('[aria-invalid]').forEach(el=>el.removeAttribute('aria-invalid'));
-        if(failures.length){const err=$('#txErr');err.textContent=failures.map(([key])=>t(key)).join(' · ');err.hidden=false;for(const [,selector] of failures){const field=$(selector);field?.setAttribute('aria-invalid','true');field?.setAttribute('aria-describedby','txErr');}const first=$(failures[0][1]);first?.scrollIntoView({block:'center',behavior:'smooth'});first?.focus({preventScroll:true});EXA.playSound?.('error');return;}
+        if(failures.length){paintMissing();const first=$(failures[0][2]);first?.scrollIntoView({block:'center',behavior:'smooth'});first?.focus({preventScroll:true});EXA.playSound?.('error');return;}
 
 		if(!(T.scheduleKind==='bill'&&amount==='')&&(!/^\d{1,9}(\.\d{1,2})?$/.test(amount)||EX.cents(amount)<=0))return entryError('errAmountReq','[data-tx=target-amount]');
 		if(!T.date||!/^\d{4}-\d{2}-\d{2}$/.test(T.date))return entryError('errDate','#txDate');
@@ -377,7 +434,7 @@
 		delete T.pendingShortcut;drawTx(true,false);storeDraft();
 	}
 	function changeWallet(id,to=false){
-		readTxFields();if(!writable(id))return;
+		readTxFields();if(!writable(id))return;if(!to)T.walletTouched=true;
 		const prev=walletCur(T.account),prevTo=walletCur(T.toAccount);
 		if(to){if(id===T.account||!EX.sameScope(EX.account(id),EX.account(T.account)))return;T.toAccount=id;T.toWalletOpen=false;}
 		else{T.account=id;T.walletOpen=false;T.makeDefault=S().settings.defaultAccount===id;T.defaultTouched=false;if(T.toAccount===id||!EX.sameScope(EX.account(T.toAccount),EX.account(id)))T.toAccount='';}
@@ -400,6 +457,7 @@
 		if((el=g('[data-key]'))){pressKey(el.dataset.key);storeDraft();return true;}
 		if((el=g('[data-tx-saved]'))){readTxFields();const x=EX.savedNames(T.type)[Number(el.dataset.txSaved)];if(x&&(T.name.trim()&&T.name!==x.name||x.amount&&T.amount&&T.amount!==x.amount||x.account&&T.account&&T.account!==x.account)){T.pendingShortcut=Number(el.dataset.txSaved);drawTx(false,false);}else applyShortcut(Number(el.dataset.txSaved));return true;}
 		if((el=g('[data-tx-forget]'))){readTxFields();const x=EX.savedNames(T.type)[Number(el.dataset.txForget)];if(x){S().settings.savedNames=S().settings.savedNames.filter(n=>n!==x);EX.save();drawTx(true,false);}return true;}
+		if((el=g('[data-smart-undo]'))){smartUndo();return true;}
 		if((el=g('[data-tx-type]'))){changeType(el.dataset.txType);return true;}
 		if(g('[data-tx-catsmore]')){readTxFields();T.catsOpen=!T.catsOpen;drawTx(true,false);return true;}
 		if((el=g('[data-service-preset]'))){const p=EX.SERVICE_PRESETS[Number(el.dataset.servicePreset)];if(p){readTxFields();T.name=EXA.servicePresetName(p);T.category=p[2];drawTx(true,false);storeDraft();}return true;}
@@ -436,7 +494,7 @@
 		 if(field){if(['wallet','to-wallet','date'].includes(a))T.entryGroup='payment';T[field]=!T[field];drawTx(true,false);return true;}return true;
 		}
 		if((el=g('[data-tx]'))){const a=el.dataset.tx;
-		 if(a==='quick-review'){readTxFields();T.quick=false;drawTx(true,false);storeDraft();}else if(a==='save')saveTx();else if(a==='target-amount')setKeypad(true,'amount');else if(a==='target-to')setKeypad(true,'toAmount');else if(a==='amount-done'){setKeypad(false);storeDraft();}else if(a==='field-done'){finishField();drawTx(true,false);storeDraft();}else if(a==='quick'){readTxFields();T.quick=true;T.moreOpen=true;T.entryGroup='extras';drawTx(true,false);$('#txQuick')?.focus();}else if(a==='note'){readTxFields();T.noteOpen=!T.noteOpen;drawTx(true,false);}
+		 if(a==='quick-review'){readTxFields();T.quick=false;drawTx(true,false);storeDraft();}else if(a==='save')saveTx();else if(a==='target-amount')setKeypad(true,'amount');else if(a==='target-to')setKeypad(true,'toAmount');else if(a==='amount-done'){setKeypad(false);storeDraft();guideNext();}else if(a==='field-done'){finishField();drawTx(true,false);storeDraft();}else if(a==='quick'){readTxFields();T.quick=true;T.moreOpen=true;T.entryGroup='extras';drawTx(true,false);$('#txQuick')?.focus();}else if(a==='note'){readTxFields();T.noteOpen=!T.noteOpen;drawTx(true,false);}
 		 return true;
 		}return false;
 	};
@@ -444,7 +502,7 @@
 		if(e.target.closest('[data-schedule-panel]')){readTxFields();storeDraft();return true;}
         if(e.target.id==='entryRepeat'){readTxFields();drawTx(true,false);storeDraft();return true;}
 		if(e.target.id==='txQuick'){onTxQuick();storeDraft();return true;}
-		if(e.target.id==='txDesc'&&e.type==='input'){T.name=e.target.value;const services=$('#entryServices');if(services)services.hidden=!!T.name.trim()||!!T.editScheduleId||!!T.editId;const r=$('.remember-name');if(r)r.hidden=!T.name.trim();const cat=$('#entryCategory');if(cat)cat.innerHTML=entryCategories();}
+		if(e.target.id==='txDesc'&&e.type==='input'){T.name=e.target.value;if(T.missing?.length)paintMissing();scheduleSmart();const services=$('#entryServices');if(services)services.hidden=!!T.name.trim()||!!T.editScheduleId||!!T.editId;const r=$('.remember-name');if(r)r.hidden=!T.name.trim();const cat=$('#entryCategory');if(cat)cat.innerHTML=entryCategories();}
 		if(e.target.id==='entryCategoryIcon'){const preview=$('.entry-icon-preview');if(preview)preview.innerHTML=UI.ci(e.target.value,'teal',40);}
 		if(['entryRememberAmount','entryRememberWallet'].includes(e.target.id)&&e.target.checked){if(T.name.trim()){T.rememberName=true;$('#rememberName').checked=true;}else{e.target.checked=false;toast(t('entryNoName'));}}
 		if(e.target.id==='entryDefault'){T.defaultTouched=true;T.makeDefault=e.target.checked;}
@@ -452,7 +510,7 @@
 	};
 	window.addEventListener('pagehide',storeDraft);
 	document.addEventListener('visibilitychange',()=>{if(document.hidden)storeDraft();});
-	document.addEventListener('change',e=>{if(T&&e.target.closest('#sheet')){EXA.txInput(e);storeDraft();}});
+	document.addEventListener('change',e=>{if(T&&e.target.closest('#sheet')){EXA.txInput(e);storeDraft();if(e.target.id==='txDesc')smartFill();if(T.missing?.length)guideNext();}});
 	document.addEventListener('click',()=>{if(T)queueMicrotask(()=>{if(T)storeDraft();});});
 	EX.on('auth',event=>{if(!event?.accountChanged)return;if(T){clearTimeout(draftTimer);T.committed=true;T=null;UI.closeSheet(true);}try{for(let i=localStorage.length-1;i>=0;i--){const k=localStorage.key(i);if(k.startsWith('expenity.entryDraft.v1:')||k.startsWith('expenity.entryRecovery.v1:'))localStorage.removeItem(k);}}catch(e){}});
 	EX.on('photochange',()=>{if(T){readTxFields();storeDraft();const btn=$('[data-entry=photo]');if(btn){btn.classList.toggle('populated',!!T.photo);btn.querySelector('small')?.remove();if(T.photo)btn.insertAdjacentHTML('beforeend','<small>1</small>');}}});

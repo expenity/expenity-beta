@@ -12,7 +12,7 @@
 	const $ = ( s, r = document ) => r.querySelector( s );
 	const $$ = ( s, r = document ) => [ ...r.querySelectorAll( s ) ];
 	const toast = UI.toast;
-	window.EXPENITY_VERSION = '0.30.1';
+	window.EXPENITY_VERSION = '0.31.0';
 
  const seenCharacters=new Set();try{for(const skin of JSON.parse(sessionStorage.getItem('expenity.charactersSeen')||'[]'))seenCharacters.add(skin);}catch(_){}
  const characterSeen=skin=>seenCharacters.has(skin);
@@ -66,6 +66,11 @@
 		view.scrollTop = top;
 		return true;
 	}
+	// Every on/off option is announced as a switch, to match how it looks (the day pickers stay checkboxes).
+	let switchQueued = false;
+	const markSwitches = () => document.querySelectorAll( 'input[type=checkbox]:not([role]):not(.schedule-days input):not(.switch input)' ).forEach( ( i ) => i.setAttribute( 'role', 'switch' ) );
+	new MutationObserver( () => { if ( switchQueued ) return; switchQueued = true; requestAnimationFrame( () => { switchQueued = false; markSwitches(); } ); } ).observe( document.body, { childList: true, subtree: true } );
+	markSwitches();
 	EXA.render = render;
 	EXA.applyMotion = () => { const m = S().device.motion || 'auto'; if ( m === 'auto' ) delete document.documentElement.dataset.motion; else document.documentElement.dataset.motion = m; try { if ( m === 'auto' ) localStorage.removeItem( 'expenity.motion' ); else localStorage.setItem( 'expenity.motion', m ); } catch ( e ) { /* ignore */ } };
 	function go( view, more = 'root' ) {
@@ -225,7 +230,7 @@
 				await EX.auth.logout(); st.devCache = null; toast( t( 'tSignedOut' ) ); go( 'home' ); break;
 			}
 			case 'delete-account': {
-				if ( ! await EXA.confirm( { title: t( 'devDelete' ), text: t( 'confirmDeleteAcct' ), confirm: t( 'devDelete' ) } ) ) break;
+				if ( ! await EXA.confirm( { title: t( 'devDelete' ), text: t( 'confirmDeleteAcct' ), confirm: t( 'devDelete' ), word: 'DELETE' } ) ) break;
 				const r = await EX.auth.deleteAccount();
 				if ( r.ok ) { st.devCache = null; toast( t( 'tAccountDeleted' ) ); go( 'home' ); } else toast( EXA.errText( r.error ) );
 				break;

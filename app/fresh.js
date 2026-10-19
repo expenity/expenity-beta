@@ -5,7 +5,7 @@
 	EXA.resetAccount = EXA.startFresh = async () => {
 		const S = EX.state();
 		if ( S.accounts.some( ( a ) => a.space ) ) { UI.toast( t( 'freshShared' ) ); return; }
-		if ( ! await EXA.confirm( { title: t( 'freshTitle' ), text: t( 'freshConfirm' ), confirm: t( 'freshBtn' ) } ) ) return;
+		if ( ! await EXA.confirm( { title: t( 'freshTitle' ), text: t( 'freshConfirm' ), confirm: t( 'freshBtn' ), word: 'RESET' } ) ) return;
 		let proof = null;
 		if ( EX.auth.isSignedIn() ) { proof = await EX.auth.stepUp(); if ( ! proof.ok ) { UI.toast( EXA.errText( proof.error ) ); return; } }
 		if ( proof ) await EX.api( 'DELETE', '/api/photos', {}, { stepUp: proof.token } );

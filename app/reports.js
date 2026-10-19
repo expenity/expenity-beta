@@ -224,6 +224,40 @@
 		return sec( 'overview', t( 'repOverview' ), overview( r, list ) ) + sec( 'spending', t( 'repSpending' ), noDonut( spending( r, list ) ) ) + sec( 'flow', t( 'repFlowTab' ), flow( r, list ) ) + sec( 'trends', t( 'repTrends' ), trends( r, list ) )
 			+ sec( 'forecast', t( 'repForecastTab' ), forecast() ) + sec( 'subs', t( 'repSubsTab' ), subs() ) + `<div class="btn-row"><button type="button" class="btn btn-ghost" data-rep="tab" data-tab="table">${ UI.icon( 'table', 20 ) } ${ esc( t( 'repTable' ) ) }</button></div>`;
 	}
+	/* ------------------------------------------------------------------ Reports on Home */
+	// Three reports can sit on Home as cards: Where it went (on by default, at the bottom), the spending trend and subscriptions (added from
+	// Cards while editing Home). They always use this month and never touch the filters of the Reports screen.
+	const monthRange = ( offset = 0 ) => { const d = parse( today() ); return { from: iso( new Date( d.getFullYear(), d.getMonth() + offset, 1 ) ), to: offset === 0 ? today() : iso( new Date( d.getFullYear(), d.getMonth() + offset + 1, 0 ) ) }; };
+	const homeTxs = ( rg ) => EX.reportTxs().filter( ( x ) => x.date >= rg.from && x.date <= rg.to && ! x.goalId );
+	const seeAllLink = () => `<button type="button" class="link" data-go="reports">${ esc( t( 'seeAll' ) ) } ${ UI.icon( 'chevron-right', 18 ) }</button>`;
+	const smallTile = ( icon, label, value, sub ) => `<div class="dash-summary"><span>${ UI.icon( icon, 20 ) } ${ esc( label ) }</span><strong>${ esc( value ) }</strong><small>${ esc( sub ) }</small>${ seeAllLink() }</div>`;
+	const homeLegend = ( list, total, n ) => `<ul class="legend2">${ list.slice( 0, n ).map( ( [ k, v ], i ) => `<li><button type="button" data-go="reports"><i style="background:${ colorOf( k, i ) }"></i><span>${ esc( EX.catInfo( k ).name ) }</span><b>${ esc( m$( v ) ) }</b><em>${ total > 0 ? Math.round( v / total * 100 ) + '%' : '\u2014' }</em></button></li>` ).join( '' ) }</ul>`;
+	R.homeCard = ( id, size = 'full' ) => {
+		if ( id === 'where' ) {
+			const cats = byCat( homeTxs( monthRange() ) ).filter( ( [ , v ] ) => v > 0 ), total = cats.reduce( ( s, x ) => s + x[ 1 ], 0 ); if ( ! total ) return '';
+			if ( size === 'small' ) return smallTile( 'chart-donut', t( 'ovTopCats' ), EX.catInfo( cats[ 0 ][ 0 ] ).name, m$( cats[ 0 ][ 1 ] ) + ' \u00b7 ' + Math.round( cats[ 0 ][ 1 ] / total * 100 ) + '%' );
+			return `<section class="card home-report"><h2>${ esc( t( 'ovTopCats' ) ) }</h2><div class="donut-wrap2${ size === 'medium' ? ' compact' : '' }">${ donut( cats, total, '' ) }${ homeLegend( cats, total, size === 'medium' ? 3 : 5 ) }</div></section>`;
+		}
+		if ( id === 'trend' ) {
+			const now = monthRange(), prevFull = monthRange( -1 ), day = parse( today() ).getDate(), prevTo = iso( new Date( parse( prevFull.from ).getFullYear(), parse( prevFull.from ).getMonth(), Math.min( day, parse( prevFull.to ).getDate() ) ) );
+			const cur = sum( homeTxs( now ), 'expense' ), before = sum( homeTxs( { from: prevFull.from, to: prevTo } ), 'expense' ); if ( ! cur && ! before ) return '';
+			const pct = before ? Math.round( ( cur - before ) / Math.abs( before ) * 100 ) : null;
+			if ( size === 'small' ) return smallTile( 'chart-line', t( 'repTrends' ), m$( cur ), pct == null ? t( 'ovExpenses' ) : ( pct >= 0 ? '+' : '\u2212' ) + Math.abs( pct ) + '% \u00b7 ' + t( 'repVsPrev' ) );
+			const head = `<p><b>${ esc( m$( cur ) ) }</b> ${ delta( cur, before, false ) } <span class="muted">${ esc( t( 'repVsPrev' ) ) }</span></p>`;
+			let chart = '';
+			if ( size === 'full' ) { const series = []; for ( let o = -5; o <= 0; o++ ) { const rg = monthRange( o ), l = homeTxs( rg ); series.push( { label: monthLabel( rg.from ), a: sum( l, 'income' ), b: sum( l, 'expense' ) } ); } chart = bars2( series ); }
+			return `<section class="card home-report"><h2>${ esc( t( 'repTrends' ) ) }</h2>${ head }${ chart }</section>`;
+		}
+		if ( id === 'subs' ) {
+			const rows = S().bills.filter( ( b ) => ! b.done && b.category === 'subscriptions' && EX.scheduleFactor( b ) ).map( ( b ) => { const v = EX.convert( num( b.amount ), b.currency || main(), main() ) || 0, yearly = Math.round( v * 100 * EX.scheduleFactor( b ) ); return { b, yearly, monthly: Math.round( yearly / 12 ) }; } ).sort( ( a, z ) => z.yearly - a.yearly );
+			if ( ! rows.length ) return ''; const tot = rows.reduce( ( s, x ) => s + x.yearly, 0 );
+			if ( size === 'small' ) return smallTile( 'repeat', t( 'subs' ), m$( Math.round( tot / 12 ) ), t( 'repPerMonth' ) );
+			const list = size === 'full' ? `<ul class="plain">${ rows.slice( 0, 4 ).map( ( x ) => `<li>${ esc( x.b.name ) } \u00b7 <b>${ esc( m$( x.monthly ) ) }</b></li>` ).join( '' ) }</ul>` : '';
+			return `<section class="card home-report"><h2>${ esc( t( 'subs' ) ) }</h2><div class="tiles">${ tile( t( 'repPerMonth' ), m$( Math.round( tot / 12 ) ) ) }${ tile( t( 'repPerYear' ), m$( tot ) ) }</div>${ list }</section>`;
+		}
+		return '';
+	};
+
 	EXA.reports = () => {
 		if ( ! S().bills.length && ! S().txs.length && ! S().incomes.length ) return `<div class="empty">${ UI.ci( 'chart-pie', 'purple', 80 ) }<h2>${ esc( t( 'tabReports' ) ) }</h2><p class="muted">${ esc( t( 'emptyIns' ) ) }</p></div>`;
 		const r = R.range(), list = pick( r.from, r.to );

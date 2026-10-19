@@ -1,6 +1,28 @@
 {
-  "version": "0.30.1",
+  "version": "0.31.0",
   "releases": [
+    {
+      "version": "0.31.0",
+      "date": "2026-10-19",
+      "en": [
+        "Smart detection (Advanced): type a description and the category, tags and wallet fill in, with an Undo. It can be switched off in Features.",
+        "Reports on Home: \"Where it went\" sits at the bottom by default, and you can add Trends and Subscriptions from Cards.",
+        "Home editor: only sizes that look different are offered, and the daily number and streak have proper small tiles.",
+        "When you save an entry with fields missing, they stay red and take you to the next one as you fill each in.",
+        "Reset account and Delete account now ask you to type RESET or DELETE first.",
+        "A new, centred What's new window over a grey backdrop, and every on/off option is now a toggle, including the monthly backup reminder.",
+        "Two new tutorials: Smart detection and Reports on Home."
+      ],
+      "el": [
+        "Έξυπνη ανίχνευση (Advanced): γράψτε μια περιγραφή και συμπληρώνονται η κατηγορία, οι ετικέτες και το πορτοφόλι, με δυνατότητα αναίρεσης. Απενεργοποιείται από τις Λειτουργίες.",
+        "Αναφορές στην Αρχική: η κάρτα «Πού πήγαν τα χρήματα» βρίσκεται στο τέλος από προεπιλογή και μπορείτε να προσθέσετε Τάσεις και Συνδρομές από τις Κάρτες.",
+        "Επεξεργασία Αρχικής: προσφέρονται μόνο τα μεγέθη που φαίνονται διαφορετικά και το ημερήσιο ποσό και το σερί έχουν σωστά μικρά πλακίδια.",
+        "Όταν αποθηκεύετε μια εγγραφή με πεδία που λείπουν, παραμένουν κόκκινα και σας μεταφέρουν στο επόμενο καθώς συμπληρώνετε το καθένα.",
+        "Η Επαναφορά λογαριασμού και η Διαγραφή λογαριασμού ζητούν πλέον να πληκτρολογήσετε πρώτα RESET ή DELETE.",
+        "Νέο, κεντραρισμένο παράθυρο «Τι νέο υπάρχει» πάνω από γκρίζο φόντο, και κάθε επιλογή ενεργοποίησης/απενεργοποίησης είναι πλέον διακόπτης, μαζί με την υπενθύμιση μηνιαίου αντιγράφου.",
+        "Δύο νέοι οδηγοί: Έξυπνη ανίχνευση και Αναφορές στην Αρχική."
+      ]
+    },
     {
       "version": "0.30.1",
       "date": "2026-10-19",

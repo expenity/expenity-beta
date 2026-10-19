@@ -384,5 +384,7 @@ window.EXPENITY_I18N = ( function () {
  Object.assign(el,{syncWaiting:({n})=>n===1?'1 αλλαγή σε αναμονή':n+' αλλαγές σε αναμονή',syncConfirmed:({time})=>'Τελευταίος επιτυχής συγχρονισμός: '+time,insightBudgetTitle:({name})=>'Προϋπολογισμός: '+name,insightBudgetLeft:({amount,days})=>amount+' απομένουν για '+days+' ημέρες.',insightBudgetOver:({amount})=>'Υπέρβαση προϋπολογισμού κατά '+amount+'.',insightGrowthTitle:({name})=>'Αύξηση εξόδων: '+name,insightGrowthText:({amount})=>amount+' περισσότερα τις τελευταίες 30 ημέρες σε σύγκριση με τις προηγούμενες 30.',insightEvidence:({n,from,to})=>n+' καταχωρισμένα έξοδα · '+from+' – '+to});
 	Object.assign(en,{entryWalletDate:'Wallet and date',wtBankCompact:'Bank',entryPayment:'Payment',entryCategoryTags:'Category and tags',entryExtras:'Extras',entryExtrasHint:'Receipt, note and shortcuts'});
 	Object.assign(el,{entryWalletDate:'Πορτοφόλι και ημερομηνία',wtBankCompact:'Τράπεζα',entryPayment:'Πληρωμή',entryCategoryTags:'Κατηγορία και ετικέτες',entryExtras:'Πρόσθετα',entryExtrasHint:'Απόδειξη, σημείωση και συντομεύσεις'});
+	Object.assign(en,{typeToConfirm:({word})=>'Type '+word+' to confirm.'});
+	Object.assign(el,{typeToConfirm:({word})=>'Πληκτρολογήστε '+word+' για επιβεβαίωση.'});
 	return { langs: { en, el }, default: 'en' };
 }() );
