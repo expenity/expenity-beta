@@ -825,14 +825,4 @@
 		const h = EXA.detailHtml( sel );
 		if ( h ) UI.openSheet( `${ head( kind === 'tx' ? t( 'tabActivity' ) : t( 'tabBills' ) ) }<div class="sheet-pad">${ h }</div>`, { cls: 'small' } );
 	};
-	// Amounts typed into ordinary fields (setup, budgets, goals, bills, targets) are shown grouped underneath as you type (20000 -> 20,000 or 20.000),
-	// the way the keypad shows them. The field itself keeps the plain number, so nothing that reads it changes.
-	function paintAmountPreview( input ) {
-		let p = input.nextElementSibling && input.nextElementSibling.classList && input.nextElementSibling.classList.contains( 'amt-preview' ) ? input.nextElementSibling : null;
-		const raw = String( input.value || '' ).replace( ',', '.' ).replace( /[^0-9.]/g, '' ), [ whole, frac ] = raw.split( '.' );
-		if ( ! whole || whole.length < 4 ) { if ( p ) p.remove(); return; }
-		if ( ! p ) { p = document.createElement( 'small' ); p.className = 'amt-preview muted'; p.setAttribute( 'aria-hidden', 'true' ); input.insertAdjacentElement( 'afterend', p ); }
-		p.textContent = showAmt( whole + ( frac !== undefined ? '.' + frac.slice( 0, 2 ) : '' ) );
-	}
-	[ 'input', 'focusin' ].forEach( ( type ) => document.addEventListener( type, ( e ) => { const i = e.target; if ( i && i.matches && i.matches( 'input[inputmode="decimal"]' ) ) paintAmountPreview( i ); } ) );
 }() );

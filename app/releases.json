@@ -1,6 +1,16 @@
 {
-  "version": "0.40.0",
+  "version": "0.41.0",
   "releases": [
+    {
+      "version": "0.41.0",
+      "date": "2026-10-21",
+      "en": [
+        "Amount fields now show the thousands and decimal separators as you type, right inside the field (1,234.50 or 1.234,50), everywhere in the app."
+      ],
+      "el": [
+        "Τα πεδία ποσών δείχνουν πλέον τους διαχωριστές χιλιάδων και δεκαδικών καθώς πληκτρολογείτε, μέσα στο ίδιο το πεδίο (1,234.50 ή 1.234,50), σε όλη την εφαρμογή."
+      ]
+    },
     {
       "version": "0.40.0",
       "date": "2026-10-21",
