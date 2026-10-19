@@ -47,7 +47,7 @@
 	const txPill = ( x ) => {
 		if ( x.date > today() ) return `<span class="bm-pill later">${ esc( rel( x.date ) ) }</span>`;
 		if ( x.type === 'income' ) return `<span class="bm-pill paid">${ UI.icon( 'check', 14 ) } ${ esc( t( 'receivedWord' ) ) }</span>`;
-		if ( x.billId ) return `<span class="bm-pill paid">${ UI.icon( 'check', 14 ) } ${ esc( t( 'paid' ) ) }</span>`;
+		if ( x.type === 'expense' ) return `<span class="bm-pill paid">${ UI.icon( 'check', 14 ) } ${ esc( t( 'paid' ) ) }</span>`; // a recorded expense is a paid one
 		return '';
 	};
 	function txItem( x ) {

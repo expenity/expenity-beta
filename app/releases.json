@@ -1,6 +1,16 @@
 {
-  "version": "0.43.1",
+  "version": "0.43.2",
   "releases": [
+    {
+      "version": "0.43.2",
+      "date": "2026-10-21",
+      "en": [
+        "Every completed expense now shows a Paid label."
+      ],
+      "el": [
+        "Κάθε ολοκληρωμένο έξοδο δείχνει πλέον την ένδειξη Πληρωμένο."
+      ]
+    },
     {
       "version": "0.43.1",
       "date": "2026-10-21",
