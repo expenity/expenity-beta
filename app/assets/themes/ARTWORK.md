@@ -36,3 +36,7 @@ Final prompt:
 ## Locally bundled fonts
 
 Noto Sans, Noto Serif, Roboto, Roboto Slab, Open Sans, Fira Sans, Comfortaa, Alegreya, Literata and Geologica: obtained from the Google Fonts CSS API on 2026-10-17. Latin/Greek subsets at weights 400/700, unmodified WOFF2 files. Individual upstream license notices are bundled in fonts/. Fonts load locally and are cached offline; there is no runtime Google Fonts request.
+
+`vader-cutout-v1.png` is the same portrait with its background removed (subject cutout made locally, no external service), used on the start screen. The source and license note above apply to it as well.
+
+`minnie-cutout-v1.png` is the pencil drawing above with its white background removed (made locally), used on the start screen.

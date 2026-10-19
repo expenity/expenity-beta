@@ -1,6 +1,16 @@
 {
-  "version": "0.37.1",
+  "version": "0.38.0",
   "releases": [
+    {
+      "version": "0.38.0",
+      "date": "2026-10-20",
+      "en": [
+        "The start screen now dresses in your theme: its colours, and in the animated themes, its character and little friends too."
+      ],
+      "el": [
+        "Η οθόνη εκκίνησης ντύνεται πλέον με το θέμα σας: τα χρώματά του και, στα κινούμενα θέματα, τον χαρακτήρα και τους μικρούς φίλους του."
+      ]
+    },
     {
       "version": "0.37.1",
       "date": "2026-10-20",

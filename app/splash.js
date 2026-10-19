@@ -15,6 +15,27 @@
 		sessionStorage.setItem( 'expenity.splashSeen', '1' );
 	} catch ( e ) { /* ignore */ }
 	if ( again ) { el.remove(); window.EXSplashDone = () => {}; return; }
+	// A custom theme keeps its colours in the browser; the other themes come from the page's own style variables.
+	try {
+		if ( document.documentElement.dataset.skin === 'custom' ) {
+			const p = JSON.parse( localStorage.getItem( 'expenity.custom' ) || '{}' ), ok = ( v ) => /^#[0-9a-f]{6}$/i.test( v || '' );
+			[ 'bg', 'surface', 'ink', 'accent' ].forEach( ( k ) => { if ( ok( p[ k ] ) ) el.style.setProperty( '--' + k, p[ k ] ); } );
+		}
+	} catch ( e ) { /* ignore */ }
+	// Animated themes bring their character to the start screen too (and their little friends float by).
+	try {
+		const ART = {
+			mario: { hero: 'mario-pencil-v4.png', floats: [ 'goomba-pencil-v1.png', 'mushroom-pencil-v1.png', 'boo-pencil-v1.png', 'star-pencil-v1.png' ] },
+			minnie: { hero: 'minnie-cutout-v1.png' },
+			vader: { hero: 'vader-cutout-v1.png', floats: [ 'orbit-fighter.svg', 'orbit-cruiser.svg' ] },
+			bricks: { hero: 'brick-pencil-v3.webp', floats: [ 'brick-cluster-v2.webp' ] },
+		}[ document.documentElement.dataset.skin || '' ];
+		if ( ART ) {
+			const add = ( file, cls, style ) => { const im = document.createElement( 'img' ); im.src = 'assets/themes/' + file; im.alt = ''; im.className = cls; if ( style ) im.style.cssText = style; im.decoding = 'async'; el.appendChild( im ); };
+			if ( ART.floats ) { el.dataset.art = '1'; [ [ 8, 70 ], [ 74, 62 ], [ 16, 24 ], [ 80, 22 ], [ 50, 82 ], [ 38, 12 ] ].forEach( ( p, n ) => add( ART.floats[ n % ART.floats.length ], 'sp-img', `left:${ p[ 0 ] }%;top:${ p[ 1 ] }%;--d:${ 5 + n * .4 }s;--w:${ n * .5 }s` ) ); }
+			add( ART.hero, 'sp-char' ); el.dataset.skinArt = document.documentElement.dataset.skin;
+		}
+	} catch ( e ) { /* ignore */ }
 	let lang = 'en';
 	try { lang = localStorage.getItem( 'expenity.lang' ) || ( /^el/i.test( navigator.language || '' ) ? 'el' : 'en' ); } catch ( e ) { /* ignore */ }
 	const MSG = {
