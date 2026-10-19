@@ -22,7 +22,7 @@
 		if ( Notification.permission === 'denied' ) return 'denied';
 		return Notification.permission === 'granted' && S().device.push ? 'on' : 'off';
 	};
-	const subscribeBody = ( sub, hour ) => ( { subscription: sub.toJSON(), tz: tz(), hour, lang: EX.lang() } );
+	const subscribeBody = ( sub, hour ) => ( { subscription: sub.toJSON(), tz: tz(), hour, lang: EX.lang(), v: window.EXPENITY_VERSION, updates: S().device.pushUpdates !== false } );
 	const current = async () => { const reg = await navigator.serviceWorker.ready; return { reg, sub: await reg.pushManager.getSubscription() }; };
 
 	P.enable = async ( hour = 9 ) => {
@@ -63,7 +63,7 @@
 		const st = P.state(), hour = ( S().device.push || {} ).hour;
 		const msg = { guest: 'pushNeedAccount', 'needs-install': 'pushNeedInstall', unsupported: 'pushUnsupported', denied: 'notifDenied' }[ st ];
 		let body = msg ? `<p class="muted small">${ esc( t( msg ) ) }</p>` : `<p class="muted small">${ esc( t( 'pushDesc' ) ) }</p>`;
-		if ( st === 'off' ) body += `<div class="btn-row"><button type="button" class="btn btn-primary" data-push="on">${ UI.icon( 'bell', 20 ) } ${ esc( t( 'turnOn' ) ) }</button></div>`;
+		if ( st === 'off' ) body += `<label class="f row-switch"><span>${ esc( t( 'pushUpd' ) ) }</span><span class="switch"><input type="checkbox" id="pushUpd"${ S().device.pushUpdates !== false ? ' checked' : '' } aria-label="${ esc( t( 'pushUpd' ) ) }"><i></i></span></label><div class="btn-row"><button type="button" class="btn btn-primary" data-push="on">${ UI.icon( 'bell', 20 ) } ${ esc( t( 'turnOn' ) ) }</button></div>`;
 		if ( st === 'on' ) body += `<label class="f"><span>${ esc( t( 'pushHour' ) ) }</span><select id="pushHour">${ Array.from( { length: 17 }, ( _, i ) => i + 6 ).map( ( h ) => `<option value="${ h }"${ h === hour ? ' selected' : '' }>${ esc( hourLabel( h ) ) }</option>` ).join( '' ) }</select></label><div class="btn-row"><button type="button" class="btn btn-ghost" data-push="test">${ esc( t( 'pushTest' ) ) }</button><button type="button" class="btn btn-ghost" data-push="off">${ esc( t( 'turnOff' ) ) }</button></div>`;
 		return `<section class="card"><h2>${ esc( t( 'pushTitle' ) ) }</h2>${ body }</section>`;
 	};
@@ -79,6 +79,7 @@
 		return true;
 	};
 	EXA.pushChange = ( e ) => {
+		if ( e.target.id === 'pushUpd' ) { S().device.pushUpdates = e.target.checked; EX.persist(); P.setHour( ( S().device.push || {} ).hour || 9 ).then( () => toast( t( 'tSaved' ) ) ); return true; }
 		if ( e.target.id !== 'pushHour' ) return false;
 		P.setHour( Number( e.target.value ) ).then( () => toast( t( 'tSaved' ) ) );
 		return true;

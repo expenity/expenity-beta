@@ -1,6 +1,18 @@
 {
-  "version": "0.32.0",
+  "version": "0.33.0",
   "releases": [
+    {
+      "version": "0.33.0",
+      "date": "2026-10-19",
+      "en": [
+        "Update notifications: when a new version is published, devices with notifications on get one notification. Tap it to see what's new and update. You can turn it off with Notify me about updates.",
+        "Smart detection now switches a new entry to Income when the description clearly says income, such as a salary or a refund. Undo switches it back, and a type you chose is never changed."
+      ],
+      "el": [
+        "Ειδοποιήσεις ενημέρωσης: όταν κυκλοφορεί νέα έκδοση, οι συσκευές με ενεργές ειδοποιήσεις παίρνουν μία ειδοποίηση. Πατήστε την για να δείτε τι νέο υπάρχει και να ενημερώσετε. Μπορείτε να την απενεργοποιήσετε με το Ειδοποίηση για ενημερώσεις.",
+        "Η Έξυπνη ανίχνευση αλλάζει πλέον μια νέα εγγραφή σε Έσοδο όταν η περιγραφή δείχνει καθαρά έσοδο, όπως μισθό ή επιστροφή χρημάτων. Η Αναίρεση την επαναφέρει και ο τύπος που επιλέξατε δεν αλλάζει ποτέ."
+      ]
+    },
     {
       "version": "0.32.0",
       "date": "2026-10-19",

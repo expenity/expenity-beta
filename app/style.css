@@ -865,3 +865,5 @@ button, a, input, select, textarea, label, summary { touch-action: manipulation;
 .tt-example > p { margin: 10px 0 0; padding: 12px 14px; border-radius: 12px; background: var(--accent-soft); border-left: 3px solid var(--accent); font-size: 14px; line-height: 1.5; }
 @keyframes ttExPulse { 0%, 100% { box-shadow: 0 6px 16px -6px color-mix(in srgb, var(--accent) 60%, transparent), 0 0 0 0 color-mix(in srgb, var(--accent) 40%, transparent); } 50% { box-shadow: 0 6px 16px -6px color-mix(in srgb, var(--accent) 60%, transparent), 0 0 0 9px transparent; } }
 @media (prefers-reduced-motion: reduce) { .tt-ex-btn { animation: none; } }
+
+.row-switch{display:flex;align-items:center;justify-content:space-between;gap:12px}.row-switch>span:first-child{flex:1}

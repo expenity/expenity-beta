@@ -348,7 +348,14 @@
 		clearTimeout(smartTimer);
 		if(!T||T.editId||T.smartOff||T.screen==='schedule'||T.type==='transfer'||!EXA.smart||!EXA.smart.enabled())return;
 		const name=String(T.name||'').trim();if(name.length<3)return;
-		const d=EXA.smart.detect(name,{type:T.type,keepType:true}),sm=T.smart||(T.smart={prev:{},tags:[]}),changed=[];let redraw=false;
+		const sm=T.smart||(T.smart={prev:{},tags:[]}),changed=[];let redraw=false;
+		// A description that clearly says income (salary, refund, pension...) switches a new expense to income, unless the type was chosen by hand.
+		if(!T.typeTouched&&!T.scheduleKind&&T.type==='expense'&&!sm.typeSwitched&&EXA.smart.detect(name,{type:'expense',keepType:false}).type==='income'){
+			const had=document.activeElement&&document.activeElement.id==='txDesc',pos=had?document.activeElement.selectionStart:0;
+			changeType('income');
+			if(T.type==='income'){sm.prev.type='expense';sm.typeSwitched=true;changed.push(t('typeIncome'));if(had){const n=$('#txDesc');n?.focus();try{n?.setSelectionRange(pos,pos);}catch(err){/* no caret */}}}
+		}
+		const d=EXA.smart.detect(name,{type:T.type,keepType:true});
 		if(d.category&&T.category!==d.category&&(!T.category||sm.category===T.category)){if(!('category' in sm.prev))sm.prev.category=T.category||null;T.category=d.category;sm.category=d.category;changed.push(EX.catInfo(d.category).name);}
 		const input=$('input[name=tags]',$('#sheet')),cur=input?EXA.readTags($('#sheet')):copy(T.tags||[]),mine=cur.filter(x=>!sm.tags.includes(x));
 		const next=[...mine,...d.tags.filter(x=>!mine.some(m=>m.toLocaleLowerCase()===x.toLocaleLowerCase()))].slice(0,4);
@@ -364,7 +371,8 @@
 	}
 	function smartUndo(){
 		const sm=T&&T.smart;if(!sm)return;
-		if('category' in sm.prev)T.category=sm.prev.category;
+		if(sm.typeSwitched){T.typeTouched=true;changeType(sm.prev.type||'expense');}
+		else if('category' in sm.prev)T.category=sm.prev.category;
 		if('tags' in sm.prev){T.tags=copy(sm.prev.tags);const input=$('input[name=tags]',$('#sheet'));if(input)input.value=T.tags.join(', ');}
 		if('account' in sm.prev)T.account=sm.prev.account;
 		T.smartOff=true;delete T.smart;drawTx(true,false);storeDraft();
@@ -458,7 +466,7 @@
 		if((el=g('[data-tx-saved]'))){readTxFields();const x=EX.savedNames(T.type)[Number(el.dataset.txSaved)];if(x&&(T.name.trim()&&T.name!==x.name||x.amount&&T.amount&&T.amount!==x.amount||x.account&&T.account&&T.account!==x.account)){T.pendingShortcut=Number(el.dataset.txSaved);drawTx(false,false);}else applyShortcut(Number(el.dataset.txSaved));return true;}
 		if((el=g('[data-tx-forget]'))){readTxFields();const x=EX.savedNames(T.type)[Number(el.dataset.txForget)];if(x){S().settings.savedNames=S().settings.savedNames.filter(n=>n!==x);EX.save();drawTx(true,false);}return true;}
 		if((el=g('[data-smart-undo]'))){smartUndo();return true;}
-		if((el=g('[data-tx-type]'))){changeType(el.dataset.txType);return true;}
+		if((el=g('[data-tx-type]'))){T.typeTouched=true;changeType(el.dataset.txType);return true;}
 		if(g('[data-tx-catsmore]')){readTxFields();T.catsOpen=!T.catsOpen;drawTx(true,false);return true;}
 		if((el=g('[data-service-preset]'))){const p=EX.SERVICE_PRESETS[Number(el.dataset.servicePreset)];if(p){readTxFields();T.name=EXA.servicePresetName(p);T.category=p[2];drawTx(true,false);storeDraft();}return true;}
 		if((el=g('[data-tx-cat]'))){readTxFields();T.entryGroup='category';T.category=el.dataset.txCat;T.catsOpen=false;drawTx(true,false);storeDraft();return true;}

@@ -117,7 +117,27 @@
   dlg.addEventListener('click',ev=>{if(ev.target===dlg)close(false);});
   dlg.showModal();dlg.querySelector('[data-wn-ok]').focus();
  }
+ // Opened from the "update available" notification: offers the new version with its notes and one button to update.
+ A.openUpdate=async()=>{
+  try{history.replaceState(null,'',location.pathname);}catch(err){}
+  let data;try{releasePromise=null;data=await getReleases();}catch(err){UI.toast(A.label('releaseFail'));return;}
+  const running=window.EXPENITY_VERSION;
+  if(!data.version||data.version===running)return A.showReleases(true);
+  const lang=EX.lang(),notes=((data.releases.find(r=>r.version===data.version)||{})[lang]||(data.releases[0]||{}).en||[]).slice(0,3);
+  document.querySelector('dialog.whatsnew')?.remove();
+  const dlg=document.createElement('dialog');dlg.className='whatsnew';dlg.setAttribute('aria-labelledby','wnTitle');
+  dlg.innerHTML=`<div class="whatsnew-card"><div class="wn-head"><span class="wn-ic" aria-hidden="true">${UI.icon('download',26)}</span><div><h2 id="wnTitle">${esc(EX.t('updAvailable'))}</h2><small>${esc(data.version)}</small></div></div><ul class="wn-list">${notes.map(x=>`<li>${esc(x)}</li>`).join('')}</ul><div class="btn-row"><button type="button" class="btn btn-ghost" data-up-later>${esc(EX.t('cancel'))}</button><button type="button" class="btn btn-primary" data-up-now>${UI.icon('download',20)} ${esc(EX.t('updNow'))}</button></div></div>`;
+  document.body.append(dlg);
+  const close=()=>{if(dlg.open)dlg.close();dlg.remove();};
+  dlg.querySelector('[data-up-later]').onclick=close;
+  dlg.querySelector('[data-up-now]').onclick=async ev=>{ev.currentTarget.disabled=true;await A.applyRelease();close();};
+  dlg.addEventListener('cancel',ev=>{ev.preventDefault();close();});
+  dlg.addEventListener('click',ev=>{if(ev.target===dlg)close();});
+  dlg.showModal();dlg.querySelector('[data-up-now]').focus();
+ };
  A.enhancementsInit=()=>{
+  if('serviceWorker' in navigator)navigator.serviceWorker.addEventListener('message',ev=>{if(ev.data&&ev.data.type==='update')A.openUpdate();});
+  if(/[?&]update=1/.test(location.search))setTimeout(A.openUpdate,1200);
   let notifying=false;
   // Show once on upgraded installs; new accounts can open it from the icon instead.
   try { if(!localStorage.getItem('expenity.releaseSeen')&&!S().device.onboarded) localStorage.setItem('expenity.releaseSeen',window.EXPENITY_VERSION); } catch(e) {}
