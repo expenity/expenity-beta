@@ -28,6 +28,7 @@
 		const map = { activity: 'filters', reports: 'reports', plan: 'budgets', bills: 'bills', home: 'home' };
 		const sub = { features: 'features', reminders: 'notify', trash: 'trash', appearance: 'themes', data: 'backup', account: 'sync', wallets: 'wallets', tutorials: '', drafts: 'quick' };
 		if ( v === 'home' && EXA.dashboardEditing && EXA.dashboardEditing() ) return live( 'homereports' ) || live( 'home' );
+		if ( v === 'more' && m === 'account' && EXA.sharedWallets && EXA.sharedWallets().length ) return live( 'leaveshared' ) || live( 'sync' );
 		return live( v === 'more' ? ( m === 'root' ? '' : sub[ m ] || '' ) : map[ v ] || '' );
 	};
 	const btn = ( id ) => `<button type="button" class="ab-btn help-ic" data-help="${ id }" aria-label="${ esc( t( 'helpIcon' ) ) }" title="${ esc( t( 'helpIcon' ) ) }">${ UI.icon( 'help-circle', 24 ) }</button>`;

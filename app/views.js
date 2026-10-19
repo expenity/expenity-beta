@@ -337,7 +337,7 @@
 			<section class="card"><div class="btn-row"><button type="button" class="btn btn-ghost" data-act="sign-out">${ UI.icon( 'logout', 20 ) } ${ esc( t( 'signOut' ) ) }</button></div></section>
 
 			${ EXA.usageCard ? EXA.usageCard() : '' }
-			<section class="card danger"><h2>${ esc( t( 'freshTitle' ) ) }</h2><p class="muted small">${ esc( t( 'freshText' ) ) }</p><div class="btn-row"><button type="button" class="btn" id="expJson">${ esc( t( 'freshBackup' ) ) }</button><button type="button" class="btn btn-danger" data-fresh>${ esc( t( 'freshBtn' ) ) }</button></div></section>
+			${ EXA.sharedWalletsCard ? EXA.sharedWalletsCard() : '' }<section class="card danger"><h2>${ esc( t( 'freshTitle' ) ) }</h2><p class="muted small">${ esc( t( 'freshText' ) ) }</p><div class="btn-row"><button type="button" class="btn" id="expJson">${ esc( t( 'freshBackup' ) ) }</button><button type="button" class="btn btn-danger" data-fresh>${ esc( t( 'freshBtn' ) ) }</button></div></section>
 			<section class="card danger"><h2>${ esc( t( 'devDelete' ) ) }</h2><p class="muted small">${ esc( t( 'devDeleteText' ) ) }</p><div class="btn-row"><button type="button" class="btn btn-danger" data-act="delete-account">${ esc( t( 'devDelete' ) ) }</button></div></section>
 			`;
 	}

@@ -848,3 +848,4 @@ button, a, input, select, textarea, label, summary { touch-action: manipulation;
 .wn-list li { display: grid; grid-template-columns: 20px 1fr; gap: 10px; align-items: start; line-height: 1.4; font-size: 15px; } .wn-list li .i { color: var(--accent-2, var(--accent)); margin-top: 2px; }
 .whatsnew .btn-row { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; } .whatsnew .btn-row .btn { flex: 1 1 auto; }
 @media (prefers-reduced-motion: reduce) { .whatsnew-card, .whatsnew::backdrop { animation: none; } }
+.amt-preview { display: block; margin-top: 4px; font-size: 12.5px; font-variant-numeric: tabular-nums; }

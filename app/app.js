@@ -12,7 +12,7 @@
 	const $ = ( s, r = document ) => r.querySelector( s );
 	const $$ = ( s, r = document ) => [ ...r.querySelectorAll( s ) ];
 	const toast = UI.toast;
-	window.EXPENITY_VERSION = '0.31.0';
+	window.EXPENITY_VERSION = '0.31.1';
 
  const seenCharacters=new Set();try{for(const skin of JSON.parse(sessionStorage.getItem('expenity.charactersSeen')||'[]'))seenCharacters.add(skin);}catch(_){}
  const characterSeen=skin=>seenCharacters.has(skin);
@@ -230,7 +230,8 @@
 				await EX.auth.logout(); st.devCache = null; toast( t( 'tSignedOut' ) ); go( 'home' ); break;
 			}
 			case 'delete-account': {
-				if ( ! await EXA.confirm( { title: t( 'devDelete' ), text: t( 'confirmDeleteAcct' ), confirm: t( 'devDelete' ), word: 'DELETE' } ) ) break;
+				const sharedNote = EXA.sharedWallets().length ? ' ' + t( 'sharedDeleteNote' ) : '';
+				if ( ! await EXA.confirm( { title: t( 'devDelete' ), text: t( 'confirmDeleteAcct' ) + sharedNote, confirm: t( 'devDelete' ), word: 'DELETE' } ) ) break;
 				const r = await EX.auth.deleteAccount();
 				if ( r.ok ) { st.devCache = null; toast( t( 'tAccountDeleted' ) ); go( 'home' ); } else toast( EXA.errText( r.error ) );
 				break;

@@ -1,6 +1,20 @@
 {
-  "version": "0.31.0",
+  "version": "0.31.1",
   "releases": [
+    {
+      "version": "0.31.1",
+      "date": "2026-10-19",
+      "en": [
+        "Reset account now works when you have shared wallets: it shows what happens to each one, you leave the ones you joined and stop sharing the ones you own, and the reset carries on. Delete account warns about shared wallets too.",
+        "A new Shared wallets card in More → Account and sync lists the wallets you share, with Leave and Stop sharing, and a tutorial shows how.",
+        "Amounts typed into fields (setup, budgets, goals, bills, targets) now show grouped underneath as you type, for example 20,000."
+      ],
+      "el": [
+        "Η Επαναφορά λογαριασμού λειτουργεί πλέον και όταν έχετε κοινά πορτοφόλια: δείχνει τι θα γίνει με καθένα, αποχωρείτε από όσα έχετε μπει και σταματάτε την κοινοποίηση όσων σας ανήκουν, και η επαναφορά συνεχίζεται. Η Διαγραφή λογαριασμού προειδοποιεί επίσης για τα κοινά πορτοφόλια.",
+        "Νέα κάρτα «Κοινά πορτοφόλια» στο Περισσότερα → Λογαριασμός και συγχρονισμός εμφανίζει τα πορτοφόλια που μοιράζεστε, με Αποχώρηση και Τέλος κοινής χρήσης, και ένας οδηγός δείχνει πώς.",
+        "Τα ποσά που πληκτρολογείτε σε πεδία (ρύθμιση, προϋπολογισμοί, στόχοι, λογαριασμοί, στόχοι δαπανών) εμφανίζονται πλέον ομαδοποιημένα από κάτω, για παράδειγμα 20.000."
+      ]
+    },
     {
       "version": "0.31.0",
       "date": "2026-10-19",
