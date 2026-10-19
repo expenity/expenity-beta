@@ -12,7 +12,7 @@
 	const $ = ( s, r = document ) => r.querySelector( s );
 	const $$ = ( s, r = document ) => [ ...r.querySelectorAll( s ) ];
 	const toast = UI.toast;
-	window.EXPENITY_VERSION = '0.41.0';
+	window.EXPENITY_VERSION = '0.42.0';
 
  const seenCharacters=new Set();try{for(const skin of JSON.parse(sessionStorage.getItem('expenity.charactersSeen')||'[]'))seenCharacters.add(skin);}catch(_){}
  const characterSeen=skin=>seenCharacters.has(skin);
@@ -280,6 +280,9 @@
 			if ( e.target.id === 'authLogin' ) { EXA.authLogin(); return; }
 			if ( EXA.flow.onClick( e ) || EXA.flow.onStepClick( e ) || EXA.pushClick( e ) || EXA.ideasClick( e ) || EXA.shareClick( e ) || EXA.planClick( e ) || EXA.repClick( e ) ) return;
 			let el;
+			if ( ( el = e.target.closest( '[data-bm-pay]' ) ) ) { e.stopImmediatePropagation(); const b = S().bills.find( ( z ) => z.id === el.dataset.bmPay ); if ( b ) quickPay( b ); return; }
+			if ( e.target.closest( '[data-actfilters]' ) ) { st.actFilters = ! st.actFilters; render(); return; }
+			if ( ( el = e.target.closest( '[data-bmonth]' ) ) ) { st.billMonth += Number( el.dataset.bmonth ); render(); return; }
 			if ( ( el = e.target.closest( '[data-income-mode]' ) ) ) { st.incomeMode = el.dataset.incomeMode; render(); return; }
 			if ( ( el = e.target.closest( '[data-go]' ) ) ) { UI.closeSheet(); go( el.dataset.go ); return; }
 			if ( ( el = e.target.closest( '[data-more]' ) ) ) { st.view = 'more'; st.more = el.dataset.more; render(); $( '#view' ).scrollTop = 0; if ( st.more === 'account' ) loadDevices(); return; }

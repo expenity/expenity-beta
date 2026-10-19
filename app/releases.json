@@ -1,6 +1,20 @@
 {
-  "version": "0.41.0",
+  "version": "0.42.0",
   "releases": [
+    {
+      "version": "0.42.0",
+      "date": "2026-10-21",
+      "en": [
+        "Bills now show a month at a glance: a summary with progress, and a clear Paid, due or overdue label on every row. Tap the label to mark a bill paid.",
+        "Activity is calmer: the filters sit behind one button, entries are cards with a date and a status, and bills still to pay are shown on top.",
+        "Plan (budgets and goals) now has its own tab, Reports moved to the top bar, and Home shows the bill calendar."
+      ],
+      "el": [
+        "Οι λογαριασμοί δείχνουν πλέον τον μήνα με μια ματιά: μια σύνοψη με πρόοδο και μια καθαρή ένδειξη Πληρωμένο, προς πληρωμή ή εκπρόθεσμο σε κάθε γραμμή. Πατήστε την ένδειξη για να σημάνετε έναν λογαριασμό ως πληρωμένο.",
+        "Οι Κινήσεις είναι πιο ήρεμες: τα φίλτρα βρίσκονται πίσω από ένα κουμπί, οι εγγραφές είναι κάρτες με ημερομηνία και κατάσταση, και οι λογαριασμοί που μένουν να πληρωθούν εμφανίζονται στην κορυφή.",
+        "Το Πλάνο (προϋπολογισμοί και στόχοι) έχει πλέον δική του καρτέλα, οι Αναφορές μεταφέρθηκαν στην επάνω γραμμή και η Αρχική δείχνει το ημερολόγιο λογαριασμών."
+      ]
+    },
     {
       "version": "0.41.0",
       "date": "2026-10-21",
