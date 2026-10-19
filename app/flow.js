@@ -97,7 +97,7 @@
 				${ moneyScene() }
 				<h1>${ esc( t( 'onbWelcomeTitle' ) ) }</h1><p class="lead">${ esc( t( 'flowWelcomeText' ) ) }</p><ul class="dev-strip" aria-label="${ esc( t( 'flowWorksOn' ) ) }"><li>${ UI.icon( 'device-mobile', 18 ) } iPhone</li><li>${ UI.icon( 'device-mobile', 18 ) } Android</li><li>${ UI.icon( 'device-tablet', 18 ) } ${ esc( t( 'flowTablets' ) ) }</li><li>${ UI.icon( 'device-desktop', 18 ) } ${ esc( t( 'flowComputers' ) ) }</li></ul><p class="dev-note">${ esc( t( 'flowNoStore' ) ) }</p>${ EXA.pendingJoin && EXA.pendingJoin() ? `<p class="joinnote">${ UI.icon( 'users', 18 ) } ${ esc( t( 'joinNeedAccount' ) ) }</p>` : '' }
 				<form id="flowRegister" novalidate><label class="f"><span class="sr">${ esc( t( 'authEmail' ) ) }</span><input name="email" type="email" autocomplete="email" placeholder="${ esc( t( 'flowEmailPh' ) ) }" required aria-label="${ esc( t( 'authEmail' ) ) }"></label>
-					<p class="err" id="flowErr" role="alert" hidden></p>
+					<p class="muted small" id="flowEmailWhy">${ esc( t( 'flowEmailWhy' ) ) }</p><p class="err" id="flowErr" role="alert" hidden></p>
 					<button type="submit" class="btn btn-primary big wide">${ UI.icon( 'key', 22 ) } ${ esc( t( 'flowCreate' ) ) }</button></form>
 				<p class="or"><span>${ esc( t( 'flowHaveAccount' ) ) }</span></p>
 				<button type="button" class="btn btn-ghost big wide" data-flow="signin">${ esc( t( 'authSignIn' ) ) }</button>

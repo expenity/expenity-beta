@@ -12,7 +12,7 @@
 	const $ = ( s, r = document ) => r.querySelector( s );
 	const $$ = ( s, r = document ) => [ ...r.querySelectorAll( s ) ];
 	const toast = UI.toast;
-	window.EXPENITY_VERSION = '0.35.0';
+	window.EXPENITY_VERSION = '0.36.0';
 
  const seenCharacters=new Set();try{for(const skin of JSON.parse(sessionStorage.getItem('expenity.charactersSeen')||'[]'))seenCharacters.add(skin);}catch(_){}
  const characterSeen=skin=>seenCharacters.has(skin);
@@ -257,6 +257,7 @@
 		if ( ! EXA.flow.active() ) enter();
 		EXA.tryJoin();
 		EXA.push.check();
+		try { if ( navigator.storage && navigator.storage.persist ) navigator.storage.persist(); } catch ( e ) { /* ignore */ } // asks the browser not to clear this app's data when space runs low
 		checkNotifications();
 		setInterval( checkNotifications, 60000 );
 		requestAnimationFrame( () => window.EXSplashDone && window.EXSplashDone() ); // the app has drawn its first screen

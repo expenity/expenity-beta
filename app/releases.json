@@ -1,6 +1,18 @@
 {
-  "version": "0.35.0",
+  "version": "0.36.0",
   "releases": [
+    {
+      "version": "0.36.0",
+      "date": "2026-10-20",
+      "en": [
+        "Expenity now asks your browser to keep its stored data, and the sign-up explains why your email is your safety net.",
+        "New help on what happens if you clear your browser data, and how to get back in."
+      ],
+      "el": [
+        "Το Expenity ζητά πλέον από το πρόγραμμα περιήγησης να διατηρεί τα αποθηκευμένα δεδομένα του και η εγγραφή εξηγεί γιατί το email σας είναι το δίχτυ ασφαλείας σας.",
+        "Νέα βοήθεια για το τι γίνεται αν διαγράψετε τα δεδομένα του προγράμματος περιήγησης και πώς θα μπείτε ξανά."
+      ]
+    },
     {
       "version": "0.35.0",
       "date": "2026-10-20",

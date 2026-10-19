@@ -254,7 +254,7 @@ window.EXPENITY_I18N = ( function () {
 	/* ---------------------------------------------------------------- First-run flow: welcome, install, setup (v0.4) */
 	Object.assign( en, {
 		flowWelcomeText: 'Track your money, bills and goals, on every device.', flowCreate: 'Create account', flowHaveAccount: 'Already have an account?', flowGuest: 'Try without an account', flowLost: 'Lost your passkey?',
-		flowLoading: 'Loading your data…', flowEmailPh: 'you@example.com', flowTrust: 'No password. Your fingerprint, face or device PIN is the key.',
+		flowLoading: 'Loading your data…', flowEmailPh: 'you@example.com', flowEmailWhy: 'Your email is your safety net: if you lose your device or clear your browser, it helps you get back into your account.', flowTrust: 'No password. Your fingerprint, face or device PIN is the key.',
 		platIos: 'iPhone', platAndroid: 'Android', platDesktop: 'Computer',
 		stepIos1: 'Tap the Share button', stepIos2: 'Choose “Add to Home Screen”', stepIos3: 'Tap Add', stepIos4: 'Open Expenity from your home screen',
 		stepAnd1: 'Open the browser menu', stepAnd2: 'Tap “Install app”', stepAnd3: 'Confirm', stepAnd4: 'Open Expenity from your home screen',
@@ -281,7 +281,7 @@ window.EXPENITY_I18N = ( function () {
 	} );
 	Object.assign( el, {
 		flowWelcomeText: 'Παρακολουθήστε χρήματα, λογαριασμούς και στόχους, σε όλες τις συσκευές σας.', flowCreate: 'Δημιουργία λογαριασμού', flowHaveAccount: 'Έχετε ήδη λογαριασμό;', flowGuest: 'Δοκιμή χωρίς λογαριασμό', flowLost: 'Χάσατε το passkey;',
-		flowLoading: 'Φόρτωση των δεδομένων σας…', flowEmailPh: 'onoma@example.com', flowTrust: 'Χωρίς κωδικό. Το δακτυλικό σας αποτύπωμα, το πρόσωπό σας ή το PIN της συσκευής είναι το κλειδί.',
+		flowLoading: 'Φόρτωση των δεδομένων σας…', flowEmailPh: 'onoma@example.com', flowEmailWhy: 'Το email σας είναι δίχτυ ασφαλείας: αν χάσετε τη συσκευή σας ή διαγράψετε τα δεδομένα του προγράμματος περιήγησης, σας βοηθά να ανακτήσετε τον λογαριασμό σας.', flowTrust: 'Χωρίς κωδικό. Το δακτυλικό σας αποτύπωμα, το πρόσωπό σας ή το PIN της συσκευής είναι το κλειδί.',
 		platIos: 'iPhone', platAndroid: 'Android', platDesktop: 'Υπολογιστής',
 		stepIos1: 'Πατήστε το κουμπί Κοινοποίηση', stepIos2: 'Επιλέξτε «Προσθήκη στην οθόνη Αφετηρίας»', stepIos3: 'Πατήστε Προσθήκη', stepIos4: 'Ανοίξτε το Expenity από την αρχική οθόνη',
 		stepAnd1: 'Ανοίξτε το μενού του προγράμματος περιήγησης', stepAnd2: 'Πατήστε «Εγκατάσταση εφαρμογής»', stepAnd3: 'Επιβεβαιώστε', stepAnd4: 'Ανοίξτε το Expenity από την αρχική οθόνη',
