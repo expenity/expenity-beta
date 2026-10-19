@@ -12,7 +12,7 @@
 	const $ = ( s, r = document ) => r.querySelector( s );
 	const $$ = ( s, r = document ) => [ ...r.querySelectorAll( s ) ];
 	const toast = UI.toast;
-	window.EXPENITY_VERSION = '0.42.0';
+	window.EXPENITY_VERSION = '0.43.0';
 
  const seenCharacters=new Set();try{for(const skin of JSON.parse(sessionStorage.getItem('expenity.charactersSeen')||'[]'))seenCharacters.add(skin);}catch(_){}
  const characterSeen=skin=>seenCharacters.has(skin);
@@ -339,6 +339,7 @@
 			if ( EXA.repChange( e ) || EXA.shareChange( e ) || EXA.pushChange( e ) ) return;
 			const id = e.target.id;
 			if ( id === 'txWalletFilter' ) { st.txFilter.account = e.target.value; render(); }
+			else if ( id === 'txTypeFilter' ) { st.txFilter.type = e.target.value; render(); }
 			else if ( id === 'setLead' ) { S().settings.lead = Number( e.target.value ); EX.save(); }
 			else if ( id === 'setCur' ) { const v = e.target.value.trim().toUpperCase(); if ( /^[A-Z]{3}$/.test( v ) ) { S().settings.currency = v; EX.save(); } }
 			else if ( id === 'impJson' ) {

@@ -1,6 +1,18 @@
 {
-  "version": "0.42.0",
+  "version": "0.43.0",
   "releases": [
+    {
+      "version": "0.43.0",
+      "date": "2026-10-21",
+      "en": [
+        "Adding an entry is now one clear screen: amount, description, category, date and paid, with everything else under More details.",
+        "Smart entry: describe an expense in a sentence and Expenity shows how it will look. Add it, or edit it in the casual form. Choose your way in setup, or switch any time with the button beside the type tabs."
+      ],
+      "el": [
+        "Η προσθήκη εγγραφής είναι πλέον μία καθαρή οθόνη: ποσό, περιγραφή, κατηγορία, ημερομηνία και πληρωμή, με όλα τα υπόλοιπα στις Περισσότερες λεπτομέρειες.",
+        "Έξυπνη προσθήκη: περιγράψτε ένα έξοδο με μια πρόταση και το Expenity δείχνει πώς θα φαίνεται. Προσθέστε το ή επεξεργαστείτε το στην κλασική φόρμα. Επιλέξτε τον τρόπο σας στη ρύθμιση ή αλλάξτε οποιαδήποτε στιγμή με το κουμπί δίπλα στις καρτέλες τύπου."
+      ]
+    },
     {
       "version": "0.42.0",
       "date": "2026-10-21",

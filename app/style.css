@@ -906,3 +906,41 @@ button.bm-pill{cursor:pointer;min-height:34px;transition:transform .15s}button.b
 .act-ic{position:relative;display:grid;place-items:center;width:44px;height:44px;flex:none;border:1.5px solid var(--line);border-radius:calc(14px * var(--rk,1));background:var(--surface);color:var(--ink);cursor:pointer}
 .act-ic.on{border-color:var(--accent);color:var(--accent)}.act-ic i{position:absolute;top:-6px;right:-6px;min-width:18px;height:18px;padding:0 4px;border-radius:99px;background:var(--accent);color:var(--accent-ink,#fff);font:700 11px/18px system-ui;font-style:normal;text-align:center}
 .bm-row.tx .bm-front{min-height:68px}
+
+/* One-screen entry (forms.js, new expense or income): amount, description, category, date and paid, then everything else under More details. */
+.entry-types{display:flex;gap:4px;padding:4px;margin:0 0 10px;border-radius:calc(16px * var(--rk,1));background:color-mix(in srgb,var(--ink) 7%,var(--surface))}
+.entry-types button{flex:1;min-height:40px;border:0;border-radius:calc(12px * var(--rk,1));background:transparent;color:var(--ink-2);font:inherit;font-weight:600;font-size:14px;cursor:pointer}
+.entry-types button.on{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+.entry-when{margin:10px 0 4px}.entry-when .entry-label,.entry-category .entry-label{display:block;margin:0 0 6px}
+.when-chips{display:flex;gap:8px;flex-wrap:wrap}.when-chips .chip{min-height:40px}
+.chip.date{display:inline-flex;align-items:center;gap:6px;position:relative}.chip.date input{border:0;background:transparent;font:inherit;color:inherit;padding:0;min-height:0;width:auto;max-width:150px}
+.entry-paid{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:12px 0 4px;padding:12px 14px;border:1.5px solid var(--line);border-radius:calc(16px * var(--rk,1));background:var(--surface);cursor:pointer}
+.entry-paid b{font-size:16px}.entry-paid small{display:block;color:var(--muted);font-size:12.5px;margin-top:2px;max-width:32ch}
+.entry-more{margin:12px 0 4px;border:1px solid var(--line);border-radius:calc(16px * var(--rk,1));background:var(--surface)}
+.entry-more>summary{list-style:none;display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer}.entry-more>summary::-webkit-details-marker{display:none}.entry-more>summary .entry-group-copy{flex:1}
+.entry-more[open]>summary svg:last-child{transform:rotate(180deg)}.entry-more-body{padding:4px 12px 12px;display:grid;gap:10px}
+.entry-amount-panel{padding-block:10px}
+
+/* Activity: transactions first. Everything that is not a transaction folds into one line; filters are three compact dropdowns. */
+.bm-head.slim{margin:2px 0 8px}.bm-head.slim .bm-title{font-size:18px}
+.act-fold{margin:0 0 8px;border:1px solid var(--line);border-radius:calc(14px * var(--rk,1));background:var(--surface)}
+.act-fold>summary{list-style:none;display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer;min-height:44px}.act-fold>summary::-webkit-details-marker{display:none}
+.act-fold .af-main{display:inline-flex;align-items:center;gap:6px;font-size:15px;white-space:nowrap}.act-fold .af-main b{font-size:15px}
+.act-fold .af-sub{flex:1;min-width:0;color:var(--muted);font-size:12.5px;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.act-fold[open]>summary>svg:last-child{transform:rotate(180deg)}.act-fold .af-body{padding:0 12px 12px;display:grid;gap:10px}
+.act-topay.late{border-color:color-mix(in srgb,var(--late) 45%,var(--line))}.act-topay.late .af-main{color:var(--late)}
+.bm-chips.wide{grid-template-columns:1fr 1fr;min-width:0}
+.act-filters{display:flex;gap:8px;margin:0 0 10px}.act-filters .chip.select{flex:1;min-width:0;max-width:none}.act-filters select{min-width:0;width:100%;text-overflow:ellipsis}
+.chip.date{padding-inline:12px}.chip.date input{width:132px}
+
+/* Smart entry: the sentence, understood. */
+.entry-top{display:flex;align-items:center;gap:8px;margin:0 0 10px}.entry-top .entry-types{flex:1;margin:0}
+.entry-mode{display:grid;place-items:center;width:46px;height:46px;flex:none;border:1.5px solid var(--line);border-radius:calc(14px * var(--rk,1));background:var(--surface);color:var(--ink-2);cursor:pointer}
+.entry-mode.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink,#fff)}
+.sentence-preview{display:grid;gap:8px;padding:18px;border:1px solid var(--line);border-radius:calc(20px * var(--rk,1));background:var(--surface);box-shadow:var(--shadow)}
+.qp-amt{font-size:34px;font-weight:800;letter-spacing:-.03em}.qp-name{font-size:18px;font-weight:600;overflow-wrap:anywhere}
+.qp-chips{display:flex;flex-wrap:wrap;gap:8px}.qp-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:99px;background:color-mix(in srgb,var(--ink) 8%,var(--surface));font-size:13.5px;font-weight:600}
+.qp-chip.paid{background:color-mix(in srgb,var(--ok) 16%,var(--surface));color:var(--ok)}.qp-chip.later{background:color-mix(in srgb,var(--warn) 20%,var(--surface));color:var(--warn)}.qp-chip.warn{background:color-mix(in srgb,var(--late) 14%,var(--surface));color:var(--late)}
+.entry-footer .btn-ghost[data-tx=quick-review]{flex:0 0 auto}
+.sentence-entry-mode>.entry-top{display:flex!important}
+.tx-scroll.entry-scroll.sentence-entry-mode>.entry-top{display:flex!important}

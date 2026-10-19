@@ -22,7 +22,7 @@
 		return list.map( ( c ) => `<button type="button" class="cur${ c === S().settings.currency ? ' on' : '' }" data-fstep="cur" data-cur="${ c }" role="radio" aria-checked="${ c === S().settings.currency }"><b>${ esc( curSym( c ) ) }</b><span>${ c }</span><small>${ esc( curName( c ) ) }</small></button>` ).join( '' );
 	};
 	// The goal step only appears for people who said they want to save for something.
-	const steps = () => [ 'name', 'currency', 'aims' ].concat( ( S().settings.aims || [] ).includes( 'save' ) ? [ 'goal' ] : [] ).concat( [ 'plan', 'wallets' ] ).concat( EX.feature && EX.feature( 'daily' ) === false ? [] : [ 'target' ] ).concat( [ 'look' ] ).concat( EX.feature && EX.feature( 'push' ) === false || ! EXA.push || EXA.push.state() === 'unsupported' ? [] : [ 'notify' ] ).concat( [ 'tour' ] ).concat( EX.feature && EX.feature( 'receipts' ) === false ? [] : [ 'scan' ] ).concat(EX.feature&&EX.feature('splits')?['split']:[]).concat(EX.feature&&EX.feature('reimbursements')?['reimburse']:[]).concat( [ 'quick', 'extras', 'help' ] ).concat( UI.isPhone() ? [ 'tips' ] : [] ).concat( [ 'done' ] );
+	const steps = () => [ 'name', 'currency', 'aims' ].concat( ( S().settings.aims || [] ).includes( 'save' ) ? [ 'goal' ] : [] ).concat( [ 'plan', 'wallets', 'entry' ] ).concat( EX.feature && EX.feature( 'daily' ) === false ? [] : [ 'target' ] ).concat( [ 'look' ] ).concat( EX.feature && EX.feature( 'push' ) === false || ! EXA.push || EXA.push.state() === 'unsupported' ? [] : [ 'notify' ] ).concat( [ 'tour' ] ).concat( EX.feature && EX.feature( 'receipts' ) === false ? [] : [ 'scan' ] ).concat(EX.feature&&EX.feature('splits')?['split']:[]).concat(EX.feature&&EX.feature('reimbursements')?['reimburse']:[]).concat( [ 'quick', 'extras', 'help' ] ).concat( UI.isPhone() ? [ 'tips' ] : [] ).concat( [ 'done' ] );
 	const GOAL_PRESETS = [ [ 'trip', 'plane' ], [ 'car', 'car' ], [ 'gift', 'gift' ], [ 'home', 'home' ], [ 'emergency', 'heart' ], [ 'other', 'target' ] ];
 
 	/* ------------------------------------------------------------------ Stage machine */
@@ -41,7 +41,7 @@
 	};
 	const setStage = ( stage ) => { D().stage = stage; EX.persist(); flow.show(); };
 	/** Used by tests and screenshots to jump straight into the app. */
-	EXA.skipFlow = () => { const d = D(); d.stage = 'done'; d.onboarded = true; S().settings.setupDone = true; EX.ensureWallet(); EX.save(); flow.show(); };
+	EXA.skipFlow = () => { const d = D(); d.entryMode = d.entryMode || 'casual'; d.stage = 'done'; d.onboarded = true; S().settings.setupDone = true; EX.ensureWallet(); EX.save(); flow.show(); };
 	flow.show = ( keep ) => {
 		const host = $( '#flow' ); const prev = host.scrollTop;
 		const stage = D().stage;
@@ -226,6 +226,10 @@
 			const mo = D().motion || 'auto';
 			const mt = ( v, label ) => `<button type="button" class="chip big${ mo === v ? ' on' : '' }" data-fstep="motion" data-motion="${ v }">${ esc( label ) }</button>`;
 			body = `${ EXA.themePicker( { edit: false } ) }<div class="lbl pad0">${ esc( t( 'setupMotion' ) ) }</div><div class="chips wrap">${ mt( 'auto', t( 'motionAuto' ) ) }${ mt( 'full', t( 'motionFull' ) ) }${ mt( 'reduced', t( 'motionReduced' ) ) }${ mt( 'off', t( 'motionOff' ) ) }</div>`;
+		} else if ( id === 'entry' ) {
+			icon = 'sparkles'; color = 'purple'; title = t( 'flowEntryTitle' ); text = t( 'flowEntryText' );
+			const cur = D().entryMode || 'smart', card = ( m, ic, name, desc ) => `<button type="button" class="fx-plan${ cur === m ? ' on' : '' }" role="radio" aria-checked="${ cur === m }" data-fstep="entry" data-mode="${ m }"><span class="fx-name">${ UI.icon( ic, 22 ) } ${ esc( t( name ) ) }${ cur === m ? UI.icon( 'check', 20 ) : '' }</span><small>${ esc( t( desc ) ) }</small></button>`;
+			body = `<div class="fx-plans" role="radiogroup">${ card( 'smart', 'sparkles', 'flowEntrySmart', 'flowEntrySmartText' ) }${ card( 'casual', 'pencil', 'flowEntryCasual', 'flowEntryCasualText' ) }</div>`;
 		} else if ( id === 'notify' ) {
 			icon = 'bell'; color = 'amber'; title = t( 'setupNotifyTitle' ); text = t( 'setupNotifyText' );
 			const st = EXA.push.state(), msg = { guest: 'pushNeedAccount', 'needs-install': 'pushNeedInstall', denied: 'notifDenied' }[ st ];
@@ -310,6 +314,7 @@
 		else if ( a === 'aim' ) { const cur = ( S().settings.aims || [] ).slice(), id = el.dataset.aim, i = cur.indexOf( id ); if ( i >= 0 ) cur.splice( i, 1 ); else cur.push( id ); S().settings.aims = cur; EX.persist(); flow.show( true ); }
 		else if ( a === 'gpreset' ) { readGoals(); W.goals = W.goals || []; const k = el.dataset.k, i = W.goals.findIndex( ( g ) => g.preset === k ); if ( i >= 0 ) W.goals.splice( i, 1 ); else W.goals.push( { preset: k, name: t( 'goalPreset_' + k ), target: '', icon: el.dataset.ic } ); flow.show( true ); }
 		else if ( a === 'plan' ) { S().settings.features = { tier: el.dataset.plan }; D().planChosen = true; EXA.features.apply(); EX.persist(); flow.show( true ); }
+		else if ( a === 'entry' ) { D().entryMode = el.dataset.mode; EX.persist(); flow.show( true ); }
 		else if ( a === 'tgt' ) { const i = $( '#setupForm [name=target]' ); if ( i && W.tgt ) W.tgt.amount = i.value; W.tgt = W.tgt || {}; W.tgt.period = el.dataset.tgt; flow.show( true ); const n = $( '#setupForm [name=target]' ); if ( n && el.dataset.tgt !== 'auto' ) n.focus(); }
 		else if ( a === 'notif' ) { el.disabled = true; EXA.push.enable( 9 ).then( ( r ) => { if ( r.ok ) UI.toast( t( 'tPushOn' ) ); else UI.toast( r.error === 'denied' ? t( 'notifDenied' ) : t( 'tPushFail' ) ); flow.show( true ); } ); }
 		else if ( a === 'cur' ) { S().settings.currency = el.dataset.cur; EX.persist(); flow.show( true ); }
