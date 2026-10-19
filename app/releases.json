@@ -1,6 +1,16 @@
 {
-  "version": "0.33.0",
+  "version": "0.34.0",
   "releases": [
+    {
+      "version": "0.34.0",
+      "date": "2026-10-19",
+      "en": [
+        "Setup now offers to turn on notifications, so you get your daily bill summary and update notices from the start. Choose Not now to skip it, and you can change it later in More. The update prompt now lists the notes of every version you missed."
+      ],
+      "el": [
+        "Η ρύθμιση προσφέρει πλέον την ενεργοποίηση των ειδοποιήσεων, ώστε να λαμβάνετε από την αρχή την καθημερινή σύνοψη λογαριασμών και τις ειδοποιήσεις ενημέρωσης. Επιλέξτε Όχι τώρα για να την παραλείψετε· μπορείτε να την αλλάξετε αργότερα στο Περισσότερα. Η ειδοποίηση ενημέρωσης δείχνει πλέον τις σημειώσεις κάθε έκδοσης που χάσατε."
+      ]
+    },
     {
       "version": "0.33.0",
       "date": "2026-10-19",

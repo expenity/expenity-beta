@@ -22,7 +22,7 @@
 		return list.map( ( c ) => `<button type="button" class="cur${ c === S().settings.currency ? ' on' : '' }" data-fstep="cur" data-cur="${ c }" role="radio" aria-checked="${ c === S().settings.currency }"><b>${ esc( curSym( c ) ) }</b><span>${ c }</span><small>${ esc( curName( c ) ) }</small></button>` ).join( '' );
 	};
 	// The goal step only appears for people who said they want to save for something.
-	const steps = () => [ 'name', 'currency', 'aims' ].concat( ( S().settings.aims || [] ).includes( 'save' ) ? [ 'goal' ] : [] ).concat( [ 'plan', 'wallets' ] ).concat( EX.feature && EX.feature( 'daily' ) === false ? [] : [ 'target' ] ).concat( [ 'look', 'tour' ] ).concat( EX.feature && EX.feature( 'receipts' ) === false ? [] : [ 'scan' ] ).concat(EX.feature&&EX.feature('splits')?['split']:[]).concat(EX.feature&&EX.feature('reimbursements')?['reimburse']:[]).concat( [ 'quick', 'extras', 'help' ] ).concat( UI.isPhone() ? [ 'tips' ] : [] ).concat( [ 'done' ] );
+	const steps = () => [ 'name', 'currency', 'aims' ].concat( ( S().settings.aims || [] ).includes( 'save' ) ? [ 'goal' ] : [] ).concat( [ 'plan', 'wallets' ] ).concat( EX.feature && EX.feature( 'daily' ) === false ? [] : [ 'target' ] ).concat( [ 'look' ] ).concat( EX.feature && EX.feature( 'push' ) === false || ! EXA.push || EXA.push.state() === 'unsupported' ? [] : [ 'notify' ] ).concat( [ 'tour' ] ).concat( EX.feature && EX.feature( 'receipts' ) === false ? [] : [ 'scan' ] ).concat(EX.feature&&EX.feature('splits')?['split']:[]).concat(EX.feature&&EX.feature('reimbursements')?['reimburse']:[]).concat( [ 'quick', 'extras', 'help' ] ).concat( UI.isPhone() ? [ 'tips' ] : [] ).concat( [ 'done' ] );
 	const GOAL_PRESETS = [ [ 'trip', 'plane' ], [ 'car', 'car' ], [ 'gift', 'gift' ], [ 'home', 'home' ], [ 'emergency', 'heart' ], [ 'other', 'target' ] ];
 
 	/* ------------------------------------------------------------------ Stage machine */
@@ -224,6 +224,10 @@
 			const mo = D().motion || 'auto';
 			const mt = ( v, label ) => `<button type="button" class="chip big${ mo === v ? ' on' : '' }" data-fstep="motion" data-motion="${ v }">${ esc( label ) }</button>`;
 			body = `${ EXA.themePicker( { edit: false } ) }<div class="lbl pad0">${ esc( t( 'setupMotion' ) ) }</div><div class="chips wrap">${ mt( 'auto', t( 'motionAuto' ) ) }${ mt( 'full', t( 'motionFull' ) ) }${ mt( 'reduced', t( 'motionReduced' ) ) }${ mt( 'off', t( 'motionOff' ) ) }</div>`;
+		} else if ( id === 'notify' ) {
+			icon = 'bell'; color = 'amber'; title = t( 'setupNotifyTitle' ); text = t( 'setupNotifyText' );
+			const st = EXA.push.state(), msg = { guest: 'pushNeedAccount', 'needs-install': 'pushNeedInstall', denied: 'notifDenied' }[ st ];
+			body = msg ? `<p class="muted small center">${ esc( t( msg ) ) }</p>` : st === 'on' ? `<p class="center"><b>${ esc( t( 'tPushOn' ) ) }</b></p>` : `<div class="btn-row"><button type="button" class="btn btn-primary big wide" data-fstep="notif">${ UI.icon( 'bell', 20 ) } ${ esc( t( 'turnOn' ) ) }</button></div>`;
 		} else if ( id === 'tour' ) {
 			icon='sparkles';color='purple';title=t('tourTitle');text=t('tourText');
 			body=`<div class="tour-grid">${[['home','layout-dashboard','tourHome','tourHomeText'],['activity','arrows-sort','tourActivity','tourActivityText'],['plan','target','planTitle','tourPlanText'],['reports','chart-pie','tabReports','tourReportsText']].map(([id,ic,label,copy],i)=>`<article style="--tour-i:${i}">${UI.ci(ic,['teal','blue','pink','amber'][i],44)}<div><h2>${esc(t(label))}</h2><p>${esc(t(copy))}</p></div></article>`).join('')}</div>`;
@@ -260,7 +264,7 @@
 			<form id="setupForm" class="flow-body" novalidate>
 				<div class="hero-art small" aria-hidden="true">${ UI.ci( icon, color, last ? 112 : 84 ) }${ last ? '<span class="confetti"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>' : '' }</div>
 				<h1>${ esc( title ) }</h1><p class="lead">${ esc( text ) }</p>${ body }</form>
-			<div class="flow-actions">${ last ? `<button type="button" class="btn btn-primary big" data-flow="start">${ esc( t( 'setupStart' ) ) }</button>` : `<button type="button" class="btn btn-primary big" data-flow="next">${ esc( t( 'onbNext' ) ) }</button><button type="button" class="btn btn-text" data-flow="skip">${ esc( t( 'skipStep' ) ) }</button>` }</div></div>`;
+			<div class="flow-actions">${ last ? `<button type="button" class="btn btn-primary big" data-flow="start">${ esc( t( 'setupStart' ) ) }</button>` : `<button type="button" class="btn btn-primary big" data-flow="next">${ esc( t( id === 'notify' && EXA.push.state() === 'off' ? 'notNow' : 'onbNext' ) ) }</button><button type="button" class="btn btn-text" data-flow="skip">${ esc( t( 'skipStep' ) ) }</button>` }</div></div>`;
 	}
 	function back() { W.step = Math.max( 0, W.step - 1 ); D().setupStep = W.step; EX.persist(); flow.show(); }
 	function next() {
@@ -305,6 +309,7 @@
 		else if ( a === 'gpreset' ) { readGoals(); W.goals = W.goals || []; const k = el.dataset.k, i = W.goals.findIndex( ( g ) => g.preset === k ); if ( i >= 0 ) W.goals.splice( i, 1 ); else W.goals.push( { preset: k, name: t( 'goalPreset_' + k ), target: '', icon: el.dataset.ic } ); flow.show( true ); }
 		else if ( a === 'plan' ) { S().settings.features = { tier: el.dataset.plan }; D().planChosen = true; EXA.features.apply(); EX.persist(); flow.show( true ); }
 		else if ( a === 'tgt' ) { const i = $( '#setupForm [name=target]' ); if ( i && W.tgt ) W.tgt.amount = i.value; W.tgt = W.tgt || {}; W.tgt.period = el.dataset.tgt; flow.show( true ); const n = $( '#setupForm [name=target]' ); if ( n && el.dataset.tgt !== 'auto' ) n.focus(); }
+		else if ( a === 'notif' ) { el.disabled = true; EXA.push.enable( 9 ).then( ( r ) => { if ( r.ok ) UI.toast( t( 'tPushOn' ) ); else UI.toast( r.error === 'denied' ? t( 'notifDenied' ) : t( 'tPushFail' ) ); flow.show( true ); } ); }
 		else if ( a === 'cur' ) { S().settings.currency = el.dataset.cur; EX.persist(); flow.show( true ); }
 		else if ( a === 'theme' ) { const v = el.dataset.theme; try { if ( v === 'auto' ) localStorage.removeItem( 'expenity.theme' ); else localStorage.setItem( 'expenity.theme', v ); } catch ( err ) { /* ignore */ } if ( v === 'auto' ) delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = v; flow.show(); }
 		else if ( a === 'motion' ) { EXA.setMotion( el.dataset.motion ); flow.show( true ); }

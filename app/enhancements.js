@@ -123,7 +123,8 @@
   let data;try{releasePromise=null;data=await getReleases();}catch(err){UI.toast(A.label('releaseFail'));return;}
   const running=window.EXPENITY_VERSION;
   if(!data.version||data.version===running)return A.showReleases(true);
-  const lang=EX.lang(),notes=((data.releases.find(r=>r.version===data.version)||{})[lang]||(data.releases[0]||{}).en||[]).slice(0,3);
+  const lang=EX.lang(),cmp=(x,y)=>{const p=String(x).split('.').map(Number),q=String(y).split('.').map(Number);for(let i=0;i<3;i++){if((p[i]||0)!==(q[i]||0))return(p[i]||0)-(q[i]||0);}return 0;};
+  const notes=data.releases.filter(r=>cmp(r.version,running)>0&&cmp(r.version,data.version)<=0).flatMap(r=>r[lang]||r.en).slice(0,4);
   document.querySelector('dialog.whatsnew')?.remove();
   const dlg=document.createElement('dialog');dlg.className='whatsnew';dlg.setAttribute('aria-labelledby','wnTitle');
   dlg.innerHTML=`<div class="whatsnew-card"><div class="wn-head"><span class="wn-ic" aria-hidden="true">${UI.icon('download',26)}</span><div><h2 id="wnTitle">${esc(EX.t('updAvailable'))}</h2><small>${esc(data.version)}</small></div></div><ul class="wn-list">${notes.map(x=>`<li>${esc(x)}</li>`).join('')}</ul><div class="btn-row"><button type="button" class="btn btn-ghost" data-up-later>${esc(EX.t('cancel'))}</button><button type="button" class="btn btn-primary" data-up-now>${UI.icon('download',20)} ${esc(EX.t('updNow'))}</button></div></div>`;
