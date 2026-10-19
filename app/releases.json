@@ -1,6 +1,16 @@
 {
-  "version": "0.36.0",
+  "version": "0.37.0",
   "releases": [
+    {
+      "version": "0.37.0",
+      "date": "2026-10-20",
+      "en": [
+        "The welcome screen now has Restore a backup, so you can sign in or bring your data back from a backup file."
+      ],
+      "el": [
+        "Η οθόνη υποδοχής έχει πλέον το Επαναφορά αντιγράφου, ώστε να συνδεθείτε ή να επαναφέρετε τα δεδομένα σας από αρχείο αντιγράφου."
+      ]
+    },
     {
       "version": "0.36.0",
       "date": "2026-10-20",

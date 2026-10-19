@@ -101,6 +101,7 @@
 					<button type="submit" class="btn btn-primary big wide">${ UI.icon( 'key', 22 ) } ${ esc( t( 'flowCreate' ) ) }</button></form>
 				<p class="or"><span>${ esc( t( 'flowHaveAccount' ) ) }</span></p>
 				<button type="button" class="btn btn-ghost big wide" data-flow="signin">${ esc( t( 'authSignIn' ) ) }</button>
+				<button type="button" class="btn btn-text wide" data-flow="restore">${ UI.icon( 'upload', 20 ) } ${ esc( t( 'restore' ) ) }</button><input type="file" id="impJson" accept="application/json,.json" hidden>
 				<p class="muted small center trust">${ esc( t( 'flowTrust' ) ) }</p>
 			</div>
 			<div class="flow-foot"><button type="button" class="link" data-flow="recover">${ esc( t( 'flowLost' ) ) }</button><button type="button" class="link" data-flow="guest">${ esc( t( 'flowGuest' ) ) }</button></div></div>`;
@@ -135,6 +136,7 @@
 			const a = el.dataset.flow;
 			if ( a === 'signin' ) login();
 			else if ( a === 'recover' ) EXA.openAuth( 'recover' );
+			else if ( a === 'restore' ) { const f = $( '#impJson' ); if ( f ) f.click(); }
 			else if ( a === 'guest' ) { D().guest = true; afterAuth(); }
 			else if ( a === 'install-done' ) { if(UI.isStandalone()) { D().installDismissed=true; S().settings.setupDone ? finish() : startSetup(); } else EXA.installHandoff(); }
 			else if ( a === 'install-skip' ) { EXA.confirm({title: EXA.label('browserTitle'), text: EXA.label('browserWarning'), confirm: t('instSkip'), danger:false}).then(ok=>{if(ok){D().installDismissed=true; S().settings.setupDone ? finish() : startSetup();}}); }

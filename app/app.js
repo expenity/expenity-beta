@@ -12,7 +12,7 @@
 	const $ = ( s, r = document ) => r.querySelector( s );
 	const $$ = ( s, r = document ) => [ ...r.querySelectorAll( s ) ];
 	const toast = UI.toast;
-	window.EXPENITY_VERSION = '0.36.0';
+	window.EXPENITY_VERSION = '0.37.0';
 
  const seenCharacters=new Set();try{for(const skin of JSON.parse(sessionStorage.getItem('expenity.charactersSeen')||'[]'))seenCharacters.add(skin);}catch(_){}
  const characterSeen=skin=>seenCharacters.has(skin);
@@ -347,6 +347,7 @@
 					const keep = { device: S().device, sync: S().sync };
 					EX.replaceState( Object.assign( { bills: d.bills, txs: d.txs || [], accounts: d.accounts || [], categories: d.categories || [], budgets: d.budgets || [], goals: d.goals || [], incomes: d.incomes || [], settings: d.settings }, keep ) );
 					EX.ensureWallet(); EX.save(); toast( t( 'tRestored' ) );
+					if ( EXA.flow.active() ) EXA.skipFlow(); // restored from the welcome screen: no setup needed
 				} ).catch( () => toast( t( 'tBadBackup' ) ) );
 			}
 		} );
