@@ -1,6 +1,18 @@
 {
-  "version": "0.45.0",
+  "version": "0.46.0",
   "releases": [
+    {
+      "version": "0.46.0",
+      "date": "2026-10-21",
+      "en": [
+        "New theme Mobie, made for phones: flat, one accent and tight rows, so roughly twice as many bills and entries fit on screen.",
+        "Status labels (Paid, due, overdue) are now solid and vivid, and stay readable on every theme."
+      ],
+      "el": [
+        "Νέο θέμα Mobie, φτιαγμένο για κινητά: επίπεδο, με ένα χρώμα έμφασης και συμπαγείς γραμμές, ώστε να χωράνε περίπου διπλάσιοι λογαριασμοί και εγγραφές στην οθόνη.",
+        "Οι ενδείξεις κατάστασης (Πληρωμένο, προς πληρωμή, εκπρόθεσμο) είναι πλέον έντονες και ευανάγνωστες σε κάθε θέμα."
+      ]
+    },
     {
       "version": "0.45.0",
       "date": "2026-10-21",

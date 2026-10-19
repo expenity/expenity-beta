@@ -19,6 +19,7 @@
 	const THEMES = [
 		{ id: 'emerald', mode: true, sw: [ '#eef6f3', '#ffffff', '#0a8f6a', '#0f1f1a' ] },
 		{ id: 'minimal', mode: true, sw: [ '#fafafa', '#ffffff', '#111111', '#111111' ] },
+		{ id: 'mobie', mode: true, sw: [ '#f3f5f9', '#ffffff', '#3b5bdb', '#101828' ] },
 		{ id: 'paper', sw: [ '#f4ecd8', '#fffdf3', '#2f4b9a', '#2b2a40' ] },
 		{ id: 'ledger', sw: [ '#e9eedd', '#fafcf2', '#1f5d3a', '#1c2a1c' ] },
 		{ id: 'terminal', sw: [ '#030803', '#071307', '#36ff6d', '#36ff6d' ] },
@@ -49,6 +50,7 @@
 		if ( m ) m.content = id === 'custom' ? EXA.customPalette().accent : THEMES.find( ( x ) => x.id === id ).sw[ 2 ];
 	};
 	EXA.setMode = ( v ) => {
+		setTimeout( () => EXA.pillInk(), 30 );
 		if ( v === 'auto' ) delete root.dataset.theme; else root.dataset.theme = v;
 		store( 'expenity.theme', v === 'auto' ? null : v );
 	};
@@ -59,6 +61,12 @@
 	EXA.hasThemeFx = ( skin ) => FX_SKINS.includes( skin ) || ( skin === 'custom' && EXA.customPalette().trails );
 	EXA.themeFxOn = ( skin ) => ! fxOffList().includes( skin );
 	EXA.setThemeFx = ( skin, on ) => { const s = new Set( fxOffList() ); if ( on ) s.delete( skin ); else s.add( skin ); store( 'expenity.fxoff', [ ...s ].join( ',' ) || null ); EXA.updateTrails(); };
+	// Dark or light text on the solid status labels, whichever reads better on the theme's own green, amber and red.
+	EXA.pillInk = () => {
+		const cs = getComputedStyle( root ), cv = document.createElement( 'canvas' ).getContext( '2d', { willReadFrequently: true } ); cv.canvas.width = cv.canvas.height = 1;
+		const lum = ( css ) => { cv.clearRect( 0, 0, 1, 1 ); cv.fillStyle = '#000'; cv.fillStyle = css; cv.fillRect( 0, 0, 1, 1 ); const d = cv.getImageData( 0, 0, 1, 1 ).data, f = ( c ) => { c /= 255; return c <= 0.03928 ? c / 12.92 : Math.pow( ( c + 0.055 ) / 1.055, 2.4 ); }; return 0.2126 * f( d[ 0 ] ) + 0.7152 * f( d[ 1 ] ) + 0.0722 * f( d[ 2 ] ); };
+		[ 'ok', 'warn', 'late' ].forEach( ( k ) => { const c = cs.getPropertyValue( '--' + k ).trim(); if ( ! c ) return; const L = lum( c ); root.style.setProperty( '--pill-' + k, ( 1.05 / ( L + 0.05 ) ) >= ( ( L + 0.05 ) / 0.0556 ) ? '#fff' : '#111' ); } ); // white (L 1) or near-black (L .0056): the larger contrast wins
+	};
 	EXA.setMotion = ( v ) => {
 		const d = EX.state().device; d.motion = v; EX.persist();
 		if ( v === 'auto' ) delete root.dataset.motion; else root.dataset.motion = v;
@@ -191,7 +199,7 @@
 	let trails;
 	EXA.updateTrails = () => {
 		const m=root.dataset.motion, on=!document.hidden&&(m==='full'||(m!=='off'&&m!=='reduced'&&!matchMedia('(prefers-reduced-motion: reduce)').matches))&&EXA.themeFxOn(EXA.skin());
-		EXA.updateFunThemes(on);
+		EXA.pillInk(); EXA.updateFunThemes(on);
 		if ( EXA.updateAmbient ) EXA.updateAmbient( on );
 		const enabled=['synthwave','amberwave','ion'].includes(EXA.skin())||(EXA.skin()==='custom'&&EXA.customPalette().trails);
 		if(!enabled){if(trails)trails.remove();trails=null;return;}
@@ -202,5 +210,6 @@
 	document.addEventListener('click',e=>{const b=e.target.closest('[data-theme-edit]');if(!b)return;e.preventDefault();e.stopImmediatePropagation();if(EXA.skin()!==b.dataset.themeEdit){EXA.themeEditPrev=EXA.skin();EXA.setSkin(b.dataset.themeEdit);}if(!EXA.homeLookDraft){EXA.homeLookDraft=JSON.parse(JSON.stringify(S().settings.themeLooks||{}));EXA.themeEditDirect=true;document.getElementById('sheet').addEventListener('close',discardDirectEdit,{once:true});}EXA.render();editCustom(true);},true);
 	document.addEventListener('visibilitychange',()=>EXA.updateTrails());
 	matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change',()=>EXA.updateTrails());
+	matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>setTimeout(()=>EXA.pillInk(),50));
 	EXA.applyCustomTheme(); EXA.updateTrails();
 }() );

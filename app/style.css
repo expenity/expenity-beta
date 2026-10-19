@@ -961,3 +961,9 @@ button.bm-pill{cursor:pointer;min-height:34px;transition:transform .15s}button.b
 .fx-theme{margin:12px 0 4px}
 #splash[data-nofx] .sp-f,#splash[data-nofx] .sp-img{display:none}#splash[data-nofx] .sp-char{animation:none}
 :root[data-status=normal] :is(.bm-row.soon,.bm-row.late)>.bm-front .mid small,:root[data-status=full] :is(.bm-row.soon,.bm-row.late,.bm-row.paid)>.bm-front .mid small{color:var(--ink-2)}
+/* Status labels are solid and vivid: they must stand out from the row tint and the date tile. Text colour (dark or light) is chosen per theme by themes.js (pillInk). */
+.bm-pill.paid{background:var(--ok);color:var(--pill-ok,#fff)}
+.bm-pill.soon{background:var(--warn);color:var(--pill-warn,#fff)}
+.bm-pill.late{background:var(--late);color:var(--pill-late,#fff)}
+.bm-pill{font-weight:800;letter-spacing:.01em}
+.bm-pill svg{stroke-width:3}

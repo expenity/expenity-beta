@@ -965,3 +965,45 @@
 /* Glass: the swipe actions behind a row must never show through the translucent surface. */
 :root[data-skin="glass"] .sw-front{background:linear-gradient(rgba(255,255,255,.55),rgba(255,255,255,.55)),#dfe6ff}
 :root[data-skin="glass"] .sw-front:hover{background:linear-gradient(rgba(255,255,255,.7),rgba(255,255,255,.7)),#dfe6ff}
+
+/* ------------------------------------------------------------------ Mobie: made for phones. Flat, one accent, tight rows, clear status. */
+:root[data-skin="mobie"] { --bg: #f3f5f9; --surface: #fff; --ink: #101828; --ink-2: #344054; --muted: #5d6b82; --line: #e1e5ec; --accent: #3b5bdb; --accent-2: #2f4cc0; --accent-ink: #fff; --accent-soft: #e9eeff; --late: #c8281c; --late-soft: #fde8e6; --warn: #a64b05; --ok: #067647; --shadow: none; --rk: 0.55; --bw: 1px; --card-line: #e1e5ec; --brand: #3b5bdb; --brand-ink: #fff; --brand-glow: none; --fab-bg: #3b5bdb; --hero-bg: #3b5bdb; --hero-ink: #fff; --bar-in: #067647; --bar-out: #c8281c; --font-head: var(--font); --bg-img: none; }
+:root[data-skin="mobie"][data-theme="dark"] { --bg: #0b1120; --surface: #131b2e; --ink: #eef2fb; --ink-2: #c9d3e6; --muted: #93a1bb; --line: #243049; --accent: #7b94ff; --accent-2: #9db0ff; --accent-ink: #0b1120; --accent-soft: #1b2745; --late: #ff8a80; --late-soft: #331a1a; --warn: #f5b04a; --ok: #4cd08a; --card-line: #243049; --brand: #7b94ff; --brand-ink: #0b1120; --fab-bg: #7b94ff; --hero-bg: #1b2745; --hero-ink: #eef2fb; --bar-in: #4cd08a; --bar-out: #ff8a80; color-scheme: dark; }
+@media (prefers-color-scheme: dark) { :root[data-skin="mobie"]:not([data-theme="light"]) { --bg: #0b1120; --surface: #131b2e; --ink: #eef2fb; --ink-2: #c9d3e6; --muted: #93a1bb; --line: #243049; --accent: #7b94ff; --accent-2: #9db0ff; --accent-ink: #0b1120; --accent-soft: #1b2745; --late: #ff8a80; --late-soft: #331a1a; --warn: #f5b04a; --ok: #4cd08a; --card-line: #243049; --brand: #7b94ff; --brand-ink: #0b1120; --fab-bg: #7b94ff; --hero-bg: #1b2745; --hero-ink: #eef2fb; --bar-in: #4cd08a; --bar-out: #ff8a80; color-scheme: dark; } }
+/* density: about twice as many rows on screen */
+:root[data-skin="mobie"] .appbar { min-height: 46px; padding-block: 4px; }
+:root[data-skin="mobie"] .ab-title, :root[data-skin="mobie"] .ab-title.home b { font-size: 20px; }
+:root[data-skin="mobie"] .ab-title.home small { font-size: 12px; }
+:root[data-skin="mobie"] .tabbar { padding-block: 3px; }
+:root[data-skin="mobie"] .tab svg { width: 22px; height: 22px; } :root[data-skin="mobie"] .tab span { font-size: 11px; }
+:root[data-skin="mobie"] .fab { width: 48px; height: 48px; margin-top: -20px; border-width: 4px; }
+:root[data-skin="mobie"] .bm-list { gap: 5px; }
+:root[data-skin="mobie"] .bm-row { box-shadow: none; }
+:root[data-skin="mobie"] .bm-front { min-height: 52px; padding: 6px 10px; gap: 10px; }
+:root[data-skin="mobie"] .bm-row.tx .bm-front { min-height: 52px; }
+:root[data-skin="mobie"] .bm-date { width: 38px; height: 38px; }
+:root[data-skin="mobie"] .bm-date b { font-size: 15px; } :root[data-skin="mobie"] .bm-date small { font-size: 9px; }
+:root[data-skin="mobie"] .bm-front .mid b { font-size: 15px; } :root[data-skin="mobie"] .bm-front .mid small { font-size: 12px; margin-top: 1px; }
+:root[data-skin="mobie"] .bm-right { gap: 3px; } :root[data-skin="mobie"] .bm-right .a { font-size: 15px; }
+:root[data-skin="mobie"] .bm-pill { min-height: 20px; padding: 0 8px; font-size: 11px; }
+:root[data-skin="mobie"] button.bm-pill { min-height: 24px; position: relative; } :root[data-skin="mobie"] button.bm-pill::after { content: ""; position: absolute; inset: -10px -8px; }
+:root[data-skin="mobie"] .bm-sum { padding: 9px 12px; margin-bottom: 8px; box-shadow: none; }
+:root[data-skin="mobie"] .bm-top > div > b { font-size: 22px; } :root[data-skin="mobie"] .bm-top small { font-size: 12px; }
+:root[data-skin="mobie"] .bm-chips { gap: 3px; min-width: 128px; } :root[data-skin="mobie"] .bm-chip { padding: 3px 10px; font-size: 12px; }
+:root[data-skin="mobie"] .bm-bar { height: 6px; margin-top: 8px; } :root[data-skin="mobie"] .bm-pct { margin-top: 8px; }
+:root[data-skin="mobie"] .bm-head { margin: 0 0 6px; } :root[data-skin="mobie"] .bm-nav { min-height: 32px; padding: 0 10px; font-size: 13px; } :root[data-skin="mobie"] .bm-title { font-size: 16px; }
+:root[data-skin="mobie"] .act-fold { margin-bottom: 5px; } :root[data-skin="mobie"] .act-fold > summary { min-height: 38px; padding: 5px 10px; }
+:root[data-skin="mobie"] .act-filters { margin-bottom: 6px; gap: 6px; } :root[data-skin="mobie"] .act-filters .chip.select { min-height: 34px; padding-block: 0; }
+:root[data-skin="mobie"] .segm { margin-bottom: 8px; }
+:root[data-skin="mobie"] .sec-head { margin: 8px 0 4px; } :root[data-skin="mobie"] .sec-head h2 { font-size: 16px; }
+:root[data-skin="mobie"] .card { padding: 12px; }
+:root[data-skin="mobie"] .hero { padding: 12px 14px; } :root[data-skin="mobie"] .hero > b { font-size: 28px; } :root[data-skin="mobie"] .hero-tiles > div { padding: 6px 10px; }
+:root[data-skin="mobie"] .promo { padding: 10px 12px; }
+:root[data-skin="mobie"] .appbar .help-ic, :root[data-skin="mobie"] .appbar .avatar, :root[data-skin="mobie"] .appbar .ab-btn { width: 38px; height: 38px; min-height: 38px; }
+:root[data-skin="mobie"] .appbar .help-ic svg, :root[data-skin="mobie"] .appbar .ab-btn svg { width: 22px; height: 22px; }
+:root[data-skin="mobie"] .segm button { min-height: 34px; font-size: 14px; } :root[data-skin="mobie"] .segm { padding: 3px; }
+:root[data-skin="mobie"] .bm-right .a { line-height: 1.15; } :root[data-skin="mobie"] button.bm-pill { min-height: 22px; } :root[data-skin="mobie"] .bm-pill { min-height: 19px; }
+:root[data-skin="mobie"] .bm-front { padding-block: 5px; min-height: 50px; }
+:root[data-skin="mobie"] .bm-top { align-items: flex-start; } :root[data-skin="mobie"] .bm-chip { padding: 2px 9px; font-size: 11.5px; }
+:root[data-skin="mobie"] .bm-sum { padding: 8px 12px; } :root[data-skin="mobie"] .bm-top > div > b { font-size: 20px; }
+:root[data-skin="mobie"] .bm-bar { margin-top: 6px; height: 5px; } :root[data-skin="mobie"] .bm-pct { margin-top: 6px; font-size: 12px; }

@@ -14,7 +14,7 @@ try {
 	var t = g( 'expenity.theme' ), s = g( 'expenity.skin' ), m = g( 'expenity.motion' );
 	if ( t === 'dark' || t === 'light' ) r.dataset.theme = t;
 	if ( ! s && ! g( 'expenity.v2' ) ) { s = 'sunset'; localStorage.setItem( 'expenity.skin', s ); } // first visit: Sunset. People who already use the app and never chose a theme keep the original green.
-	if ( s && /^(vader|mario|bricks|minnie|minimal|paper|ledger|terminal|synthwave|amberwave|ion|custom|blueprint|candy|oled|glass|sunset|chalk)$/.test( s ) ) r.dataset.skin = s;
+	if ( s && /^(vader|mario|bricks|minnie|minimal|mobie|paper|ledger|terminal|synthwave|amberwave|ion|custom|blueprint|candy|oled|glass|sunset|chalk)$/.test( s ) ) r.dataset.skin = s;
 	if ( m === 'full' || m === 'reduced' || m === 'off' ) r.dataset.motion = m;
 	var ss = g( 'expenity.status' ); r.dataset.status = /^(off|low|normal|full)$/.test( ss ) ? ss : 'normal'; // status colours: normal for everyone unless chosen otherwise
 } catch ( e ) { /* ignore */ }
