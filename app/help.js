@@ -26,7 +26,7 @@
 	H.forPage = () => {
 		const s = EXA.st, v = s.view, m = s.more;
 		const map = { activity: 'filters', reports: 'reports', plan: 'budgets', bills: 'bills', home: 'home' };
-		const sub = { features: 'features', reminders: 'notify', trash: 'trash', appearance: 'themes', data: 'backup', account: 'sync', wallets: 'wallets', tutorials: '', drafts: 'quick' };
+		const sub = { features: 'features', reminders: 'notify', trash: 'trash', appearance: 'themes', tags: 'tags', data: 'backup', account: 'sync', wallets: 'wallets', tutorials: '', drafts: 'quick' };
 		if ( v === 'home' && EXA.dashboardEditing && EXA.dashboardEditing() ) return live( 'homereports' ) || live( 'home' );
 		if ( v === 'more' && m === 'account' && EXA.sharedWallets && EXA.sharedWallets().length ) return live( 'leaveshared' ) || live( 'sync' );
 		return live( v === 'more' ? ( m === 'root' ? '' : sub[ m ] || '' ) : map[ v ] || '' );

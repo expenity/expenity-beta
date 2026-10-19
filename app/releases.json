@@ -1,6 +1,18 @@
 {
-  "version": "0.31.2",
+  "version": "0.32.0",
   "releases": [
+    {
+      "version": "0.32.0",
+      "date": "2026-10-19",
+      "en": [
+        "Real-life examples: every feature in the help center and every tutorial now has a short story you can expand, so you can see how it is used day to day.",
+        "Tags: the tag field now says you can add several tags separated by commas, and there is a new Tags tutorial and help section."
+      ],
+      "el": [
+        "Παραδείγματα από την καθημερινότητα: κάθε λειτουργία στο κέντρο βοήθειας και κάθε οδηγός έχει πλέον μια σύντομη ιστορία που μπορείτε να ανοίξετε, ώστε να δείτε πώς χρησιμοποιείται στην πράξη.",
+        "Ετικέτες: το πεδίο ετικετών λέει πλέον ότι μπορείτε να προσθέσετε πολλές ετικέτες χωρισμένες με κόμμα και υπάρχουν νέος οδηγός και ενότητα βοήθειας για τις Ετικέτες."
+      ]
+    },
     {
       "version": "0.31.2",
       "date": "2026-10-19",

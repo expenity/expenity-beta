@@ -857,3 +857,11 @@ button, a, input, select, textarea, label, summary { touch-action: manipulation;
 	.flow .cur-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 	.flow-body h1 { font-size: 36px; }
 }
+/* Real-life examples under a tutorial: closed, with a button that is easy to spot. */
+.tt-example { margin: 14px 0 4px; } .tt-example > summary { list-style: none; cursor: pointer; display: inline-block; border-radius: 999px; } .tt-example > summary::-webkit-details-marker { display: none; }
+.tt-ex-btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px 10px 12px; border-radius: 999px; font-weight: 800; font-size: 14px; color: var(--accent-ink, #fff); background: linear-gradient(135deg, var(--accent), var(--accent-2, var(--accent))); box-shadow: 0 6px 16px -6px color-mix(in srgb, var(--accent) 60%, transparent); animation: ttExPulse 2.8s ease-in-out infinite; }
+.tt-ex-chev { width: 7px; height: 7px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(45deg) translateY(-2px); transition: transform .2s; }
+.tt-example[open] .tt-ex-chev { transform: rotate(225deg); } .tt-example[open] .tt-ex-btn { animation: none; }
+.tt-example > p { margin: 10px 0 0; padding: 12px 14px; border-radius: 12px; background: var(--accent-soft); border-left: 3px solid var(--accent); font-size: 14px; line-height: 1.5; }
+@keyframes ttExPulse { 0%, 100% { box-shadow: 0 6px 16px -6px color-mix(in srgb, var(--accent) 60%, transparent), 0 0 0 0 color-mix(in srgb, var(--accent) 40%, transparent); } 50% { box-shadow: 0 6px 16px -6px color-mix(in srgb, var(--accent) 60%, transparent), 0 0 0 9px transparent; } }
+@media (prefers-reduced-motion: reduce) { .tt-ex-btn { animation: none; } }
