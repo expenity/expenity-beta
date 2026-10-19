@@ -1,6 +1,16 @@
 {
-  "version": "0.37.0",
+  "version": "0.37.1",
   "releases": [
+    {
+      "version": "0.37.1",
+      "date": "2026-10-20",
+      "en": [
+        "Tapping the update notification while Expenity is open now takes you straight to the update."
+      ],
+      "el": [
+        "Πατώντας την ειδοποίηση ενημέρωσης ενώ το Expenity είναι ανοιχτό, μεταβαίνετε απευθείας στην ενημέρωση."
+      ]
+    },
     {
       "version": "0.37.0",
       "date": "2026-10-20",
