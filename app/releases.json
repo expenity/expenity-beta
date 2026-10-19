@@ -1,6 +1,16 @@
 {
-  "version": "0.39.0",
+  "version": "0.40.0",
   "releases": [
+    {
+      "version": "0.40.0",
+      "date": "2026-10-21",
+      "en": [
+        "Share the love: a new card in About lets you send Expenity to a friend with the share sheet or a copied message. After a week of use, Home offers it once too."
+      ],
+      "el": [
+        "Μοιραστείτε την αγάπη: μια νέα κάρτα στο Σχετικά σας επιτρέπει να στείλετε το Expenity σε έναν φίλο με το μενού κοινοποίησης ή με ένα αντιγραμμένο μήνυμα. Μετά από μία εβδομάδα χρήσης, η Αρχική το προσφέρει επίσης μία φορά."
+      ]
+    },
     {
       "version": "0.39.0",
       "date": "2026-10-20",

@@ -136,6 +136,7 @@
 		if ( ! h && ! UI.isStandalone() && ! S().device.installDismissed && UI.isPhone() ) {
 			h += `<section class="promo alt"><div class="promo-head">${ UI.ci( 'device-mobile', 'purple', 44 ) }<div><b>${ esc( t( 'installTitle' ) ) }</b><p>${ esc( t( 'installText' ) ) }</p>${ installSteps() }</div></div><div class="btn-row">${ EXA.installEvent ? `<button type="button" class="btn btn-primary" data-act="install">${ esc( t( 'installBtn' ) ) }</button>` : '' }<button type="button" class="btn btn-text" data-act="dismiss-install">${ esc( t( 'dismiss' ) ) }</button></div></section>`;
 		}
+		if ( ! h && EXA.sharePrompt ) h += EXA.sharePrompt();
 		return h;
 	}
 
@@ -373,7 +374,7 @@
 	}
 	function aboutView() {
 		const L = ( href, label, icon ) => `<a class="mrow" href="${ href }" target="_blank" rel="noopener noreferrer">${ UI.ci( icon, 'gray', 40 ) }<span class="mid"><b>${ esc( label ) }</b></span>${ UI.icon( 'link', 18 ) }</a>`;
-		return `<section class="card"><h2>${ esc( t( 'aboutTitle' ) ) }</h2><p class="muted">${ esc( t( 'aboutText' ) ).replace('George Stathopoulos','<a class="creator-link" href="https://george-stathopoulos.github.io/" target="_blank" rel="noopener noreferrer">George Stathopoulos</a>') }</p></section>
+		return `${ EXA.shareCard ? EXA.shareCard() : '' }<section class="card"><h2>${ esc( t( 'aboutTitle' ) ) }</h2><p class="muted">${ esc( t( 'aboutText' ) ).replace('George Stathopoulos','<a class="creator-link" href="https://george-stathopoulos.github.io/" target="_blank" rel="noopener noreferrer">George Stathopoulos</a>') }</p></section>
 			<div class="list">${ L( 'https://expenity.github.io/expenity/docs/', t( 'aboutHelp' ), 'help-circle' ) }${ L( 'https://george-stathopoulos.github.io/blog/', t( 'aboutBlog' ), 'notes' ) }${ L( 'https://george-stathopoulos.github.io/', t( 'aboutProjects' ), 'category-2' ) }${ L( 'https://github.com/expenity/expenity', t( 'aboutSource' ), 'brand-github' ) }</div>
 			<p class="muted small pad">${ esc( t( 'footerNote' ) ) }</p>`;
 	}
