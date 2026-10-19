@@ -1,6 +1,16 @@
 {
-  "version": "0.31.1",
+  "version": "0.31.2",
   "releases": [
+    {
+      "version": "0.31.2",
+      "date": "2026-10-19",
+      "en": [
+        "Setup on a computer now uses a wider layout, and the theme step shows every theme at once. Themes cannot be edited during setup."
+      ],
+      "el": [
+        "Η αρχική ρύθμιση σε υπολογιστή χρησιμοποιεί πλέον πιο φαρδιά διάταξη και το βήμα των θεμάτων δείχνει όλα τα θέματα μαζί. Κατά τη ρύθμιση δεν μπορείτε να επεξεργαστείτε θέματα."
+      ]
+    },
     {
       "version": "0.31.1",
       "date": "2026-10-19",

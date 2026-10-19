@@ -223,7 +223,7 @@
 			icon = 'palette'; color = 'pink'; title = t( 'setupLookTitle' ); text = t( 'setupLookText' );
 			const mo = D().motion || 'auto';
 			const mt = ( v, label ) => `<button type="button" class="chip big${ mo === v ? ' on' : '' }" data-fstep="motion" data-motion="${ v }">${ esc( label ) }</button>`;
-			body = `${ EXA.themePicker() }<div class="lbl pad0">${ esc( t( 'setupMotion' ) ) }</div><div class="chips wrap">${ mt( 'auto', t( 'motionAuto' ) ) }${ mt( 'full', t( 'motionFull' ) ) }${ mt( 'reduced', t( 'motionReduced' ) ) }${ mt( 'off', t( 'motionOff' ) ) }</div>`;
+			body = `${ EXA.themePicker( { edit: false } ) }<div class="lbl pad0">${ esc( t( 'setupMotion' ) ) }</div><div class="chips wrap">${ mt( 'auto', t( 'motionAuto' ) ) }${ mt( 'full', t( 'motionFull' ) ) }${ mt( 'reduced', t( 'motionReduced' ) ) }${ mt( 'off', t( 'motionOff' ) ) }</div>`;
 		} else if ( id === 'tour' ) {
 			icon='sparkles';color='purple';title=t('tourTitle');text=t('tourText');
 			body=`<div class="tour-grid">${[['home','layout-dashboard','tourHome','tourHomeText'],['activity','arrows-sort','tourActivity','tourActivityText'],['plan','target','planTitle','tourPlanText'],['reports','chart-pie','tabReports','tourReportsText']].map(([id,ic,label,copy],i)=>`<article style="--tour-i:${i}">${UI.ci(ic,['teal','blue','pink','amber'][i],44)}<div><h2>${esc(t(label))}</h2><p>${esc(t(copy))}</p></div></article>`).join('')}</div>`;

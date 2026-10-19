@@ -849,3 +849,11 @@ button, a, input, select, textarea, label, summary { touch-action: manipulation;
 .whatsnew .btn-row { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; } .whatsnew .btn-row .btn { flex: 1 1 auto; }
 @media (prefers-reduced-motion: reduce) { .whatsnew-card, .whatsnew::backdrop { animation: none; } }
 .amt-preview { display: block; margin-top: 4px; font-size: 12.5px; font-variant-numeric: tabular-nums; }
+/* Setup on a computer: a wider card so the steps are not a phone column, and the theme step shows the whole choice. */
+@media (min-width: 900px) {
+	.flow-card { width: min(780px, 100%); padding-inline: 44px; }
+	.flow-card:has(.theme-grid) { width: min(1180px, 100%); }
+	.flow .theme-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; }
+	.flow .cur-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+	.flow-body h1 { font-size: 36px; }
+}
