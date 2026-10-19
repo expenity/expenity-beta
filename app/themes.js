@@ -52,6 +52,13 @@
 		if ( v === 'auto' ) delete root.dataset.theme; else root.dataset.theme = v;
 		store( 'expenity.theme', v === 'auto' ? null : v );
 	};
+	EXA.setStatusTint = ( v ) => { if ( ! [ 'off', 'low', 'normal', 'full' ].includes( v ) ) return; root.dataset.status = v; store( 'expenity.status', v ); EX.state().device.statusTint = v; EX.persist(); };
+	// Theme effects (characters, trails, embers...) can be switched off for one theme at a time; the list lives in the browser so it is known before the page draws.
+	const FX_SKINS = [ 'mario', 'bricks', 'minnie', 'vader', 'synthwave', 'amberwave', 'ion', 'sunset', 'emerald', 'candy', 'terminal' ];
+	const fxOffList = () => { try { return ( localStorage.getItem( 'expenity.fxoff' ) || '' ).split( ',' ).filter( Boolean ); } catch ( e ) { return []; } };
+	EXA.hasThemeFx = ( skin ) => FX_SKINS.includes( skin ) || ( skin === 'custom' && EXA.customPalette().trails );
+	EXA.themeFxOn = ( skin ) => ! fxOffList().includes( skin );
+	EXA.setThemeFx = ( skin, on ) => { const s = new Set( fxOffList() ); if ( on ) s.delete( skin ); else s.add( skin ); store( 'expenity.fxoff', [ ...s ].join( ',' ) || null ); EXA.updateTrails(); };
 	EXA.setMotion = ( v ) => {
 		const d = EX.state().device; d.motion = v; EX.persist();
 		if ( v === 'auto' ) delete root.dataset.motion; else root.dataset.motion = v;
@@ -72,6 +79,7 @@
 		const mc = ( v, label, ic ) => `<button type="button" class="chip big${ mode === v ? ' on' : '' }" data-mode-set="${ v }">${ UI.icon( ic, 20 ) } ${ esc( label ) }</button>`;
 		return `<div class="theme-grid" role="radiogroup" aria-label="${ esc( t( 'themesTitle' ) ) }">${ THEMES.filter(x=>x.id!=='custom').map( ( x ) => `<div class="theme-cell">${ card( x, cur ) }${ opts.edit === false ? '' : `<button type="button" class="tc-edit" data-theme-edit="${ x.id }" aria-label="${ esc( t( 'themeEdit', { n: t( 'theme_' + x.id ) } ) ) }">${ UI.icon( 'pencil', 16 ) }</button>` }</div>` ).join( '' ) }</div>
 
+			${ EXA.hasThemeFx( cur ) ? `<label class="entry-paid fx-theme"><span><b>${ esc( t( 'themeFx' ) ) }</b><small>${ esc( t( 'themeFxHint' ) ) }</small></span><span class="switch"><input type="checkbox" data-fx-theme="${ cur }"${ EXA.themeFxOn( cur ) ? ' checked' : '' } aria-label="${ esc( t( 'themeFx' ) ) }"><i></i></span></label>` : '' }
 			${ th.mode ? `<div class="lbl pad0">${ esc( t( 'themeLabel' ) ) }</div><div class="chips wrap">${ mc( 'auto', t( 'themeAuto' ), 'device-mobile' ) }${ mc( 'light', t( 'themeLight' ), 'sun' ) }${ mc( 'dark', t( 'themeDark' ), 'moon' ) }</div>` : '' }`;
 	};
 
@@ -182,7 +190,7 @@
 
 	let trails;
 	EXA.updateTrails = () => {
-		const m=root.dataset.motion, on=!document.hidden&&(m==='full'||(m!=='off'&&m!=='reduced'&&!matchMedia('(prefers-reduced-motion: reduce)').matches));
+		const m=root.dataset.motion, on=!document.hidden&&(m==='full'||(m!=='off'&&m!=='reduced'&&!matchMedia('(prefers-reduced-motion: reduce)').matches))&&EXA.themeFxOn(EXA.skin());
 		EXA.updateFunThemes(on);
 		if ( EXA.updateAmbient ) EXA.updateAmbient( on );
 		const enabled=['synthwave','amberwave','ion'].includes(EXA.skin())||(EXA.skin()==='custom'&&EXA.customPalette().trails);

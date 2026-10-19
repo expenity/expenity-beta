@@ -56,7 +56,7 @@
 		const title = x.reimbursementOf?t('amReceipt')+' · '+(x.reimbursementWho||x.name||''):x.name || info.name;
 		const meta = [ x.type === 'transfer' ? `${ walletName( x.account ) } → ${ walletName( x.toAccount ) }` : walletName( x.account ), x.note ].filter( Boolean ).join( ' · ' );
 		const sign = x.type === 'income' ? '+' : x.type === 'expense' ? '−' : '';
-		return `<li class="sw bm-row tx" data-kind="tx" data-id="${ esc( x.id ) }">
+		return `<li class="sw bm-row tx${ x.type === 'transfer' ? '' : x.date > today() ? ' later' : ' paid' }" data-kind="tx" data-id="${ esc( x.id ) }">
 			<div class="sw-back"><div class="sw-l"></div><div class="sw-r">${ swBtn( 'edit', 'pencil', 'actEdit', 'edit' ) }${ swBtn( 'duplicate', 'copy', 'duplicateRecord', 'duplicate' ) }${ swBtn( 'del', 'trash', 'actDelete', 'del' ) }</div></div>
 			<button type="button" class="sw-front item bm-front" data-act="open-tx" data-id="${ esc( x.id ) }" aria-label="${ esc( title ) }, ${ esc( sign + money( Number( x.amount ), cur ) ) }">
 				${ bmDay( x.date ) }
@@ -284,7 +284,7 @@
 	const bmRow = ( i ) => {
 		const name = i.kind === 'bill' ? i.b.name : ( i.x.name || EX.catInfo( i.x.category ).name ), cat = EX.catInfo( i.kind === 'bill' ? i.b.category : i.x.category );
 		const amt = i.kind === 'bill' ? amountText( i.b ) : money( Number( i.x.amount ), bmVal( i ).currency );
-		const cls = i.paid ? 'paid' : diffDays( i.due, today() ) < 0 ? 'late' : '';
+		const dn = diffDays( i.due, today() ), cls = i.paid ? 'paid' : dn < 0 ? 'late' : dn <= 3 ? 'soon' : 'later';
 		const inner = `${ bmDay( i.date ) }<span class="mid"><b>${ esc( name ) }</b><small>${ UI.icon( cat.iconName || 'tag', 14 ) } ${ esc( cat.name ) }${ i.kind === 'bill' && EX.scheduleLabel( i.b ) ? ' · ' + esc( EX.scheduleLabel( i.b ) ) : '' }</small></span><span class="bm-right"><b class="a">${ esc( amt ) }</b>${ bmPill( i ) }</span>`;
 		if ( i.kind === 'tx' ) return `<li class="bm-row ${ cls }"><div class="bm-front" role="button" tabindex="0" data-act="open-tx" data-id="${ esc( i.x.id ) }">${ inner }</div></li>`;
 		return `<li class="sw bm-row ${ cls }" data-kind="bill" data-id="${ esc( i.b.id ) }">
@@ -420,7 +420,8 @@
 	function appearanceView() {
 		return `<section class="card"><h2>${ esc( t( 'sLanguage' ) ) }</h2><div class="chips wrap">${ Object.keys( EX.I18N.langs ).map( ( k ) => `<button type="button" class="chip big${ k === EX.lang() ? ' on' : '' }" data-lang="${ k }" lang="${ k }">${ UI.icon( 'language', 20 ) } ${ esc( EX.I18N.langs[ k ].langName ) }</button>` ).join( '' ) }</div></section>
 			<section class="card"><h2>${ esc( t( 'themesTitle' ) ) }</h2>${ EXA.themePicker() }</section>
-			<section class="card"><h2>${ esc( t( 'setupMotion' ) ) }</h2><div class="chips wrap">${ [ 'auto', 'full', 'reduced', 'off' ].map( ( m ) => `<button type="button" class="chip big${ ( S().device.motion || 'auto' ) === m ? ' on' : '' }" data-motion-set="${ m }">${ esc( t( 'motion' + m.charAt( 0 ).toUpperCase() + m.slice( 1 ) ) ) }</button>` ).join( '' ) }</div><p class="muted small">${ esc( t( 'motionHint' ) ) }</p></section>`;
+			<section class="card"><h2>${ esc( t( 'setupMotion' ) ) }</h2><div class="chips wrap">${ [ 'auto', 'full', 'reduced', 'off' ].map( ( m ) => `<button type="button" class="chip big${ ( S().device.motion || 'auto' ) === m ? ' on' : '' }" data-motion-set="${ m }">${ esc( t( 'motion' + m.charAt( 0 ).toUpperCase() + m.slice( 1 ) ) ) }</button>` ).join( '' ) }</div><p class="muted small">${ esc( t( 'motionHint' ) ) }</p></section>
+			<section class="card"><h2>${ esc( t( 'statusTitle' ) ) }</h2><div class="chips wrap">${ [ 'off', 'low', 'normal', 'full' ].map( ( m ) => `<button type="button" class="chip big${ ( document.documentElement.dataset.status || 'normal' ) === m ? ' on' : '' }" data-status-set="${ m }">${ esc( t( 'status' + m.charAt( 0 ).toUpperCase() + m.slice( 1 ) ) ) }</button>` ).join( '' ) }</div><p class="muted small">${ esc( t( 'statusHint' ) ) }</p></section>`;
 	}
 	function installView() {
 		const installed=UI.isStandalone()?`<p>${esc(t('installDone'))}</p>`:'';

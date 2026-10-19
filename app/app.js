@@ -12,7 +12,7 @@
 	const $ = ( s, r = document ) => r.querySelector( s );
 	const $$ = ( s, r = document ) => [ ...r.querySelectorAll( s ) ];
 	const toast = UI.toast;
-	window.EXPENITY_VERSION = '0.44.0';
+	window.EXPENITY_VERSION = '0.45.0';
 
  const seenCharacters=new Set();try{for(const skin of JSON.parse(sessionStorage.getItem('expenity.charactersSeen')||'[]'))seenCharacters.add(skin);}catch(_){}
  const characterSeen=skin=>seenCharacters.has(skin);
@@ -251,6 +251,7 @@
 		EXA.readJoinLink();
 		EX.sync.init();
 		EXA.applyMotion();
+		EXA.updateTrails && EXA.updateTrails();
 		render();
 		EXA.flow.init();
 		EXA.enhancementsInit();
@@ -294,6 +295,7 @@
 			if ( ( el = e.target.closest( '[data-cal]' ) ) ) { const n = Number( el.dataset.cal ); st.calMonth = n === 0 ? st.nowMonth() : st.calMonth + n; st.calDay = null; render(); return; }
 			if ( ( el = e.target.closest( '[data-day]' ) ) ) { st.calDay = el.dataset.day; render(); return; }
 			if ( ( el = e.target.closest( '[data-period]' ) ) ) { st.repPeriod = el.dataset.period; render(); return; }
+			if ( ( el = e.target.closest( '[data-status-set]' ) ) ) { EXA.setStatusTint( el.dataset.statusSet ); render(); return; }
 			if ( ( el = e.target.closest( '[data-motion-set]' ) ) ) { EXA.setMotion( el.dataset.motionSet ); render(); return; }
 			if ( ( el = e.target.closest( '[data-skin-set]' ) ) ) { EXA.setSkin( el.dataset.skinSet ); if ( EXA.flow.active() ) EXA.flow.show( true ); else render(); return; }
 			if ( ( el = e.target.closest( '[data-mode-set]' ) ) ) { EXA.setMode( el.dataset.modeSet ); if ( EXA.flow.active() ) EXA.flow.show( true ); else render(); return; }
@@ -336,6 +338,7 @@
 		} );
 		document.addEventListener( 'compositionend', ( e ) => { if ( e.target.id === 'txSearch' ) { st.txFilter.q = e.target.value; if ( ! renderSearchResults() ) render(); } } );
 		document.addEventListener( 'change', ( e ) => {
+			if ( e.target.matches && e.target.matches( '[data-fx-theme]' ) ) { EXA.setThemeFx( e.target.dataset.fxTheme, e.target.checked ); render(); return; }
 			if ( EXA.repChange( e ) || EXA.shareChange( e ) || EXA.pushChange( e ) ) return;
 			const id = e.target.id;
 			if ( id === 'txWalletFilter' ) { st.txFilter.account = e.target.value; render(); }

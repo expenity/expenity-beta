@@ -30,6 +30,8 @@
 			vader: { hero: 'vader-cutout-v1.png', floats: [ 'orbit-fighter.svg', 'orbit-cruiser.svg' ] },
 			bricks: { hero: 'brick-pencil-v3.webp', floats: [ 'brick-cluster-v2.webp' ] },
 		}[ document.documentElement.dataset.skin || '' ];
+		let fxOff = false; try { fxOff = ( localStorage.getItem( 'expenity.fxoff' ) || '' ).split( ',' ).includes( document.documentElement.dataset.skin || '' ); } catch ( e ) { /* ignore */ }
+		if ( fxOff ) el.dataset.nofx = '1';
 		if ( ART ) {
 			const add = ( file, cls, style ) => { const im = document.createElement( 'img' ); im.src = 'assets/themes/' + file; im.alt = ''; im.className = cls; if ( style ) im.style.cssText = style; im.decoding = 'async'; el.appendChild( im ); };
 			if ( ART.floats ) { el.dataset.art = '1'; [ [ 8, 70 ], [ 74, 62 ], [ 16, 24 ], [ 80, 22 ], [ 50, 82 ], [ 38, 12 ] ].forEach( ( p, n ) => add( ART.floats[ n % ART.floats.length ], 'sp-img', `left:${ p[ 0 ] }%;top:${ p[ 1 ] }%;--d:${ 5 + n * .4 }s;--w:${ n * .5 }s` ) ); }

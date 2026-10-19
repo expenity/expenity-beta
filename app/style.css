@@ -948,3 +948,16 @@ button.bm-pill{cursor:pointer;min-height:34px;transition:transform .15s}button.b
 .qp-chip.pick{position:relative;cursor:pointer}.qp-chip.pick select{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;font-size:16px}
 .wdef{display:grid;place-items:center;width:40px;height:40px;border:0;border-radius:50%;background:transparent;color:var(--muted);cursor:pointer}.wdef.on{color:#f0a020}.wdef.on svg{fill:currentColor}
 .wallet-default{margin:6px 0}
+
+/* Status colours (Settings > Appearance): off / low / normal / full. Colours come from the theme's own tokens so every theme stays readable. */
+.bm-row.late{border-color:color-mix(in srgb,var(--late) 45%,var(--line))}
+:root[data-status=off] .bm-row.late{border-color:var(--line)}:root[data-status=off] .bm-row.late .bm-date,:root[data-status=off] .bm-row.paid .bm-date{background:var(--accent-soft);color:var(--accent)}
+:root[data-status=normal] .bm-row.late,:root[data-status=full] .bm-row.late,:root[data-status=normal] .bm-row.soon,:root[data-status=full] .bm-row.soon,:root[data-status=full] .bm-row.paid{border-color:var(--line)}
+:root[data-status=normal] .bm-row.soon>.bm-front{background:color-mix(in srgb,var(--warn) 9%,var(--surface));box-shadow:inset 4px 0 0 var(--warn)}
+:root[data-status=normal] .bm-row.late>.bm-front{background:color-mix(in srgb,var(--late) 10%,var(--surface));box-shadow:inset 4px 0 0 var(--late)}
+:root[data-status=full] .bm-row.soon>.bm-front{background:color-mix(in srgb,var(--warn) 17%,var(--surface));box-shadow:inset 5px 0 0 var(--warn)}
+:root[data-status=full] .bm-row.late>.bm-front{background:color-mix(in srgb,var(--late) 18%,var(--surface));box-shadow:inset 5px 0 0 var(--late)}
+:root[data-status=full] .bm-row.paid>.bm-front{background:color-mix(in srgb,var(--ok) 10%,var(--surface));box-shadow:inset 5px 0 0 var(--ok)}
+.fx-theme{margin:12px 0 4px}
+#splash[data-nofx] .sp-f,#splash[data-nofx] .sp-img{display:none}#splash[data-nofx] .sp-char{animation:none}
+:root[data-status=normal] :is(.bm-row.soon,.bm-row.late)>.bm-front .mid small,:root[data-status=full] :is(.bm-row.soon,.bm-row.late,.bm-row.paid)>.bm-front .mid small{color:var(--ink-2)}

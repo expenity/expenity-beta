@@ -1,6 +1,18 @@
 {
-  "version": "0.44.0",
+  "version": "0.45.0",
   "releases": [
+    {
+      "version": "0.45.0",
+      "date": "2026-10-21",
+      "en": [
+        "Status colors: bills and entries are tinted by status (due soon in amber, overdue in red, paid in green at Full). Choose Off, Low, Normal or Full in More, Appearance.",
+        "Theme effects: themes with animated decoration now have a switch, so you can turn the effects off for one theme at a time."
+      ],
+      "el": [
+        "Χρώματα κατάστασης: οι λογαριασμοί και οι εγγραφές χρωματίζονται ανάλογα με την κατάσταση (προσεχώς πληρωτέα με κεχριμπαρί, εκπρόθεσμα με κόκκινο, πληρωμένα με πράσινο στο Πλήρη). Επιλέξτε Κλειστά, Χαμηλά, Κανονικά ή Πλήρη στα Περισσότερα, Εμφάνιση.",
+        "Εφέ θέματος: τα θέματα με κινούμενη διακόσμηση έχουν πλέον διακόπτη, ώστε να απενεργοποιείτε τα εφέ για ένα θέμα τη φορά."
+      ]
+    },
     {
       "version": "0.44.0",
       "date": "2026-10-21",

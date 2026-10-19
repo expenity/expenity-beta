@@ -16,6 +16,7 @@ try {
 	if ( ! s && ! g( 'expenity.v2' ) ) { s = 'sunset'; localStorage.setItem( 'expenity.skin', s ); } // first visit: Sunset. People who already use the app and never chose a theme keep the original green.
 	if ( s && /^(vader|mario|bricks|minnie|minimal|paper|ledger|terminal|synthwave|amberwave|ion|custom|blueprint|candy|oled|glass|sunset|chalk)$/.test( s ) ) r.dataset.skin = s;
 	if ( m === 'full' || m === 'reduced' || m === 'off' ) r.dataset.motion = m;
+	var ss = g( 'expenity.status' ); r.dataset.status = /^(off|low|normal|full)$/.test( ss ) ? ss : 'normal'; // status colours: normal for everyone unless chosen otherwise
 } catch ( e ) { /* ignore */ }
 // The app is never meant to be shown inside another page (clickjacking). GitHub Pages cannot send frame-ancestors, so it is enforced here.
 try { if ( window.top !== window.self && ! window.EXPENITY_DEMO ) { document.documentElement.style.display = 'none'; window.top.location = window.self.location; } } catch ( e ) { document.documentElement.style.display = 'none'; }
