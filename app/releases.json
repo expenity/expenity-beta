@@ -1,6 +1,18 @@
 {
-  "version": "0.43.2",
+  "version": "0.44.0",
   "releases": [
+    {
+      "version": "0.44.0",
+      "date": "2026-10-21",
+      "en": [
+        "Smart entry now has two steps: describe the expense, then press Prepare my expense to see the card. Add it, or change the category or wallet right on the card. Anything it cannot place goes under Other.",
+        "Default wallet: choose one in setup or in the wallet editor. Expenity also learns which wallet you use for each kind of expense, such as coffee on the card and electricity from the bank."
+      ],
+      "el": [
+        "Η Έξυπνη προσθήκη έχει πλέον δύο βήματα: περιγράψτε το έξοδο και πατήστε Ετοιμάστε το έξοδό μου για να δείτε την κάρτα. Προσθέστε το ή αλλάξτε κατηγορία ή πορτοφόλι πάνω στην κάρτα. Ό,τι δεν μπορεί να τοποθετηθεί πηγαίνει στα Άλλα.",
+        "Προεπιλεγμένο πορτοφόλι: επιλέξτε ένα στη ρύθμιση ή στον επεξεργαστή πορτοφολιού. Το Expenity μαθαίνει επίσης ποιο πορτοφόλι χρησιμοποιείτε για κάθε είδος εξόδου, π.χ. καφέ με κάρτα και ρεύμα από την τράπεζα."
+      ]
+    },
     {
       "version": "0.43.2",
       "date": "2026-10-21",

@@ -193,7 +193,7 @@
 	}
 	function setup() {
 		const id = steps()[ W.step ];
-		if ( id === 'wallets' && ! W.wallets ) W.wallets = defaultWallets();
+		if ( id === 'wallets' && ! W.wallets ) { W.wallets = defaultWallets(); W.defIdx = 0; }
 		const total = steps().length - 1;
 		const progress = `<div class="flow-progress" role="progressbar" aria-valuemin="0" aria-valuemax="${ total }" aria-valuenow="${ Math.min( W.step, total ) }"><i style="width:${ Math.round( ( Math.min( W.step, total ) / total ) * 100 ) }%"></i></div>`;
 		let body = '', icon = 'user-circle', color = 'teal', title = '', text = '';
@@ -219,6 +219,7 @@
 		} else if ( id === 'wallets' ) {
 			icon = 'wallet'; color = 'green'; title = t( 'setupWalletsTitle' ); text = t( 'setupWalletsText' );
 			body = `<div class="wrows">${ W.wallets.map( ( w, i ) => `<div class="wrow${ w.on ? ' on' : '' }" data-wrow="${ i }">${ UI.ci( EX.WALLET_ICON[ w.type ] || 'wallet', 'teal', 44 ) }<label class="switch"><input type="checkbox" name="on"${ w.on ? ' checked' : '' } aria-label="${ esc( w.name || t( 'wtOther' ) ) }"><i></i></label>
+				<button type="button" class="wdef${ W.defIdx === i && w.on ? ' on' : '' }" data-fstep="wdef" data-i="${ i }" aria-pressed="${ W.defIdx === i && w.on }" aria-label="${ esc( t( 'wDefault' ) ) }"${ w.on ? '' : ' hidden' }>${ UI.icon( 'bookmark', 20 ) }</button>
 				<input name="wname" maxlength="40" value="${ esc( EX.accountName(w) ) }" placeholder="${ esc( t( 'wName' ) ) }" aria-label="${ esc( t( 'wName' ) ) }"><input name="wopening" inputmode="decimal" value="${ esc( w.opening ) }" placeholder="${ esc( curSym( S().settings.currency ) ) } 0.00" aria-label="${ esc( t( 'wOpening' ) ) }"></div>` ).join( '' ) }</div>
 				<button type="button" class="btn btn-ghost" data-flow="add-wallet">${ UI.icon( 'plus', 20 ) } ${ esc( t( 'setupAnother' ) ) }</button><p class="err" id="setupErr" role="alert" hidden></p>`;
 		} else if ( id === 'look' ) {
@@ -295,7 +296,8 @@
 			for ( const w of W.wallets ) { if ( w.on && w.opening.trim() && ! /^-?\d+([.,]\d{1,2})?$/.test( w.opening.trim() ) ) return err( 'errAmount' ); }
 			const cur = S().settings.currency;
 			if ( W.wallets.some( ( w ) => w.on ) ) S().accounts = S().accounts.filter( ( a ) => ! a.auto );
-			W.wallets.filter( ( w ) => w.on ).forEach( ( w ) => S().accounts.push( { id: EX.uid(), name: w.name.trim() || t( 'wt' + w.type.charAt( 0 ).toUpperCase() + w.type.slice( 1 ) ), type: w.type, currency: cur, opening: ( w.opening.trim() || '0' ).replace( ',', '.' ) } ) );
+			const defW = W.wallets[ W.defIdx ] && W.wallets[ W.defIdx ].on ? W.wallets[ W.defIdx ] : W.wallets.find( ( w ) => w.on );
+			W.wallets.filter( ( w ) => w.on ).forEach( ( w ) => { const acct = { id: EX.uid(), name: w.name.trim() || t( 'wt' + w.type.charAt( 0 ).toUpperCase() + w.type.slice( 1 ) ), type: w.type, currency: cur, opening: ( w.opening.trim() || '0' ).replace( ',', '.' ) }; S().accounts.push( acct ); if ( w === defW ) S().settings.defaultAccount = acct.id; } );
 			W.wallets = null;
 			EX.save();
 		}
@@ -314,6 +316,7 @@
 		else if ( a === 'aim' ) { const cur = ( S().settings.aims || [] ).slice(), id = el.dataset.aim, i = cur.indexOf( id ); if ( i >= 0 ) cur.splice( i, 1 ); else cur.push( id ); S().settings.aims = cur; EX.persist(); flow.show( true ); }
 		else if ( a === 'gpreset' ) { readGoals(); W.goals = W.goals || []; const k = el.dataset.k, i = W.goals.findIndex( ( g ) => g.preset === k ); if ( i >= 0 ) W.goals.splice( i, 1 ); else W.goals.push( { preset: k, name: t( 'goalPreset_' + k ), target: '', icon: el.dataset.ic } ); flow.show( true ); }
 		else if ( a === 'plan' ) { S().settings.features = { tier: el.dataset.plan }; D().planChosen = true; EXA.features.apply(); EX.persist(); flow.show( true ); }
+		else if ( a === 'wdef' ) { readWallets(); W.defIdx = Number( el.dataset.i ); flow.show( true ); }
 		else if ( a === 'entry' ) { D().entryMode = el.dataset.mode; EX.persist(); flow.show( true ); }
 		else if ( a === 'tgt' ) { const i = $( '#setupForm [name=target]' ); if ( i && W.tgt ) W.tgt.amount = i.value; W.tgt = W.tgt || {}; W.tgt.period = el.dataset.tgt; flow.show( true ); const n = $( '#setupForm [name=target]' ); if ( n && el.dataset.tgt !== 'auto' ) n.focus(); }
 		else if ( a === 'notif' ) { el.disabled = true; EXA.push.enable( 9 ).then( ( r ) => { if ( r.ok ) UI.toast( t( 'tPushOn' ) ); else UI.toast( r.error === 'denied' ? t( 'notifDenied' ) : t( 'tPushFail' ) ); flow.show( true ); } ); }

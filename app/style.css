@@ -944,3 +944,7 @@ button.bm-pill{cursor:pointer;min-height:34px;transition:transform .15s}button.b
 .entry-footer .btn-ghost[data-tx=quick-review]{flex:0 0 auto}
 .sentence-entry-mode>.entry-top{display:flex!important}
 .tx-scroll.entry-scroll.sentence-entry-mode>.entry-top{display:flex!important}
+
+.qp-chip.pick{position:relative;cursor:pointer}.qp-chip.pick select{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;font-size:16px}
+.wdef{display:grid;place-items:center;width:40px;height:40px;border:0;border-radius:50%;background:transparent;color:var(--muted);cursor:pointer}.wdef.on{color:#f0a020}.wdef.on svg{fill:currentColor}
+.wallet-default{margin:6px 0}

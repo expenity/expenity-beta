@@ -133,7 +133,25 @@
 	};
 	const top = ( items, pick ) => { const m = new Map(); items.forEach( ( { x, w } ) => { const k = pick( x ); if ( k ) m.set( k, ( m.get( k ) || 0 ) + w ); } ); return [ ...m ].sort( ( p, q ) => q[ 1 ] - p[ 1 ] ).map( ( p ) => p[ 0 ] ); };
 
+	/** The wallet to use: one named in the text, else the one used for similar entries, else the one this kind of expense usually goes through, else the default. Works on every plan. */
+	const walletFor = ( text, category, type ) => {
+		const wallets = EX.writableAccounts(); if ( ! wallets.length ) return '';
+		if ( wallets.length === 1 ) return wallets[ 0 ].id;
+		const ok = ( id ) => wallets.some( ( w ) => w.id === id ), low = ' ' + fold( text || '' ).trim() + ' ';
+		const named = wallets.find( ( w ) => { const n = fold( EX.accountName ? EX.accountName( w ) : w.name || '' ).trim(); return n.length >= 3 && low.includes( n ); } );
+		if ( named ) return named.id;
+		const used = top( history( text, type || 'expense' ), ( x ) => x.account ).find( ok );
+		if ( used ) return used;
+		if ( category ) { // what usually pays for this kind of expense (at least two earlier ones)
+			const n = {}; EX.state().txs.forEach( ( x ) => { if ( x.type === ( type || 'expense' ) && x.category === category && x.account && ok( x.account ) ) n[ x.account ] = ( n[ x.account ] || 0 ) + 1; } );
+			const best = Object.entries( n ).sort( ( a, b ) => b[ 1 ] - a[ 1 ] )[ 0 ];
+			if ( best && best[ 1 ] >= 2 ) return best[ 0 ];
+		}
+		const def = EX.state().settings.defaultAccount;
+		return def && ok( def ) ? def : '';
+	};
 	EXA.smart = {
+		walletFor,
 		enabled: () => EX.feature ? EX.feature( 'smartFill' ) !== false : true,
 		/** Suggestions for a description: { type, category, tags, account } (any of them can be missing). */
 		detect( text, opts = {} ) {
@@ -159,13 +177,7 @@
 			if ( ! tags.length && category && CAT_TAGS[ category ] ) tags = CAT_TAGS[ category ].slice( 0, 2 ).map( ( k ) => tagFor( k, existing ) );
 			out.tags = [ ...new Set( tags ) ].slice( 0, 2 );
 			// the wallet: the only one, else the one used for similar entries, else one named in the text
-			const wallets = EX.writableAccounts();
-			if ( wallets.length === 1 ) out.account = wallets[ 0 ].id;
-			else {
-				const used = top( hist, ( x ) => x.account ).find( ( id ) => wallets.some( ( w ) => w.id === id ) );
-				const named = wallets.find( ( w ) => { const n = fold( EX.accountName ? EX.accountName( w ) : w.name || '' ).trim(); return n.length >= 3 && low.includes( n ); } );
-				out.account = used || ( named && named.id ) || undefined;
-			}
+			out.account = EXA.smart.walletFor( text, category, effective ) || undefined;
 			return out;
 		},
 	};

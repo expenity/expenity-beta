@@ -187,7 +187,7 @@
 		${T.notice?`<p class="entry-alert" role="status">${esc(t(T.notice))}</p>`:''}
 		${T.type==='transfer'?`<div class="entry-transfer-wallets"><div><span class="entry-label">${esc(t('fromWallet'))}</span>${walletControl()}</div><button type="button" class="ab-btn" data-entry="swap" aria-label="${esc(t('entrySwap'))}">${UI.icon('arrows-exchange',24)}</button><div><span class="entry-label">${esc(t('toWallet'))}</span>${walletControl(true)}</div></div>`:''}
 
-        ${!T.editId&&!T.scheduleKind&&T.type!=='transfer'?T.quick?`<section class="sentence-entry"><label class="f"><span>${esc(t('quickLabel'))}</span><input id="txQuick" autocomplete="off" spellcheck="false" placeholder="${esc(t('quickTxPh'))}" value="${esc(T.quickText||'')}"></label><p class="muted">${esc(t('sentenceHint'))}</p><div class="sentence-preview" aria-live="polite">${quickPreviewHtml()}</div></section>`:(simple?'':sentenceBtn):''}
+        ${!T.editId&&!T.scheduleKind&&T.type!=='transfer'?T.quick?`<section class="sentence-entry">${T.quickStage==='review'?`<div class="sentence-preview" aria-live="polite">${quickPreviewHtml()}</div><button type="button" class="btn btn-text" data-tx="quick-describe">${UI.icon('pencil',18)} ${esc(t('quickChangeText'))}</button>`:`<label class="f"><span>${esc(t('quickLabel'))}</span><input id="txQuick" autocomplete="off" spellcheck="false" placeholder="${esc(t('quickTxPh'))}" value="${esc(T.quickText||'')}"></label><p class="muted">${esc(t('quickDescribeHint'))}</p>`}</section>`:(simple?'':sentenceBtn):''}
 
 		<div class="entry-amount-panel"><div class="entry-amount-context"><span>${esc(t(T.type==='transfer'?'entrySent':'fAmount'))}</span><span class="entry-currency" aria-label="${esc(cur)}">${esc(T.account?cur:'—')}</span></div>
 		<button type="button" class="amt-display${T.keypadOpen&&T.target==='amount'?' on':''}" data-tx="target-amount" aria-controls="txKeypad" aria-expanded="${!!T.keypadOpen&&T.target==='amount'}" aria-label="${esc(t('fAmount'))}"><span class="cur">${esc(T.account?curSymbol(cur):'')}</span><span class="val${T.amount===''?' zero':''}" id="amtVal">${esc(showAmt(T.amount))}</span></button><small>${esc(t('entryTap'))}</small>
@@ -212,7 +212,7 @@
 		</div>`)}
 		${T.editScheduleId?`<details class="editor-record-options"><summary>${UI.icon('dots',20)} ${esc(t('editorOptions'))}</summary><button type="button" class="btn btn-ghost" data-entry="duplicate-record">${UI.icon('copy',20)} ${esc(t('duplicateRecord'))}</button><button type="button" class="btn btn-danger" data-entry="delete-record">${UI.icon('trash',20)} ${esc(t('del'))}</button></details>`:''}${T.confirmDelete?`<div class="entry-alert" role="alertdialog"><b>${esc(t('editorDeleteConfirm'))}</b><p>${esc(t('editorDeleteWarning'))}</p><button type="button" class="btn btn-danger" data-entry="delete-confirm">${esc(t('del'))}</button><button type="button" class="btn btn-ghost" data-entry="delete-cancel">${esc(t('cancel'))}</button></div>`:''}<p class="err entry-error" id="txErr" role="alert" hidden></p></div>
 		${simple?'</div></details>':''}
-		<div class="entry-footer"><div class="tx-field-actions"${T.editingField?'':' hidden'}><button type="button" class="btn btn-ghost" data-tx="field-done">${UI.icon('check',20)}${esc(t('entryDone'))}</button></div>${T.quick?`<button type="button" class="btn btn-ghost" data-tx="quick-review">${esc(t('actEdit'))}</button><button type="button" class="btn btn-primary entry-save" data-tx="quick-add"${T.saving?' disabled':''}>${esc(t(!T.editId&&((T.repeat||'once')!=='once'||T.date>today()||T.unpaid)?(T.type==='income'?'entryScheduleIncome':'entryScheduleBill'):buttonKey()))}</button>`:`<button type="button" class="btn btn-primary entry-save" data-tx="save"${T.saving?' disabled':''}>${esc(t(T.editScheduleId?'entrySaveChanges':!T.editId&&T.type!=='transfer'&&((T.repeat||'once')!=='once'||T.date>today()||T.unpaid)?(T.type==='income'?'entryScheduleIncome':'entryScheduleBill'):buttonKey()))}</button>`}</div>
+		<div class="entry-footer"><div class="tx-field-actions"${T.editingField?'':' hidden'}><button type="button" class="btn btn-ghost" data-tx="field-done">${UI.icon('check',20)}${esc(t('entryDone'))}</button></div>${T.quick&&T.quickStage!=='review'?`<button type="button" class="btn btn-primary entry-save" data-tx="quick-prepare">${UI.icon('sparkles',20)} ${esc(t('quickPrepare'))}</button>`:T.quick?`<button type="button" class="btn btn-ghost" data-tx="quick-review">${esc(t('actEdit'))}</button><button type="button" class="btn btn-primary entry-save" data-tx="quick-add"${T.saving?' disabled':''}>${esc(t(!T.editId&&((T.repeat||'once')!=='once'||T.date>today()||T.unpaid)?(T.type==='income'?'entryScheduleIncome':'entryScheduleBill'):buttonKey()))}</button>`:`<button type="button" class="btn btn-primary entry-save" data-tx="save"${T.saving?' disabled':''}>${esc(t(T.editScheduleId?'entrySaveChanges':!T.editId&&T.type!=='transfer'&&((T.repeat||'once')!=='once'||T.date>today()||T.unpaid)?(T.type==='income'?'entryScheduleIncome':'entryScheduleBill'):buttonKey()))}</button>`}</div>
 		<div id="txKeypad" class="keypad"${T.keypadOpen?'':' hidden'} role="group" aria-label="${esc(t('fAmount'))}"><div class="keypad-head"><span>${esc(t(T.target==='toAmount'?'fToAmount':'fAmount'))}</span><button type="button" class="btn btn-ghost" data-tx="amount-done">${UI.icon('check',20)}${esc(t('entryDone'))}</button></div>${['1','2','3','4','5','6','7','8','9','.','0','<'].map(k=>`<button type="button" class="key" data-key="${k}" aria-label="${k==='<'?esc(t('del')):k==='.'?esc(decimalMark()):k}">${k==='<'?UI.icon('backspace',26):k==='.'?esc(decimalMark()):k}</button>`).join('')}</div>`;
 	}
 	EXA.advancedDraft=()=>{readTxFields();return T;};EXA.redrawAdvanced=()=>{drawTx(true,false);storeDraft();};
@@ -315,9 +315,11 @@
         if(p.repeat)T.repeat=p.repeat;
 		if ( p.date ) { T.date = p.date; T.dateMode = p.date === today() ? 'today' : p.date === addDays( today(), -1 ) ? 'yesterday' : 'other'; }
 		if ( T.type !== 'transfer' ) { const c = guessCategory( p.name, T.type ); const list = EX.catList( T.type === 'income' ? 'income' : 'expense' ).map( ( x ) => x.key ); if(T.category&&!list.includes(T.category)&&T.category!=='uncategorized')T.category=null; }
+		if(!T.walletTouched&&!T.editId&&T.type!=='transfer'){const w=EXA.smart.walletFor(T.name,T.category,T.type);if(w&&writable(w))T.account=w;}
 		smartFill();
 		// Update only the preview while typing. Rebuilding the whole sheet on every key made the buttons below flicker (Android most of all, where the
 		// keyboard and the sheet re-lay out each time) and could interrupt the keyboard's own text suggestions.
+		if ( T.quickStage !== 'review' ) return; // the card appears when the person asks for it
 		if ( T.type === typeBefore && paintQuickPreview() ) return;
 		const hadFocus = document.activeElement && document.activeElement.id === 'txQuick';
 		drawTx( true, false );
@@ -327,8 +329,23 @@
 	function quickPreviewHtml() {
 		const cur = walletCur( T.account ), cat = T.type !== 'transfer' && T.category ? EX.catInfo( T.category ) : null, later = T.date > today() || T.unpaid;
 		const repeat = ( T.repeat || 'once' ) !== 'once' ? `<span class="qp-chip">${ UI.icon( 'repeat', 16 ) } ${ esc( EX.scheduleLabel( T ) ) }</span>` : '';
+		const wallets = EX.writableAccounts(), acct = T.account ? EX.account( T.account ) : null;
+		const catOpts = T.type === 'transfer' ? '' : EX.catList( T.type === 'income' ? 'income' : 'expense' ).map( ( c ) => `<option value="${ esc( c.key ) }"${ T.category === c.key ? ' selected' : '' }>${ esc( c.name ) }</option>` ).join( '' );
+		const catChip = `<label class="qp-chip pick${ cat ? '' : ' warn' }">${ cat ? UI.icon( cat.iconName || 'tag', 16 ) + ' ' + esc( cat.name ) : esc( t( 'entryChooseCat' ) ) }<select data-qp-cat aria-label="${ esc( t( 'fCategory' ) ) }">${ cat ? '' : `<option value="" selected disabled>${ esc( t( 'entryChooseCat' ) ) }</option>` }${ catOpts }</select></label>`;
+		const walletChip = wallets.length > 1 ? `<label class="qp-chip pick${ acct ? '' : ' warn' }">${ UI.icon( 'wallet', 16 ) } ${ esc( acct ? EX.accountName( acct ) : t( 'entryChooseWallet' ) ) }<select data-qp-wallet aria-label="${ esc( t( T.type === 'income' ? 'incTo' : 'fPayFrom' ) ) }">${ acct ? '' : `<option value="" selected disabled>${ esc( t( 'entryChooseWallet' ) ) }</option>` }${ wallets.map( ( w ) => `<option value="${ esc( w.id ) }"${ T.account === w.id ? ' selected' : '' }>${ esc( EX.accountName( w ) ) }</option>` ).join( '' ) }</select></label>` : '';
 		return `<div class="qp-amt">${ esc( EX.money( T.amount || 0, cur ) ) }</div><div class="qp-name">${ esc( T.name || '\u2014' ) }</div>
-			<div class="qp-chips">${ cat ? `<span class="qp-chip">${ UI.icon( cat.iconName || 'tag', 16 ) } ${ esc( cat.name ) }</span>` : `<span class="qp-chip warn">${ esc( t( 'entryChooseCat' ) ) }</span>` }<span class="qp-chip">${ UI.icon( 'calendar', 16 ) } ${ esc( EX.dayName( T.date ) ) }</span><span class="qp-chip ${ later ? 'later' : 'paid' }">${ later ? esc( t( 'unpaidWord' ) ) : UI.icon( 'check', 14 ) + ' ' + esc( t( T.type === 'income' ? 'receivedWord' : 'paid' ) ) }</span>${ repeat }</div>`;
+			<div class="qp-chips">${ catChip }${ walletChip }<span class="qp-chip">${ UI.icon( 'calendar', 16 ) } ${ esc( EX.dayName( T.date ) ) }</span><span class="qp-chip ${ later ? 'later' : 'paid' }">${ later ? esc( t( 'unpaidWord' ) ) : UI.icon( 'check', 14 ) + ' ' + esc( t( T.type === 'income' ? 'receivedWord' : 'paid' ) ) }</span>${ repeat }</div>`;
+	}
+	/** "Prepare my expense": understand the sentence, fill in anything it could not tell (Other, the usual wallet) and show the card. */
+	function prepareQuick() {
+		const q = $( '#txQuick' ); if ( ! q ) return;
+		if ( ! q.value.trim() ) return entryError( 'quickNeedText', '#txQuick' );
+		onTxQuick();
+		const amount = String( T.amount || '' ).replace( /\.$/, '' );
+		if ( ! /^\d{1,9}(\.\d{1,2})?$/.test( amount ) || EX.cents( amount ) <= 0 ) return entryError( 'quickNeedAmount', '#txQuick' );
+		if ( T.type !== 'transfer' && ! T.category ) T.category = EX.catList( T.type === 'income' ? 'income' : 'expense' ).some( ( c ) => c.key === 'other' ) ? 'other' : 'uncategorized';
+		if ( ! writable( T.account ) ) { const w = EXA.smart.walletFor( T.name, T.category, T.type ) || ( EX.writableAccounts()[ 0 ] || {} ).id; if ( w ) T.account = w; }
+		T.quickStage = 'review'; drawTx( true, false ); storeDraft();
 	}
 	function paintQuickPreview() {
 		const pv = $( '.sentence-preview' ); if ( ! pv ) return false;
@@ -527,13 +544,15 @@
 		 if(field){if(['wallet','to-wallet','date'].includes(a))T.entryGroup='payment';T[field]=!T[field];drawTx(true,false);return true;}return true;
 		}
 		if((el=g('[data-tx]'))){const a=el.dataset.tx;
-		 if(a==='quick-add'){readTxFields();if(!T.category||missingList().length){T.quick=false;drawTx(true,false);storeDraft();}saveTx();}else if(a==='toggle-mode'){readTxFields();T.quick=!T.quick;S().device.entryMode=T.quick?'smart':'casual';EX.persist();drawTx(true,false);storeDraft();if(T.quick)setTimeout(()=>$('#txQuick')?.focus(),60);}else if(a==='quick-review'){readTxFields();T.quick=false;drawTx(true,false);storeDraft();}else if(a==='save')saveTx();else if(a==='target-amount')setKeypad(true,'amount');else if(a==='target-to')setKeypad(true,'toAmount');else if(a==='amount-done'){setKeypad(false);storeDraft();guideNext();}else if(a==='field-done'){finishField();drawTx(true,false);storeDraft();}else if(a==='quick'){readTxFields();T.quick=true;T.moreOpen=true;T.entryGroup='extras';drawTx(true,false);$('#txQuick')?.focus();}else if(a==='note'){readTxFields();T.noteOpen=!T.noteOpen;drawTx(true,false);}
+		 if(a==='quick-prepare'){prepareQuick();}else if(a==='quick-describe'){T.quickStage='describe';drawTx(true,false);storeDraft();setTimeout(()=>$('#txQuick')?.focus(),60);}else if(a==='quick-add'){readTxFields();if(!T.name.trim())T.name=T.category&&T.category!=='uncategorized'?EX.catInfo(T.category).name:'';if(missingList().length){T.quick=false;drawTx(true,false);storeDraft();}saveTx();}else if(a==='toggle-mode'){readTxFields();T.quick=!T.quick;T.quickStage='describe';S().device.entryMode=T.quick?'smart':'casual';EX.persist();drawTx(true,false);storeDraft();if(T.quick)setTimeout(()=>$('#txQuick')?.focus(),60);}else if(a==='quick-review'){readTxFields();T.quick=false;drawTx(true,false);storeDraft();}else if(a==='save')saveTx();else if(a==='target-amount')setKeypad(true,'amount');else if(a==='target-to')setKeypad(true,'toAmount');else if(a==='amount-done'){setKeypad(false);storeDraft();guideNext();}else if(a==='field-done'){finishField();drawTx(true,false);storeDraft();}else if(a==='quick'){readTxFields();T.quick=true;T.moreOpen=true;T.entryGroup='extras';drawTx(true,false);$('#txQuick')?.focus();}else if(a==='note'){readTxFields();T.noteOpen=!T.noteOpen;drawTx(true,false);}
 		 return true;
 		}return false;
 	};
 	EXA.txInput=e=>{if(!T||(!$('#txDesc')&&T.screen!=='schedule'))return false;
 		if(e.target.closest('[data-schedule-panel]')){readTxFields();storeDraft();return true;}
         if(e.target.id==='entryRepeat'){readTxFields();drawTx(true,false);storeDraft();return true;}
+        if(e.target.matches?.('[data-qp-cat]')){T.category=e.target.value;T.catTouched=true;paintQuickPreview();storeDraft();return true;}
+        if(e.target.matches?.('[data-qp-wallet]')){T.account=e.target.value;T.walletTouched=true;paintQuickPreview();storeDraft();return true;}
         if(e.target.id==='entryPaid'){readTxFields();T.unpaid=!e.target.checked;drawTx(true,false);storeDraft();return true;}
         if(e.target.id==='txDate'&&e.target.closest('.chip.date')){T.date=e.target.value||T.date;drawTx(true,false);storeDraft();return true;}
 		if(e.target.id==='txQuick'){onTxQuick();storeDraft();return true;}
@@ -710,6 +729,7 @@
 			<div class="lbl">${ esc( t( 'wType' ) ) }</div><div class="chip-scroll" id="wTypes">${ EX.WALLET_TYPES.map( ( w ) => `<button type="button" class="chip big${ v.type === w[ 0 ] ? ' on' : '' }" data-wtype="${ w[ 0 ] }">${ UI.icon( EX.WALLET_ICON[ w[ 0 ] ], 20 ) } ${ esc( t( 'wt' + w[ 0 ].charAt( 0 ).toUpperCase() + w[ 0 ].slice( 1 ) ) ) }</button>` ).join( '' ) }</div><input type="hidden" name="type" value="${ esc( v.type ) }">
 			<div class="grid2"><label class="f"><span>${ esc( t( 'wCurrency' ) ) }</span><input name="currency" list="curList" maxlength="3" autocomplete="off" value="${ esc( v.currency ) }"></label><label class="f"><span>${ esc( t( 'wOpening' ) ) }</span><input name="opening" inputmode="decimal" placeholder="0.00" autocomplete="off" value="${ esc( v.opening === '0' ? '' : v.opening ) }"></label></div>
 			${ EXA.walletColorField ? EXA.walletColorField( v ) : '' }
+			<label class="entry-paid wallet-default"><span><b>${ esc( t( 'wDefault' ) ) }</b><small>${ esc( t( 'wDefaultHint' ) ) }</small></span><span class="switch"><input type="checkbox" name="isDefault"${ a && S().settings.defaultAccount === a.id ? ' checked' : '' }><i></i></span></label>
 			<label class="f chk"><input type="checkbox" name="archived"${ v.archived ? ' checked' : '' }> <span>${ esc( t( 'wArchived' ) ) }</span></label>
 			${ a ? EXA.shareRow( a ) : '' }
 			${ EXA.tagsField(v.tags) }${ EXA.photos.slot( v.photo ) }<p class="err" id="walletErr" role="alert" hidden></p>
@@ -741,9 +761,11 @@
 		if ( ! name ) return err( 'errNameReq' );
 		if ( ! /^[A-Z]{3}$/.test( cur ) ) return err( 'errCur' );
 		if ( ! /^-?\d+(\.\d{1,2})?$/.test( opening ) ) return err( 'errAmount' );
-		const v = { name, type: f.type.value, currency: cur, opening, archived: f.archived.checked, color: f.color ? f.color.value : '', photo: f.photo.value, tags: EXA.readTags(document.querySelector('#walletForm')) };
+		const v = { name, type: f.type.value, currency: cur, opening, archived: f.archived.checked, color: f.color ? f.color.value : '', photo: f.photo ? f.photo.value : '', tags: EXA.readTags(document.querySelector('#walletForm')) };
 		if ( ! v.color ) delete v.color;
-		if ( editingWallet ) { Object.assign( editingWallet, v ); if ( ! v.color ) delete editingWallet.color; delete editingWallet.auto; } else S().accounts.push( Object.assign( { id: uid() }, v ) );
+		let saved;
+		if ( editingWallet ) { saved = editingWallet; Object.assign( editingWallet, v ); if ( ! v.color ) delete editingWallet.color; delete editingWallet.auto; } else { saved = Object.assign( { id: uid() }, v ); S().accounts.push( saved ); }
+		if ( f.isDefault && f.isDefault.checked && ! saved.archived ) S().settings.defaultAccount = saved.id; else if ( S().settings.defaultAccount === saved.id && f.isDefault && ! f.isDefault.checked ) delete S().settings.defaultAccount;
 		EX.repairCurrencies();
 		UI.closeSheet(); EX.save(); toast( t( 'tWalletSaved' ) );
 	};
