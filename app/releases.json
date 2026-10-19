@@ -1,6 +1,16 @@
 {
-  "version": "0.43.0",
+  "version": "0.43.1",
   "releases": [
+    {
+      "version": "0.43.1",
+      "date": "2026-10-21",
+      "en": [
+        "Smart entry understands more: a weekday like “Friday” or “last Friday” now means that day, not a weekly repeat, and words like paid, bought, received and from are tidied out of the description."
+      ],
+      "el": [
+        "Η Έξυπνη προσθήκη καταλαβαίνει περισσότερα: μια μέρα της εβδομάδας όπως «Παρασκευή» σημαίνει πλέον εκείνη την ημέρα και όχι εβδομαδιαία επανάληψη, και λέξεις όπως πλήρωσα, αγόρασα, έλαβα και από αφαιρούνται από την περιγραφή."
+      ]
+    },
     {
       "version": "0.43.0",
       "date": "2026-10-21",

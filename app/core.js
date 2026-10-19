@@ -329,6 +329,7 @@
 
 	/** "Netflix 15.99 monthly on the 3rd", "Coffee 3.50 yesterday", "Ενοίκιο 850€ κάθε μήνα στις 1". */
 	EX.parseQuick = ( text, opts = {} ) => {
+		const past = opts.past && ! /\b(due|λήγει|ληγει|προθεσμία|προθεσμια)\b/iu.test( text ); // "due on the 25th" is the next 25th
 		let orig = ' ' + text.trim() + ' ';
 		let norm = fold( orig );
 		const out = {};
@@ -349,7 +350,7 @@
 		// Income or expense.
 		// Words like "salary" decide the type but stay in the description; "income" and "expense" are only markers.
 		if ( new RegExp( `${ B }(salary|wage|wages|bonus|refund|revenue|μισθος|επιστροφη|μπονους)${ E }`, 'iu' ).test( norm ) ) out.type = 'income';
-		while ( cut( `${ B }(income|received|εσοδο|εσοδα|εισπραχθηκε|εισπραξη)${ E }` ) ) out.type = 'income';
+		while ( cut( `${ B }(income|received|earned|got paid|εσοδο|εσοδα|εισπραχθηκε|εισπραξη|ελαβα|εισπραξα)${ E }` ) ) out.type = 'income';
 		while ( cut( `${ B }(expense|spent|εξοδο|εξοδα|ξοδεψα)${ E }` ) ) out.type = out.type || 'expense';
 		// Repeat.
 		const reps = [
@@ -380,7 +381,7 @@
 				if ( dd >= 1 && dd <= 31 && mi >= 0 ) {
 					const y = new Date().getFullYear();
 					let c = iso( new Date( y, mi, Math.min( dd, dim( y, mi ) ) ) );
-					if ( opts.past ) { if ( c > today() ) c = iso( new Date( y - 1, mi, Math.min( dd, dim( y - 1, mi ) ) ) ); }
+					if ( past ) { if ( c > today() ) c = iso( new Date( y - 1, mi, Math.min( dd, dim( y - 1, mi ) ) ) ); }
 					else if ( c < today() ) c = iso( new Date( y + 1, mi, Math.min( dd, dim( y + 1, mi ) ) ) );
 					date = c; day = dd;
 					if ( ! out.repeat ) out.repeat = 'once';
@@ -388,24 +389,25 @@
 			}
 		}
 		if ( ! date ) {
-			m = cut( `${ B }(?:(?:every|on|καθε|την)\\s+)?${ WD_RE }${ E }` );
+			m = cut( `${ B }(?:(?:every|on|last|previous|past|καθε|την|περασμεν\\p{L}*)\\s+)?${ WD_RE }${ E }` );
 			if ( m ) {
 				const w = m[ 1 ].toLowerCase();
 				const target = WD_IDX.findIndex( ( p ) => p.includes( w ) );
 				if ( target >= 0 ) {
-					date = addDays( today(), opts.past ? -( ( new Date().getDay() - target + 7 ) % 7 ) : ( target - new Date().getDay() + 7 ) % 7 );
-					if ( ! out.repeat ) out.repeat = 'weekly';
+					date = addDays( today(), past ? -( ( new Date().getDay() - target + 7 ) % 7 ) : ( target - new Date().getDay() + 7 ) % 7 );
+					if ( ! out.repeat ) out.repeat = past && ! /(every|καθε)/i.test( m[ 0 ] ) ? 'once' : 'weekly'; // a single entry's "Friday" is when it happened, not a schedule
 				}
 			}
 		}
 		if ( ! date ) {
 			m = cut( `${ B }(?:(?:on|the|στις|την|στη|καθε)\\s+)*(\\d{1,2})(?:st|nd|rd|th|η|ης)${ E }` ) || cut( `${ B }(?:on|στις|την|στη|καθε)\\s+(?:the\\s+)?(\\d{1,2})(?:\\s+του\\s+μηνα)?${ E }` ) || cut( `${ B }(\\d{1,2})\\s+του\\s+μηνα${ E }` );
 			if ( m && Number( m[ 1 ] ) >= 1 && Number( m[ 1 ] ) <= 31 ) {
-				day = Number( m[ 1 ] ); date = opts.past ? EX.prevWithDay( day ) : EX.nextWithDay( day );
-				if ( ! out.repeat ) out.repeat = 'monthly';
+				day = Number( m[ 1 ] ); date = past ? EX.prevWithDay( day ) : EX.nextWithDay( day );
+				if ( ! out.repeat ) out.repeat = past && ! /(every|each|καθε)/i.test( m[ 0 ] ) ? 'once' : 'monthly';
 			}
 		}
 		// Amount: the first remaining number, with . or , as decimal mark.
+		orig = orig.replace( /(\d)[.,](\d{3})(?!\d)/g, '$1$2' ); norm = norm.replace( /(\d)[.,](\d{3})(?!\d)/g, '$1$2' );
 		m = /(\d+(?:[.,]\d{1,2})?)/.exec( norm.replace( /(\d)[.,](\d{3})(?!\d)/g, '$1$2' ) );
 		if ( m ) {
 			out.amount = m[ 1 ].replace( ',', '.' );
@@ -413,7 +415,8 @@
 			if ( at >= 0 ) { const blankS = ' '.repeat( m[ 1 ].length ); orig = orig.slice( 0, at ) + blankS + orig.slice( at + m[ 1 ].length ); norm = norm.slice( 0, at ) + blankS + norm.slice( at + m[ 1 ].length ); }
 		}
 		const name = orig.replace( /[€$£~]/g, ' ' ).replace( new RegExp( `${ B }(on|the|every|each|per|a|an|for|of|about|around|due|pay|bill|στις|στη|στην|στο|τον|την|κάθε|Κάθε|ανά|για|του)${ E }`, 'giu' ), ' ' ).replace( /[^\p{L}\p{N}&'’.+()-]+/gu, ' ' ).replace( /\s+/g, ' ' ).trim();
-		if ( name ) out.name = name.charAt( 0 ).toUpperCase() + name.slice( 1 );
+		const bare = name.replace( /^(paid|bought|spent|got|πλήρωσα|πληρωσα|αγόρασα|αγορασα|ξόδεψα|ξοδεψα)\s+/iu, '' ).replace( /^(from|από τον|από την|από το|από)\s+/iu, '' ) || name;
+		if ( bare ) out.name = bare.charAt( 0 ).toUpperCase() + bare.slice( 1 );
 		if ( date ) { out.next = date; out.date = date; if ( day ) out.day = day; }
 		if ( ! out.repeat && out.next ) out.repeat = 'once';
 		return out;
