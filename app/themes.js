@@ -184,6 +184,7 @@
 	EXA.updateTrails = () => {
 		const m=root.dataset.motion, on=!document.hidden&&(m==='full'||(m!=='off'&&m!=='reduced'&&!matchMedia('(prefers-reduced-motion: reduce)').matches));
 		EXA.updateFunThemes(on);
+		if ( EXA.updateAmbient ) EXA.updateAmbient( on );
 		const enabled=['synthwave','amberwave','ion'].includes(EXA.skin())||(EXA.skin()==='custom'&&EXA.customPalette().trails);
 		if(!enabled){if(trails)trails.remove();trails=null;return;}
 		if(!trails){trails=document.createElement('div');trails.className='neon-trails';trails.setAttribute('aria-hidden','true');for(let i=0;i<22;i++){const dot=document.createElement('i');dot.style.left=(Math.random()*100)+'%';dot.style.setProperty('--duration',(7+Math.random()*12)+'s');dot.style.setProperty('--delay',(-Math.random()*20)+'s');dot.style.setProperty('--length',(15+Math.random()*45)+'px');trails.appendChild(dot);}document.body.prepend(trails);}

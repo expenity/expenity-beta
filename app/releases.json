@@ -1,6 +1,18 @@
 {
-  "version": "0.38.0",
+  "version": "0.39.0",
   "releases": [
+    {
+      "version": "0.39.0",
+      "date": "2026-10-20",
+      "en": [
+        "Sunset, Emerald, Pastel candy and Terminal now have gentle ambient motion behind the content. It follows the Animations setting.",
+        "Glass theme: the swipe actions behind a row no longer show through."
+      ],
+      "el": [
+        "Τα θέματα Sunset, Emerald, Pastel candy και Terminal έχουν πλέον διακριτική κίνηση πίσω από το περιεχόμενο. Ακολουθεί τη ρύθμιση των κινούμενων εφέ.",
+        "Θέμα Glass: οι ενέργειες σάρωσης πίσω από μια γραμμή δεν φαίνονται πλέον μέσα από αυτήν."
+      ]
+    },
     {
       "version": "0.38.0",
       "date": "2026-10-20",

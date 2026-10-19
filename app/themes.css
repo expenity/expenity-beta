@@ -945,3 +945,23 @@
 /* Preview on Home: Apply or Cancel in a clear panel above the tab bar. */
 .look-preview { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(var(--tab-h) + var(--safe-b) + 18px); z-index: 250; width: min(440px, calc(100vw - 24px)); display: grid; gap: 10px; padding: 14px 16px; background: var(--surface); color: var(--ink); border: 2px solid var(--accent); border-radius: calc(18px * var(--rk)); box-shadow: 0 14px 40px rgba(0, 0, 0, 0.28); text-align: center; }
 .look-preview b { font-size: 15px; } .look-preview .btn-row { display: flex; gap: 10px; } .look-preview .btn { flex: 1; }
+
+/* Ambient motion (ambient.js): behind the content, never takes taps, off with the Animations setting. */
+.ambient{position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:0;contain:strict}.ambient[hidden]{display:none}
+.ambient i{position:absolute;display:block;left:var(--x);will-change:transform,opacity}
+.amb-glow{position:absolute;left:-10%;right:-10%;bottom:-25%;height:60%;background:radial-gradient(ellipse at 50% 100%,color-mix(in srgb,var(--accent) 55%,transparent),transparent 68%);animation:ambBreath 7s ease-in-out infinite}
+.amb-ember{bottom:-12px;width:var(--s);height:var(--s);border-radius:50%;background:var(--accent);box-shadow:0 0 10px 2px color-mix(in srgb,var(--accent) 60%,transparent);opacity:0;animation:ambRise var(--d) var(--w) linear infinite}
+.amb-bubble{bottom:-40px;width:var(--s);height:var(--s);border-radius:50%;border:2px solid color-mix(in srgb,var(--accent) 80%,transparent);background:radial-gradient(circle at 30% 30%,rgba(255,255,255,.85),color-mix(in srgb,var(--accent) 14%,transparent) 62%);opacity:0;animation:ambRise var(--d) var(--w) ease-in infinite}
+.amb-sprinkle{bottom:-20px;width:calc(var(--s) * .55);height:calc(var(--s) * .2);min-height:4px;border-radius:99px;background:var(--accent);opacity:0;animation:ambRise var(--d) var(--w) ease-in infinite,ambSpin 6s linear infinite}
+.amb-leaf{top:-40px;width:var(--s);height:var(--s);border-radius:0 100% 0 100%;background:color-mix(in srgb,var(--accent) 45%,transparent);opacity:0;animation:ambFall var(--d) var(--w) linear infinite}
+.amb-digits{top:-260px;width:12px;font:600 13px/1.25 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre;color:var(--accent);opacity:0;animation:ambDigits var(--d) var(--w) linear infinite;text-shadow:0 0 6px var(--accent)}
+@keyframes ambRise{0%{transform:translate(0,0);opacity:0}12%{opacity:.95}85%{opacity:.5}100%{transform:translate(var(--sway),-108vh);opacity:0}}
+@keyframes ambFall{0%{transform:translate(0,0) rotate(0);opacity:0}10%{opacity:.55}90%{opacity:.4}100%{transform:translate(var(--sway),108vh) rotate(var(--rot));opacity:0}}
+@keyframes ambDigits{0%{transform:translateY(0);opacity:0}10%{opacity:.28}90%{opacity:.2}100%{transform:translateY(120vh);opacity:0}}
+@keyframes ambBreath{0%,100%{opacity:.55;transform:scale(1)}50%{opacity:1;transform:scale(1.06)}}
+@keyframes ambSpin{to{rotate:360deg}}
+:root[data-motion=off] .ambient,:root[data-motion=reduced] .ambient{display:none}
+@media(prefers-reduced-motion:reduce){:root:not([data-motion=full]) .ambient{display:none}}
+/* Glass: the swipe actions behind a row must never show through the translucent surface. */
+:root[data-skin="glass"] .sw-front{background:linear-gradient(rgba(255,255,255,.55),rgba(255,255,255,.55)),#dfe6ff}
+:root[data-skin="glass"] .sw-front:hover{background:linear-gradient(rgba(255,255,255,.7),rgba(255,255,255,.7)),#dfe6ff}
