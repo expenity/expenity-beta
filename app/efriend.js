@@ -396,6 +396,7 @@
 	const WISHES = [ [ 'trip', 'plane', '✈️', 'efWishTrip' ], [ 'shoes', 'heart', '👟', 'efWishShoes' ], [ 'phone', 'device-mobile', '📱', 'efWishPhone' ], [ 'gift', 'gift', '🎁', 'efWishGift' ], [ 'car', 'car', '🚗', 'efWishCar' ], [ 'holiday', 'beach', '🏖️', 'efWishHoliday' ], [ 'laptop', 'device-laptop', '💻', 'efWishLaptop' ], [ 'home', 'home', '🏠', 'efWishHome' ] ];
 	const wishChips = ( on = [] ) => `<div class="ef-wishes">${ WISHES.map( ( w ) => `<button type="button" class="ef-wish${ on.includes( w[ 0 ] ) ? ' on' : '' }" data-ef-wish="${ w[ 0 ] }">${ w[ 2 ] } ${ esc( t( w[ 3 ] ) ) }</button>` ).join( '' ) }</div>`;
 	EXA.openEfPlan = ( p, pre ) => {
+		if ( document.querySelector( '.ef-cp' ) ) closeChat(); // making a plan from a chat leaves the chat
 		const ws = EX.writableAccounts(), chosen = p && p.wallets && p.wallets.length ? p.wallets : ws.map( ( w ) => w.id );
 		const goals = S().goals.filter( ( x ) => ! isPlan( x ) ), v = p || Object.assign( { name: '', target: '', deadline: '', icon: 'plane' }, pre || {} );
 		const X = `<button type="button" class="ab-btn" data-close aria-label="${ esc( t( 'close' ) ) }">${ UI.icon( 'x', 24 ) }</button>`;
@@ -1424,7 +1425,7 @@
 		const f = e.target; if ( f.id !== 'efChatForm' ) return; e.preventDefault();
 		const q = f.elements.q.value.trim(); if ( ! q || chat.busy ) return; f.elements.q.value = ''; onUser( q );
 	} );
-	const openPlan = ( dl ) => { const ic = F.askIcon( chat.item ); UI.closeSheet && UI.closeSheet( true ); setTimeout( () => EXA.openEfPlan( null, Object.assign( { name: ( chat.item || t( 'efAskThing' ) ) + ( chat.who ? ' ' + forWho() : '' ), target: String( chat.cost / 100 ), icon: ic.icon }, dl ? { deadline: dl > today() ? dl : addDays( today(), 1 ) } : {} ) ), 220 ); };
+	const openPlan = ( dl ) => { const ic = F.askIcon( chat.item ); closeChat(); UI.closeSheet && UI.closeSheet( true ); setTimeout( () => EXA.openEfPlan( null, Object.assign( { name: ( chat.item || t( 'efAskThing' ) ) + ( chat.who ? ' ' + forWho() : '' ), target: String( chat.cost / 100 ), icon: ic.icon }, dl ? { deadline: dl > today() ? dl : addDays( today(), 1 ) } : {} ) ), 220 ); };
 	document.addEventListener( 'click', ( e ) => {
 		const tg = e.target.closest ? e.target : null; if ( ! tg ) return;
 		if ( tg.closest( '[data-ef-ask]' ) ) { e.preventDefault(); EXA.efriendAskOpen(); return; }

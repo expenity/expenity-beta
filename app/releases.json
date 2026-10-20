@@ -1,6 +1,16 @@
 {
-  "version": "0.54.1",
+  "version": "0.54.2",
   "releases": [
+    {
+      "version": "0.54.2",
+      "date": "2026-10-20",
+      "en": [
+        "Making a plan from an eFriend chat now closes the chat, so you land straight in the plan."
+      ],
+      "el": [
+        "Η δημιουργία σχεδίου από μια συζήτηση με το eFriend κλείνει πλέον τη συζήτηση, ώστε να πηγαίνετε κατευθείαν στο σχέδιο."
+      ]
+    },
     {
       "version": "0.54.1",
       "date": "2026-10-20",
