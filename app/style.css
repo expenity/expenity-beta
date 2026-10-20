@@ -1335,3 +1335,72 @@ input[type=date]::-webkit-datetime-edit{padding:0}
 .ef-det summary::after{content:"";margin-left:auto;width:9px;height:9px;border-right:2.5px solid var(--muted);border-bottom:2.5px solid var(--muted);transform:rotate(45deg);transition:transform .2s}
 .ef-det[open] summary::after{transform:rotate(-135deg)}.ef-det[open] summary{margin-bottom:8px}
 .ef-disc{margin-top:16px}
+
+/* priorities */
+.ef-prio{list-style:none;margin:10px 0;padding:0;display:flex;flex-direction:column;gap:8px}
+.ef-prio-i{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--line);border-radius:16px;background:var(--surface);touch-action:pan-y}
+.ef-prio-i.drag{box-shadow:0 8px 24px rgba(0,0,0,.2);border-color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,var(--surface))}
+.ef-grip{border:0;background:transparent;color:var(--muted);font-size:1.4rem;line-height:1;padding:4px 6px;cursor:grab;touch-action:none}
+.ef-rank{width:28px;text-align:center;font-weight:700;font-size:1.05rem;flex:none}
+.ef-prio-t{flex:1;min-width:0}.ef-prio-t b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ef-prio-t small{color:var(--muted)}
+.ef-ud{display:flex;flex-direction:column;gap:2px}.ef-ud button{border:0;background:transparent;color:var(--muted);font-size:.7rem;line-height:1;padding:2px 6px;cursor:pointer}
+.ef-risk{padding:4px 0}.ef-risk-h{display:flex;justify-content:space-between;align-items:center;gap:8px}.ef-risk-val{font-weight:700;color:#0f766e}
+.ef-risk input[type=range]{width:100%;margin:10px 0 2px;accent-color:#0f766e;height:28px}.ef-risk-ends{display:flex;justify-content:space-between;font-size:.8rem;color:var(--muted)}
+.ef-ask{display:flex;align-items:center;gap:10px;padding:10px 12px;margin:0 0 10px;border-radius:14px;background:color-mix(in srgb,var(--warn) 18%,var(--surface));border:1px solid color-mix(in srgb,var(--warn) 45%,var(--line))}
+.ef-ask>span:nth-child(2){flex:1;line-height:1.35}.ef-ask-em{font-size:1.3rem}
+
+/* wishes, shuffle animation */
+.ef-wishes{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:10px 0}
+.ef-wish{border:1.5px solid var(--line);background:var(--surface);color:var(--ink);border-radius:99px;padding:8px 14px;font:inherit;font-weight:600;cursor:pointer}
+.ef-wish.on{background:color-mix(in srgb,#0f766e 16%,var(--surface));border-color:#0f766e}.ef-wish-other{align-self:center;margin:0 auto 8px;display:block}
+.ef-wish-rows{display:flex;flex-direction:column;gap:12px;width:100%;max-width:360px;text-align:left}
+.ef-wish-row{padding:12px;border:1px solid var(--line);border-radius:16px;background:var(--surface)}
+.ef-wish-head{display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:1.4rem}.ef-wish-head input{flex:1;min-width:0;height:44px;border:1.5px solid var(--line);border-radius:12px;padding:0 12px;font:inherit;font-size:16px;background:var(--bg);color:var(--ink)}
+.ef-wish-del{border:0;background:transparent;color:var(--muted);font-size:1.1rem;cursor:pointer;padding:6px}
+.ef-shuf{position:relative;width:240px;height:150px;margin:6px auto 10px}
+.ef-shuf span{position:absolute;left:0;right:0;height:42px;display:flex;align-items:center;gap:6px;padding:0 14px;border:1.5px solid var(--line);border-radius:14px;background:var(--surface);font-weight:600;text-align:left}
+.ef-shuf .s1{animation:ef-s1 6s ease-in-out infinite}.ef-shuf .s2{animation:ef-s2 6s ease-in-out infinite}.ef-shuf .s3{animation:ef-s3 6s ease-in-out infinite}
+.ef-shuf .s3 i{font-style:normal;opacity:0;width:0;overflow:hidden;animation:ef-trophy 6s ease-in-out infinite}
+@keyframes ef-s1{0%,20%{top:0}40%,80%{top:54px}100%{top:0}}@keyframes ef-s2{0%,20%{top:54px}40%,80%{top:108px}100%{top:54px}}@keyframes ef-s3{0%,20%{top:108px}40%,80%{top:0;border-color:#0f766e}100%{top:108px}}
+@keyframes ef-trophy{0%,35%{opacity:0;width:0}45%,80%{opacity:1;width:1.4em}100%{opacity:0;width:0}}
+@media (prefers-reduced-motion:reduce){.ef-shuf span,.ef-shuf .s3 i{animation:none}.ef-shuf .s1{top:54px}.ef-shuf .s2{top:108px}.ef-shuf .s3{top:0}.ef-shuf .s3 i{opacity:1;width:1.4em}}
+.ef-nudge{margin:0 0 12px}
+
+/* the cushion slider: one continuous gradient, the thumb takes the colour of its place */
+.ef-risk input.ef-grad{-webkit-appearance:none;appearance:none;width:100%;height:12px;margin:14px 0 4px;border-radius:99px;background:linear-gradient(90deg,#d92d20 0%,#f08c00 20%,#16a34a 40%,#14a0a8 60%,#2563eb 80%,#1e3a8a 100%);outline-offset:6px}
+.ef-risk input.ef-grad::-webkit-slider-thumb{-webkit-appearance:none;width:30px;height:30px;border-radius:50%;background:var(--c,#16a34a);border:4px solid #fff;box-shadow:0 2px 10px rgba(0,0,0,.35);cursor:grab}
+.ef-risk input.ef-grad::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:var(--c,#16a34a);border:4px solid #fff;box-shadow:0 2px 10px rgba(0,0,0,.35);cursor:grab}
+.ef-risk input.ef-grad::-moz-range-track{background:transparent}
+.ef-risk-val{color:var(--c,#16a34a);font-weight:800}
+.ef-risk-hint .btn{margin-top:8px}
+
+.ef-ob.paused{display:none}
+.ef-tile-sub{margin-top:2px;color:var(--muted);font-size:.75rem}
+.ef-inc-demo{display:flex;align-items:center;gap:14px;font-size:2rem;margin:4px 0}.ef-inc-pay{animation:ef-fall 2.4s ease-in-out infinite}.ef-inc-arrow{opacity:.5}
+@keyframes ef-fall{0%{transform:translateY(-10px);opacity:0}30%{opacity:1}70%{transform:translateX(30px) translateY(6px);opacity:1}100%{transform:translateX(40px);opacity:0}}
+
+/* did you make it? */
+.ef-due-main{align-items:center;gap:12px}.ef-due-name{font-size:1.1rem;display:flex;align-items:center;gap:8px;justify-content:center;margin:0}
+.ef-due-btns{display:flex;flex-direction:column;gap:10px;width:100%;max-width:340px;margin-top:6px}
+.ef-due-form{width:100%;max-width:360px;text-align:left;display:flex;flex-direction:column;gap:6px}
+.ef-due .ef-hop.on{opacity:1;animation:ef-pop .7s both}
+.ef-confetti{position:absolute;inset:0;overflow:hidden;pointer-events:none}.ef-confetti i{position:absolute;top:-30px;left:calc(var(--n) * 10%);font-style:normal;font-size:1.6rem;animation:ef-fall2 3.2s calc(var(--n) * .18s) ease-in infinite}
+@keyframes ef-fall2{0%{transform:translateY(-30px) rotate(0);opacity:0}10%{opacity:1}100%{transform:translateY(110vh) rotate(360deg);opacity:1}}
+.ef-txbadge{vertical-align:-3px;margin-left:6px}
+.ef-ach-ic{display:flex;align-items:center;gap:4px;color:#0b7a58}
+@media (prefers-reduced-motion:reduce){.ef-confetti i{animation:none;top:20%}}
+
+/* eFriend helping with goals */
+.ef-prop{padding:12px;margin:0 0 12px;border:1.5px solid #0f766e;border-radius:18px;background:color-mix(in srgb,#0f766e 8%,var(--surface))}
+.ef-prop-h{display:flex;align-items:center;gap:8px;font-size:1.05rem;margin-bottom:4px}.ef-prop-btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.ef-week{margin:0 0 10px;padding:8px 12px;border-radius:14px;background:color-mix(in srgb,#0f766e 10%,var(--surface))}.ef-week .ef-points{margin:0}
+.ef-moved .bm-front{border-left:4px solid #0f766e;background:color-mix(in srgb,#0f766e 7%,var(--surface))}
+.ef-undo{display:inline-block;margin-top:4px;font-size:.8rem;font-weight:700;color:#0f766e;border:1px solid #0f766e;border-radius:99px;padding:2px 10px;cursor:pointer}
+.ef-modes{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
+.ef-mode{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;padding:10px 12px;border:1.5px solid var(--line);border-radius:16px;background:var(--surface);color:var(--ink);font:inherit;cursor:pointer}
+.ef-mode span{font-size:1.3rem}.ef-mode small{color:var(--muted);font-size:.78rem;line-height:1.25}.ef-mode.on{border-color:#0f766e;background:color-mix(in srgb,#0f766e 12%,var(--surface))}
+.ef-alloc-opts{margin:8px 0}.ef-pend{width:100%;accent-color:#0f766e}
+.ef-moves-demo{display:flex;align-items:center;gap:12px;font-size:2rem;margin:6px 0}.ef-md-ok{font-size:1.3rem;opacity:0;animation:ef-fade .5s 1.8s both}.ef-md-a{animation:ef-bob 2s ease-in-out infinite}.ef-md-ar{opacity:.5;animation:ef-fade .5s 1s both}
+
+.ef-datehelp{display:flex;flex-direction:column;align-items:flex-start;gap:6px;margin:-4px 0 12px}.ef-datehelp #efDateNote .ef-points{margin:0}
+.ef-lim{display:flex;flex-direction:column;gap:6px;width:100%;max-width:340px;text-align:left}.ef-lim-note{width:100%;max-width:340px}

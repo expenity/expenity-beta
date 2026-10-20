@@ -1,6 +1,30 @@
 {
-  "version": "0.50.6",
+  "version": "0.51.0",
   "releases": [
+    {
+      "version": "0.51.0",
+      "date": "2026-10-28",
+      "en": [
+        "eFriend can now help with your savings goals. Choose Suggest (it tells you the safe amount), Ask first (it proposes, you confirm, edit or dismiss) or Automatic (it records the move and you can undo). You pick how often, how many proposals can wait at once (1 to 5) and which goals it may feed. Unanswered proposals expire after 3 days, and nothing real moves: it only updates your records.",
+        "Entries made by eFriend stand out in Activity with a robot badge, a coloured edge, the label Moved by eFriend and an Undo button, plus a weekly line showing what it moved.",
+        "Safety is now measured in months of your usual spending left after buying, with a slider that blends from red (risky) through green (balanced) to blue (very safe). eFriend also looks at your income and asks for your salary when it does not know it.",
+        "When a plan's date arrives, a full-screen question asks if you made it. Say yes and it adds the expense with an eFriend badge, then keeps it in a new list of what you achieved with eFriend. You can also move the date or drop the plan.",
+        "You can turn a goal into an eFriend plan from the goal's edit screen. The Home balance shows your total and how much of it is set aside for goals.",
+        "The tour has new steps about your income, your own spending limits and how eFriend can help move money.",
+        "Set the most you are comfortable spending per day, week and month (in the tour or in Spending targets). eFriend plans around the lower of your limit and your habits, and warns when limits do not line up.",
+        "For bigger amounts, eFriend suggests the earliest safe date (up to a year ahead) in the plan form, in the analysis and when a date arrives, and tells you on the date whether you can afford it today."
+      ],
+      "el": [
+        "Το eFriend μπορεί πλέον να βοηθά με τους στόχους αποταμίευσής σας. Διαλέξτε Πρόταση (σας λέει το ασφαλές ποσό), Ρωτά πρώτα (προτείνει, εσείς επιβεβαιώνετε, επεξεργάζεστε ή απορρίπτετε) ή Αυτόματο (καταγράφει τη μετακίνηση και μπορείτε να την αναιρέσετε). Ορίζετε πόσο συχνά, πόσες προτάσεις μπορούν να περιμένουν ταυτόχρονα (1 έως 5) και ποιους στόχους μπορεί να τροφοδοτεί. Οι προτάσεις που δεν απαντάτε λήγουν σε 3 ημέρες και δεν μετακινούνται πραγματικά χρήματα: ενημερώνονται μόνο τα αρχεία σας.",
+        "Οι εγγραφές που κάνει το eFriend ξεχωρίζουν στις Κινήσεις με σήμα ρομπότ, χρωματιστό άκρο, την ένδειξη Μετακινήθηκε από το eFriend και κουμπί Αναίρεσης, καθώς και μια εβδομαδιαία γραμμή με όσα μετακίνησε.",
+        "Η ασφάλεια μετριέται πλέον σε μήνες των συνηθισμένων εξόδων σας που απομένουν μετά την αγορά, με ένα ρυθμιστικό που αλλάζει σταδιακά από κόκκινο (επικίνδυνο) σε πράσινο (ισορροπημένο) και μπλε (πολύ ασφαλές). Το eFriend λαμβάνει υπόψη και το εισόδημά σας και ζητά τον μισθό σας όταν δεν τον γνωρίζει.",
+        "Όταν φτάσει η ημερομηνία ενός σχεδίου, μια ερώτηση πλήρους οθόνης ρωτά αν τα καταφέρατε. Αν πείτε ναι, προσθέτει το έξοδο με σήμα eFriend και το κρατά σε μια νέα λίστα με όσα καταφέρατε με το eFriend. Μπορείτε επίσης να μετακινήσετε την ημερομηνία ή να παραλείψετε το σχέδιο.",
+        "Μπορείτε να μετατρέψετε έναν στόχο σε σχέδιο eFriend από την οθόνη επεξεργασίας του στόχου. Το υπόλοιπο στην Αρχική δείχνει το σύνολό σας και πόσο από αυτό είναι στην άκρη για στόχους.",
+        "Η περιήγηση έχει νέα βήματα για το εισόδημά σας, τα δικά σας όρια εξόδων και για το πώς μπορεί να βοηθά το eFriend με τη μετακίνηση χρημάτων.",
+        "Ορίστε το μέγιστο που νιώθετε άνετα να ξοδεύετε ανά ημέρα, εβδομάδα και μήνα (στην περιήγηση ή στους Στόχους εξόδων). Το eFriend σχεδιάζει με βάση το χαμηλότερο ανάμεσα στο όριό σας και στις συνήθειές σας και προειδοποιεί όταν τα όρια δεν συμφωνούν.",
+        "Για μεγαλύτερα ποσά, το eFriend προτείνει την πρώτη ασφαλή ημερομηνία (έως έναν χρόνο μπροστά) στη φόρμα του σχεδίου, στην ανάλυση και όταν φτάνει μια ημερομηνία, και σας λέει εκείνη την ημέρα αν μπορείτε να το αντέξετε σήμερα."
+      ]
+    },
     {
       "version": "0.50.6",
       "date": "2026-10-27",

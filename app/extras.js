@@ -22,7 +22,7 @@
 	/* ------------------------------------------------------------------ 2. Daily number */
 	const spentOn = ( d ) => EX.reportTxs().filter( ( x ) => x.type === 'expense' && ! x.goalId && x.date === d ).reduce( ( n, x ) => n + cents( x ), 0 );
 	/* Targets: the automatic figure, or the person's own spending target (day, week or month) and an optional income target. */
-	const tg = () => { const x = S().settings.targets; return { spend: Object.assign( { period: 'auto', amount: '' }, x && x.spend ), income: Object.assign( { period: 'off', amount: '' }, x && x.income ) }; };
+	const tg = () => { const x = S().settings.targets; return { spend: Object.assign( { period: 'auto', amount: '' }, x && x.spend ), income: Object.assign( { period: 'off', amount: '' }, x && x.income ), limits: Object.assign( { day: '', week: '', month: '' }, x && x.limits ) }; };
 	const range = ( period, ref = today() ) => {
 		if ( period === 'week' ) { const d = EX.parse( ref ), from = EX.addDays( ref, -( ( d.getDay() + 6 ) % 7 ) ); return { from, to: EX.addDays( from, 6 ) }; }
 		if ( period === 'month' ) { const d = EX.parse( ref ); return { from: EX.iso( new Date( d.getFullYear(), d.getMonth(), 1 ) ), to: EX.iso( new Date( d.getFullYear(), d.getMonth() + 1, 0 ) ) }; }
@@ -71,7 +71,8 @@
 		const f = e.target.elements, cur = tg(), sp = ( pick && pick.spend ) || cur.spend.period, ip = ( pick && pick.income ) || cur.income.period, err = document.getElementById( 'tgErr' );
 		const ok = ( v ) => /^\d{1,9}([.,]\d{1,2})?$/.test( String( v ).trim() ) && parseFloat( String( v ).replace( ',', '.' ) ) > 0;
 		if ( ( sp !== 'auto' && ! ok( f.spend.value ) ) || ( ip !== 'off' && ! ok( f.income.value ) ) ) { err.textContent = t( 'targetBad' ); err.hidden = false; return; }
-		const s = S().settings; s.targets = { spend: { period: sp, amount: sp === 'auto' ? '' : f.spend.value.trim().replace( ',', '.' ) }, income: { period: ip, amount: ip === 'off' ? '' : f.income.value.trim().replace( ',', '.' ) } }; s.u = Date.now();
+		const lim = {}; for ( const [ k, n ] of [ [ 'day', 'limDay' ], [ 'week', 'limWeek' ], [ 'month', 'limMonth' ] ] ) { const v = f[ n ] ? f[ n ].value.trim().replace( ',', '.' ) : ''; if ( v && ! ok( v ) ) { err.textContent = t( 'targetBad' ); err.hidden = false; return; } lim[ k ] = v; }
+		const s = S().settings; s.targets = { spend: { period: sp, amount: sp === 'auto' ? '' : f.spend.value.trim().replace( ',', '.' ) }, income: { period: ip, amount: ip === 'off' ? '' : f.income.value.trim().replace( ',', '.' ) }, limits: lim }; s.u = Date.now();
 		EX.save(); pick = null; UI.closeSheet( true ); UI.done( t( 'tSaved' ) ); EXA.render();
 	}, true );
 
