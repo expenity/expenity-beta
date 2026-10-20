@@ -1,6 +1,16 @@
 {
-  "version": "0.54.12",
+  "version": "0.54.13",
   "releases": [
+    {
+      "version": "0.54.13",
+      "date": "2026-10-20",
+      "en": [
+        "The playable eFriend chat on the website now loads in the background and appears straight on the chat, without showing the app first. Its demo household is now Danae."
+      ],
+      "el": [
+        "Η συζήτηση με το eFriend που μπορείτε να δοκιμάσετε στον ιστότοπο φορτώνει πλέον στο παρασκήνιο και εμφανίζεται κατευθείαν η συζήτηση, χωρίς να φαίνεται πρώτα η εφαρμογή. Το νοικοκυριό του demo είναι πλέον η Δανάη."
+      ]
+    },
     {
       "version": "0.54.12",
       "date": "2026-10-20",
