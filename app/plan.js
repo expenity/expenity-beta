@@ -120,7 +120,7 @@
 		const eta = i.remaining === 0 ? t( 'goalReached' ) : i.eta ? t( 'goalEta', { date: dateShort( i.eta ) } ) : t( 'goalNoEta' );
 		return `<div class="gcard">${ ring( i.pct, 72, UI.icon( g.icon || 'target', 26 ) ) }
 			<button type="button" class="mid" data-plan="edit-goal" data-id="${ esc( g.id ) }"><b>${ esc( g.name ) }</b>${EXA.tagsInline(g.tags)}<small>${ esc( t( 'goalSaved', { a: m$( i.saved ), b: m$( i.target ) } ) ) }</small><small class="st">${ i.pct }% · ${ esc( eta ) }${ i.needMonthly ? ' · ' + esc( t( 'goalNeed', { a: m$( i.needMonthly ) } ) ) : '' }</small></button>
-			<button type="button" class="btn btn-ghost sm" data-plan="goal-money" data-id="${ esc( g.id ) }">${ UI.icon( 'plus', 18 ) } ${ esc( t( 'goalAddMoney' ) ) }</button></div>`;
+			<button type="button" class="btn btn-ghost sm" data-plan="goal-money" data-id="${ esc( g.id ) }">${ UI.icon( 'plus', 18 ) } ${ esc( t( 'goalAddMoney' ) ) }</button>${ EXA.efriendChip ? EXA.efriendChip( g ) : '' }</div>`;
 	}
 	function incomeRow( i ) {
 		const days = Math.round( ( parse( i.next ) - parse( today() ) ) / 864e5 );
@@ -198,6 +198,7 @@
 			<div class="grid2"><label class="f"><span>${ esc( t( 'goalTarget' ) ) } (${ esc( main() ) })</span><input name="target" inputmode="decimal" autocomplete="off" placeholder="0.00" value="${ esc( v.target ) }"></label>
 			<label class="f"><span>${ esc( t( 'goalDeadline' ) ) }</span><input name="deadline" type="date" value="${ esc( v.deadline || '' ) }"></label></div>
 			<div class="lbl">${ esc( t( 'goalIcon' ) ) }</div><div class="icon-pick" id="goalIcons">${ GOAL_ICONS.map( ( n ) => `<button type="button" class="ipick${ v.icon === n ? ' on' : '' }" data-plan="pick-icon" data-icon="${ n }" aria-label="${ n }">${ UI.icon( n, 24 ) }</button>` ).join( '' ) }</div><input type="hidden" name="icon" value="${ esc( v.icon ) }">
+			${ EXA.efriendGoalFields ? EXA.efriendGoalFields( g ) : '' }
 			${ EXA.tagsField(typeof v !== 'undefined' ? v.tags : g.tags) }${ EXA.photos.slot( typeof v !== 'undefined' ? v.photo : '' ) }<p class="err" id="planErr" role="alert" hidden></p>
 			<div class="btn-row sticky-actions">${ g ? `<button type="button" class="btn btn-danger" data-plan="del-goal">${ esc( t( 'del' ) ) }</button>` : '' }<span class="sp"></span><button type="submit" class="btn btn-primary">${ esc( t( 'saveTx' ) ) }</button></div></form>`, { cls: 'small' } );
 	}
@@ -265,8 +266,9 @@
 			const name = el.gname.value.trim(), target = amt( el.target.value );
 			if ( ! name ) return err( 'errNameReq' );
 			if ( ! ok( target ) ) return err( 'errAmount' );
-			const v = { tags: EXA.readTags(f), photo: el.photo.value, name, target, deadline: el.deadline.value || '', icon: el.icon.value };
+			const v = { tags: EXA.readTags(f), photo: el.photo.value, name, target, deadline: el.deadline.value || '', icon: el.icon.value, ...( EXA.efriendReadFields ? EXA.efriendReadFields( f ) : {} ) };
 			if ( editing ) Object.assign( editing, v ); else S().goals.push( Object.assign( { id: uid() }, v ) );
+			if ( EXA.efriendAfterSave && v.coach ) setTimeout( EXA.efriendAfterSave, 0 );
 		} else if ( f.id === 'contribForm' ) {
 			const amount = amt( el.amount.value );
 			if ( ! ok( amount ) ) return err( 'errAmount' );

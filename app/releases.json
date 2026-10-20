@@ -1,6 +1,18 @@
 {
-  "version": "0.49.0",
+  "version": "0.50.0",
   "releases": [
+    {
+      "version": "0.50.0",
+      "date": "2026-10-23",
+      "en": [
+        "Meet your eFriend: a small robot that coaches a savings goal. Turn on Let eFriend coach this goal when you add a goal (a trip, a gift) and pick the wallets the money comes from. It checks your bills, income and habits until the date and tells you, with a smile, whether you will make it and what would help.",
+        "eFriend sorts your spending into Must, Need and Want for you. Adjust any of them with a 3-way toggle, and it remembers."
+      ],
+      "el": [
+        "Γνωρίστε το eFriend σας: ένα μικρό ρομπότ που προπονεί έναν στόχο αποταμίευσης. Ενεργοποιήστε το Να προπονεί το eFriend αυτόν τον στόχο όταν προσθέτετε στόχο (ταξίδι, δώρο) και διαλέξτε τα πορτοφόλια από τα οποία προέρχονται τα χρήματα. Ελέγχει τους λογαριασμούς, τα έσοδα και τις συνήθειές σας μέχρι την ημερομηνία και σας λέει, με χαμόγελο, αν θα τα καταφέρετε και τι θα βοηθούσε.",
+        "Το eFriend ταξινομεί τα έξοδά σας σε Αναγκαίο, Ανάγκη και Επιθυμία. Αλλάξτε οποιοδήποτε με διακόπτη 3 θέσεων και το θυμάται."
+      ]
+    },
     {
       "version": "0.49.0",
       "date": "2026-10-22",

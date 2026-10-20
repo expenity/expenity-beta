@@ -236,7 +236,7 @@
 				<div class="mini-bars">${ spark.map( ( s ) => `<div><span class="mb-in" style="height:${ Math.max( 4, Math.round( ( s.inc / sMax ) * 100 ) ) }%"></span><span class="mb-out" style="height:${ Math.max( 4, Math.round( ( s.exp / sMax ) * 100 ) ) }%"></span><em>${ esc( s.l ) }</em></div>` ).join( '' ) }</div>
 				<div class="hero-tiles"><div><span class="k">${ esc( t( 'heroRate' ) ) }</span><b>${ rate == null ? '—' : rate + '%' }</b></div><div><span class="k">${ esc( t( 'heroPerDay' ) ) }</span><b>${ esc( M( Math.round( mC.exp / Math.max( 1, now.getDate() ) ) ) ) }</b></div></div><i class="flip-ic" aria-hidden="true">${ UI.icon( 'refresh', 18 ) }</i></section></div>
 			</section>`;
-		return `${ lead ? `<section data-home="due">${DUE}</section>` : '' }${ fun ? legacy : strip }<section data-home="welcome">${ promos() }</section>
+		return `${ lead ? `<section data-home="due">${DUE}</section>` : '' }${ fun ? legacy : strip }<section data-home="welcome">${ promos() }</section>${ EXA.efriendHome ? EXA.efriendHome() : '' }
 			${ lead ? `<section data-home="ideas">${EXA.ideasHome()}</section>` : `<section data-home="wallets">${WAL}</section>` }
 			${ lead ? `<section data-home="wallets">${WAL}</section>` : `<section data-home="due">${DUE}</section>` }
 			${ lead ? '' : `<section data-home="ideas">${EXA.ideasHome()}</section>` }
