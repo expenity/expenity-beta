@@ -14,6 +14,10 @@
 	const F = ( EX.efriend = {} );
 	const main = () => S().settings.currency;
 	const num = ( v ) => Number( String( v == null ? '' : v ).replace( ',', '.' ) ) || 0;
+	/** Readable text: **bold** for numbers, one idea per line, an emoji in front of each point. */
+	const rich = ( x ) => esc( x ).replace( /\*\*(.+?)\*\*/g, '<b>$1</b>' );
+	const points = ( lines ) => `<ul class="ef-points">${ lines.filter( Boolean ).map( ( l ) => { const m = String( l ).match( /^((?:\p{Extended_Pictographic}\uFE0F?\u200D?)+)\s*(.*)$/u ); return m ? `<li><span class="ef-em" aria-hidden="true">${ m[ 1 ] }</span><span>${ rich( m[ 2 ] ) }</span></li>` : `<li class="plain"><span>${ rich( l ) }</span></li>`; } ).join( '' ) }</ul>`;
+	const para = ( key, vars ) => points( String( t( key, vars ) ).split( '\n' ) );
 	const fold = ( s ) => String( s || '' ).toLowerCase().normalize( 'NFD' ).replace( /[̀-ͯ]/g, '' );
 
 	/* ------------------------------------------------------------------ Must / Need / Want */
@@ -148,6 +152,26 @@
 			<path d="m52 84 4 4 8-9" fill="none" stroke="#ffc94d" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" opacity=".95"/>${ extra }</g><g class="ef-fx"><path class="ef-heart h1" d="M60 24c-5-8-16 0-8 8l8 7 8-7c8-8-3-16-8-8z" fill="#ff6b8a"/><path class="ef-steam s1" d="M30 20q-6-6 0-12M90 20q6-6 0-12" fill="none" stroke="#9aa4b5" stroke-width="3" stroke-linecap="round"/></g></svg>`;
 	};
 
+	/* ------------------------------------------------------------------ Sounds: a smile chirps, a giggle trills, anger growls (synthesised here, nothing is downloaded) */
+	let actx = null;
+	const soundOn = () => ( S().settings.efSound !== false ) && ( ( S().settings.sounds || {} ).volume == null || S().settings.sounds.volume > 0 );
+	F.sound = ( kind ) => {
+		if ( ! soundOn() || document.hidden ) return;
+		try {
+			const C = window.AudioContext || window.webkitAudioContext; if ( ! C ) return; actx = actx || new C(); if ( actx.state === 'suspended' ) actx.resume().catch( () => {} );
+			const c = actx, vol = Math.max( 0.15, Math.min( 1, ( S().settings.sounds || {} ).volume ?? 0.6 ) ) * 0.5, t0 = c.currentTime;
+			const tone = ( type, f1, f2, start, dur, g ) => { const o = c.createOscillator(), a = c.createGain(); o.type = type; o.frequency.setValueAtTime( f1, t0 + start ); if ( f2 ) o.frequency.exponentialRampToValueAtTime( f2, t0 + start + dur ); a.gain.setValueAtTime( 0.0001, t0 + start ); a.gain.exponentialRampToValueAtTime( vol * g, t0 + start + 0.015 ); a.gain.exponentialRampToValueAtTime( 0.0001, t0 + start + dur ); o.connect( a ).connect( c.destination ); o.start( t0 + start ); o.stop( t0 + start + dur + 0.02 ); };
+			if ( kind === 'smile' ) { tone( 'sine', 660, 880, 0, 0.12, 1 ); tone( 'sine', 880, 1175, 0.11, 0.16, 1 ); }
+			else if ( kind === 'giggle' ) { [ 0, 1, 2, 3, 4 ].forEach( ( i ) => tone( 'triangle', i % 2 ? 1000 : 780, i % 2 ? 900 : 1100, i * 0.075, 0.07, 0.9 ) ); }
+			else {
+				const o = c.createOscillator(), o2 = c.createOscillator(), a = c.createGain(), lfo = c.createOscillator(), lg = c.createGain(), f = c.createBiquadFilter();
+				o.type = 'sawtooth'; o2.type = 'square'; o.frequency.setValueAtTime( 120, t0 ); o.frequency.exponentialRampToValueAtTime( 70, t0 + 0.7 ); o2.frequency.setValueAtTime( 123, t0 ); o2.frequency.exponentialRampToValueAtTime( 66, t0 + 0.7 );
+				f.type = 'lowpass'; f.frequency.value = 520; lfo.frequency.value = 28; lg.gain.value = vol * 0.5; a.gain.setValueAtTime( 0.0001, t0 ); a.gain.exponentialRampToValueAtTime( vol * 0.9, t0 + 0.04 ); a.gain.exponentialRampToValueAtTime( 0.0001, t0 + 0.75 );
+				lfo.connect( lg ).connect( a.gain ); o.connect( f ); o2.connect( f ); f.connect( a ).connect( c.destination ); [ o, o2, lfo ].forEach( ( x ) => { x.start( t0 ); x.stop( t0 + 0.8 ); } );
+			}
+		} catch ( e ) { /* no sound is fine */ }
+	};
+
 	/* Poke it: a click smiles and waves, a few giggle, many make it angry and shake. */
 	const pokes = new WeakMap();
 	document.addEventListener( 'click', ( e ) => {
@@ -156,7 +180,7 @@
 		const now = performance.now(), st = pokes.get( m ) || { t: [], timer: 0 }; pokes.set( m, st );
 		st.t = st.t.filter( ( x ) => now - x < 2500 ); st.t.push( now );
 		const n = st.t.length, cls = n >= 5 ? 'angry' : n >= 3 ? 'giggle' : 'smile';
-		m.classList.remove( 'ef-poke-smile', 'ef-poke-giggle', 'ef-poke-angry' ); void m.getBoundingClientRect(); m.classList.add( 'ef-poke-' + cls );
+		F.sound( cls ); m.classList.remove( 'ef-poke-smile', 'ef-poke-giggle', 'ef-poke-angry' ); void m.getBoundingClientRect(); m.classList.add( 'ef-poke-' + cls );
 		clearTimeout( st.timer ); st.timer = setTimeout( () => m.classList.remove( 'ef-poke-smile', 'ef-poke-giggle', 'ef-poke-angry' ), cls === 'angry' ? 2400 : 1300 );
 	}, true );
 
@@ -203,7 +227,7 @@
 				<div class="ef-meta">${ chip( v ) }<span>${ esc( t( 'efPlansN', { n: sm.n } ) ) }</span></div>
 				<ul class="ef-mini-list">${ all.slice( 0, 4 ).map( ( x ) => `<li role="button" tabindex="0" data-ef-open="${ esc( x.goal.id ) }"><span class="ef-mi">${ UI.icon( x.goal.icon || 'plane', 18 ) }</span><b>${ esc( x.goal.name ) }</b>${ chip( x.verdict ) }</li>` ).join( '' ) }</ul>
 				${ all.length > 4 ? `<small>${ esc( t( 'efMorePlans', { n: all.length - 4 } ) ) }</small>` : '' }<small>${ esc( t( 'efTogether', { a: m( sm.cost ), b: m( sm.free ) } ) ) }</small></div>`;
-			const back = `<div class="wk-back ef-back"><span class="wk-ic bob">${ UI.icon( 'sparkles', 30 ) }</span><h3>${ esc( t( 'efAllPlans' ) ) }</h3>${ F.allSentences( sm ).map( ( x ) => `<p class="wk-line">${ esc( x ) }</p>` ).join( '' ) }<button type="button" class="btn btn-primary" data-ef-all="">${ esc( t( 'efOpen' ) ) }</button></div>`;
+			const back = `<div class="wk-back ef-back"><span class="wk-ic bob">${ UI.icon( 'sparkles', 30 ) }</span><h3>${ esc( t( 'efAllPlans' ) ) }</h3>${ points( F.allSentences( sm ) ) }<button type="button" class="btn btn-primary" data-ef-all="">${ esc( t( 'efOpen' ) ) }</button></div>`;
 			return `<section data-home="efriend"><div class="sec-head"><h2>${ esc( t( 'efAllPlans' ) ) }</h2><span class="sec-acts">${ EXA.flipBtn( 'efriend' ) }</span></div>${ EXA.flipCard( 'efriend', front, back, 'fc-ef' ) }</section>`;
 		}
 		const g = f.goal, have = Math.max( 0, ( f.projectedFree || 0 ) + f.saved ), pct = f.done ? 100 : f.target ? Math.min( 100, Math.round( have / f.target * 100 ) ) : 0, label = { comfortable: 'Comfortable', ontrack: 'On track', tight: 'Tight', atrisk: 'At risk', unlikely: 'Unlikely', done: 'Done' }[ f.verdict ];
@@ -211,7 +235,7 @@
 			<div class="ef-meta"><span class="ef-chip">${ label }</span><span>${ esc( t( 'efDaysLeft', { n: Math.max( 0, f.days ) } ) ) }</span></div>
 			<div class="ef-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${ pct }"><i style="width:${ pct }%"></i><span class="ef-suit" style="left:${ pct }%">${ UI.icon( g.icon || 'plane', 18 ) }</span></div>
 			<small>${ esc( t( 'efFreeOf', { a: money( have / 100, main() ), b: money( f.target / 100, main() ) } ) ) }</small></div>`;
-		const back = `<div class="wk-back ef-back"><span class="wk-ic bob">${ UI.icon( 'sparkles', 30 ) }</span><h3>${ esc( g.name ) }</h3>${ F.sentences( f ).map( ( x ) => `<p class="wk-line">${ esc( x ) }</p>` ).join( '' ) }<button type="button" class="btn btn-primary" data-ef-open="${ esc( g.id ) }">${ esc( t( 'efOpen' ) ) }</button><button type="button" class="btn btn-ghost sm" data-ef-edit="${ esc( g.id ) }">${ UI.icon( 'pencil', 18 ) } ${ esc( t( 'efEdit' ) ) }</button></div>`;
+		const back = `<div class="wk-back ef-back"><span class="wk-ic bob">${ UI.icon( 'sparkles', 30 ) }</span><h3>${ esc( g.name ) }</h3>${ points( F.sentences( f ) ) }<button type="button" class="btn btn-primary" data-ef-open="${ esc( g.id ) }">${ esc( t( 'efOpen' ) ) }</button><button type="button" class="btn btn-ghost sm" data-ef-edit="${ esc( g.id ) }">${ UI.icon( 'pencil', 18 ) } ${ esc( t( 'efEdit' ) ) }</button></div>`;
 		return `<section data-home="efriend"><div class="sec-head"><h2>${ esc( g.name ) }</h2><span class="sec-acts">${ EXA.flipBtn( 'efriend' ) }</span></div>${ EXA.flipCard( 'efriend', front, back, 'fc-ef' ) }</section>`;
 	};
 
@@ -228,11 +252,11 @@
 		UI.openSheet( `<div class="sheet-head"><h2>${ esc( g.name ) }</h2><span class="sp"></span><button type="button" class="ab-btn" data-close aria-label="${ esc( t( 'close' ) ) }">${ UI.icon( 'x', 24 ) }</button></div>
 			<div class="sheet-pad ef-sheet"><div class="ef-editrow"><button type="button" class="btn btn-ghost sm" data-ef-edit="${ esc( id ) }">${ UI.icon( 'pencil', 18 ) } ${ esc( t( 'efEdit' ) ) }</button></div><div class="ef-top">${ F.mascot( f.verdict, 84 ) }<div class="ef-bubble"><b>${ esc( pickLine( f.verdict ) ) }</b><span class="ef-chip">${ label }</span></div></div>
 			${ f.verdict === 'done' ? '' : `<ul class="ef-kv"><li><span>${ esc( t( 'efStillNeed' ) ) }</span><b>${ esc( m( f.remaining ) ) }</b></li><li><span>${ esc( t( 'efProjected' ) ) }</span><b>${ esc( m( Math.max( 0, f.projectedFree || 0 ) ) ) }</b></li><li><span>${ esc( t( 'efDays' ) ) }</span><b>${ Math.max( 0, f.days ) }</b></li><li><span>${ esc( t( 'efConfidence' ) ) }</span><b>${ esc( t( 'efConf_' + f.confidence ) ) }</b></li></ul>` }
-			${ F.sentences( f ).map( ( s ) => `<p class="wk-line">${ esc( s ) }</p>` ).join( '' ) }
-			${ suggRows ? `<h3>${ esc( t( 'efHelps' ) ) }</h3><ul class="ef-list">${ suggRows }</ul><p class="muted small">${ esc( t( 'efHelpsNote', { a: m( f.gain ) } ) ) }</p>` : '' }
-			${ alt.length ? `<h3>${ esc( t( 'efOtherWays' ) ) }</h3>${ alt.map( ( a ) => `<p class="wk-line">${ esc( a ) }</p>` ).join( '' ) }` : '' }
+			${ points( F.sentences( f ) ) }
+			${ suggRows ? `<h3>${ esc( t( 'efHelps' ) ) }</h3><ul class="ef-list">${ suggRows }</ul>${ points( [ t( 'efHelpsNote', { a: m( f.gain ) } ) ] ) }` : '' }
+			${ alt.length ? `<h3>${ esc( t( 'efOtherWays' ) ) }</h3>${ points( alt ) }` : '' }
 			${ mustRows ? `<h3>${ esc( t( 'efMustTitle' ) ) }</h3><ul class="ef-list">${ mustRows }</ul>` : '' }
-			${ catRows ? `<h3>${ esc( t( 'efSortTitle' ) ) }</h3><p class="muted small">${ esc( t( 'efSortText' ) ) }</p><ul class="ef-list">${ catRows }</ul>` : '' }
+			${ catRows ? `<h3>${ esc( t( 'efSortTitle' ) ) }</h3>${ para( 'efSortText' ) }<ul class="ef-list">${ catRows }</ul>` : '' }
 			<button type="button" class="btn btn-ghost wide" data-ef-redo="${ esc( id ) }">${ esc( t( 'efRedo' ) ) }</button><p class="muted small">${ esc( t( 'efDisclaimer' ) ) }</p></div>`, { tall: true } );
 		document.querySelector( '.ef-sheet' ).addEventListener( 'click', ( e ) => { const s = e.target.closest( '[data-ef-to]' ); if ( ! s ) return; const o = S().settings.importance = S().settings.importance || {}; o[ 'cat:' + s.dataset.efLevel ] = s.dataset.efTo; S().settings.u = Date.now(); EX.save(); EXA.openEfriend( id ); EXA.render(); } );
 	};
@@ -249,10 +273,10 @@
 			<label class="f"><span>${ esc( t( 'efPlanName' ) ) }</span><input name="pname" maxlength="60" autocomplete="off" placeholder="${ esc( t( 'efPlanNamePh' ) ) }" value="${ esc( v.name ) }"></label>
 			<div class="grid2"><label class="f"><span>${ esc( t( 'efPlanCost' ) ) } (${ esc( main() ) })</span><input name="pcost" inputmode="decimal" autocomplete="off" placeholder="0.00" value="${ esc( v.target ) }"></label>
 			<label class="f"><span>${ esc( t( 'efPlanDate' ) ) }</span><input name="pdate" type="date" value="${ esc( v.deadline || '' ) }"></label></div>
-			<label class="f"><span>${ esc( t( 'efGroupLabel' ) ) }</span><input name="pgroup" list="efGroups" maxlength="40" autocomplete="off" placeholder="${ esc( t( 'efGroupPh' ) ) }" value="${ esc( v.group || '' ) }"><datalist id="efGroups">${ F.groups().map( ( n ) => `<option value="${ esc( n ) }">` ).join( '' ) }</datalist><small class="muted">${ esc( t( 'efGroupHint' ) ) }</small></label>
+			<label class="f"><span>${ esc( t( 'efGroupLabel' ) ) }</span><input name="pgroup" list="efGroups" maxlength="40" autocomplete="off" placeholder="${ esc( t( 'efGroupPh' ) ) }" value="${ esc( v.group || '' ) }"><datalist id="efGroups">${ F.groups().map( ( n ) => `<option value="${ esc( n ) }">` ).join( '' ) }</datalist><span class="ef-hint">${ para( 'efGroupHint' ) }</span></label>
 			<div class="lbl">${ esc( t( 'goalIcon' ) ) }</div><div class="icon-pick" id="efIcons">${ PLAN_ICONS.map( ( n ) => `<button type="button" class="ipick${ v.icon === n ? ' on' : '' }" data-ef-icon="${ n }" aria-label="${ n }">${ UI.icon( n, 22 ) }</button>` ).join( '' ) }</div><input type="hidden" name="picon" value="${ esc( v.icon || 'plane' ) }">
 			<div class="lbl">${ esc( t( 'efPlanWallets' ) ) }</div><div class="chips wrap">${ ws.map( ( w ) => `<label class="chip ef-wallet"><input type="checkbox" name="gw" value="${ esc( w.id ) }"${ chosen.includes( w.id ) ? ' checked' : '' }> ${ esc( EX.accountName( w ) ) }</label>` ).join( '' ) }</div>
-			${ goals.length ? `<label class="f"><span>${ esc( t( 'efPlanLink' ) ) }</span><select name="plink"><option value="">${ esc( t( 'efPlanLinkNone' ) ) }</option>${ goals.map( ( g ) => `<option value="${ esc( g.id ) }"${ p && p.linkedGoal === g.id ? ' selected' : '' }>${ esc( g.name ) }</option>` ).join( '' ) }</select><small class="muted">${ esc( t( 'efPlanLinkHint' ) ) }</small></label>` : '' }
+			${ goals.length ? `<label class="f"><span>${ esc( t( 'efPlanLink' ) ) }</span><select name="plink"><option value="">${ esc( t( 'efPlanLinkNone' ) ) }</option>${ goals.map( ( g ) => `<option value="${ esc( g.id ) }"${ p && p.linkedGoal === g.id ? ' selected' : '' }>${ esc( g.name ) }</option>` ).join( '' ) }</select><span class="ef-hint">${ para( 'efPlanLinkHint' ) }</span></label>` : '' }
 			<p class="err" id="efErr" role="alert" hidden></p>
 			<div class="btn-row sticky-actions">${ p ? `<button type="button" class="btn btn-danger" data-ef-del="${ esc( p.id ) }">${ esc( t( 'del' ) ) }</button>` : '' }<span class="sp"></span><button type="submit" class="btn btn-primary">${ esc( t( 'saveTx' ) ) }</button></div></form>` );
 		document.getElementById( 'efPlanForm' ).dataset.id = p ? p.id : '';
@@ -292,7 +316,7 @@
 	};
 	EXA.efriendIntro = () => {
 		const d = document.createElement( 'div' ); d.className = 'ef-intro-ov'; d.setAttribute( 'role', 'dialog' ); d.setAttribute( 'aria-label', 'eFriend' );
-		d.innerHTML = `<div class="ef-intro-card">${ F.logoWord( 'play' ) }<div class="ef-hop">${ F.mascot( 'cheer', 96 ) }</div><p>${ esc( t( 'efMeetText' ) ) }</p><button type="button" class="btn btn-primary">${ esc( t( 'tutDone' ) ) }</button></div>`;
+		d.innerHTML = `<div class="ef-intro-card">${ F.logoWord( 'play' ) }<div class="ef-hop">${ F.mascot( 'cheer', 96 ) }</div>${ para( 'efMeetText' ) }<button type="button" class="btn btn-primary">${ esc( t( 'tutDone' ) ) }</button></div>`;
 		document.body.appendChild( d ); d.querySelector( 'button' ).addEventListener( 'click', () => d.remove() ); d.addEventListener( 'click', ( e ) => { if ( e.target === d ) d.remove(); } );
 		try { S().device.efIntro = 1; } catch ( e ) { /* ignore */ }
 	};
@@ -326,12 +350,12 @@
 				<div class="ef-ph-block"></div><div class="ef-ph-block short"></div></div>`
 			: `<div class="ef-phone"><div class="ef-ph-title">${ esc( t( 'barMore' ) ) }</div><div class="ef-ph-row"></div><div class="ef-ph-row"></div><div class="ef-ph-row hot"><span class="ef-ph-ic">${ UI.icon( 'sparkles', 18 ) }</span><b>eFriend</b><i class="ef-tap"></i></div><div class="ef-ph-row"></div><div class="ef-ph-row"></div></div>`;
 		const body = ( id ) => {
-			if ( id === 'meet' ) return `${ F.logoWord( 'play' ) }<div class="ef-hop">${ F.mascot( 'cheer', 110 ) }</div><p>${ esc( t( 'efMeetText' ) ) }</p>`;
-			if ( id === 'how' ) { const m = ( n ) => money( n, main() ), row = ( cls, k, v, i ) => `<li class="ef-how-${ cls }" style="--i:${ i }"><span>${ esc( t( k ) ) }</span><b>${ v }</b></li>`; return `<h2>${ esc( t( 'efObHowTitle' ) ) }</h2><ul class="ef-how">${ row( 'plus', 'efHowWallets', '+ ' + m( 900 ), 0 ) }${ row( 'plus', 'efHowIncome', '+ ' + m( 300 ), 1 ) }${ row( 'minus', 'efHowBills', '− ' + m( 300 ), 2 ) }${ row( 'minus', 'efHowSpend', '− ' + m( 350 ), 3 ) }${ row( 'total', 'efHowFree', '= ' + m( 550 ), 4 ) }<li class="ef-how-cmp" style="--i:5"><span>${ F.mascot( 'comfortable', 40 ) }</span><b>${ m( 550 ) } &gt; ${ m( 400 ) } ✓</b></li></ul><p>${ esc( t( 'efObHowText' ) ) }</p><p class="muted small">${ esc( t( 'efObHowLink' ) ) }</p>`; }
-			if ( id === 'see' ) return `<h2>${ esc( t( 'efObSeeTitle' ) ) }</h2>${ mock( 'see' ) }<p>${ esc( t( 'efObSeeText' ) ) }</p>`;
-			if ( id === 'where' ) return `<h2>${ esc( t( 'efObWhereTitle' ) ) }</h2>${ mock( 'where' ) }<p>${ esc( t( 'efObWhereText' ) ) }</p>`;
+			if ( id === 'meet' ) return `${ F.logoWord( 'play' ) }<div class="ef-hop">${ F.mascot( 'cheer', 110 ) }</div>${ para( 'efMeetText' ) }`;
+			if ( id === 'how' ) { const m = ( n ) => money( n, main() ), row = ( cls, k, v, i ) => `<li class="ef-how-${ cls }" style="--i:${ i }"><span>${ esc( t( k ) ) }</span><b>${ v }</b></li>`; return `<h2>${ esc( t( 'efObHowTitle' ) ) }</h2><ul class="ef-how">${ row( 'plus', 'efHowWallets', '+ ' + m( 900 ), 0 ) }${ row( 'plus', 'efHowIncome', '+ ' + m( 300 ), 1 ) }${ row( 'minus', 'efHowBills', '− ' + m( 300 ), 2 ) }${ row( 'minus', 'efHowSpend', '− ' + m( 350 ), 3 ) }${ row( 'total', 'efHowFree', '= ' + m( 550 ), 4 ) }<li class="ef-how-cmp" style="--i:5"><span>${ F.mascot( 'comfortable', 40 ) }</span><b>${ m( 550 ) } &gt; ${ m( 400 ) } ✓</b></li></ul>${ para( 'efObHowText' ) }${ para( 'efObHowLink' ) }`; }
+			if ( id === 'see' ) return `<h2>${ esc( t( 'efObSeeTitle' ) ) }</h2>${ mock( 'see' ) }${ para( 'efObSeeText' ) }`;
+			if ( id === 'where' ) return `<h2>${ esc( t( 'efObWhereTitle' ) ) }</h2>${ mock( 'where' ) }${ para( 'efObWhereText' ) }`;
 			const row = ( r ) => `<li data-ef-row="${ esc( r.cat ) }"><div><b>${ esc( EX.catInfo( r.cat ).name ) }</b>${ r.spent ? `<small>${ esc( money( r.spent / 100, main() ) ) }</small>` : '' }</div><div class="ef-tri" role="group" aria-label="${ esc( EX.catInfo( r.cat ).name ) }">${ LVL.map( ( l ) => `<button type="button" data-ef-set="${ l }" aria-pressed="${ pick[ r.cat ] === l }" class="${ pick[ r.cat ] === l ? 'on ' : '' }ef-l-${ l }">${ esc( t( 'ef_lvl_' + l ) ) }</button>` ).join( '' ) }</div></li>`;
-			return `<div class="ef-top">${ F.mascot( 'happy', 72 ) }<div class="ef-bubble"><b>${ esc( t( 'efOnbHi' ) ) }</b></div></div><p class="muted small">${ esc( t( 'efSortText' ) ) }</p>${ rows.length ? `<ul class="ef-list">${ rows.map( row ).join( '' ) }</ul>` : `<p class="muted">${ esc( t( 'efNoSpend' ) ) }</p>` }`;
+			return `<div class="ef-top">${ F.mascot( 'happy', 72 ) }<div class="ef-bubble"><b>${ esc( t( 'efOnbHi' ) ) }</b></div></div>${ para( 'efSortText' ) }${ rows.length ? `<ul class="ef-list">${ rows.map( row ).join( '' ) }</ul>` : `<p class="muted">${ esc( t( 'efNoSpend' ) ) }</p>` }`;
 		};
 		const finish = ( save ) => {
 			if ( save && rows.length ) { const o = S().settings.importance = S().settings.importance || {}; rows.forEach( ( r ) => { if ( pick[ r.cat ] === r.auto ) delete o[ 'cat:' + r.cat ]; else o[ 'cat:' + r.cat ] = pick[ r.cat ]; } ); S().settings.u = Date.now(); EX.save(); }
@@ -373,7 +397,7 @@
 		UI.openSheet( `<div class="sheet-head"><h2>${ esc( group || t( 'efAllPlans' ) ) }</h2><span class="sp"></span>${ X }</div>
 			<div class="sheet-pad ef-sheet"><div class="ef-top">${ F.mascot( v, 84 ) }<div class="ef-bubble"><b>${ esc( pickLine( v ) ) }</b>${ chip( v ) }</div></div>
 			<ul class="ef-kv"><li><span>${ esc( t( 'efPlansN', { n: sm.n } ) ) }</span><b>${ esc( m( sm.cost ) ) }</b></li><li><span>${ esc( t( 'efProjected' ) ) }</span><b>${ esc( m( sm.free ) ) }</b></li></ul>
-			${ F.allSentences( sm ).map( ( x ) => `<p class="wk-line">${ esc( x ) }</p>` ).join( '' ) }
+			${ points( F.allSentences( sm ) ) }
 			<h3>${ esc( t( 'efPlansByDate' ) ) }</h3><ul class="ef-list ef-plan-rows">${ rows }</ul><p class="muted small">${ esc( t( 'efOrderNote' ) ) }</p>
 			${ tips ? `<h3>${ esc( t( 'efHelps' ) ) }</h3><ul class="ef-list">${ tips }</ul>` : '' }
 			<p class="muted small">${ esc( t( 'efDisclaimer' ) ) }</p></div>`, { tall: true } );
@@ -398,9 +422,10 @@
 			return `<section class="card"><div class="ef-ghead"><h2>${ esc( head ) }</h2>${ gs ? chip( gs.verdict ) : '' }${ gs ? `<button type="button" class="btn btn-ghost sm" data-ef-all="${ esc( b.name ) }">${ esc( t( 'efAnalysisBtn' ) ) }</button>` : '' }</div><ul class="ef-list">${ b.plans.map( row ).join( '' ) }</ul></section>`;
 		};
 		const worst = all.length ? F.summary( all ) : null;
-		return `<section class="card ef-page"><div class="ef-top">${ F.mascot( 'happy', 84 ) }<div class="ef-bubble"><b>${ esc( t( 'efMeet' ) ) }</b>${ esc( t( 'efMeetText' ) ) }</div></div></section>
+		return `<section class="card ef-page"><div class="ef-top">${ F.mascot( 'happy', 84 ) }<div class="ef-bubble"><b>${ esc( t( 'efMeet' ) ) }</b></div></div>${ para( 'efMeetText' ) }</section>
 			${ overview }${ buckets.length ? buckets.map( section ).join( '' ) : `<section class="card"><h2>${ esc( t( 'efYourGoals' ) ) }</h2><p class="muted">${ esc( t( 'efNoGoals' ) ) }</p></section>` }
 			<section class="card"><div class="btn-row"><button type="button" class="btn btn-primary" data-ef-new>${ UI.icon( 'plus', 20 ) } ${ esc( t( 'efNewGoal' ) ) }</button></div></section>
+			<section class="card"><label class="fx-row"><span class="mid"><b>${ esc( t( 'efSoundTitle' ) ) }</b><small>${ esc( t( 'efSoundHint' ) ) }</small></span><span class="switch"><input type="checkbox" data-ef-sound${ S().settings.efSound !== false ? ' checked' : '' } aria-label="${ esc( t( 'efSoundTitle' ) ) }"><i></i></span></label></section>
 			<section class="card"><div class="list mlist"><button type="button" class="mrow" data-ef-sort>${ UI.ci( 'adjustments-horizontal', 'teal', 40 ) }<span class="mid"><b>${ esc( t( 'efSortTitle' ) ) }</b><small>${ esc( t( 'efSortSub' ) ) }</small></span>${ UI.icon( 'chevron-right', 18 ) }</button><button type="button" class="mrow" data-ef-intro>${ UI.ci( 'player-play', 'purple', 40 ) }<span class="mid"><b>${ esc( t( 'efReplay' ) ) }</b><small>${ esc( t( 'efReplaySub' ) ) }</small></span>${ UI.icon( 'chevron-right', 18 ) }</button></div></section>`;
 	};
 	/** The eFriend panel on the More page: the robot, what it is doing, and a way in. */
@@ -415,6 +440,7 @@
 		if ( e.target.closest( '[data-ef-intro]' ) ) { EXA.efriendOnboard(); return; }
 		const all = e.target.closest( '[data-ef-all]' ); if ( all ) { e.preventDefault(); e.stopImmediatePropagation(); const grp = all.dataset.efAll; UI.closeSheet && UI.closeSheet(); setTimeout( () => EXA.openEfriendAll( grp ), 200 ); }
 	}, true );
+	document.addEventListener( 'change', ( e ) => { if ( e.target.matches && e.target.matches( '[data-ef-sound]' ) ) { S().settings.efSound = e.target.checked; S().settings.u = Date.now(); EX.save(); if ( e.target.checked ) F.sound( 'smile' ); } } );
 	document.addEventListener( 'keydown', ( e ) => { const r = e.target.closest && e.target.closest( '[data-ef-open][role=button]' ); if ( r && ( e.key === 'Enter' || e.key === ' ' ) ) { e.preventDefault(); r.click(); } } );
 
 	/* ------------------------------------------------------------------ Progress: what eFriend can honestly show */
@@ -446,7 +472,7 @@
 		let wants = '';
 		if ( created && diff( td, created ) >= 14 ) {
 			const before = wantPerWeek( addDays( created, -28 ), created ), since = wantPerWeek( created, td );
-			if ( before.any ) { const d = Math.round( before.perWeek - since.perWeek ); wants = `<section class="card"><h2>${ esc( t( 'efRepWantsTitle' ) ) }</h2><ul class="ef-kv"><li><span>${ esc( t( 'efRepBefore' ) ) }</span><b>${ esc( m( Math.round( before.perWeek ) ) ) }</b></li><li><span>${ esc( t( 'efRepSince' ) ) }</span><b>${ esc( m( Math.round( since.perWeek ) ) ) }</b></li></ul><p class="wk-line">${ esc( d > 0 ? t( 'efRepLess', { a: m( d ) } ) : d < 0 ? t( 'efRepMore', { a: m( -d ) } ) : t( 'efRepSame' ) ) }</p><p class="muted small">${ esc( t( 'efRepNotProof' ) ) }</p></section>`; }
+			if ( before.any ) { const d = Math.round( before.perWeek - since.perWeek ); wants = `<section class="card"><h2>${ esc( t( 'efRepWantsTitle' ) ) }</h2><ul class="ef-kv"><li><span>${ esc( t( 'efRepBefore' ) ) }</span><b>${ esc( m( Math.round( before.perWeek ) ) ) }</b></li><li><span>${ esc( t( 'efRepSince' ) ) }</span><b>${ esc( m( Math.round( since.perWeek ) ) ) }</b></li></ul>${ points( [ d > 0 ? t( 'efRepLess', { a: m( d ) } ) : d < 0 ? t( 'efRepMore', { a: m( -d ) } ) : t( 'efRepSame' ), t( 'efRepNotProof' ) ] ) }</section>`; }
 		} else if ( created ) wants = `<section class="card"><h2>${ esc( t( 'efRepWantsTitle' ) ) }</h2><p class="muted">${ esc( t( 'efRepWait', { n: Math.max( 1, 14 - diff( td, created ) ) } ) ) }</p></section>`;
 		const worst = sm.firstBad, tip = worst && worst.suggestions && worst.suggestions.length ? `<section class="card"><h2>${ esc( t( 'efHelps' ) ) }</h2><ul class="ef-list">${ worst.suggestions.slice( 0, 3 ).map( ( x ) => `<li><div><b>${ esc( x.kind === 'cut' ? t( 'efCutLabel', { name: EX.catInfo( x.cat ).name } ) : t( 'efPauseLabel', { name: x.name } ) ) }</b></div><span class="ef-gain">+${ esc( m( x.gain ) ) }</span></li>` ).join( '' ) }</ul></section>` : '';
 		return `<section class="card ef-rep"><div class="ef-top">${ F.mascot( sm.verdict, 64 ) }<div class="ef-bubble"><b>${ esc( t( 'efRepHeadline', { a: fits, b: all.length } ) ) }</b>${ chip( sm.verdict ) }</div></div><ul class="ef-kv"><li><span>${ esc( t( 'efPlansN', { n: sm.n } ) ) }</span><b>${ esc( m( sm.cost ) ) }</b></li><li><span>${ esc( t( 'efProjected' ) ) }</span><b>${ esc( m( sm.free ) ) }</b></li></ul></section>
@@ -582,5 +608,36 @@
 		efRepWantsTitle: 'Έξοδα για επιθυμίες, ανά εβδομάδα', efRepBefore: 'Πριν από το πρώτο σας σχέδιο', efRepSince: 'Από τότε',
 		efRepLess: 'Ξοδεύετε περίπου {a} λιγότερα την εβδομάδα σε επιθυμίες από πριν.', efRepMore: 'Ξοδεύετε περίπου {a} περισσότερα την εβδομάδα σε επιθυμίες από πριν.', efRepSame: 'Τα έξοδά σας για επιθυμίες έμειναν περίπου ίδια.',
 		efRepNotProof: 'Πρόκειται για σύγκριση των δικών σας αριθμών και όχι απόδειξη για το τι προκάλεσε την αλλαγή.', efRepWait: 'Χρειάζομαι περίπου {n} ακόμα ημέρες ιστορικού για να συγκρίνω.',
+	} );
+	/* Readable wording: an emoji in front of each point, **bold** for the numbers, one idea per line */
+	Object.assign( window.EXPENITY_I18N.langs.en, {
+		efCost: '💶 It will cost **{a}**.\n🏦 I expect about **{b}** free by then.', efShort: '⚠️ At your current pace you would be **{a}** short.', efSpare: '🎉 At your current pace you would have **{a}** to spare.',
+		efAfter: '📅 This is after setting aside **{a}** for your earlier plans.', efOverdue: '🧾 **{a}** of overdue bills must be paid first. They come before any plan.',
+		efTipCut: '✂️ Cutting {name} by a quarter would add about **{a}**.', efTipPause: '⏸️ Pausing {name} would add about **{a}**.',
+		efAllLine: '💶 Together these need **{a}**.\n🏦 I expect about **{b}** free by {d}.', efFirstBad: '🚧 **{name}** is the first plan that does not fit.', efAllFits: '✅ Everything fits, one plan after the other.',
+		efLate: '📅 The date has passed. Edit the plan to pick a new date.', efDone: '🎉 Already covered by the money you set aside. Time to enjoy it!',
+		efAltSmaller: '🎯 Aim a little lower: about **{a}** ({p}% less) fits comfortably.', efAltLater: '🗓️ Or move the date to about **{d}**.', efHelpsNote: '💡 Together these could add about **{a}** by the date.',
+		efSortText: '🔒 **Must**: fixed and necessary\n🛒 **Need**: necessary, but you can shop smarter\n🎁 **Want**: nice to have\n👆 Tap to change any of them.',
+		efObSeeText: '🃏 A card with your plan and my verdict\n🔄 Flip it for the numbers\n🔍 Tap **Full analysis** for the details', efObWhereText: '📍 Open **More**, then **eFriend**\n📋 Your plans, the full analysis and how your spending is sorted are all there',
+		efObHowText: '🙌 No need to put any money aside\n👀 I look at your wallets, income, bills and spending habits\n✅ Then I tell you if you can afford it by the date', efObHowLink: '🔗 Optional: link a savings goal and I will count what is saved there.',
+		efMeetText: '👋 A small friend who checks whether you can afford a trip or a big purchase\n🧮 Using your wallets, bills, income and habits\n😄 Kindly, and with jokes',
+		efRepLess: '📉 You spend about **{a}** less a week on wants than before.', efRepMore: '📈 You spend about **{a}** more a week on wants than before.', efRepSame: '➖ Your spending on wants has stayed about the same.', efRepNotProof: 'ℹ️ A comparison of your own numbers, not proof of what caused the change.',
+		efPlanLinkHint: '🙌 Not needed: I work it out from your wallets, income, bills and spending habits.\n🔗 Only choose a goal if you also put money into it for this. What is saved there counts as already set aside.', efGroupHint: '🗂️ Plans in the same group are also checked together.',
+		efSoundTitle: 'Robot sounds', efSoundHint: 'Little sounds when you tap eFriend.',
+	} );
+	Object.assign( window.EXPENITY_I18N.langs.el, {
+		efCost: '💶 Θα κοστίσει **{a}**.\n🏦 Υπολογίζω περίπου **{b}** ελεύθερα μέχρι τότε.', efShort: '⚠️ Με τον τρέχοντα ρυθμό θα σας λείπουν **{a}**.', efSpare: '🎉 Με τον τρέχοντα ρυθμό θα σας περισσεύουν **{a}**.',
+		efAfter: '📅 Αυτό είναι αφού κρατηθούν **{a}** για τα προηγούμενα σχέδιά σας.', efOverdue: '🧾 Πρέπει να πληρωθούν πρώτα **{a}** εκπρόθεσμων λογαριασμών. Προηγούνται κάθε σχεδίου.',
+		efTipCut: '✂️ Αν περικόψετε το «{name}» κατά ένα τέταρτο, θα προσθέσετε περίπου **{a}**.', efTipPause: '⏸️ Αν παγώσετε το «{name}», θα προσθέσετε περίπου **{a}**.',
+		efAllLine: '💶 Μαζί χρειάζονται **{a}**.\n🏦 Υπολογίζω περίπου **{b}** ελεύθερα μέχρι {d}.', efFirstBad: '🚧 Το **«{name}»** είναι το πρώτο σχέδιο που δεν χωράει.', efAllFits: '✅ Όλα χωράνε, το ένα μετά το άλλο.',
+		efLate: '📅 Η ημερομηνία πέρασε. Επεξεργαστείτε το σχέδιο για να διαλέξετε νέα ημερομηνία.', efDone: '🎉 Καλύπτεται ήδη από τα χρήματα που έχετε βάλει στην άκρη. Ώρα να το απολαύσετε!',
+		efAltSmaller: '🎯 Στοχεύστε λίγο χαμηλότερα: περίπου **{a}** ({p}% λιγότερο) χωράει άνετα.', efAltLater: '🗓️ Ή μετακινήστε την ημερομηνία γύρω στις **{d}**.', efHelpsNote: '💡 Μαζί αυτά θα μπορούσαν να προσθέσουν περίπου **{a}** μέχρι την ημερομηνία.',
+		efSortText: '🔒 **Αναγκαίο**: σταθερό και απαραίτητο\n🛒 **Ανάγκη**: απαραίτητο, αλλά μπορείτε να ψωνίσετε εξυπνότερα\n🎁 **Επιθυμία**: καλό να υπάρχει\n👆 Πατήστε για να αλλάξετε οποιοδήποτε.',
+		efObSeeText: '🃏 Μια κάρτα με το σχέδιό σας και την εκτίμησή μου\n🔄 Αναστρέψτε την για τους αριθμούς\n🔍 Πατήστε **Πλήρης ανάλυση** για λεπτομέρειες', efObWhereText: '📍 Ανοίξτε το **Περισσότερα** και μετά το **eFriend**\n📋 Εκεί βρίσκονται τα σχέδιά σας, η πλήρης ανάλυση και ο τρόπος που ταξινομούνται τα έξοδά σας',
+		efObHowText: '🙌 Δεν χρειάζεται να βάλετε χρήματα στην άκρη\n👀 Κοιτάζω τα πορτοφόλια, τα έσοδα, τους λογαριασμούς και τις συνήθειες εξόδων σας\n✅ Μετά σας λέω αν μπορείτε να το αντέξετε μέχρι την ημερομηνία', efObHowLink: '🔗 Προαιρετικό: συνδέστε έναν στόχο αποταμίευσης και θα υπολογίσω όσα έχουν αποταμιευτεί εκεί.',
+		efMeetText: '👋 Ένας μικρός φίλος που ελέγχει αν μπορείτε να αντέξετε ένα ταξίδι ή μια μεγάλη αγορά\n🧮 Με βάση τα πορτοφόλια, τους λογαριασμούς, τα έσοδα και τις συνήθειές σας\n😄 Ευγενικά και με αστεία',
+		efRepLess: '📉 Ξοδεύετε περίπου **{a}** λιγότερα την εβδομάδα σε επιθυμίες από πριν.', efRepMore: '📈 Ξοδεύετε περίπου **{a}** περισσότερα την εβδομάδα σε επιθυμίες από πριν.', efRepSame: '➖ Τα έξοδά σας για επιθυμίες έμειναν περίπου ίδια.', efRepNotProof: 'ℹ️ Σύγκριση των δικών σας αριθμών και όχι απόδειξη για το τι προκάλεσε την αλλαγή.',
+		efPlanLinkHint: '🙌 Δεν χρειάζεται: το υπολογίζω από τα πορτοφόλια, τα έσοδα, τους λογαριασμούς και τις συνήθειες εξόδων σας.\n🔗 Διαλέξτε στόχο μόνο αν βάζετε και χρήματα σε αυτόν για αυτό. Όσα έχουν αποταμιευτεί εκεί υπολογίζονται ως ήδη στην άκρη.', efGroupHint: '🗂️ Τα σχέδια της ίδιας ομάδας ελέγχονται και μαζί.',
+		efSoundTitle: 'Ήχοι ρομπότ', efSoundHint: 'Μικροί ήχοι όταν πατάτε το eFriend.',
 	} );
 }() );

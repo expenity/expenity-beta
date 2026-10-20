@@ -239,3 +239,58 @@ document.addEventListener('toggle',event=>{
 	}, true );
 	window.addEventListener( 'resize', close ); document.addEventListener( 'scroll', ( e ) => { if ( menu && Date.now() - openedAt > 300 && ! e.target.closest?.( '.dd-menu' ) ) close(); }, true );
 }() );
+
+/* Date picker: a modern calendar instead of the browser's, on computers. Touch screens keep the phone's own date picker. */
+( function () {
+	'use strict';
+	if ( ! window.matchMedia || ! window.matchMedia( '(hover: hover) and (pointer: fine)' ).matches ) return;
+	let pop = null, input = null, view = null, cur = null, openedAt = 0;
+	const pad = ( n ) => String( n ).padStart( 2, '0' ), iso = ( d ) => `${ d.getFullYear() }-${ pad( d.getMonth() + 1 ) }-${ pad( d.getDate() ) }`;
+	const parse = ( v ) => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec( v || '' ); return m ? new Date( +m[ 1 ], +m[ 2 ] - 1, +m[ 3 ] ) : null; };
+	const T = ( k ) => ( window.EX && window.EX.t ? window.EX.t( k ) : k ), loc = () => ( window.EX && window.EX.loc ? window.EX.loc() : undefined );
+	const close = () => { if ( ! pop ) return; try { if ( pop.matches( ':popover-open' ) ) pop.hidePopover(); } catch ( e ) { /* ignore */ } pop.remove(); pop = null; if ( input ) input.classList.remove( 'dd-open' ); input = null; };
+	const inRange = ( d ) => { const lo = parse( input.min ), hi = parse( input.max ); return ( ! lo || d >= lo ) && ( ! hi || d <= hi ); };
+	const setValue = ( d ) => { const el = input; el.value = d ? iso( d ) : ''; el.dispatchEvent( new Event( 'input', { bubbles: true } ) ); el.dispatchEvent( new Event( 'change', { bubbles: true } ) ); };
+	const draw = () => {
+		const y = view.getFullYear(), m = view.getMonth(), first = new Date( y, m, 1 ), lead = ( first.getDay() + 6 ) % 7, sel = parse( input.value ), today = new Date(); today.setHours( 0, 0, 0, 0 );
+		const wd = Array.from( { length: 7 }, ( _, i ) => new Intl.DateTimeFormat( loc(), { weekday: 'short' } ).format( new Date( 2024, 0, 1 + i ) ).slice( 0, 2 ) );
+		let cells = ''; for ( let i = 0; i < 42; i++ ) { const d = new Date( y, m, 1 - lead + i ), out = d.getMonth() !== m, v = iso( d ), dis = ! inRange( d );
+			cells += `<button type="button" class="dp-day${ out ? ' out' : '' }${ sel && iso( sel ) === v ? ' sel' : '' }${ iso( today ) === v ? ' today' : '' }${ cur && iso( cur ) === v ? ' cur' : '' }" data-d="${ v }"${ dis ? ' disabled' : '' } tabindex="-1">${ d.getDate() }</button>`; }
+		const quick = [ [ 'dpToday', 0 ], [ 'dpTomorrow', 1 ], [ 'dpNextWeek', 7 ] ].map( ( [ k, n ] ) => { const d = new Date( today ); d.setDate( d.getDate() + n ); return inRange( d ) ? `<button type="button" class="dp-chip" data-q="${ iso( d ) }">${ T( k ) }</button>` : ''; } ).join( '' );
+		pop.innerHTML = `<div class="dp-head"><button type="button" class="dp-nav" data-nav="-1" aria-label="${ T( 'dpPrev' ) }">‹</button><b>${ new Intl.DateTimeFormat( loc(), { month: 'long', year: 'numeric' } ).format( view ) }</b><button type="button" class="dp-nav" data-nav="1" aria-label="${ T( 'dpNext' ) }">›</button></div>
+			<div class="dp-wd">${ wd.map( ( x ) => `<span>${ x }</span>` ).join( '' ) }</div><div class="dp-grid">${ cells }</div><div class="dp-foot">${ quick }${ input.required ? '' : `<button type="button" class="dp-chip ghost" data-clear>${ T( 'dpClear' ) }</button>` }</div>`;
+	};
+	const place = () => { const r = input.getBoundingClientRect(), h = pop.offsetHeight, below = innerHeight - r.bottom - 10, up = below < h && r.top > below; pop.style.left = Math.max( 8, Math.min( r.left, innerWidth - pop.offsetWidth - 8 ) ) + 'px'; pop.style.top = Math.max( 8, up ? r.top - h - 6 : r.bottom + 6 ) + 'px'; };
+	const open = ( el ) => {
+		close(); input = el; openedAt = Date.now(); el.classList.add( 'dd-open' ); cur = parse( el.value ) || new Date(); cur.setHours( 0, 0, 0, 0 ); view = new Date( cur.getFullYear(), cur.getMonth(), 1 );
+		pop = document.createElement( 'div' ); pop.className = 'dp'; pop.setAttribute( 'role', 'dialog' ); pop.setAttribute( 'popover', 'manual' ); ( el.closest( 'dialog' ) || document.body ).appendChild( pop );
+		draw(); try { pop.showPopover(); } catch ( e ) { /* older browsers */ } place();
+		pop.addEventListener( 'mousedown', ( e ) => e.preventDefault() );
+		pop.addEventListener( 'click', ( e ) => {
+			const n = e.target.closest( '[data-nav]' ), d = e.target.closest( '[data-d]' ), q = e.target.closest( '[data-q]' );
+			if ( n ) { view = new Date( view.getFullYear(), view.getMonth() + Number( n.dataset.nav ), 1 ); draw(); place(); return; }
+			const pick = d ? d.dataset.d : q ? q.dataset.q : null; if ( pick ) { const el2 = input; setValue( parse( pick ) ); close(); el2.focus( { preventScroll: true } ); return; }
+			if ( e.target.closest( '[data-clear]' ) ) { const el2 = input; setValue( null ); close(); el2.focus( { preventScroll: true } ); }
+		} );
+	};
+	const isDate = ( t ) => t && t.matches && t.matches( 'input[type=date]' ) && ! t.disabled && ! t.readOnly;
+	document.addEventListener( 'mousedown', ( e ) => {
+		if ( isDate( e.target ) ) { e.preventDefault(); if ( input === e.target ) close(); else { e.target.focus( { preventScroll: true } ); open( e.target ); } return; }
+		if ( pop && ! e.target.closest( '.dp' ) ) close();
+	}, true );
+	document.addEventListener( 'click', ( e ) => { if ( isDate( e.target ) ) e.preventDefault(); }, true );
+	document.addEventListener( 'keydown', ( e ) => {
+		if ( pop ) {
+			const mv = ( days, months ) => { const d = new Date( cur ); if ( months ) d.setMonth( d.getMonth() + months ); d.setDate( d.getDate() + days ); cur = d; view = new Date( d.getFullYear(), d.getMonth(), 1 ); draw(); place(); };
+			if ( e.key === 'Escape' ) { e.preventDefault(); e.stopPropagation(); const el = input; close(); el && el.focus( { preventScroll: true } ); }
+			else if ( e.key === 'ArrowLeft' ) { e.preventDefault(); mv( -1, 0 ); } else if ( e.key === 'ArrowRight' ) { e.preventDefault(); mv( 1, 0 ); }
+			else if ( e.key === 'ArrowUp' ) { e.preventDefault(); mv( -7, 0 ); } else if ( e.key === 'ArrowDown' ) { e.preventDefault(); mv( 7, 0 ); }
+			else if ( e.key === 'PageUp' ) { e.preventDefault(); mv( 0, -1 ); } else if ( e.key === 'PageDown' ) { e.preventDefault(); mv( 0, 1 ); }
+			else if ( e.key === 'Enter' ) { e.preventDefault(); if ( inRange( cur ) ) { const el = input; setValue( cur ); close(); el.focus( { preventScroll: true } ); } }
+			else if ( e.key === 'Tab' ) close();
+			return;
+		}
+		if ( isDate( e.target ) && ( e.key === 'Enter' || ( e.altKey && e.key === 'ArrowDown' ) ) ) { e.preventDefault(); open( e.target ); }
+	}, true );
+	window.addEventListener( 'resize', close ); document.addEventListener( 'scroll', ( e ) => { if ( pop && Date.now() - openedAt > 300 && ! e.target.closest?.( '.dp' ) ) close(); }, true );
+}() );

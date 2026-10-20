@@ -1,6 +1,20 @@
 {
-  "version": "0.50.3",
+  "version": "0.50.4",
   "releases": [
+    {
+      "version": "0.50.4",
+      "date": "2026-10-25",
+      "en": [
+        "eFriend makes sounds when you tap it: a happy chirp, a giggle, and a low growl when you poke it too much. You can turn them off in More, then eFriend.",
+        "A modern calendar for dates on computers, with quick Today, Tomorrow and In a week buttons. Phones keep their own date picker.",
+        "eFriend's text is now easier to read: short points with an emoji in front and the numbers in bold."
+      ],
+      "el": [
+        "Το eFriend κάνει ήχους όταν το πατάτε: ένα χαρούμενο τιτίβισμα, ένα γελάκι και ένα χαμηλό γρύλισμα αν το πειράξετε πολύ. Μπορείτε να τους απενεργοποιήσετε στο Περισσότερα, μετά eFriend.",
+        "Ένα σύγχρονο ημερολόγιο για ημερομηνίες σε υπολογιστή, με γρήγορα κουμπιά Σήμερα, Αύριο και Σε μία εβδομάδα. Τα κινητά κρατούν τον δικό τους επιλογέα ημερομηνίας.",
+        "Τα κείμενα του eFriend διαβάζονται πλέον πιο εύκολα: σύντομα σημεία με emoji μπροστά και τους αριθμούς με έντονα γράμματα."
+      ]
+    },
     {
       "version": "0.50.3",
       "date": "2026-10-24",
