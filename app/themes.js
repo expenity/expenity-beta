@@ -67,6 +67,7 @@
 		const lum = ( css ) => { cv.clearRect( 0, 0, 1, 1 ); cv.fillStyle = '#000'; cv.fillStyle = css; cv.fillRect( 0, 0, 1, 1 ); const d = cv.getImageData( 0, 0, 1, 1 ).data, f = ( c ) => { c /= 255; return c <= 0.03928 ? c / 12.92 : Math.pow( ( c + 0.055 ) / 1.055, 2.4 ); }; return 0.2126 * f( d[ 0 ] ) + 0.7152 * f( d[ 1 ] ) + 0.0722 * f( d[ 2 ] ); };
 		[ 'ok', 'warn', 'late' ].forEach( ( k ) => { const c = cs.getPropertyValue( '--' + k ).trim(); if ( ! c ) return; const L = lum( c ); root.style.setProperty( '--pill-' + k, ( 1.05 / ( L + 0.05 ) ) >= ( ( L + 0.05 ) / 0.0556 ) ? '#fff' : '#111' ); } ); // white (L 1) or near-black (L .0056): the larger contrast wins
 	};
+	EXA.setDensity = ( compact ) => { if ( compact ) root.dataset.density = 'compact'; else delete root.dataset.density; store( 'expenity.density', compact ? 'compact' : null ); };
 	EXA.setMotion = ( v ) => {
 		const d = EX.state().device; d.motion = v; EX.persist();
 		if ( v === 'auto' ) delete root.dataset.motion; else root.dataset.motion = v;
@@ -87,6 +88,7 @@
 		const mc = ( v, label, ic ) => `<button type="button" class="chip big${ mode === v ? ' on' : '' }" data-mode-set="${ v }">${ UI.icon( ic, 20 ) } ${ esc( label ) }</button>`;
 		return `<div class="theme-grid" role="radiogroup" aria-label="${ esc( t( 'themesTitle' ) ) }">${ THEMES.filter(x=>x.id!=='custom').map( ( x ) => `<div class="theme-cell">${ card( x, cur ) }${ opts.edit === false ? '' : `<button type="button" class="tc-edit" data-theme-edit="${ x.id }" aria-label="${ esc( t( 'themeEdit', { n: t( 'theme_' + x.id ) } ) ) }">${ UI.icon( 'pencil', 16 ) }</button>` }</div>` ).join( '' ) }</div>
 
+			${ cur === 'mobie' ? '' : `<label class="entry-paid fx-theme"><span><b>${ esc( t( 'compactTitle' ) ) }</b><small>${ esc( t( 'compactHint' ) ) }</small></span><span class="switch"><input type="checkbox" data-density-toggle${ root.dataset.density === 'compact' ? ' checked' : '' } aria-label="${ esc( t( 'compactTitle' ) ) }"><i></i></span></label>` }
 			${ EXA.hasThemeFx( cur ) ? `<label class="entry-paid fx-theme"><span><b>${ esc( t( 'themeFx' ) ) }</b><small>${ esc( t( 'themeFxHint' ) ) }</small></span><span class="switch"><input type="checkbox" data-fx-theme="${ cur }"${ EXA.themeFxOn( cur ) ? ' checked' : '' } aria-label="${ esc( t( 'themeFx' ) ) }"><i></i></span></label>` : '' }
 			${ th.mode ? `<div class="lbl pad0">${ esc( t( 'themeLabel' ) ) }</div><div class="chips wrap">${ mc( 'auto', t( 'themeAuto' ), 'device-mobile' ) }${ mc( 'light', t( 'themeLight' ), 'sun' ) }${ mc( 'dark', t( 'themeDark' ), 'moon' ) }</div>` : '' }`;
 	};

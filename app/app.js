@@ -12,7 +12,7 @@
 	const $ = ( s, r = document ) => r.querySelector( s );
 	const $$ = ( s, r = document ) => [ ...r.querySelectorAll( s ) ];
 	const toast = UI.toast;
-	window.EXPENITY_VERSION = '0.46.1';
+	window.EXPENITY_VERSION = '0.47.0';
 
  const seenCharacters=new Set();try{for(const skin of JSON.parse(sessionStorage.getItem('expenity.charactersSeen')||'[]'))seenCharacters.add(skin);}catch(_){}
  const characterSeen=skin=>seenCharacters.has(skin);
@@ -320,7 +320,7 @@
 			const { action, id, kind } = e.detail;
 			const rowEl = e.target.closest ? e.target.closest( '.sw' ) : null;
 			if ( rowEl && ( action === 'del' || action === 'paid' ) && motionOn() ) { rowEl.classList.add( action === 'del' ? 'leaving' : 'paid-out' ); await new Promise( ( r ) => setTimeout( r, 280 ) ); }
-			if ( kind === 'tx' ) { const x = S().txs.find( ( z ) => z.id === id ); if(action==='duplicate'&&x){EXA.duplicateRecord('tx',id);return;} if ( action === 'edit' && x ) EXA.openTx( x ); else if ( action === 'del' ) EXA.removeTx( id ); }
+			if ( kind === 'tx' ) { const x = S().txs.find( ( z ) => z.id === id ); if(action==='duplicate'&&x){EXA.duplicateRecord('tx',id);return;} if ( action === 'edit' && x ) EXA.openTx( x ); else if ( action === 'del' ) EXA.removeTx( id ); else if ( action === 'unpay' && x ) EXA.unpayTx( id ); }
 			else { const b = S().bills.find( ( z ) => z.id === id ); if(action==='duplicate'&&b){EXA.duplicateRecord('bill',id);return;} if ( action === 'paid' && b ) quickPay( b ); else if ( action === 'edit' && b ) EXA.openBill( b ); else if ( action === 'del' ) EXA.removeBill( id ); }
 		} );
 
@@ -338,6 +338,7 @@
 		} );
 		document.addEventListener( 'compositionend', ( e ) => { if ( e.target.id === 'txSearch' ) { st.txFilter.q = e.target.value; if ( ! renderSearchResults() ) render(); } } );
 		document.addEventListener( 'change', ( e ) => {
+			if ( e.target.matches && e.target.matches( '[data-density-toggle]' ) ) { EXA.setDensity( e.target.checked ); render(); return; }
 			if ( e.target.matches && e.target.matches( '[data-fx-theme]' ) ) { EXA.setThemeFx( e.target.dataset.fxTheme, e.target.checked ); render(); return; }
 			if ( EXA.repChange( e ) || EXA.shareChange( e ) || EXA.pushChange( e ) ) return;
 			const id = e.target.id;

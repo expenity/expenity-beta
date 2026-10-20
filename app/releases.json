@@ -1,6 +1,18 @@
 {
-  "version": "0.46.1",
+  "version": "0.47.0",
   "releases": [
+    {
+      "version": "0.47.0",
+      "date": "2026-10-21",
+      "en": [
+        "Compact view: a switch on the Themes page gives any theme Mobie's tighter layout, so about twice as many bills and entries fit on screen.",
+        "Swipe a paid expense to the right to mark it unpaid; it turns back into a bill, and Undo puts it back."
+      ],
+      "el": [
+        "Συμπαγής προβολή: ένας διακόπτης στη σελίδα των θεμάτων δίνει σε κάθε θέμα τη συμπαγή διάταξη του Mobie, ώστε να χωράνε περίπου διπλάσιοι λογαριασμοί και εγγραφές στην οθόνη.",
+        "Σύρετε ένα πληρωμένο έξοδο προς τα δεξιά για να το σημάνετε ως απλήρωτο· γίνεται ξανά λογαριασμός και η Αναίρεση το επαναφέρει."
+      ]
+    },
     {
       "version": "0.46.1",
       "date": "2026-10-21",

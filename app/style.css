@@ -967,3 +967,4 @@ button.bm-pill{cursor:pointer;min-height:34px;transition:transform .15s}button.b
 .bm-pill.late{background:var(--late);color:var(--pill-late,#fff)}
 .bm-pill{font-weight:800;letter-spacing:.01em}
 .bm-pill svg{stroke-width:3}
+.sw-act.unpay{background:var(--warn);color:var(--pill-warn,#fff)}

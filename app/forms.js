@@ -70,7 +70,16 @@
 		EX.save();
 		toast( t( 'tTxDeleted' ), () => { S().txs.splice( i, 0, x ); EX.save(); } );
 	}
-	Object.assign( EXA, { markPaid, skipBill, snoozeBill, removeBill, removeTx } );
+	/** Mark a plain expense as not paid: it becomes a one-time bill due on its date, and Undo puts the expense back. */
+	function unpayTx( id ) {
+		const i = S().txs.findIndex( ( x ) => x.id === id ); if ( i < 0 ) return;
+		const x = S().txs[ i ]; if ( x.type !== 'expense' || x.billId || x.goalId || x.incomeId ) return;
+		const cur = ( S().accounts.find( ( a ) => a.id === x.account ) || {} ).currency || S().settings.currency;
+		const bill = { id: uid(), name: x.name || EX.catInfo( x.category ).name, amount: x.amount, account: x.account, currency: cur, category: x.category, tags: copy( x.tags || [] ), photo: x.photo || '', repeat: 'once', next: x.date };
+		S().txs.splice( i, 1 ); S().bills.push( bill ); EX.save();
+		toast( t( 'tUnpaid' ), () => { S().bills = S().bills.filter( ( b ) => b.id !== bill.id ); S().txs.splice( i, 0, x ); EX.save(); } );
+	}
+	Object.assign( EXA, { unpayTx, markPaid, skipBill, snoozeBill, removeBill, removeTx } );
 
 	/* ------------------------------------------------------------------ Confirm */
 
