@@ -1159,7 +1159,7 @@
 	/** The chips at the start: a few ideas, an About eFriend button and a More button that opens every idea and the questions to ask him. */
 	const startChips = () => {
 		const ideas = String( t( 'efc_ideas_all' ) ).split( '|' ).map( ( l ) => ( { label: l, text: l.replace( /^[^\p{L}\p{N}]+/u, '' ) } ) );
-		if ( ! chat.more ) return setChips( ideas.slice( 0, 4 ).concat( [ { k: 'persona', topic: 'story', label: '🤖 ' + t( 'efc_c_about' ), text: t( 'efc_c_about' ) }, { k: 'more', label: '➕ ' + t( 'efc_more' ) } ] ) );
+		if ( ! chat.more ) return setChips( ideas.slice( 0, 4 ).concat( [ { k: 'persona', topic: 'story', label: '🤖 ' + t( 'efc_c_about' ), text: t( 'efc_c_about' ) }, { k: 'persona', topic: 'likes', label: '🎶 ' + t( 'efc_c_likes' ), text: t( 'efc_c_likes' ) }, { k: 'more', label: '➕ ' + t( 'efc_more' ) } ] ) );
 		const asks = String( t( 'efc_asks' ) ).split( '|' ).map( ( x ) => { const i = x.indexOf( ':' ); return { k: 'persona', topic: x.slice( 0, i ), label: x.slice( i + 1 ), text: x.slice( i + 1 ).replace( /^[^\p{L}\p{N}]+/u, '' ) }; } );
 		setChips( [ { k: 'head', label: t( 'efc_h_buy' ) } ].concat( ideas, [ { k: 'head', label: t( 'efc_h_know' ) } ], asks, [ { k: 'more', label: '➖ ' + t( 'efc_less' ) } ] ) );
 	};
@@ -1174,10 +1174,10 @@
 		const bx = document.getElementById( 'efChips' ); if ( bx ) bx.scrollTop = 0;
 	};
 	const aboutChips = () => [ { k: 'persona', topic: 'story', label: '🤖 ' + t( 'efc_c_about' ), text: t( 'efc_c_about' ) }, { k: 'persona', topic: 'likes', label: '🎶 ' + t( 'efc_c_likes' ), text: t( 'efc_c_likes' ) } ];
-	const whenChips = () => setChips( [ { by: 3, label: '🔥 ' + t( 'efc_wc1' ) }, { by: 14, label: '📅 ' + t( 'efc_wc2' ) }, { by: 30, label: '🗓️ ' + t( 'efc_wc3' ) }, { by: null, label: '🕊️ ' + t( 'efc_wc4' ) } ].concat( aboutChips() ) );
+	const whenChips = () => setChips( [ { by: 3, label: '🔥 ' + t( 'efc_wc1' ) }, { by: 14, label: '📅 ' + t( 'efc_wc2' ) }, { by: 30, label: '🗓️ ' + t( 'efc_wc3' ) }, { by: null, label: '🕊️ ' + t( 'efc_wc4' ) } ] );
 	const nextQ = async () => {
 		if ( ! chat.item ) { chat.stage = 'what'; return say( [ pool( 'efc_askwhat' ) ], { mood: 'happy' } ); }
-		if ( ! chat.cost ) { chat.stage = 'price'; await say( [ pool( 'efc_askprice' ) ], { mood: 'happy' } ); return setChips( aboutChips() ); }
+		if ( ! chat.cost ) { chat.stage = 'price'; return say( [ pool( 'efc_askprice' ) ], { mood: 'happy' } ); }
 		if ( chat.by === undefined ) { chat.stage = 'when'; await say( [ pool( 'efc_askurg' ) ], { mood: 'happy' } ); return whenChips(); }
 		return recap();
 	};
@@ -1987,7 +1987,7 @@
 	} );
 	Object.assign( window.EXPENITY_I18N.langs.el, {
 		efc_online: 'συνδεδεμένο',
-		efc_typing: 'πληκτρολογεί…',
+		efc_typing: 'γράφει…',
 		efc_hi: 'Να λοιπόν ποιος ήρθε! 👋 Τι έχετε στο μυαλό σας σήμερα; Ένα σπορ αυτοκίνητο; Ένα ταξίδι; Παπούτσια που σίγουρα δεν χρειάζεστε; Πείτε μου τα πάντα.|Γεια σας! 😄 Μετρούσα τα κέρματά σας. Μου πήρε τέσσερα δευτερόλεπτα. Τι ονειρευόμαστε σήμερα;|Ντινγκ ντονγκ! 🔔 Το eFriend είναι ανοιχτό. Τι θα θέλατε να αγοράσετε; Υπόσχομαι να μην κρίνω. Πολύ.|Ψιτ… 🤫 Σκέφτεστε να αγοράσετε κάτι; Ωραία. Ρωτήστε με πρώτα. Κοστίζω λιγότερο από τη μετάνοια.|Γεια σας! 🤖 Φρέσκιες μπαταρίες, ξυπνητό μυαλό, κομπιουτεράκι πάντα στο χέρι. Ποια είναι η φαντασίωση αγορών της ημέρας;|Πάλι εσείς! 🎉 Ο αγαπημένος μου άνθρωπος. Πείτε μου τι έχετε βάλει στο μάτι και θα σας πω αν συμφωνεί το πορτοφόλι σας.',
 		efc_pick: 'Διαλέξτε ένα ή πείτε μου με δικά σας λόγια 👇',
 		efc_ideas: '🚗 Αυτοκίνητο|✈️ Ένα ταξίδι|👟 Παπούτσια|📱 Ένα κινητό|🎁 Ένα δώρο|💻 Ένα λάπτοπ',

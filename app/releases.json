@@ -1,6 +1,20 @@
 {
-  "version": "0.54.11",
+  "version": "0.54.12",
   "releases": [
+    {
+      "version": "0.54.12",
+      "date": "2026-10-20",
+      "en": [
+        "The chat’s text box has its original look back (same height as the Send button, rounded), with the sparkle button inside it.",
+        "The “Tell me about yourself” and “What do you love?” buttons show only when you start a chat, not while eFriend interviews you (the sparkle button still has them).",
+        "In Greek, the typing status is shorter so it no longer collides with the header icons."
+      ],
+      "el": [
+        "Το πεδίο κειμένου της συζήτησης ξαναβρήκε την αρχική του όψη (ίδιο ύψος με το κουμπί Αποστολής, στρογγυλεμένο), με το κουμπί με τα αστράκια μέσα του.",
+        "Τα κουμπιά «Πες μου για σένα» και «Τι αγαπάς;» εμφανίζονται μόνο όταν ξεκινάτε συζήτηση και όχι όσο το eFriend σας παίρνει συνέντευξη (το κουμπί με τα αστράκια τα έχει ακόμα).",
+        "Στα ελληνικά, η κατάσταση πληκτρολόγησης είναι πιο σύντομη ώστε να μη συγκρούεται με τα εικονίδια της κεφαλίδας."
+      ]
+    },
     {
       "version": "0.54.11",
       "date": "2026-10-20",

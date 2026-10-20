@@ -1567,3 +1567,9 @@ input[type=date]::-webkit-datetime-edit{padding:0}
 .ef-cp .ef-cp-h { flex: none; position: relative; z-index: 3; }
 .ef-cp .ef-chat { min-height: 0; flex: 1 1 0; }
 .ef-cp .ef-chips, .ef-cp .ef-chat-in { flex: none; }
+/* the text box keeps its original look and height, with the sparkle button inside */
+.ef-cp .ef-chat-in { align-items: stretch; }
+.ef-cp .ef-inwrap { display: flex; align-self: stretch; flex: 1; min-width: 0; }
+.ef-cp .ef-inwrap input { flex: 1; width: 100%; min-height: 56px; height: auto; border-radius: 16px; padding-right: 52px; box-sizing: border-box; }
+.ef-cp-who small { white-space: nowrap; } .ef-cp-who { min-width: 0; flex: 1; }
+.ef-cp-who small { overflow: hidden; text-overflow: ellipsis; } .ef-cp-who > div { min-width: 0; }
