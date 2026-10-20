@@ -1,6 +1,18 @@
 {
-  "version": "0.51.2",
+  "version": "0.51.3",
   "releases": [
+    {
+      "version": "0.51.3",
+      "date": "2026-10-30",
+      "en": [
+        "Fixed: on Home, a plan that is Comfortable no longer shows a red chip when the overall card says Unlikely. Each plan now keeps its own colour.",
+        "New: a full announcement page for eFriend on the Expenity website, with real screens, real-life examples and a few things to play with."
+      ],
+      "el": [
+        "Διορθώθηκε: στην Αρχική, ένα σχέδιο που είναι Comfortable δεν δείχνει πια κόκκινο σήμα όταν η συνολική κάρτα λέει Unlikely. Κάθε σχέδιο κρατά πλέον το δικό του χρώμα.",
+        "Νέο: μια πλήρης σελίδα ανακοίνωσης για το eFriend στον ιστότοπο του Expenity, με πραγματικές οθόνες, παραδείγματα από την καθημερινή ζωή και μερικά πράγματα για να παίξετε."
+      ]
+    },
     {
       "version": "0.51.2",
       "date": "2026-10-29",

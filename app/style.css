@@ -1042,8 +1042,6 @@ button.bm-pill{cursor:pointer;min-height:34px;transition:transform .15s}button.b
 .ef-bubble::before{content:"";position:absolute;left:-6px;top:22px;width:12px;height:12px;background:inherit;transform:rotate(45deg)}
 .ef-meta{display:flex;justify-content:space-between;align-items:center;margin:10px 0 8px;font-size:.85rem;color:var(--muted)}
 .ef-chip{display:inline-block;padding:2px 10px;border-radius:99px;font-weight:700;font-size:.8rem;background:color-mix(in srgb,var(--ok) 22%,var(--surface));color:color-mix(in srgb,var(--ok) 36%,var(--ink));border:1px solid color-mix(in srgb,var(--ok) 40%,transparent)}
-.ef-tight .ef-chip{background:color-mix(in srgb,var(--warn) 22%,var(--surface));color:color-mix(in srgb,var(--warn) 36%,var(--ink));border-color:color-mix(in srgb,var(--warn) 40%,transparent)}
-.ef-atrisk .ef-chip,.ef-unlikely .ef-chip{background:color-mix(in srgb,var(--late) 20%,var(--surface));color:color-mix(in srgb,var(--late) 36%,var(--ink));border-color:color-mix(in srgb,var(--late) 40%,transparent)}
 .ef-bar{position:relative;height:10px;border-radius:99px;background:color-mix(in srgb,var(--accent) 14%,var(--surface));margin:14px 10px 6px 0}
 .ef-bar i{position:absolute;left:0;top:0;bottom:0;border-radius:99px;background:var(--accent);transition:width .8s}
 .ef-suit{position:absolute;top:-11px;transform:translateX(-50%);width:28px;height:28px;border-radius:50%;background:var(--surface);border:2px solid var(--accent);display:grid;place-items:center;color:var(--accent);animation:ef-bob 2.4s ease-in-out infinite}
