@@ -1,6 +1,16 @@
 {
-  "version": "0.54.8",
+  "version": "0.54.9",
   "releases": [
+    {
+      "version": "0.54.9",
+      "date": "2026-10-20",
+      "en": [
+        "A little surprise: about one chat in ten, if your name is George, Olga or Danae (or Giorgos, Georgios, in Greek too), eFriend is thrilled and tells you why."
+      ],
+      "el": [
+        "Μια μικρή έκπληξη: περίπου σε μία συζήτηση στις δέκα, αν το όνομά σας είναι George, Olga ή Danae (ή Γιώργος, Γεώργιος, Όλγα, Δανάη), το eFriend ενθουσιάζεται και σας λέει γιατί."
+      ]
+    },
     {
       "version": "0.54.8",
       "date": "2026-10-20",

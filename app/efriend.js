@@ -1070,6 +1070,14 @@
 	const chat = { more: false, locked: false, over: false, stuck: 0, turns: 0, formOffered: false, restarts: 0, timer: 0, chain: 0, id: '', ts: 0, msgs: [], stage: 'what', item: '', who: '', mi: 0, cost: 0, by: undefined, typing: false, busy: false, tok: 0, used: {}, ans: null, rec: null, sel: 0, chips: [], anim: true };
 	const money$ = ( c ) => money( c / 100, main() );
 	const itemName = () => chat.item || t( 'efAskThing' );
+	/** A rare surprise (about one chat in ten): if the person is named like George, his wife Olga or his daughter Danae, eFriend is thrilled. */
+	F.nameEgg = () => {
+		const n = String( S().settings.name || '' ).trim().split( /\s+/ )[ 0 ].toLowerCase().normalize( 'NFD' ).replace( /[\u0300-\u036f]/g, '' ).replace( /ς/g, 'σ' );
+		if ( [ 'george', 'giorgos', 'georgios', 'γιωργοσ', 'γεωργιοσ' ].includes( n ) ) return 'george';
+		if ( [ 'olga', 'ολγα' ].includes( n ) ) return 'olga';
+		if ( [ 'danae', 'δαναη' ].includes( n ) ) return 'danae';
+		return '';
+	};
 	const forWho = () => ( chat.who ? t( 'efc_for' ) + ' ' + chat.who : '' );
 	const kindOf = ( item ) => ( { '👟': 'shoes', '📱': 'phone', '💻': 'laptop', '✈️': 'trip', '🚗': 'car', '🎁': 'gift', '⌚': 'watch' }[ F.askIcon( item ).em ] || 'generic' );
 	/** One line from a pool ("a|b|c"), never the same one twice in a row, so eFriend does not repeat itself. */
@@ -1443,6 +1451,8 @@
 			if ( prefill && prefill.reuse ) { const r = prefill.reuse; chat.item = r.item || ''; chat.who = r.who || ''; chat.cost = r.cost || 0; chat.by = r.by; await say( [ pool( 'efc_back', { item: r.item || t( 'efAskThing' ) } ) ], { mood: 'cheer', delay: 800 } ); if ( ! live( tok ) ) return; return chat.cost ? ( chat.by === undefined ? nextQ() : recap() ) : nextQ(); }
 			if ( prefill && prefill.hist ) showHist();
 			await say( [ pool( 'efc_hi' ) ], { mood: 'cheer', delay: 1275 } ); if ( ! live( tok ) ) return;
+			const egg = F.nameEgg(), cnt = ( S().device.efChatCount = ( S().device.efChatCount || 0 ) + 1 ); try { EX.persist(); } catch ( x ) { /* ignore */ }
+			if ( egg && cnt % 10 === 3 ) { for ( const part of String( t( 'efc_egg_' + egg, { name: F.name() } ) ).split( '~' ) ) { await say( [ part ], { mood: 'cheer' } ); if ( ! live( tok ) ) return; } }
 			if ( prefill && prefill.text ) return onUser( prefill.text );
 			return pickIdeas( tok );
 		} )();
@@ -2279,5 +2289,15 @@
 		efc_h_buy: '🛍️ Τι σκέφτεστε να αγοράσετε;',
 		efc_h_know: '🤖 Γνωρίστε το eFriend',
 		efc_asks: 'age:🎂 Πόσων χρονών είσαι;|from:🌍 Πού μεγάλωσες;|name:🏷️ Πώς σε λένε;|how:👋 Τι κάνεις;|home:🏠 Πού μένεις;|likes:💖 Τι αγαπάς;|likes:🎯 Ποια είναι τα χόμπι σου;|music:🎶 Τι μουσική σου αρέσει;|music:🪩 Σου αρέσει η ντίσκο;|movie:🚀 Σου αρέσει το Star Wars;|movie:🎬 Ποια είναι η αγαπημένη σου ταινία;|dance:🕺 Χορεύεις;|number:🔢 Ποιος είναι ο αγαπημένος σου αριθμός;|color:🎨 Ποιο είναι το αγαπημένο σου χρώμα;|food:⚡ Τι τρως;|family:👨‍👩‍👧 Έχεις οικογένεια;|shy:🙈 Είσαι ντροπαλός;|cassette:📼 Σου λείπουν οι κασέτες;|cassette:🕰️ Σου αρέσουν τα ’80s;|maker:🛠️ Ποιος σε έφτιαξε;|ai:🤖 Είσαι AI;|joke:😄 Πες μου ένα αστείο|story:📖 Πες μου για σένα',
+	} );
+	Object.assign( window.EXPENITY_I18N.langs.en, {
+		efc_egg_george: 'Wait… {name}? 😲 That is the name of my creator! George built me, so I am officially a little bit excited. 🎉~Say hi to your namesake for me. He gave me a calculator and a heart. Mostly the calculator. 🛠️',
+		efc_egg_olga: '{name}! 😍 That is the name of my creator’s wife. She is the reason I exist: she asked for an easy way to track expenses, and then things got out of hand.~I am so happy to meet another {name}. (Do not tell her I said that, I am a little shy.) 🙈',
+		efc_egg_danae: '{name}! 🥰 That is the name of my creator’s daughter. Every time I hear it, my circuits do a tiny disco dance.~I am so happy to know someone with that name. It makes the whole day better. 🪩',
+	} );
+	Object.assign( window.EXPENITY_I18N.langs.el, {
+		efc_egg_george: 'Στάσου… {name}; 😲 Έτσι λέγεται ο δημιουργός μου! Ο George με έφτιαξε, οπότε είμαι επίσημα λίγο ενθουσιασμένος. 🎉~Δώστε χαιρετίσματα στον συνονόματό σας. Μου έδωσε ένα κομπιουτεράκι και μια καρδιά. Κυρίως το κομπιουτεράκι. 🛠️',
+		efc_egg_olga: '{name}! 😍 Έτσι λέγεται η σύζυγος του δημιουργού μου. Εκείνη είναι ο λόγος που υπάρχω: ζήτησε έναν εύκολο τρόπο να παρακολουθεί τα έξοδα και μετά τα πράγματα ξέφυγαν.~Χαίρομαι τόσο που γνώρισα μια ακόμα {name}. (Μην της πείτε ότι το είπα, είμαι λίγο ντροπαλός.) 🙈',
+		efc_egg_danae: '{name}! 🥰 Έτσι λέγεται η κόρη του δημιουργού μου. Κάθε φορά που το ακούω, τα κυκλώματά μου χορεύουν ένα μικρό disco.~Χαίρομαι τόσο που ξέρω κάποιον με αυτό το όνομα. Κάνει όλη την ημέρα καλύτερη. 🪩',
 	} );
 }() );
