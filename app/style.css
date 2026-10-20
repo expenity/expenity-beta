@@ -1555,3 +1555,8 @@ input[type=date]::-webkit-datetime-edit{padding:0}
 .ef-an { animation: ef-fade 1s both; }
 .ef-qform { display: grid; gap: 10px; min-width: 240px; } .ef-qnr { display: flex; align-items: center; gap: 8px; } .ef-chat-in input:disabled { opacity: .6; }
 .ef-lowlist { margin-top: 6px; } .ef-lowlist summary { cursor: pointer; font-weight: 700; } .ef-lowlist ul { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 8px; } .ef-lowrow { display: flex; align-items: center; gap: 10px; } .ef-lowtx { flex: 1; min-width: 0; } .ef-lowtx small { display: block; color: var(--muted, #8a7568); }
+
+.ef-qform input[type=date] { display: block; width: 100%; max-width: 100%; min-width: 0; box-sizing: border-box; min-height: 48px; -webkit-appearance: none; appearance: none; }
+.ef-qform .f { min-width: 0; } .ef-qform { width: 100%; box-sizing: border-box; }
+.ef-qdates { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; } .ef-chipq.sm { padding: 6px 12px; font-size: .85rem; animation: none; }
+.ef-cp-skip { font-size: 1.25rem; }

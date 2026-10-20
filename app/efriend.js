@@ -1109,7 +1109,7 @@
 	};
 	const live = ( tok ) => tok === chat.tok && document.getElementById( 'efChat' );
 
-	const formCard = () => `<form id="efQForm" class="ef-qform" novalidate autocomplete="off"><label class="f"><span>${ esc( t( 'efAskWhat' ) ) }</span><input name="what" autocomplete="off" value="${ esc( chat.item ) }"></label><label class="f"><span>${ esc( t( 'efAskHow' ) ) } (${ esc( main() ) })</span><input name="cost" inputmode="decimal" autocomplete="off" placeholder="${ zeroPh() }" value="${ chat.cost ? esc( fmtCents( chat.cost ) ) : '' }"></label><label class="f"><span>${ esc( t( 'efc_f_when' ) ) }</span><input type="date" name="when" min="${ today() }"></label><label class="ef-qnr"><input type="checkbox" name="norush"> ${ esc( t( 'efc_wc4' ) ) }</label><p class="err" id="efQErr" role="alert" hidden></p><button type="submit" class="btn btn-primary wide">✅ ${ esc( t( 'efc_f_go' ) ) }</button></form>`;
+	const formCard = () => `<form id="efQForm" class="ef-qform" novalidate autocomplete="off"><label class="f"><span>${ esc( t( 'efAskWhat' ) ) }</span><input name="what" autocomplete="off" value="${ esc( chat.item ) }"></label><label class="f"><span>${ esc( t( 'efAskHow' ) ) } (${ esc( main() ) })</span><input name="cost" inputmode="decimal" autocomplete="off" placeholder="${ zeroPh() }" value="${ chat.cost ? esc( fmtCents( chat.cost ) ) : '' }"></label><label class="f"><span>${ esc( t( 'efc_f_when' ) ) }</span><input type="date" name="when" min="${ today() }"><span class="ef-qdates">${ [ 7, 14, 30, 90 ].map( ( n ) => `<button type="button" class="ef-chipq sm" data-ef-qdate="${ n }">${ esc( t( 'efc_qd' + n ) ) }</button>` ).join( '' ) }</span></label><label class="ef-qnr"><input type="checkbox" name="norush"> ${ esc( t( 'efc_wc4' ) ) }</label><p class="err" id="efQErr" role="alert" hidden></p><button type="submit" class="btn btn-primary wide">✅ ${ esc( t( 'efc_f_go' ) ) }</button></form>`;
 	const bubble = ( x ) => x.form ? `<div class="ef-msg ef wide" data-form-msg><span class="ef-av">${ F.icon( 30 ) }</span><div class="ef-mb">${ formCard() }</div></div>` : x.who === 'me'
 		? `<div class="ef-msg me"><div class="ef-mb">${ esc( x.text ) }</div></div>`
 		: `<div class="ef-msg ef"><span class="ef-av">${ F.icon( 30 ) }</span><div class="ef-mb">${ x.lines.map( ( l ) => `<p class="ef-ml">${ rich( l ) }</p>` ).join( '' ) }</div></div>`;
@@ -1243,11 +1243,13 @@
 		if ( chat.over || chat.busy || chat.stage === 'done' || chat.stage === 'confirm' || chat.formOffered ) return;
 		if ( chat.stuck >= 2 || chat.turns >= 7 ) await offerForm();
 	};
-	const showForm = async () => {
-		if ( chat.busy || chat.over ) return; chat.busy = true; const tok = chat.tok; chat.chain = tok;
+	const showForm = async ( force ) => {
+		if ( chat.over || ( chat.busy && ! force ) ) return;
+		if ( force ) { chat.tok++; chat.typing = false; hideTyping(); setChips( [] ); const old = document.getElementById( 'efQForm' ); if ( old ) { old.scrollIntoView( { block: 'center' } ); chat.busy = false; return; } }
+		chat.busy = true; const tok = chat.tok; chat.chain = tok;
 		try {
-			const mm = { who: 'me', text: '📝 ' + t( 'efc_f_chip' ) }; chat.msgs.push( mm ); appendMsg( mm ); setChips( [] ); scrollEnd(); await wait( 500 );
-			await say( [ pool( 'efc_f_ask' ) ], { mood: 'cheer' } ); if ( ! live( tok ) ) return;
+			if ( ! force ) { const mm = { who: 'me', text: '📝 ' + t( 'efc_f_chip' ) }; chat.msgs.push( mm ); appendMsg( mm ); setChips( [] ); scrollEnd(); await wait( 500 ); }
+			await say( [ pool( 'efc_f_ask' ) ], { mood: 'cheer', delay: force ? 600 : undefined } ); if ( ! live( tok ) ) return;
 			const fm = { who: 'ef', form: true, lines: [] }; chat.msgs.push( fm ); appendMsg( fm ); scrollEnd();
 			const first = document.querySelector( '#efQForm input[name=what]' ); if ( first && ! reduceMotion() ) first.focus( { preventScroll: true } );
 		} finally { if ( tok === chat.tok ) chat.busy = false; }
@@ -1256,6 +1258,12 @@
 		if ( chat.busy || chat.over ) return; chat.busy = true; const tok = chat.tok; chat.chain = tok;
 		try { const mm = { who: 'me', text: '💬 ' + t( 'efc_f_keep' ) }; chat.msgs.push( mm ); appendMsg( mm ); setChips( [] ); scrollEnd(); chat.stuck = -3; chat.turns = 0; await wait( 500 ); await say( [ pool( 'efc_f_keepsay' ) ], { mood: 'cheer' } ); } finally { if ( tok === chat.tok ) chat.busy = false; }
 	};
+	document.addEventListener( 'change', ( e ) => {
+		const f = e.target.closest && e.target.closest( '#efQForm' ); if ( ! f ) return;
+		if ( e.target.name === 'when' && e.target.value ) f.elements.norush.checked = false;
+		if ( e.target.name === 'norush' ) { f.elements.when.disabled = e.target.checked; if ( e.target.checked ) f.elements.when.value = ''; }
+	} );
+	document.addEventListener( 'input', ( e ) => { const f = e.target.closest && e.target.closest( '#efQForm' ); if ( f && e.target.name === 'when' && e.target.value ) f.elements.norush.checked = false; } );
 	document.addEventListener( 'submit', async ( e ) => {
 		const f = e.target; if ( f.id !== 'efQForm' ) return; e.preventDefault();
 		if ( chat.busy || chat.over ) return;
@@ -1266,7 +1274,7 @@
 			chat.item = what.charAt( 0 ).toUpperCase() + what.slice( 1 ); chat.cost = cost; chat.who = ''; chat.by = norush || ! when ? null : Math.max( 0, diff( when, today() ) );
 			const node = f.closest( '.ef-msg' ), idx = chat.msgs.findIndex( ( x ) => x.form ); if ( idx >= 0 ) chat.msgs[ idx ] = { who: 'me', text: `${ chat.item } · ${ money$( cost ) } · ${ whenWords( chat.by ) }` };
 			if ( node ) node.outerHTML = bubble( chat.msgs[ idx ] ); scrollEnd(); saveChat(); chat.stuck = 0; await wait( 500 );
-			await say( [ pool( 'efc_f_ok' ) ], { mood: 'cheer' } ); if ( ! live( tok ) ) return; await recap();
+			chat.busy = false; await finish();
 		} finally { if ( tok === chat.tok ) chat.busy = false; }
 	} );
 	/** Time is up (five minutes), or the app was closed mid-chat: eFriend falls asleep, and says so. */
@@ -1405,7 +1413,7 @@
 	EXA.efriendAskOpen = ( prefill ) => {
 		closeChat(); Object.assign( chat, { stuck: 0, turns: 0, formOffered: false, over: false, restarts: 0, id: EX.uid(), ts: Date.now(), msgs: [], stage: 'what', item: '', who: '', mi: 0, cost: 0, by: undefined, typing: false, busy: false, ans: null, rec: null, sel: 0, chips: [], used: {}, anim: true } );
 		const ov = document.createElement( 'div' ); ov.className = 'ef-cp'; ov.setAttribute( 'role', 'dialog' ); ov.setAttribute( 'aria-modal', 'true' ); ov.setAttribute( 'aria-label', 'eFriend' );
-		ov.innerHTML = `<header class="ef-cp-h"><button type="button" class="ab-btn" data-ef-cpx aria-label="${ esc( t( 'close' ) ) }">${ UI.icon( 'x', 24 ) }</button><div class="ef-cp-who"><span class="ef-cp-av">${ F.mascot( 'happy', 46 ) }</span><div><b>eFriend</b><small id="efCpStat">${ esc( t( 'efc_online' ) ) }</small></div></div><button type="button" class="ab-btn ef-cp-clear" data-ef-clear aria-label="${ esc( t( 'efc_clear' ) ) }" title="${ esc( t( 'efc_clear' ) ) }">🧹</button><button type="button" class="ab-btn ef-cp-hist" data-ef-hist aria-label="${ esc( t( 'efc_h_title' ) ) }" title="${ esc( t( 'efc_h_title' ) ) }">🕘</button></header>
+		ov.innerHTML = `<header class="ef-cp-h"><button type="button" class="ab-btn" data-ef-cpx aria-label="${ esc( t( 'close' ) ) }">${ UI.icon( 'x', 24 ) }</button><div class="ef-cp-who"><span class="ef-cp-av">${ F.mascot( 'happy', 46 ) }</span><div><b>eFriend</b><small id="efCpStat">${ esc( t( 'efc_online' ) ) }</small></div></div><button type="button" class="ab-btn ef-cp-skip" data-ef-skip aria-label="${ esc( t( 'efc_skip' ) ) }" title="${ esc( t( 'efc_skip' ) ) }">📝</button><button type="button" class="ab-btn ef-cp-clear" data-ef-clear aria-label="${ esc( t( 'efc_clear' ) ) }" title="${ esc( t( 'efc_clear' ) ) }">🧹</button><button type="button" class="ab-btn ef-cp-hist" data-ef-hist aria-label="${ esc( t( 'efc_h_title' ) ) }" title="${ esc( t( 'efc_h_title' ) ) }">🕘</button></header>
 			<div id="efChat" class="ef-chat" aria-live="polite"></div><div class="ef-chips" id="efChips"></div>
 			<form id="efChatForm" class="ef-chat-in" novalidate autocomplete="off"><input name="q" id="efChatQ" autocomplete="off" enterkeyhint="send" placeholder="${ esc( t( 'efAskPh' ) ) }" aria-label="${ esc( t( 'efAskQ' ) ) }"><button type="submit" class="btn btn-primary" aria-label="${ esc( t( 'efAskGo' ) ) }">➤</button></form>`;
 		document.body.appendChild( ov ); document.body.classList.add( 'ef-ob-open' );
@@ -1437,6 +1445,8 @@
 		if ( tg.closest( '[data-ef-ask]' ) ) { e.preventDefault(); EXA.efriendAskOpen(); return; }
 		if ( tg.closest( '[data-ef-cpx]' ) ) { closeChat(); return; }
 		if ( tg.closest( '[data-ef-clear]' ) ) { restartChat(); return; }
+		if ( tg.closest( '[data-ef-skip]' ) ) { showForm( true ); return; }
+		const qd = tg.closest( '[data-ef-qdate]' ); if ( qd ) { const f = document.getElementById( 'efQForm' ); if ( f ) { f.elements.norush.checked = false; f.elements.when.disabled = false; f.elements.when.value = addDays( today(), Number( qd.dataset.efQdate ) ); } return; }
 		if ( tg.closest( '[data-ef-hist]' ) ) { showHist(); return; }
 		if ( tg.closest( '[data-ef-hist-open]' ) ) { e.preventDefault(); EXA.efriendAskOpen( { hist: true } ); return; }
 		if ( tg.closest( '[data-ef-hback]' ) ) { const open = document.querySelector( '.ef-hist .ef-hist-chat' ); if ( open ) showHist(); else hideHist(); return; }
@@ -2207,5 +2217,23 @@
 		efLowList: 'Πληρωμές μέχρι τότε',
 		efLowMoveBill: 'Μετακίνηση',
 		efLowMovePlan: 'Μετακίνηση',
+	} );
+	Object.assign( window.EXPENITY_I18N.langs.en, {
+		efc_skip: 'Skip the chat and fill in a form',
+	} );
+	Object.assign( window.EXPENITY_I18N.langs.el, {
+		efc_skip: 'Παράλειψη συζήτησης και συμπλήρωση φόρμας',
+	} );
+	Object.assign( window.EXPENITY_I18N.langs.en, {
+		efc_qd7: 'In 1 week',
+		efc_qd14: 'In 2 weeks',
+		efc_qd30: 'In 1 month',
+		efc_qd90: 'In 3 months',
+	} );
+	Object.assign( window.EXPENITY_I18N.langs.el, {
+		efc_qd7: 'Σε 1 εβδομάδα',
+		efc_qd14: 'Σε 2 εβδομάδες',
+		efc_qd30: 'Σε 1 μήνα',
+		efc_qd90: 'Σε 3 μήνες',
 	} );
 }() );

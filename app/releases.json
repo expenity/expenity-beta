@@ -1,6 +1,20 @@
 {
-  "version": "0.54.4",
+  "version": "0.54.5",
   "releases": [
+    {
+      "version": "0.54.5",
+      "date": "2026-10-20",
+      "en": [
+        "Chat form: picking a date turns No rush off, turning No rush on clears and disables the date, and quick dates (1 week, 2 weeks, 1 month, 3 months) fill it in one tap. The date field also sizes properly on phones.",
+        "After the form, eFriend no longer asks you to confirm: it goes straight to the calculation.",
+        "A new icon at the top of the chat (the note) skips the chat at any time, even right when it opens, so you can just fill in the form."
+      ],
+      "el": [
+        "Φόρμα συζήτησης: η επιλογή ημερομηνίας απενεργοποιεί το «Καμία βιασύνη», η ενεργοποίηση του «Καμία βιασύνη» καθαρίζει και απενεργοποιεί την ημερομηνία και οι γρήγορες ημερομηνίες (1 εβδομάδα, 2 εβδομάδες, 1 μήνας, 3 μήνες) τη συμπληρώνουν με ένα πάτημα. Το πεδίο ημερομηνίας έχει πλέον σωστό μέγεθος στο κινητό.",
+        "Μετά τη φόρμα, το eFriend δεν ζητά πια επιβεβαίωση: πηγαίνει κατευθείαν στον υπολογισμό.",
+        "Ένα νέο εικονίδιο στην κορυφή της συζήτησης (το σημείωμα) την παραλείπει οποιαδήποτε στιγμή, ακόμα και μόλις ανοίξει, ώστε να συμπληρώσετε απλώς τη φόρμα."
+      ]
+    },
     {
       "version": "0.54.4",
       "date": "2026-10-20",
