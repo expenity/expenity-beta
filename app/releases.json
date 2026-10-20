@@ -1,6 +1,16 @@
 {
-  "version": "0.54.5",
+  "version": "0.54.6",
   "releases": [
+    {
+      "version": "0.54.6",
+      "date": "2026-10-20",
+      "en": [
+        "Get to know eFriend: two buttons in the chat, “Tell me about yourself” and “What do you love?”, start a chat about him at any moment, even while he waits for a price. You can also just ask: “how old are you?”, “do you like Star Wars?”, “where did you grow up?”, “who made you?”."
+      ],
+      "el": [
+        "Γνωρίστε το eFriend: δύο κουμπιά στη συζήτηση, «Πες μου για σένα» και «Τι αγαπάς;», ξεκινούν συζήτηση γι' αυτόν οποιαδήποτε στιγμή, ακόμα και όταν περιμένει μια τιμή. Μπορείτε και να ρωτήσετε απλά: «πόσων χρονών είσαι;», «σου αρέσει το Star Wars;», «πού μεγάλωσες;», «ποιος σε έφτιαξε;»."
+      ]
+    },
     {
       "version": "0.54.5",
       "date": "2026-10-20",

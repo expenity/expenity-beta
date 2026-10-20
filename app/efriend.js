@@ -1144,10 +1144,11 @@
 		await say( [ pool( 'efc_recap' ), `${ F.askIcon( chat.item ).em } **${ itemName() }**${ chat.who ? ' ' + forWho() : '' } · **${ money$( chat.cost ) }** · ${ whenWords( chat.by ) }`, pool( 'efc_right' ) ], { mood: 'happy' } );
 		setChips( [ { k: 'yes', label: '✅ ' + t( 'efc_yes' ) }, { k: 'fix', label: '✏️ ' + t( 'efChatFix' ) } ] );
 	};
-	const whenChips = () => setChips( [ { by: 3, label: '🔥 ' + t( 'efc_wc1' ) }, { by: 14, label: '📅 ' + t( 'efc_wc2' ) }, { by: 30, label: '🗓️ ' + t( 'efc_wc3' ) }, { by: null, label: '🕊️ ' + t( 'efc_wc4' ) } ] );
+	const aboutChips = () => [ { k: 'persona', topic: 'story', label: '🤖 ' + t( 'efc_c_about' ), text: t( 'efc_c_about' ) }, { k: 'persona', topic: 'likes', label: '🎶 ' + t( 'efc_c_likes' ), text: t( 'efc_c_likes' ) } ];
+	const whenChips = () => setChips( [ { by: 3, label: '🔥 ' + t( 'efc_wc1' ) }, { by: 14, label: '📅 ' + t( 'efc_wc2' ) }, { by: 30, label: '🗓️ ' + t( 'efc_wc3' ) }, { by: null, label: '🕊️ ' + t( 'efc_wc4' ) } ].concat( aboutChips() ) );
 	const nextQ = async () => {
 		if ( ! chat.item ) { chat.stage = 'what'; return say( [ pool( 'efc_askwhat' ) ], { mood: 'happy' } ); }
-		if ( ! chat.cost ) { chat.stage = 'price'; return say( [ pool( 'efc_askprice' ) ], { mood: 'happy' } ); }
+		if ( ! chat.cost ) { chat.stage = 'price'; await say( [ pool( 'efc_askprice' ) ], { mood: 'happy' } ); return setChips( aboutChips() ); }
 		if ( chat.by === undefined ) { chat.stage = 'when'; await say( [ pool( 'efc_askurg' ) ], { mood: 'happy' } ); return whenChips(); }
 		return recap();
 	};
@@ -1193,7 +1194,7 @@
 			{ const m = { who: 'me', text }; chat.msgs.push( m ); appendMsg( m ); saveChat(); } setChips( [] ); scrollEnd(); await wait( 600 ); if ( ! live( tok ) ) return;
 			const st = chat.stage;
 			// eFriend answers about himself from his own story; anything else he cannot answer gets the retro joke
-			const asksCost = F.parseAsk( stripWhen( text ) ).cost, topic = ! chip && ! asksCost && ! F.parseWhen( text ) ? personaTopic( text ) : null;
+			const asksCost = F.parseAsk( stripWhen( text ) ).cost, topic = chip && chip.k === 'persona' ? chip.topic : ! chip && ! asksCost && ! F.parseWhen( text ) ? personaTopic( text ) : null;
 			if ( topic ) {
 				if ( topic === 'story' ) await sayStory(); else await say( [ pool( 'efc_p_' + topic ) ], { mood: 'cheer', delay: 1500 } );
 				if ( ! live( tok ) ) return;
@@ -1397,7 +1398,7 @@
 
 	const pickIdeas = async ( tok ) => {
 		await say( [ t( 'efc_pick' ) ], { mood: 'happy', delay: 1020 } ); if ( ! live( tok ) ) return;
-		setChips( String( t( 'efc_ideas' ) ).split( '|' ).map( ( l ) => ( { label: l, text: l.replace( /^[^\p{L}\p{N}]+/u, '' ) } ) ) );
+		setChips( String( t( 'efc_ideas' ) ).split( '|' ).map( ( l ) => ( { label: l, text: l.replace( /^[^\p{L}\p{N}]+/u, '' ) } ) ).concat( aboutChips() ) );
 		const q = document.getElementById( 'efChatQ' ); if ( q && ! reduceMotion() ) q.focus( { preventScroll: true } );
 	};
 	/** "Start over": the chat is wiped (the old one stays in the history) and eFriend jokes about it. */
@@ -2235,5 +2236,13 @@
 		efc_qd14: 'Σε 2 εβδομάδες',
 		efc_qd30: 'Σε 1 μήνα',
 		efc_qd90: 'Σε 3 μήνες',
+	} );
+	Object.assign( window.EXPENITY_I18N.langs.en, {
+		efc_c_about: 'Tell me about yourself',
+		efc_c_likes: 'What do you love?',
+	} );
+	Object.assign( window.EXPENITY_I18N.langs.el, {
+		efc_c_about: 'Πες μου για σένα',
+		efc_c_likes: 'Τι αγαπάς;',
 	} );
 }() );
