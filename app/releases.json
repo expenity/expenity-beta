@@ -1,6 +1,16 @@
 {
-  "version": "0.46.0",
+  "version": "0.46.1",
   "releases": [
+    {
+      "version": "0.46.1",
+      "date": "2026-10-21",
+      "en": [
+        "Editing a saved expense now has a Paid switch. Turn it off to turn the expense into a bill that is due."
+      ],
+      "el": [
+        "Η επεξεργασία ενός αποθηκευμένου εξόδου έχει πλέον διακόπτη Πληρωμένο. Απενεργοποιήστε τον για να γίνει το έξοδο λογαριασμός προς πληρωμή."
+      ]
+    },
     {
       "version": "0.46.0",
       "date": "2026-10-21",
