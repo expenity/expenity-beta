@@ -1,6 +1,16 @@
 {
-  "version": "0.54.3",
+  "version": "0.54.4",
   "releases": [
+    {
+      "version": "0.54.4",
+      "date": "2026-10-20",
+      "en": [
+        "The warning on Home now has a list of the payments and plans before the day your money runs short, each with its date, its amount and a Move button that opens it, so you can act right away."
+      ],
+      "el": [
+        "Η προειδοποίηση στην Αρχική έχει πλέον λίστα με τις πληρωμές και τα σχέδια πριν από την ημέρα που τα χρήματα θα τελειώσουν, με ημερομηνία, ποσό και κουμπί Μετακίνηση που τα ανοίγει, ώστε να ενεργήσετε αμέσως."
+      ]
+    },
     {
       "version": "0.54.3",
       "date": "2026-10-20",

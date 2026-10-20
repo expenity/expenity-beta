@@ -1554,3 +1554,4 @@ input[type=date]::-webkit-datetime-edit{padding:0}
 .ef-cp.fading > *:not(.ef-an) { opacity: 0; transition: opacity 1s ease; }
 .ef-an { animation: ef-fade 1s both; }
 .ef-qform { display: grid; gap: 10px; min-width: 240px; } .ef-qnr { display: flex; align-items: center; gap: 8px; } .ef-chat-in input:disabled { opacity: .6; }
+.ef-lowlist { margin-top: 6px; } .ef-lowlist summary { cursor: pointer; font-weight: 700; } .ef-lowlist ul { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 8px; } .ef-lowrow { display: flex; align-items: center; gap: 10px; } .ef-lowtx { flex: 1; min-width: 0; } .ef-lowtx small { display: block; color: var(--muted, #8a7568); }

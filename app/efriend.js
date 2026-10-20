@@ -725,6 +725,7 @@
 		if ( e.target.closest( '[data-ef-suggest]' ) ) { EXA.efSuggestOpen(); return; }
 		if ( e.target.closest( '[data-ef-limfill]' ) ) { if ( F.pendingFill ) limFill( F.pendingFill, true ); const bx = document.querySelector( '.ef-lim-fill' ); if ( bx ) bx.remove(); return; }
 		if ( e.target.closest( '[data-ef-limuse]' ) ) { const sg = F.suggestLimits(); if ( sg ) limFill( sg, false ); const b = e.target.closest( '[data-ef-limuse]' ); if ( b && b.parentNode ) b.parentNode.remove(); return; }
+		const lm = e.target.closest( '[data-ef-lowmove]' ); if ( lm ) { const [ kind, id ] = lm.dataset.efLowmove.split( ':' ); if ( kind === 'bill' ) { const b = S().bills.find( ( x ) => x.id === id ); if ( b && EXA.openBill ) EXA.openBill( b ); } else { const g = S().goals.find( ( x ) => x.id === id ); if ( g ) EXA.openEfPlan( g ); } return; }
 		const lx = e.target.closest( '[data-ef-lowx]' ); if ( lx ) { S().device.efLowDismiss = lx.dataset.efLowx; try { EX.persist(); } catch ( x ) { /* ignore */ } const bx = lx.closest( '.ef-low' ); if ( bx ) bx.remove(); return; }
 		const ba = e.target.closest( '[data-ef-budadd]' ); if ( ba ) { const [ cat, amt ] = ba.dataset.efBudadd.split( ':' ); F.addBudgets( [ { cat, amount: Number( amt ) } ] ); return; }
 		if ( e.target.closest( '[data-ef-budall]' ) ) { F.addBudgets( F.budgetIdeas() ); return; }
@@ -1023,17 +1024,18 @@
 			const hit = tl.find( ( x ) => x.k > 0 && x.bal < th ); if ( ! hit ) continue;
 			// what pulls the money down before that day: the biggest bill or plan date
 			const end = hit.d, now = today(), cands = [];
-			S().bills.filter( ( x ) => ! x.done && x.next ).forEach( ( x ) => EX.occurrences( x, end ).forEach( ( d ) => { if ( d > now && d <= end ) cands.push( { n: x.name, a: centsOf( x.amount, x.currency ), kind: 'bill' } ); } ) );
-			F.all().forEach( ( f ) => { if ( ! f.done && ! f.late && f.goal.deadline > now && f.goal.deadline <= end ) cands.push( { n: f.goal.name, a: f.remaining, kind: 'plan' } ); } );
+			S().bills.filter( ( x ) => ! x.done && x.next ).forEach( ( x ) => EX.occurrences( x, end ).forEach( ( d ) => { if ( d > now && d <= end ) cands.push( { n: x.name, a: centsOf( x.amount, x.currency ), kind: 'bill', id: x.id, d } ); } ) );
+			F.all().forEach( ( f ) => { if ( ! f.done && ! f.late && f.goal.deadline > now && f.goal.deadline <= end ) cands.push( { n: f.goal.name, a: f.remaining, kind: 'plan', id: f.goal.id, d: f.goal.deadline } ); } );
 			const big = cands.sort( ( x, y ) => y.a - x.a )[ 0 ];
-			return { kind, d: hit.d, k: hit.k, bal: hit.bal, cushion, why: big ? big.n : '', whyKind: big ? big.kind : '', whyAmt: big ? big.a : 0 };
+			return { kind, d: hit.d, k: hit.k, bal: hit.bal, cushion, why: big ? big.n : '', whyKind: big ? big.kind : '', whyAmt: big ? big.a : 0, list: cands.slice( 0, 6 ) };
 		}
 		return null;
 	};
 	const lowBanner = () => {
 		const w = F.lowAhead(); if ( ! w || ( S().device || {} ).efLowDismiss === w.d ) return '';
 		const lines = [ t( w.kind === 'zero' ? 'efLowZero' : 'efLowCushion', { d: EX.dayName( w.d ), c: money( w.cushion / 100, main() ) } ) ].concat( w.why ? [ t( w.whyKind === 'plan' ? 'efLowWhyPlan' : 'efLowWhyBill', { n: w.why, a: money( w.whyAmt / 100, main() ) } ) ] : [], [ t( w.whyKind === 'bill' ? 'efLowTip' : w.whyKind === 'plan' ? 'efLowTipPlan' : 'efLowTipSpend' ) ] );
-		return `<div class="ef-ask ef-low"><div>${ points( lines ) }</div><button type="button" class="btn btn-ghost sm" data-ef-lowx="${ esc( w.d ) }">${ esc( t( 'efGotIt' ) ) }</button></div>`;
+		const rows = ( w.list || [] ).map( ( x ) => `<li class="ef-lowrow"><span class="ef-lowic">${ x.kind === 'plan' ? '🎯' : '🧾' }</span><span class="ef-lowtx"><b>${ esc( x.n ) }</b><small>${ esc( EX.dayName( x.d ) ) } · ${ esc( money( x.a / 100, main() ) ) }</small></span><button type="button" class="btn btn-ghost sm" data-ef-lowmove="${ x.kind }:${ esc( x.id ) }">${ esc( t( x.kind === 'plan' ? 'efLowMovePlan' : 'efLowMoveBill' ) ) }</button></li>` ).join( '' );
+		return `<div class="ef-ask ef-low"><div>${ points( lines ) }${ rows ? `<details class="ef-lowlist"><summary>${ esc( t( 'efLowList' ) ) }</summary><ul>${ rows }</ul></details>` : '' }</div><button type="button" class="btn btn-ghost sm" data-ef-lowx="${ esc( w.d ) }">${ esc( t( 'efGotIt' ) ) }</button></div>`;
 	};
 	/** Budgets worth adding, from what the person really spent per category over the last weeks (needs about six weeks of history). */
 	F.budgetIdeas = () => {
@@ -2195,5 +2197,15 @@
 		efLowTip: '💡 Θα βοηθούσε να μετακινήσετε αυτή την πληρωμή, ή ένα σχέδιο, λίγες ημέρες αργότερα.',
 		efLowTipPlan: '💡 Θα βοηθούσε να μετακινήσετε αυτό το σχέδιο λίγες ημέρες αργότερα.',
 		efLowTipSpend: '💡 Θα βοηθούσε να ξοδέψετε λίγο λιγότερο μέχρι τότε ή να μετακινήσετε ένα σχέδιο αργότερα.',
+	} );
+	Object.assign( window.EXPENITY_I18N.langs.en, {
+		efLowList: 'Payments before then',
+		efLowMoveBill: 'Move',
+		efLowMovePlan: 'Move',
+	} );
+	Object.assign( window.EXPENITY_I18N.langs.el, {
+		efLowList: 'Πληρωμές μέχρι τότε',
+		efLowMoveBill: 'Μετακίνηση',
+		efLowMovePlan: 'Μετακίνηση',
 	} );
 }() );
