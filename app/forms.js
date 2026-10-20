@@ -303,7 +303,8 @@
 	}
 	document.addEventListener( 'focusin', e => {
 		if ( T && T.autoKeypad && T.keypadOpen && Date.now() - T.openedAt < 2500 && Date.now() - lastPointer > 500 ) { e.target.blur(); return; } // the sheet focusing a field by itself must not close the keypad we opened
-		if ( ! T || !( [ 'txDesc', 'txQuick', 'txNote', 'txDate' ].includes( e.target.id ) || (e.target.name === 'tags' && e.target.closest('#sheet')) ) ) return;
+		if ( T && e.target.id === 'txDate' ) { if ( T.keypadOpen ) { T.keypadOpen = false; $( '#txKeypad' ).hidden = true; } return; } // the date picker is not a text field: no Done bar, the sheet stays scrollable
+		if ( ! T || !( [ 'txDesc', 'txQuick', 'txNote' ].includes( e.target.id ) || (e.target.name === 'tags' && e.target.closest('#sheet')) ) ) return;
 		T.keypadOpen = false; T.editingField = true;
 		$( '#txKeypad' ).hidden = true;
 		$( '.tx-field-actions' ).hidden = false;
@@ -567,8 +568,9 @@
         if(e.target.id==='entryRepeat'){readTxFields();drawTx(true,false);storeDraft();return true;}
         if(e.target.matches?.('[data-qp-cat]')){T.category=e.target.value;T.catTouched=true;paintQuickPreview();storeDraft();return true;}
         if(e.target.matches?.('[data-qp-wallet]')){T.account=e.target.value;T.walletTouched=true;paintQuickPreview();storeDraft();return true;}
-        if(e.target.id==='entryPaid'){readTxFields();T.unpaid=!e.target.checked;drawTx(true,false);storeDraft();return true;}
+        if(e.target.id==='entryPaid'){readTxFields();T.unpaid=!e.target.checked;if(T.unpaid&&T.editId)T.dateOpen=true;drawTx(true,false);storeDraft();if(T.unpaid&&T.editId)setTimeout(()=>$('.entry-date-options')?.scrollIntoView({block:'center',behavior:'smooth'}),80);return true;} // not paid: the date is when it is due, so ask for it right away
         if(e.target.id==='txDate'&&e.target.closest('.chip.date')){T.date=e.target.value||T.date;drawTx(true,false);storeDraft();return true;}
+        if(e.target.id==='txDate'){T.date=e.target.value||T.date;e.target.blur();storeDraft();return true;} // a chosen date closes the picker, so Save is right there
 		if(e.target.id==='txQuick'){onTxQuick();storeDraft();return true;}
 		if(e.target.id==='txDesc'&&e.type==='input'){T.name=e.target.value;if(T.missing?.length)paintMissing();scheduleSmart();const services=$('#entryServices');if(services)services.hidden=!!T.name.trim()||!!T.editScheduleId||!!T.editId;const r=$('.remember-name');if(r)r.hidden=!T.name.trim();const cat=$('#entryCategory');if(cat)cat.innerHTML=entryCategories();}
 		if(e.target.id==='entryCategoryIcon'){const preview=$('.entry-icon-preview');if(preview)preview.innerHTML=UI.ci(e.target.value,'teal',40);}

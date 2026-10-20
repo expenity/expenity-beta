@@ -1,6 +1,18 @@
 {
-  "version": "0.47.0",
+  "version": "0.47.1",
   "releases": [
+    {
+      "version": "0.47.1",
+      "date": "2026-10-21",
+      "en": [
+        "Status labels are back to a soft tint, now with a clear ring, so they stand out without turning dark.",
+        "Marking a saved expense as unpaid opens the date right away. Choosing a date no longer gets in the way of scrolling to Save."
+      ],
+      "el": [
+        "Οι ενδείξεις κατάστασης επανήλθαν σε απαλή απόχρωση, τώρα με καθαρό περίγραμμα, ώστε να ξεχωρίζουν χωρίς να σκουραίνουν.",
+        "Όταν σημαίνετε ένα αποθηκευμένο έξοδο ως απλήρωτο, η ημερομηνία ανοίγει αμέσως. Η επιλογή ημερομηνίας δεν εμποδίζει πλέον την κύλιση προς την Αποθήκευση."
+      ]
+    },
     {
       "version": "0.47.0",
       "date": "2026-10-21",
