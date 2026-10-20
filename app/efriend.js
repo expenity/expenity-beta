@@ -204,6 +204,8 @@
 	const MOODS = { comfortable: 'cheer', done: 'cheer', ontrack: 'happy', tight: 'meh', atrisk: 'worried', unlikely: 'worried', nodata: 'meh' };
 	let gid = 0;
 	/** A glossy floating robot with a glass screen face: hovers, waves, blinks, and changes its expression with the news. */
+	/** A small outline of eFriend, for places where the full robot would be too much. */
+	F.icon = ( size = 28 ) => `<svg class="ef-ico" width="${ size }" height="${ size * 0.83 }" viewBox="0 0 120 100" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="eFriend"><path d="M24 28q-3-18 12-20 8 4 10 14M96 28q3-18-12-20-8 4-10 14"/><rect x="20" y="18" width="80" height="66" rx="28"/><rect x="31" y="31" width="58" height="40" rx="15"/><rect x="41" y="42" width="10" height="12" rx="3" fill="currentColor" stroke="none"/><path d="M70 48h12M52 62q8 7 16 0"/></svg>`;
 	F.mascot = ( verdict, size = 72 ) => {
 		const mood = MOODS[ verdict ] || 'happy', id = 'efg' + ( ++gid ), G = '#9ff3e6';
 		const eyeL = mood === 'cheer' ? `<path d="M38 50q6-9 12 0" class="ef-glow ef-stk"/>` : `<rect class="ef-eye" x="${ mood === 'meh' ? 38 : 39 }" y="${ mood === 'meh' ? 47 : 42 }" width="11" height="${ mood === 'meh' ? 5 : mood === 'worried' ? 9 : 12 }" rx="3" fill="${ G }"/>`;
@@ -606,12 +608,12 @@
 		const plans = F.plans(), m = ( c ) => money( c / 100, main() );
 		const row = ( g ) => {
 			const f = byId[ g.id ], ready = !! f;
-			return `<li class="ef-grow"><div class="ef-gtop">${ f ? F.mascot( f.verdict, 40 ) : UI.icon( g.icon || 'target', 28 ) }<div><b>${ esc( g.name ) }</b><small>${ esc( g.deadline ? t( 'efDaysLeft', { n: Math.max( 0, diff( g.deadline, today() ) ) } ) : t( 'efNoDate' ) ) }</small></div>${ f ? chip( f.verdict ) : '' }</div>
+			return `<li class="ef-grow"><div class="ef-gtop">${ f ? F.icon( 32 ) : UI.icon( g.icon || 'target', 28 ) }<div><b>${ esc( g.name ) }</b><small>${ esc( g.deadline ? t( 'efDaysLeft', { n: Math.max( 0, diff( g.deadline, today() ) ) } ) : t( 'efNoDate' ) ) }</small></div>${ f ? chip( f.verdict ) : '' }</div>
 				<div class="ef-gacts"><button type="button" class="btn btn-ghost sm" data-ef-edit="${ esc( g.id ) }">${ UI.icon( 'pencil', 18 ) } ${ esc( t( 'efEdit' ) ) }</button>${ ready ? `<button type="button" class="btn btn-primary sm" data-ef-open="${ esc( g.id ) }">${ esc( t( 'efOpen' ) ) }</button>` : `<button type="button" class="btn btn-primary sm" data-ef-try="${ esc( g.id ) }">${ esc( t( 'efAddDate' ) ) }</button>` }</div></li>`;
 		};
 		const buckets = F.groups().map( ( n ) => ( { name: n, plans: plans.filter( ( g ) => ( g.group || '' ).trim() === n ) } ) ), rest = plans.filter( ( g ) => ! ( g.group || '' ).trim() );
 		if ( rest.length ) buckets.push( { name: '', plans: rest } );
-		const overview = all.length > 1 ? ( ( sm ) => `<section class="card ef-overview"><div class="ef-top">${ F.mascot( sm.verdict, 64 ) }<div class="ef-bubble"><b>${ esc( t( 'efOverviewTitle' ) ) }</b>${ chip( sm.verdict ) }<small>${ esc( t( 'efTogether', { a: m( sm.cost ), b: m( sm.free ) } ) ) }</small></div></div><div class="btn-row"><button type="button" class="btn btn-primary" data-ef-all="">${ esc( t( 'efOpen' ) ) }</button></div></section>` )( F.summary( all ) ) : '';
+		const overview = all.length > 1 ? ( ( sm ) => `<section class="card ef-overview"><div class="ef-top">${ F.icon( 52 ) }<div class="ef-bubble"><b>${ esc( t( 'efOverviewTitle' ) ) }</b>${ chip( sm.verdict ) }<small>${ esc( t( 'efTogether', { a: m( sm.cost ), b: m( sm.free ) } ) ) }</small></div></div><div class="btn-row"><button type="button" class="btn btn-primary" data-ef-all="">${ esc( t( 'efOpen' ) ) }</button></div></section>` )( F.summary( all ) ) : '';
 		const section = ( b ) => {
 			const list = b.name ? all.filter( ( f ) => ( f.goal.group || '' ).trim() === b.name ) : [];
 			const head = b.name || ( buckets.length > 1 ? t( 'efOtherPlans' ) : t( 'efYourGoals' ) );
@@ -622,7 +624,7 @@
 		const achievements = ( ach.length || plans.length ) ? `<section class="card ef-ach"><h2>🏆 ${ esc( t( 'efAchTitle' ) ) }</h2>${ ach.length ? points( [ t( 'efAchLine', { n: ach.length, a: m( totalDone ) } ) ] ) + `<ul class="ef-list">${ ach.map( ( g ) => `<li><div><b>${ esc( g.name ) }</b><small>${ esc( EX.dayName( g.doneOn || g.deadline ) ) } · ${ esc( m( EX.cents( g.doneAmount || g.target ) ) ) }</small></div><span class="ef-ach-ic">${ UI.icon( g.icon || 'trophy', 22 ) } ✅</span></li>` ).join( '' ) }</ul>` : points( [ t( 'efAchNone' ) ] ) }</section>` : '';
 		const pastHtml = pastList.length ? `<details class="card ef-sec ef-det"><summary><span class="ef-sec-em">🗄️</span><b>${ esc( t( 'efPast' ) ) }</b></summary><ul class="ef-list">${ pastList.map( ( g ) => `<li><div><b>${ esc( g.name ) }</b><small>${ esc( m( EX.cents( g.target ) ) ) }</small></div><button type="button" class="btn btn-ghost sm" data-ef-reopen="${ esc( g.id ) }">${ esc( t( 'efReopen' ) ) }</button></li>` ).join( '' ) }</ul></details>` : '';
 		const worst = all.length ? F.summary( all ) : null;
-		const askCard = `<section class="card ef-askcard"><div class="ef-top">${ F.mascot( 'happy', 64 ) }<div class="ef-bubble"><b>${ esc( t( 'efAskCardTitle' ) ) }</b>${ esc( t( 'efAskCardText' ) ) }</div></div><div class="btn-row"><button type="button" class="btn btn-primary" data-ef-ask>💬 ${ esc( t( 'efAskGo' ) ) }</button>${ histList().length ? `<button type="button" class="btn btn-ghost" data-ef-hist-open>🕘 ${ esc( t( 'efc_h_title' ) ) }</button>` : '' }</div></section>`;
+		const askCard = `<section class="card ef-askcard"><div class="ef-top">${ F.icon( 52 ) }<div class="ef-bubble"><b>${ esc( t( 'efAskCardTitle' ) ) }</b>${ esc( t( 'efAskCardText' ) ) }</div></div><div class="btn-row"><button type="button" class="btn btn-primary" data-ef-ask>💬 ${ esc( t( 'efAskGo' ) ) }</button>${ histList().length ? `<button type="button" class="btn btn-ghost" data-ef-hist-open>🕘 ${ esc( t( 'efc_h_title' ) ) }</button>` : '' }</div></section>`;
 		return `${ askCard }<section class="card ef-page"><div class="ef-top">${ F.mascot( 'happy', 84 ) }<div class="ef-bubble"><b>${ esc( t( 'efMeet' ) ) }</b></div></div>${ para( 'efMeetText' ) }</section>
 			${ proposalsHtml() }${ overview }${ achievements }${ askBanner() ? `<section class="card">${ askBanner() }</section>` : '' }${ all.length > 1 ? `<section class="card"><h2>🏆 ${ esc( t( 'efPrioSection' ) ) }</h2>${ para( 'efPrioTextShort' ) }${ prioList( all ) }<div class="btn-row"><button type="button" class="btn btn-ghost" data-ef-suggest>✨ ${ esc( t( 'efSuggestOrder' ) ) }</button></div></section>` : '' }${ all.length ? `<section class="card">${ riskHtml() }</section>` : '' }${ budIdeasHtml() }${ buckets.length ? buckets.map( section ).join( '' ) : `<section class="card"><h2>${ esc( t( 'efYourGoals' ) ) }</h2><p class="muted">${ esc( t( 'efNoGoals' ) ) }</p></section>` }
 			${ allocCard() }${ pastHtml }<section class="card"><div class="btn-row"><button type="button" class="btn btn-primary" data-ef-new>${ UI.icon( 'plus', 20 ) } ${ esc( t( 'efNewGoal' ) ) }</button></div></section>
@@ -889,9 +891,10 @@
 
 	/* ------------------------------------------------------------------ Ask eFriend: "Can I buy shoes that cost 49?" */
 	const STOP = new Set( 'can could may i we you buy get purchase afford a an the that which cost costs costing for to is it be would should do does about my me on of at with euro euros eur dollar dollars usd and or please new'.split( ' ' ).concat( 'μπορώ να αγοράσω αγοράσουμε αγοράσει που κοστίζει κοστίζουν ένα μία μια ένας για το τα την τον με στο ευρώ ευρω και ή παρακαλώ νέο νέα νέος είναι θα πρέπει'.split( ' ' ) ) );
-	const ASK_ICONS = [ [ /shoe|sneaker|boot|sandal|παπούτσ|μπότ/i, 'heart', '👟' ], [ /phone|mobile|κινητ|τηλέφων/i, 'device-mobile', '📱' ], [ /laptop|computer|tablet|υπολογ/i, 'device-laptop', '💻' ], [ /trip|flight|holiday|vacation|hotel|ταξίδ|διακοπ|ξενοδοχ/i, 'plane', '✈️' ], [ /car|bike|scooter|αυτοκ|μηχαν|ποδήλατ/i, 'car', '🚗' ], [ /gift|present|δώρο|δωρο/i, 'gift', '🎁' ], [ /dinner|lunch|restaurant|coffee|φαγητ|δείπν|εστιατ|καφέ/i, 'trophy', '🍽️' ], [ /sofa|furniture|table|chair|καναπ|έπιπλ/i, 'home', '🛋️' ], [ /course|book|school|μάθημα|βιβλί|σχολ/i, 'school', '📚' ] ];
+	const ASK_ICONS = [ [ /watch|ρολόι|ρολοι/i, 'gift', '⌚' ], [ /shoe|sneaker|boot|sandal|παπούτσ|μπότ/i, 'heart', '👟' ], [ /phone|mobile|κινητ|τηλέφων/i, 'device-mobile', '📱' ], [ /laptop|computer|tablet|υπολογ/i, 'device-laptop', '💻' ], [ /trip|flight|holiday|vacation|hotel|ταξίδ|διακοπ|ξενοδοχ/i, 'plane', '✈️' ], [ /car|bike|scooter|αυτοκ|μηχαν|ποδήλατ/i, 'car', '🚗' ], [ /gift|present|δώρο|δωρο/i, 'gift', '🎁' ], [ /dinner|lunch|restaurant|coffee|φαγητ|δείπν|εστιατ|καφέ/i, 'trophy', '🍽️' ], [ /sofa|furniture|table|chair|καναπ|έπιπλ/i, 'home', '🛋️' ], [ /course|book|school|μάθημα|βιβλί|σχολ/i, 'school', '📚' ] ];
 	F.askIcon = ( item ) => { const x = ASK_ICONS.find( ( r ) => r[ 0 ].test( item || '' ) ); return x ? { icon: x[ 1 ], em: x[ 2 ] } : { icon: 'gift', em: '🛍️' }; };
 	const FIXSTOP = new Set( 'no nope not its it is the price cost costs actually instead sorry yes right correct wrong i mean meant thing item called name should be was it’s όχι οχι είναι ειναι η τιμή τιμη κοστίζει πραγματικά ήθελα να πω λάθος σωστό'.split( ' ' ) );
+	const REL = /(?<![\p{L}])(?:girlfriend|boyfriend|wife|husband|mom|mum|mother|dad|father|son|daughter|friend|sister|brother|kids?|baby|partner|fianc[eé]e?|grandma|grandpa|grandmother|grandfather|boss|colleague|teacher|neighbou?r|cousin|aunt|uncle|φίλη|φιλη|φίλο|φιλο|γυναίκα|γυναικα|σύζυγο|συζυγο|άντρα|αντρα|μαμά|μαμα|μητέρα|μητερα|μπαμπά|μπαμπα|πατέρα|πατερα|γιο|κόρη|κορη|αδερφή|αδερφη|αδερφό|αδερφο|παιδί|παιδι|παιδιά|παιδια|σύντροφο|συντροφο|γιαγιά|γιαγια|παππού|παππου|αφεντικό|αφεντικο|συνάδελφο|συναδελφο|δασκάλα|δασκαλα|δάσκαλο|δασκαλο)(?![\p{L}])/iu;
 	const CURMARK = /^\s*(?:[€$£]|eur\b|euros?\b|usd\b|dollars?\b|ευρώ|ευρω)/i;
 	/** "new iphone 16 1250$" -> { item: 'iphone 16', cost: 125000 } (cents). The price is the number next to a currency sign, else the biggest one; the other numbers stay in the name. English and Greek. */
 	F.parseAsk = ( text, fix ) => {
@@ -900,9 +903,19 @@
 		const cents = ( n ) => { if ( /^\d{1,3}([.,]\d{3})+$/.test( n ) ) n = n.replace( /[.,]/g, '' ); else n = n.replace( ',', '.' ); return Math.round( parseFloat( n ) * 100 ) || 0; };
 		const near = ( f ) => /[€$£]\s*$/.test( raw.slice( Math.max( 0, f.i - 2 ), f.i ) ) || CURMARK.test( raw.slice( f.e, f.e + 10 ) );
 		const pick = found.filter( near ).pop() || found.slice().sort( ( x, y ) => cents( y.s ) - cents( x.s ) )[ 0 ] || null;
-		const rest = pick ? raw.slice( 0, pick.i ) + ' ' + raw.slice( pick.e ) : raw;
-		const words = rest.replace( /['’]/g, '' ).replace( /[€$£?!.,;:()"“”]/g, ' ' ).split( /\s+/ ).filter( ( w ) => w && ! STOP.has( w.toLowerCase() ) && ! ( fix && FIXSTOP.has( w.toLowerCase() ) ) );
-		const item = words.join( ' ' ).trim(); return { item: item ? ( words[ 0 ] === words[ 0 ].toLowerCase() ? item.charAt( 0 ).toUpperCase() + item.slice( 1 ) : item ) : '', cost: pick ? cents( pick.s ) : 0 };
+		let rest = pick ? raw.slice( 0, pick.i ) + ' ' + raw.slice( pick.e ) : raw, who = '';
+		rest = rest.replace( /[€$£]|(?<![\p{L}])(?:euros?|eur|usd|dollars?|ευρώ|ευρω)(?![\p{L}])/giu, ' ' );
+		if ( ! fix ) {
+			// "I want to buy a new watch for my girlfriend": drop the sentence frame before the verb, and the reason after "for"; the person after "for" is remembered, not mistaken for the item
+			const vb = rest.match( new RegExp( '(?<![\\p{L}\\p{N}])(?:buy|buying|get|getting|purchase|purchasing|order|ordering|afford|book|booking|grab|pick up|αγοράσω|αγορασω|αγοράσει|αγορασει|αγοράζω|αγοραζω|αγοράσουμε|πάρω|παρω|παραγγείλω|κλείσω|κλεισω)(?![\\p{L}\\p{N}])', 'iu' ) );
+			if ( vb ) rest = rest.slice( vb.index + vb[ 0 ].length );
+			else rest = rest.replace( /^\s*(?:(?:hi|hey|hello|well|so|ok|okay)\b[,!\s]*)?(?:i\s+)?(?:really\s+)?(?:want|need|wanna|would like|'d like|θέλω|θελω|θα ήθελα|χρειάζομαι)(?:\s+to)?\s*/i, ' ' );
+			const cut = rest.match( new RegExp( '(?<=\\S\\s)(for|because|so that|so|that|which|since|as|για|γιά|επειδή|ώστε|που)(?![\\p{L}\\p{N}])', 'iu' ) );
+			if ( cut ) { const after = rest.slice( cut.index + cut[ 0 ].length ).replace( /[?!.,;:()"“”]/g, ' ' ).trim(); rest = rest.slice( 0, cut.index ); if ( /^(for|για|γιά)$/i.test( cut[ 0 ] ) && REL.test( after ) ) who = after.split( /\s+/ ).slice( 0, 4 ).join( ' ' ); }
+		}
+		const toks = rest.replace( /['’]/g, '' ).replace( /[€$£?!.,;:()"“”]/g, ' ' ).split( /\s+/ ).filter( Boolean ), drop = ( w ) => STOP.has( w.toLowerCase() ) || ( fix && FIXSTOP.has( w.toLowerCase() ) ), PREP = new Set( [ 'to', 'in', 'at', 'of', 'from', 'σε', 'στο', 'στη', 'στην', 'στον', 'από' ] ), words = [];
+		toks.forEach( ( w, k ) => { if ( ! drop( w ) ) words.push( w ); else if ( PREP.has( w.toLowerCase() ) && words.length && toks[ k + 1 ] && ! drop( toks[ k + 1 ] ) ) words.push( w ); } );
+		const item = words.join( ' ' ).trim(); return { item: item ? ( words[ 0 ] === words[ 0 ].toLowerCase() ? item.charAt( 0 ).toUpperCase() + item.slice( 1 ) : item ) : '', cost: pick ? cents( pick.s ) : 0, who };
 	};
 	/** "in 2 weeks", "right away", "no rush": how soon the person wants it. { days } (3 = right away), { none: true } for no rush, or null. English and Greek. */
 	F.parseWhen = ( text ) => {
@@ -997,10 +1010,11 @@
 		return { cost, days, tl: tl.slice( 0, N ), cushion, today: days[ 0 ], best: first, first, anyOk: days.some( ( x ) => x.st !== 'avoid' ), maxSafe, monthly: b.monthly, incomeMonthly: b.incomeMonthly, hasIncome: b.hasIncome };
 	};
 	/* ------------------------------------------------------------------ The chat: eFriend interviews you (what, how much, how soon), then brings the full analysis back to the app */
-	const chat = { id: '', ts: 0, msgs: [], stage: 'what', item: '', cost: 0, by: undefined, typing: false, busy: false, tok: 0, used: {}, ans: null, rec: null, sel: 0, chips: [], anim: true };
+	const chat = { chain: 0, id: '', ts: 0, msgs: [], stage: 'what', item: '', who: '', mi: 0, cost: 0, by: undefined, typing: false, busy: false, tok: 0, used: {}, ans: null, rec: null, sel: 0, chips: [], anim: true };
 	const money$ = ( c ) => money( c / 100, main() );
 	const itemName = () => chat.item || t( 'efAskThing' );
-	const kindOf = ( item ) => ( { '👟': 'shoes', '📱': 'phone', '💻': 'laptop', '✈️': 'trip', '🚗': 'car', '🎁': 'gift' }[ F.askIcon( item ).em ] || 'generic' );
+	const forWho = () => ( chat.who ? t( 'efc_for' ) + ' ' + chat.who : '' );
+	const kindOf = ( item ) => ( { '👟': 'shoes', '📱': 'phone', '💻': 'laptop', '✈️': 'trip', '🚗': 'car', '🎁': 'gift', '⌚': 'watch' }[ F.askIcon( item ).em ] || 'generic' );
 	/** One line from a pool ("a|b|c"), never the same one twice in a row, so eFriend does not repeat itself. */
 	const pool = ( key, vars ) => {
 		const list = String( t( key, vars ) ).split( '|' ), u = chat.used[ key ] = chat.used[ key ] || []; let i = 0;
@@ -1022,14 +1036,15 @@
 
 	const bubble = ( x ) => x.who === 'me'
 		? `<div class="ef-msg me"><div class="ef-mb">${ esc( x.text ) }</div></div>`
-		: `<div class="ef-msg ef"><span class="ef-av">${ F.mascot( x.mood || 'happy', 34 ) }</span><div class="ef-mb">${ x.lines.map( ( l ) => `<p class="ef-ml">${ rich( l ) }</p>` ).join( '' ) }</div></div>`;
-	const paint = ( scroll ) => {
-		const box = document.getElementById( 'efChat' ); if ( ! box ) return false;
-		box.innerHTML = chat.msgs.map( bubble ).join( '' ) + ( chat.typing ? `<div class="ef-msg ef"><span class="ef-av">${ F.mascot( 'happy', 34 ) }</span><div class="ef-mb ef-typing" aria-label="${ esc( t( 'efc_typing' ) ) }"><i></i><i></i><i></i></div></div>` : '' );
-		const st = document.getElementById( 'efCpStat' ); if ( st ) st.textContent = chat.typing ? t( 'efc_typing' ) : t( 'efc_online' );
-		if ( scroll ) box.scrollTo( { top: box.scrollHeight, behavior: reduceMotion() ? 'auto' : 'smooth' } );
-		return true;
-	};
+		: `<div class="ef-msg ef"><span class="ef-av">${ F.icon( 30 ) }</span><div class="ef-mb">${ x.lines.map( ( l ) => `<p class="ef-ml">${ rich( l ) }</p>` ).join( '' ) }</div></div>`;
+	const chatBox = () => document.getElementById( 'efChat' );
+	const scrollEnd = () => { const box = chatBox(); if ( box ) box.scrollTo( { top: box.scrollHeight, behavior: reduceMotion() ? 'auto' : 'smooth' } ); };
+	const setStat = ( typing ) => { const st = document.getElementById( 'efCpStat' ); if ( st ) st.textContent = typing ? t( 'efc_typing' ) : t( 'efc_online' ); };
+	/** Messages are added one by one, never redrawn, so nothing above flickers. */
+	const appendMsg = ( x ) => { const box = chatBox(); if ( box ) box.insertAdjacentHTML( 'beforeend', bubble( x ) ); };
+	const showTyping = () => { const box = chatBox(); if ( ! box || document.getElementById( 'efTyping' ) ) return; box.insertAdjacentHTML( 'beforeend', `<div class="ef-msg ef" id="efTyping"><span class="ef-av">${ F.icon( 30 ) }</span><div class="ef-mb ef-typing" aria-label="${ esc( t( 'efc_typing' ) ) }"><i></i><i></i><i></i></div></div>` ); setStat( true ); };
+	const hideTyping = () => { const el = document.getElementById( 'efTyping' ); if ( el ) el.remove(); setStat( false ); };
+	const paint = ( scroll ) => { if ( scroll ) scrollEnd(); return !! chatBox(); };
 	const setMood = ( m ) => { const av = document.querySelector( '.ef-cp-av' ); if ( av && m ) av.innerHTML = F.mascot( m, 46 ); };
 	const setChips = ( list ) => {
 		chat.chips = list || []; const box = document.getElementById( 'efChips' ); if ( ! box ) return;
@@ -1037,17 +1052,19 @@
 	};
 	/** eFriend "types" for a moment, then speaks: the pause is part of the charm. */
 	const say = async ( lines, o = {} ) => {
+		if ( chat.chain !== chat.tok ) return;
 		const tok = chat.tok, txt = [].concat( lines ).join( ' ' ), len = txt.length;
-		chat.typing = true; setMood( o.mood ); if ( ! paint( true ) ) return;
-		await wait( o.delay || Math.max( 700, Math.min( 1900, 450 + len * 16 ) ) );
+		await wait( 450 ); if ( ! live( tok ) ) return;
+		chat.typing = true; setMood( o.mood ); showTyping(); scrollEnd();
+		await wait( o.delay || Math.max( 1300, Math.min( 4200, 1000 + len * 38 ) ) );
 		if ( ! live( tok ) ) return;
-		chat.typing = false; chat.msgs.push( { who: 'ef', lines: [].concat( lines ), mood: o.mood } ); paint( true );
-		await wait( 250 );
+		chat.typing = false; hideTyping(); const m = { who: 'ef', lines: [].concat( lines ), mood: o.mood }; chat.msgs.push( m ); appendMsg( m ); scrollEnd();
+		await wait( 500 );
 	};
 
 	const recap = async () => {
 		chat.stage = 'confirm';
-		await say( [ pool( 'efc_recap' ), `${ F.askIcon( chat.item ).em } **${ itemName() }** · **${ money$( chat.cost ) }** · ${ whenWords( chat.by ) }`, pool( 'efc_right' ) ], { mood: 'happy' } );
+		await say( [ pool( 'efc_recap' ), `${ F.askIcon( chat.item ).em } **${ itemName() }**${ chat.who ? ' ' + forWho() : '' } · **${ money$( chat.cost ) }** · ${ whenWords( chat.by ) }`, pool( 'efc_right' ) ], { mood: 'happy' } );
 		setChips( [ { k: 'yes', label: '✅ ' + t( 'efc_yes' ) }, { k: 'fix', label: '✏️ ' + t( 'efChatFix' ) } ] );
 	};
 	const whenChips = () => setChips( [ { by: 3, label: '🔥 ' + t( 'efc_wc1' ) }, { by: 14, label: '📅 ' + t( 'efc_wc2' ) }, { by: 30, label: '🗓️ ' + t( 'efc_wc3' ) }, { by: null, label: '🕊️ ' + t( 'efc_wc4' ) } ] );
@@ -1058,7 +1075,7 @@
 		return recap();
 	};
 	const urgencyKey = ( d ) => ( d == null ? 'later' : d <= 3 ? 'now' : 'soon' );
-	const sayItem = () => say( [ pool( 'efc_re_' + kindOf( chat.item ), { item: itemName() } ) ], { mood: 'cheer' } );
+	const sayItem = () => say( [ chat.who ? pool( 'efc_re_for', { item: itemName(), forwho: forWho() } ) : pool( 'efc_re_' + kindOf( chat.item ), { item: itemName() } ) ], { mood: 'cheer' } );
 	const sayPrice = () => { const z = priceSize( chat.cost ); return say( [ pool( 'efc_pr_' + z, { cost: money$( chat.cost ) } ) ], { mood: z === 'huge' ? 'atrisk' : z === 'big' ? 'cheer' : 'happy' } ); };
 	const sayWhen = () => say( [ pool( 'efc_ur_' + urgencyKey( chat.by ), { when: whenWords( chat.by ) } ) ], { mood: chat.by != null && chat.by <= 3 ? 'tight' : 'happy' } );
 	const read = ( text, fix ) => ( { p: F.parseAsk( stripWhen( text ), fix ), w: F.parseWhen( text ) } );
@@ -1066,9 +1083,9 @@
 	const yesRe = /^\s*(yes|yeah|yep|yup|ok|okay|correct|right|sure|go|ναι|ναί|σωστά|οκ)\b/i, noRe = /^\s*(no|nope|όχι|οχι)\s*[.!]?\s*$/i;
 
 	const onUser = async ( text, chip ) => {
-		if ( chat.busy ) return; chat.busy = true; const tok = chat.tok;
+		if ( chat.busy ) return; chat.busy = true; const tok = chat.tok; chat.chain = tok;
 		try {
-			chat.msgs.push( { who: 'me', text } ); setChips( [] ); paint( true ); await wait( 350 ); if ( ! live( tok ) ) return;
+			{ const m = { who: 'me', text }; chat.msgs.push( m ); appendMsg( m ); } setChips( [] ); scrollEnd(); await wait( 700 ); if ( ! live( tok ) ) return;
 			const st = chat.stage;
 			if ( st === 'confirm' || st === 'fix' ) {
 				if ( ( chip && chip.k === 'yes' ) || ( st === 'confirm' && yesRe.test( text ) && ! /\d/.test( text ) ) ) return await finish();
@@ -1089,10 +1106,10 @@
 			}
 			// the first message (or an answer to "what is it?")
 			const { p, w } = read( text, false ); const hadItem = !! chat.item, hadCost = !! chat.cost;
-			if ( p.item ) chat.item = p.item; if ( p.cost ) chat.cost = p.cost; if ( w ) setBy( w );
+			if ( p.item ) chat.item = p.item; if ( p.who ) chat.who = p.who; if ( p.cost ) chat.cost = p.cost; if ( w ) setBy( w );
 			if ( p.item && ! hadItem ) await sayItem(); if ( p.cost && ! hadCost ) await sayPrice(); if ( w ) await sayWhen();
 			return await nextQ();
-		} finally { chat.busy = false; }
+		} finally { if ( tok === chat.tok ) chat.busy = false; }
 	};
 
 	/* The decision: the best day, inside the person's window when they gave one. */
@@ -1104,14 +1121,14 @@
 		if ( a.first ) return { kind: 'late', day: a.first };
 		return { kind: 'none', day: null };
 	};
+	/** One month at a time, opened on the best day, with arrows to go back or forward. */
+	const monthsOf = ( a ) => { const months = []; a.days.forEach( ( x ) => { let g = months[ months.length - 1 ]; if ( ! g || g.k !== x.d.slice( 0, 7 ) ) { g = { k: x.d.slice( 0, 7 ), days: [] }; months.push( g ); } g.days.push( x ); } ); return months; };
 	const calHtml = ( a ) => {
-		const wd = Array.from( { length: 7 }, ( _, i ) => new Intl.DateTimeFormat( EX.loc(), { weekday: 'short' } ).format( new Date( 2024, 0, 1 + i ) ).slice( 0, 2 ) ), months = [];
-		a.days.forEach( ( x ) => { let g = months[ months.length - 1 ]; if ( ! g || g.k !== x.d.slice( 0, 7 ) ) { g = { k: x.d.slice( 0, 7 ), days: [] }; months.push( g ); } g.days.push( x ); } );
-		const star = chat.rec && chat.rec.day ? chat.rec.day.i : -1;
-		const grid = months.map( ( g ) => { const first = parse( g.days[ 0 ].d ), cells = []; for ( let i = 0; i < ( first.getDay() + 6 ) % 7; i++ ) cells.push( '<i class="ef-cal-x"></i>' );
-			g.days.forEach( ( x ) => { cells.push( `<button type="button" class="ef-cal-d st-${ x.st }${ x.i === chat.sel ? ' sel' : '' }${ x.i === 0 ? ' now' : '' }" style="--i:${ x.i }" data-ef-askday="${ x.i }" aria-label="${ esc( EX.dayName( x.d ) ) }"><b>${ parse( x.d ).getDate() }</b><span class="mk">${ x.inc.length ? '💶' : '' }${ x.bills.length ? '🧾' : '' }</span>${ star === x.i ? '<em>⭐</em>' : '' }</button>` ); } );
-			return `<h4 class="ef-cal-mh">${ esc( first.toLocaleDateString( EX.loc(), { month: 'long', year: 'numeric' } ) ) }</h4><div class="ef-cal-g">${ cells.join( '' ) }</div>`; } ).join( '' );
-		return `<div class="ef-cal" role="group" aria-label="${ esc( t( 'efAskCalTitle' ) ) }"><div class="ef-cal-wd">${ wd.map( ( w ) => `<span>${ w }</span>` ).join( '' ) }</div>${ grid }</div><div class="ef-cal-legend"><span class="st-best">${ esc( t( 'efAskLBest' ) ) }</span><span class="st-good">${ esc( t( 'efAskLGood' ) ) }</span><span class="st-tight">${ esc( t( 'efAskLTight' ) ) }</span><span class="st-avoid">${ esc( t( 'efAskLAvoid' ) ) }</span><span>💶 ${ esc( t( 'efAskLPay' ) ) }</span><span>🧾 ${ esc( t( 'efAskLBill' ) ) }</span><span>⭐ ${ esc( t( 'efAskLStar' ) ) }</span></div>`;
+		const wd = Array.from( { length: 7 }, ( _, i ) => new Intl.DateTimeFormat( EX.loc(), { weekday: 'short' } ).format( new Date( 2024, 0, 1 + i ) ).slice( 0, 2 ) ), months = monthsOf( a ), mi = Math.max( 0, Math.min( months.length - 1, chat.mi ) ), g = months[ mi ];
+		const star = chat.rec && chat.rec.day ? chat.rec.day.i : -1, first = parse( g.days[ 0 ].d ), cells = []; for ( let i = 0; i < ( first.getDay() + 6 ) % 7; i++ ) cells.push( '<i class="ef-cal-x"></i>' );
+		g.days.forEach( ( x ) => { cells.push( `<button type="button" class="ef-cal-d st-${ x.st }${ x.i === chat.sel ? ' sel' : '' }${ x.i === 0 ? ' now' : '' }" style="--i:${ x.i % 31 }" data-ef-askday="${ x.i }" aria-label="${ esc( EX.dayName( x.d ) ) }"><b>${ parse( x.d ).getDate() }</b><span class="mk">${ x.inc.length ? '💶' : '' }${ x.bills.length ? '🧾' : '' }</span>${ star === x.i ? '<em>⭐</em>' : '' }</button>` ); } );
+		const nav = `<div class="ef-cal-nav"><button type="button" class="ab-btn" data-ef-mon="-1" aria-label="‹"${ mi === 0 ? ' disabled' : '' }>‹</button><b>${ esc( first.toLocaleDateString( EX.loc(), { month: 'long', year: 'numeric' } ) ) }</b><button type="button" class="ab-btn" data-ef-mon="1" aria-label="›"${ mi === months.length - 1 ? ' disabled' : '' }>›</button></div>`;
+		return `<div class="ef-cal" role="group" aria-label="${ esc( t( 'efAskCalTitle' ) ) }">${ nav }<div class="ef-cal-wd">${ wd.map( ( w ) => `<span>${ w }</span>` ).join( '' ) }</div><div class="ef-cal-g">${ cells.join( '' ) }</div></div><div class="ef-cal-legend"><span class="st-best">${ esc( t( 'efAskLBest' ) ) }</span><span class="st-good">${ esc( t( 'efAskLGood' ) ) }</span><span class="st-tight">${ esc( t( 'efAskLTight' ) ) }</span><span class="st-avoid">${ esc( t( 'efAskLAvoid' ) ) }</span><span>💶 ${ esc( t( 'efAskLPay' ) ) }</span><span>🧾 ${ esc( t( 'efAskLBill' ) ) }</span><span>⭐ ${ esc( t( 'efAskLStar' ) ) }</span></div>`;
 	};
 	const dayDetail = ( a ) => {
 		const x = a.days[ chat.sel ] || a.days[ 0 ], mk = [];
@@ -1138,10 +1155,10 @@
 		return `<div class="ef-res${ chat.anim ? ' anim' : '' }"><div class="ef-burst" aria-hidden="true"></div><div class="ef-top">${ F.mascot( mood, 84 ) }<div class="ef-bubble"><b>${ esc( head ) }</b></div></div>
 			<div class="ef-res-item"><span class="ef-em">${ em }</span><div><b>${ esc( itemName() ) }</b><small>${ esc( whenWords( chat.by ) ) }</small></div><b class="ef-res-cost" data-count="${ a.cost }">${ esc( money$( a.cost ) ) }</b></div>
 			<div class="ef-res-lines">${ points( lines ) }</div>
+			<div class="btn-row ef-ask-btns ef-hero-btns"><button type="button" class="btn btn-primary" data-ef-askplan="${ esc( d ) }">🎯 ${ esc( d ? t( 'efAskMakePlan', { d: EX.dayName( d ) } ) : t( 'efChatPlan' ) ) }</button><button type="button" class="btn btn-ghost" data-ef-again>💬 ${ esc( t( 'efChatAgain' ) ) }</button></div>
 			<ul class="ef-tiles ef-tiles3"><li class="ef-tile"><span class="ef-tile-em">🛍️</span><small>${ esc( t( 'efTileCost' ) ) }</small><b data-count="${ a.cost }">${ esc( money$( a.cost ) ) }</b></li><li class="ef-tile ${ lowShown >= a.cushion ? 'good' : lowShown < 0 ? 'bad' : '' }"><span class="ef-tile-em">📉</span><small>${ esc( t( 'efAskLow' ) ) }</small><b data-count="${ lowShown }">${ esc( ( lowShown < 0 ? '−' : '' ) + money$( Math.abs( lowShown ) ) ) }</b></li><li class="ef-tile ${ rec.day ? 'good' : '' }"><span class="ef-tile-em">⭐</span><small>${ esc( t( 'efAskBestDay' ) ) }</small><b>${ esc( rec.day ? EX.dayName( rec.day.d ) : '–' ) }</b></li></ul>
-			<h3 class="ef-h">📈 ${ esc( t( 'efc_g_title' ) ) }</h3>${ graphHtml( a ) }
 			<h3 class="ef-h">📅 ${ esc( t( 'efAskCalTitle' ) ) }</h3>${ calHtml( a ) }<div class="ef-callouts" id="efAskDetail">${ dayDetail( a ) }</div>
-			<div class="btn-row ef-ask-btns"><button type="button" class="btn btn-primary" data-ef-askplan="${ esc( d ) }">🎯 ${ esc( d ? t( 'efAskMakePlan', { d: EX.dayName( d ) } ) : t( 'efChatPlan' ) ) }</button><button type="button" class="btn btn-ghost" data-ef-again>💬 ${ esc( t( 'efChatAgain' ) ) }</button></div><p class="muted small">${ esc( t( 'efAskNote' ) ) }</p></div>`;
+			<h3 class="ef-h">📈 ${ esc( t( 'efc_g_title' ) ) }</h3>${ graphHtml( a ) }<p class="muted small">${ esc( t( 'efAskNote' ) ) }</p></div>`;
 	};
 	const countUp = ( root ) => root.querySelectorAll( '[data-count]' ).forEach( ( el ) => {
 		const v = Number( el.dataset.count ); if ( reduceMotion() || ! v ) return; const t0 = performance.now(), D = 900;
@@ -1160,14 +1177,14 @@
 	const histList = () => ( S().settings.efChats = S().settings.efChats || [] );
 	const saveChat = () => {
 		if ( ! chat.id || ! chat.msgs.some( ( x ) => x.who === 'me' ) ) return;
-		const rec = { id: chat.id, ts: chat.ts, item: chat.item, cost: chat.cost, by: chat.by, msgs: chat.msgs.map( ( x ) => ( x.who === 'me' ? { w: 'me', t: x.text } : { w: 'ef', l: x.lines, m: x.mood } ) ), done: chat.stage === 'done', st: chat.ans ? chat.ans.today.st : '', kind: chat.rec ? chat.rec.kind : '', rd: chat.rec && chat.rec.day ? chat.rec.day.d : '' };
+		const rec = { id: chat.id, ts: chat.ts, item: chat.item, who: chat.who, cost: chat.cost, by: chat.by, msgs: chat.msgs.map( ( x ) => ( x.who === 'me' ? { w: 'me', t: x.text } : { w: 'ef', l: x.lines, m: x.mood } ) ), done: chat.stage === 'done', st: chat.ans ? chat.ans.today.st : '', kind: chat.rec ? chat.rec.kind : '', rd: chat.rec && chat.rec.day ? chat.rec.day.d : '' };
 		const l = histList(), i = l.findIndex( ( x ) => x.id === rec.id ); if ( i >= 0 ) l[ i ] = rec; else l.unshift( rec ); if ( l.length > 30 ) l.length = 30;
 		S().settings.u = Date.now(); try { EX.persist(); } catch ( e ) { /* ignore */ }
 	};
 	const VERD = { best: 'comfortable', good: 'ontrack', tight: 'tight', avoid: 'atrisk' };
 	const histHtml = ( id ) => {
 		const l = histList(), r = id ? l.find( ( x ) => x.id === id ) : null, back = `<button type="button" class="btn btn-ghost sm" data-ef-hback>← ${ esc( t( 'efc_h_back' ) ) }</button>`;
-		if ( r ) return `<div class="ef-hist-h">${ back }<b>${ esc( ( F.askIcon( r.item ).em ) + ' ' + ( r.item || t( 'efAskThing' ) ) ) }</b></div><div class="ef-chat ef-hist-chat">${ r.msgs.map( ( x ) => ( x.w === 'me' ? `<div class="ef-msg me"><div class="ef-mb">${ esc( x.t ) }</div></div>` : `<div class="ef-msg ef"><span class="ef-av">${ F.mascot( x.m || 'happy', 34 ) }</span><div class="ef-mb">${ x.l.map( ( q ) => `<p class="ef-ml">${ rich( q ) }</p>` ).join( '' ) }</div></div>` ) ).join( '' ) }</div><div class="btn-row ef-hist-act">${ r.cost ? `<button type="button" class="btn btn-primary" data-ef-hagain="${ esc( r.id ) }">🔁 ${ esc( t( 'efc_h_again' ) ) }</button>` : '' }<button type="button" class="btn btn-ghost" data-ef-hnew>💬 ${ esc( t( 'efc_h_new' ) ) }</button></div>`;
+		if ( r ) return `<div class="ef-hist-h">${ back }<b>${ esc( ( F.askIcon( r.item ).em ) + ' ' + ( r.item || t( 'efAskThing' ) ) ) }</b></div><div class="ef-chat ef-hist-chat">${ r.msgs.map( ( x ) => ( x.w === 'me' ? `<div class="ef-msg me"><div class="ef-mb">${ esc( x.t ) }</div></div>` : `<div class="ef-msg ef"><span class="ef-av">${ F.icon( 30 ) }</span><div class="ef-mb">${ x.l.map( ( q ) => `<p class="ef-ml">${ rich( q ) }</p>` ).join( '' ) }</div></div>` ) ).join( '' ) }</div><div class="btn-row ef-hist-act">${ r.cost ? `<button type="button" class="btn btn-primary" data-ef-hagain="${ esc( r.id ) }">🔁 ${ esc( t( 'efc_h_again' ) ) }</button>` : '' }<button type="button" class="btn btn-ghost" data-ef-hnew>💬 ${ esc( t( 'efc_h_new' ) ) }</button></div>`;
 		return `<div class="ef-hist-h">${ back }<b>🕘 ${ esc( t( 'efc_h_title' ) ) }</b></div>${ l.length ? `<ul class="ef-hist-list">${ l.map( ( x ) => `<li><button type="button" class="ef-hrow" data-ef-hopen="${ esc( x.id ) }"><span class="ef-em">${ F.askIcon( x.item ).em }</span><span><b>${ esc( x.item || t( 'efAskThing' ) ) }</b><small>${ esc( [ x.cost ? money$( x.cost ) : '', EX.dayName( new Date( x.ts ).toISOString().slice( 0, 10 ) ) ].filter( Boolean ).join( ' · ' ) ) }</small></span>${ x.done && VERD[ x.st ] ? chip( VERD[ x.st ] ) : `<span class="ef-chip">${ esc( t( 'efc_h_open' ) ) }</span>` }</button><button type="button" class="ab-btn" data-ef-hdel="${ esc( x.id ) }" aria-label="${ esc( t( 'efc_h_del' ) ) }">${ UI.icon( 'trash', 20 ) }</button></li>` ).join( '' ) }</ul>` : `<p class="muted ef-hist-empty">${ esc( t( 'efc_h_empty' ) ) }</p>` }`;
 	};
 	const showHist = ( id ) => { const ov = document.querySelector( '.ef-cp' ); if ( ! ov ) return; let p = document.getElementById( 'efHist' ); if ( ! p ) { p = document.createElement( 'div' ); p.id = 'efHist'; p.className = 'ef-hist'; ov.appendChild( p ); } p.innerHTML = histHtml( id ); };
@@ -1176,44 +1193,58 @@
 	/** The thinking screen: the robot scans, the checklist ticks, then the page opens like a curtain on the result. */
 	const analysis = async () => {
 		const tok = chat.tok, ov = document.querySelector( '.ef-cp' ); if ( ! ov ) return;
-		chat.ans = F.answer( chat.cost ); chat.rec = decide( chat.ans, chat.by ); chat.sel = chat.rec.day ? chat.rec.day.i : 0;
+		chat.ans = F.answer( chat.cost ); chat.rec = decide( chat.ans, chat.by ); chat.sel = chat.rec.day ? chat.rec.day.i : 0; chat.mi = Math.max( 0, monthsOf( chat.ans ).findIndex( ( g ) => g.k === chat.ans.days[ chat.sel ].d.slice( 0, 7 ) ) );
 		ov.classList.add( 'an' ); ov.innerHTML = `<div class="ef-an"><div class="ef-an-bot">${ F.mascot( 'happy', 130 ) }<i class="ef-scan"></i><i class="ef-scan s2"></i></div><h2>${ esc( pool( 'efc_think' ) ) }</h2><ul class="ef-an-steps">${ [ 1, 2, 3, 4, 5 ].map( ( n ) => `<li style="--i:${ n }"><span class="tick">✓</span>${ esc( t( 'efc_step' + n ) ) }</li>` ).join( '' ) }</ul><div class="ef-an-bar"><i></i></div></div>`;
 		const items = [ ...ov.querySelectorAll( '.ef-an-steps li' ) ], bar = ov.querySelector( '.ef-an-bar i' );
-		for ( let i = 0; i < items.length; i++ ) { await wait( 650 ); if ( tok !== chat.tok ) return; items[ i ].classList.add( 'on' ); bar.style.width = Math.round( ( i + 1 ) / items.length * 100 ) + '%'; }
-		await wait( 600 ); if ( tok !== chat.tok ) return;
-		ov.classList.add( 'out' ); await wait( 600 ); if ( tok !== chat.tok ) return;
+		for ( let i = 0; i < items.length; i++ ) { await wait( 1100 + Math.random() * 600 ); if ( tok !== chat.tok ) return; items[ i ].classList.add( 'on' ); bar.style.width = Math.round( ( i + 1 ) / items.length * 100 ) + '%'; }
+		await wait( 1000 ); if ( tok !== chat.tok ) return;
+		ov.classList.add( 'out' ); await wait( 700 ); if ( tok !== chat.tok ) return;
 		closeChat(); showResult();
 	};
-	const finish = async () => { chat.stage = 'done'; await say( [ pool( 'efc_close' ) ], { mood: 'cheer' } ); await wait( 400 ); return analysis(); };
+	const finish = async () => { chat.stage = 'done'; await say( [ pool( 'efc_close' ) ], { mood: 'cheer' } ); await wait( 900 ); return analysis(); };
 
+	const pickIdeas = async ( tok ) => {
+		await say( [ t( 'efc_pick' ) ], { mood: 'happy', delay: 1200 } ); if ( ! live( tok ) ) return;
+		setChips( String( t( 'efc_ideas' ) ).split( '|' ).map( ( l ) => ( { label: l, text: l.replace( /^[^\p{L}\p{N}]+/u, '' ) } ) ) );
+		const q = document.getElementById( 'efChatQ' ); if ( q && ! reduceMotion() ) q.focus( { preventScroll: true } );
+	};
+	/** "Start over": the chat is wiped (the old one stays in the history) and eFriend jokes about it. */
+	const restartChat = async () => {
+		const box = chatBox(); if ( ! box ) return;
+		saveChat(); chat.tok++; chat.chain = chat.tok;
+		Object.assign( chat, { id: EX.uid(), ts: Date.now(), msgs: [], stage: 'what', item: '', who: '', cost: 0, by: undefined, typing: false, busy: false, ans: null, rec: null, sel: 0, mi: 0, chips: [] } );
+		const tok = chat.tok; hideTyping(); setChips( [] ); hideHist(); box.classList.add( 'clearing' ); await wait( 350 ); if ( tok !== chat.tok ) return;
+		box.innerHTML = ''; box.classList.remove( 'clearing' );
+		await say( [ pool( 'efc_reset' ) ], { mood: 'worried', delay: 1600 } ); if ( ! live( tok ) ) return;
+		return pickIdeas( tok );
+	};
 	EXA.efriendAskOpen = ( prefill ) => {
-		closeChat(); Object.assign( chat, { id: EX.uid(), ts: Date.now(), msgs: [], stage: 'what', item: '', cost: 0, by: undefined, typing: false, busy: false, ans: null, rec: null, sel: 0, chips: [], used: {}, anim: true } );
+		closeChat(); Object.assign( chat, { id: EX.uid(), ts: Date.now(), msgs: [], stage: 'what', item: '', who: '', mi: 0, cost: 0, by: undefined, typing: false, busy: false, ans: null, rec: null, sel: 0, chips: [], used: {}, anim: true } );
 		const ov = document.createElement( 'div' ); ov.className = 'ef-cp'; ov.setAttribute( 'role', 'dialog' ); ov.setAttribute( 'aria-modal', 'true' ); ov.setAttribute( 'aria-label', 'eFriend' );
-		ov.innerHTML = `<header class="ef-cp-h"><button type="button" class="ab-btn" data-ef-cpx aria-label="${ esc( t( 'close' ) ) }">${ UI.icon( 'x', 24 ) }</button><div class="ef-cp-who"><span class="ef-cp-av">${ F.mascot( 'happy', 46 ) }</span><div><b>eFriend</b><small id="efCpStat">${ esc( t( 'efc_online' ) ) }</small></div></div><button type="button" class="ab-btn ef-cp-hist" data-ef-hist aria-label="${ esc( t( 'efc_h_title' ) ) }" title="${ esc( t( 'efc_h_title' ) ) }">🕘</button></header>
+		ov.innerHTML = `<header class="ef-cp-h"><button type="button" class="ab-btn" data-ef-cpx aria-label="${ esc( t( 'close' ) ) }">${ UI.icon( 'x', 24 ) }</button><div class="ef-cp-who"><span class="ef-cp-av">${ F.mascot( 'happy', 46 ) }</span><div><b>eFriend</b><small id="efCpStat">${ esc( t( 'efc_online' ) ) }</small></div></div><button type="button" class="ab-btn ef-cp-clear" data-ef-clear aria-label="${ esc( t( 'efc_clear' ) ) }" title="${ esc( t( 'efc_clear' ) ) }">🧹</button><button type="button" class="ab-btn ef-cp-hist" data-ef-hist aria-label="${ esc( t( 'efc_h_title' ) ) }" title="${ esc( t( 'efc_h_title' ) ) }">🕘</button></header>
 			<div id="efChat" class="ef-chat" aria-live="polite"></div><div class="ef-chips" id="efChips"></div>
 			<form id="efChatForm" class="ef-chat-in" novalidate autocomplete="off"><input name="q" id="efChatQ" autocomplete="off" enterkeyhint="send" placeholder="${ esc( t( 'efAskPh' ) ) }" aria-label="${ esc( t( 'efAskQ' ) ) }"><button type="submit" class="btn btn-primary" aria-label="${ esc( t( 'efAskGo' ) ) }">➤</button></form>`;
 		document.body.appendChild( ov ); document.body.classList.add( 'ef-ob-open' );
 		ov.addEventListener( 'keydown', ( e ) => { if ( e.key === 'Escape' ) closeChat(); } );
-		const tok = chat.tok;
+		const tok = chat.tok; chat.chain = tok;
 		( async () => {
-			if ( prefill && prefill.reuse ) { const r = prefill.reuse; chat.item = r.item || ''; chat.cost = r.cost || 0; chat.by = r.by; await say( [ pool( 'efc_back', { item: r.item || t( 'efAskThing' ) } ) ], { mood: 'cheer', delay: 800 } ); if ( ! live( tok ) ) return; return chat.cost ? ( chat.by === undefined ? nextQ() : recap() ) : nextQ(); }
+			if ( prefill && prefill.reuse ) { const r = prefill.reuse; chat.item = r.item || ''; chat.who = r.who || ''; chat.cost = r.cost || 0; chat.by = r.by; await say( [ pool( 'efc_back', { item: r.item || t( 'efAskThing' ) } ) ], { mood: 'cheer', delay: 800 } ); if ( ! live( tok ) ) return; return chat.cost ? ( chat.by === undefined ? nextQ() : recap() ) : nextQ(); }
 			if ( prefill && prefill.hist ) showHist();
-			await say( [ pool( 'efc_hi' ) ], { mood: 'cheer', delay: 800 } ); if ( ! live( tok ) ) return;
+			await say( [ pool( 'efc_hi' ) ], { mood: 'cheer', delay: 1500 } ); if ( ! live( tok ) ) return;
 			if ( prefill && prefill.text ) return onUser( prefill.text );
-			await say( [ t( 'efc_pick' ) ], { mood: 'happy', delay: 600 } ); if ( ! live( tok ) ) return;
-			setChips( String( t( 'efc_ideas' ) ).split( '|' ).map( ( l ) => ( { label: l, text: l.replace( /^[^\p{L}\p{N}]+/u, '' ) } ) ) );
-			const q = document.getElementById( 'efChatQ' ); if ( q && ! reduceMotion() ) q.focus( { preventScroll: true } );
+			return pickIdeas( tok );
 		} )();
 	};
 	document.addEventListener( 'submit', ( e ) => {
 		const f = e.target; if ( f.id !== 'efChatForm' ) return; e.preventDefault();
 		const q = f.elements.q.value.trim(); if ( ! q || chat.busy ) return; f.elements.q.value = ''; onUser( q );
 	} );
-	const openPlan = ( dl ) => { const ic = F.askIcon( chat.item ); UI.closeSheet && UI.closeSheet( true ); setTimeout( () => EXA.openEfPlan( null, Object.assign( { name: chat.item || t( 'efAskThing' ), target: String( chat.cost / 100 ), icon: ic.icon }, dl ? { deadline: dl > today() ? dl : addDays( today(), 1 ) } : {} ) ), 220 ); };
+	const openPlan = ( dl ) => { const ic = F.askIcon( chat.item ); UI.closeSheet && UI.closeSheet( true ); setTimeout( () => EXA.openEfPlan( null, Object.assign( { name: ( chat.item || t( 'efAskThing' ) ) + ( chat.who ? ' ' + forWho() : '' ), target: String( chat.cost / 100 ), icon: ic.icon }, dl ? { deadline: dl > today() ? dl : addDays( today(), 1 ) } : {} ) ), 220 ); };
 	document.addEventListener( 'click', ( e ) => {
 		const tg = e.target.closest ? e.target : null; if ( ! tg ) return;
 		if ( tg.closest( '[data-ef-ask]' ) ) { e.preventDefault(); EXA.efriendAskOpen(); return; }
 		if ( tg.closest( '[data-ef-cpx]' ) ) { closeChat(); return; }
+		if ( tg.closest( '[data-ef-clear]' ) ) { restartChat(); return; }
 		if ( tg.closest( '[data-ef-hist]' ) ) { showHist(); return; }
 		if ( tg.closest( '[data-ef-hist-open]' ) ) { e.preventDefault(); EXA.efriendAskOpen( { hist: true } ); return; }
 		if ( tg.closest( '[data-ef-hback]' ) ) { const open = document.querySelector( '.ef-hist .ef-hist-chat' ); if ( open ) showHist(); else hideHist(); return; }
@@ -1222,6 +1253,7 @@
 		const ha = tg.closest( '[data-ef-hagain]' ); if ( ha ) { const r = histList().find( ( x ) => x.id === ha.dataset.efHagain ); if ( r ) EXA.efriendAskOpen( { reuse: r } ); return; }
 		const hd = tg.closest( '[data-ef-hdel]' ); if ( hd ) { const l = histList(), i = l.findIndex( ( x ) => x.id === hd.dataset.efHdel ); if ( i >= 0 ) { l.splice( i, 1 ); S().settings.u = Date.now(); try { EX.persist(); } catch ( x ) { /* ignore */ } } showHist(); return; }
 		const q = tg.closest( '[data-ef-q]' ); if ( q ) { const c = chat.chips[ Number( q.dataset.efQ ) ]; if ( c && ! chat.busy ) onUser( c.text || c.label.replace( /^[^\p{L}\p{N}]+/u, '' ), c ); return; }
+		const mo = tg.closest( '[data-ef-mon]' ); if ( mo && chat.ans ) { chat.mi = Math.max( 0, Math.min( monthsOf( chat.ans ).length - 1, chat.mi + Number( mo.dataset.efMon ) ) ); repaintResult(); return; }
 		const d = tg.closest( '[data-ef-askday]' ); if ( d && chat.ans ) { chat.sel = Number( d.dataset.efAskday ); repaintResult(); return; }
 		if ( tg.closest( '[data-ef-again]' ) ) { UI.closeSheet && UI.closeSheet( true ); setTimeout( () => EXA.efriendAskOpen(), 220 ); return; }
 		const pl = tg.closest( '[data-ef-askplan]' ); if ( pl ) openPlan( pl.dataset.efAskplan );
@@ -1799,5 +1831,23 @@
 		efc_h_back: 'Πίσω',
 		efc_h_del: 'Διαγραφή',
 		efc_back: 'Ξανά εδώ; 😏 Την προηγούμενη φορά κοιτάξαμε: **{item}**. Ας το ελέγξουμε ξανά με τους σημερινούς αριθμούς.|Ωχ, δεύτερος γύρος! 🥊 Πάλι **{item}**. Τα πράγματα μπορεί να άλλαξαν, ας δούμε.|Ντεζαβού! 🔁 Το **{item}** επέστρεψε. Τώρα έχω φρεσκότερους αριθμούς.',
+	} );
+	Object.assign( window.EXPENITY_I18N.langs.en, {
+		efc_for: 'for',
+		efc_re_for: '{item} {forwho}? 🎁 Aww, somebody is lucky.|A {item} {forwho}! 🥰 Good taste, and good intentions.|{item} {forwho}… 🎀 Okay, now I am emotionally invested.',
+		efc_re_watch: '{item}! ⌚ Time is money, so let us spend it wisely.|A watch! ⌚ Finally, something that is always on time. Unlike me.|{item}… ⌚ Tick tock, I like where this is going.',
+	} );
+	Object.assign( window.EXPENITY_I18N.langs.el, {
+		efc_for: 'για',
+		efc_re_for: '{item} {forwho}; 🎁 Αχ, κάποιος είναι τυχερός.|{item} {forwho}! 🥰 Καλό γούστο και καλές προθέσεις.|{item} {forwho}… 🎀 Εντάξει, τώρα συγκινήθηκα.',
+		efc_re_watch: '{item}! ⌚ Ο χρόνος είναι χρήμα, ας τον ξοδέψουμε σοφά.|Ρολόι! ⌚ Επιτέλους κάτι που είναι πάντα στην ώρα του. Αντίθετα από εμένα.|{item}… ⌚ Τικ τακ, μου αρέσει πού το πάει.',
+	} );
+	Object.assign( window.EXPENITY_I18N.langs.en, {
+		efc_clear: 'Start over',
+		efc_reset: 'Hmm, I think we got lost in translation. 🙈 Be gentle with me: short descriptions work best.|Whoa, clean slate! 🧽 I have already forgotten everything. Mostly. Tell me again, nice and simple.|Rebooting… 🔄 beep boop. Okay, I am back. What were we buying?|Let us pretend that never happened. 🤫 New chat, new me. What are we shopping for?|Oops, did I mess up? 😅 My bad. One thing at a time, short and sweet, and I will keep up.|Memory wiped, dignity intact. 🧠✨ So… what is on your mind?|Fresh page, fresh start! 📄 Tell me what you want, like “watch 300”. I am a quick learner. Sometimes.',
+	} );
+	Object.assign( window.EXPENITY_I18N.langs.el, {
+		efc_clear: 'Ξεκινήστε από την αρχή',
+		efc_reset: 'Χμ, νομίζω ότι χαθήκαμε στη μετάφραση. 🙈 Να είστε επιεικής μαζί μου: οι σύντομες περιγραφές δουλεύουν καλύτερα.|Ουάου, καθαρή σελίδα! 🧽 Τα ξέχασα ήδη όλα. Σχεδόν. Πείτε μου ξανά, απλά και καθαρά.|Επανεκκίνηση… 🔄 μπιπ μπουπ. Εντάξει, επέστρεψα. Τι αγοράζαμε;|Ας υποθέσουμε ότι δεν έγινε ποτέ. 🤫 Νέα συζήτηση, νέος εγώ. Τι ψωνίζουμε;|Ωχ, τα μπέρδεψα; 😅 Δικό μου λάθος. Ένα πράγμα τη φορά, σύντομα και ωραία, και θα σας παρακολουθήσω.|Μνήμη σβησμένη, αξιοπρέπεια ανέπαφη. 🧠✨ Λοιπόν… τι έχετε στο μυαλό σας;|Καθαρή σελίδα, νέα αρχή! 📄 Πείτε μου τι θέλετε, όπως «ρολόι 300». Μαθαίνω γρήγορα. Μερικές φορές.',
 	} );
 }() );

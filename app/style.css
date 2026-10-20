@@ -1541,3 +1541,12 @@ input[type=date]::-webkit-datetime-edit{padding:0}
 .ef-hist-empty { padding: 24px; text-align: center; }
 .ef-hist-chat { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 12px; }
 .ef-hist-act { padding: 10px 12px 12px; display: flex; gap: 8px; }
+
+.ef-cal-nav { display: flex; align-items: center; justify-content: space-between; margin: 4px 0 8px; }
+.ef-cal-nav b { text-transform: capitalize; font-size: 1.05rem; }
+.ef-cal-nav .ab-btn { font-size: 1.6rem; line-height: 1; width: 44px; height: 44px; }
+.ef-cal-nav .ab-btn:disabled { opacity: .25; }
+.ef-hero-btns { margin: 8px 0 12px; }
+.ef-cp-clear { margin-left: auto; font-size: 1.25rem; } .ef-cp-clear + .ef-cp-hist { margin-left: 0; }
+.ef-chat { transition: opacity .3s, transform .3s; } .ef-chat.clearing { opacity: 0; transform: scale(.97); }
+.ef-ico { color: #0f766e; flex: none; } .ef-av .ef-ico { width: 34px; height: auto; margin-bottom: 4px; } .ef-av { width: 34px; }

@@ -1,6 +1,24 @@
 {
-  "version": "0.53.0",
+  "version": "0.53.1",
   "releases": [
+    {
+      "version": "0.53.1",
+      "date": "2026-11-02",
+      "en": [
+        "eFriend understands sentences better: “I want to buy a new watch for my girlfriend” is read as a watch, for your girlfriend, not as a pile of words.",
+        "The chat is calmer: messages no longer flicker, eFriend types at a natural pace, and the analysis takes its time.",
+        "The result now shows the Make it a plan button at the top and a calendar one month at a time, opened on the best day, with arrows.",
+        "Start over: clear the chat at any time and eFriend jokes about it. The old chat stays in your history.",
+        "A small outline of eFriend replaces the full robot in repeated places, so only one big robot shows per page."
+      ],
+      "el": [
+        "Το eFriend καταλαβαίνει καλύτερα τις προτάσεις: το «Θέλω να αγοράσω ένα ρολόι για τη φίλη μου» διαβάζεται ως ρολόι, για τη φίλη σας, και όχι ως σωρός λέξεων.",
+        "Η συζήτηση είναι πιο ήρεμη: τα μηνύματα δεν τρεμοπαίζουν, το eFriend πληκτρολογεί με φυσικό ρυθμό και η ανάλυση παίρνει το χρόνο της.",
+        "Το αποτέλεσμα δείχνει πλέον το κουμπί «Κάντε το σχέδιο» στην κορυφή και ημερολόγιο ανά μήνα, με άνοιγμα στην καλύτερη ημέρα και βέλη.",
+        "Ξεκινήστε από την αρχή: καθαρίστε τη συζήτηση όποτε θέλετε και το eFriend θα κάνει αστείο. Η παλιά συζήτηση μένει στο ιστορικό σας.",
+        "Ένα μικρό περίγραμμα του eFriend αντικαθιστά το πλήρες ρομπότ σε επαναλαμβανόμενα σημεία, ώστε να φαίνεται ένα μεγάλο ρομπότ ανά σελίδα."
+      ]
+    },
     {
       "version": "0.53.0",
       "date": "2026-11-01",
