@@ -1067,7 +1067,7 @@
 		return { cost, days, tl: tl.slice( 0, N ), cushion, today: days[ 0 ], best: first, first, anyOk: days.some( ( x ) => x.st !== 'avoid' ), maxSafe, monthly: b.monthly, incomeMonthly: b.incomeMonthly, hasIncome: b.hasIncome };
 	};
 	/* ------------------------------------------------------------------ The chat: eFriend interviews you (what, how much, how soon), then brings the full analysis back to the app */
-	const chat = { over: false, stuck: 0, turns: 0, formOffered: false, restarts: 0, timer: 0, chain: 0, id: '', ts: 0, msgs: [], stage: 'what', item: '', who: '', mi: 0, cost: 0, by: undefined, typing: false, busy: false, tok: 0, used: {}, ans: null, rec: null, sel: 0, chips: [], anim: true };
+	const chat = { locked: false, over: false, stuck: 0, turns: 0, formOffered: false, restarts: 0, timer: 0, chain: 0, id: '', ts: 0, msgs: [], stage: 'what', item: '', who: '', mi: 0, cost: 0, by: undefined, typing: false, busy: false, tok: 0, used: {}, ans: null, rec: null, sel: 0, chips: [], anim: true };
 	const money$ = ( c ) => money( c / 100, main() );
 	const itemName = () => chat.item || t( 'efAskThing' );
 	const forWho = () => ( chat.who ? t( 'efc_for' ) + ' ' + chat.who : '' );
@@ -1100,12 +1100,14 @@
 	const zeroPh = () => '0' + marks().dec + '00';
 	/** While eFriend waits for a price the keyboard is numeric and only numbers can be typed. */
 	/** While eFriend waits for a price, the box becomes a numeric one (decimal keyboard); Expenity's amount fields then group the digits as they are typed and refuse letters. */
+	/** While eFriend waits for a choice (form or keep chatting) or the form is open, the text box rests. */
+	const lockInput = ( on, ph ) => { chat.locked = !! on; const q = document.getElementById( 'efChatQ' ); if ( ! q || chat.over ) return; q.disabled = !! on; const b = q.parentNode.querySelector( 'button' ); if ( b ) b.disabled = !! on; if ( on ) { q.value = ''; q.placeholder = ph || ''; } else q.placeholder = chat.stage === 'price' ? zeroPh() : t( 'efAskPh' ); };
 	const syncInput = () => {
 		const q = document.getElementById( 'efChatQ' ); if ( ! q || chat.over ) return; const price = chat.stage === 'price';
 		if ( ( q.getAttribute( 'inputmode' ) === 'decimal' ) === price ) return;
 		const n = document.createElement( 'input' ); n.name = 'q'; n.id = 'efChatQ'; n.autocomplete = 'off'; n.setAttribute( 'enterkeyhint', 'send' ); n.setAttribute( 'aria-label', q.getAttribute( 'aria-label' ) || '' );
 		if ( price ) { n.setAttribute( 'inputmode', 'decimal' ); n.placeholder = zeroPh(); } else n.placeholder = t( 'efAskPh' );
-		const had = document.activeElement === q; q.replaceWith( n ); if ( had ) n.focus( { preventScroll: true } );
+		n.disabled = !! chat.locked; if ( chat.locked ) n.placeholder = q.placeholder; const had = document.activeElement === q; q.replaceWith( n ); if ( had ) n.focus( { preventScroll: true } );
 	};
 	const live = ( tok ) => tok === chat.tok && document.getElementById( 'efChat' );
 
@@ -1131,6 +1133,7 @@
 	const say = async ( lines, o = {} ) => {
 		if ( chat.chain !== chat.tok ) return;
 		const tok = chat.tok, txt = [].concat( lines ).join( ' ' ), len = txt.length;
+		if ( o.instant ) { const m = { who: 'ef', lines: [].concat( lines ), mood: o.mood }; chat.msgs.push( m ); appendMsg( m ); setMood( o.mood ); scrollEnd(); syncInput(); saveChat(); return; }
 		await wait( 380 ); if ( ! live( tok ) ) return;
 		chat.typing = true; setMood( o.mood ); showTyping(); scrollEnd();
 		await wait( o.delay || Math.max( 1100, Math.min( 3600, 850 + len * 32 ) ) );
@@ -1234,8 +1237,8 @@
 
 	/** When the chat goes round in circles: offer the quick form (what, how much, when) inside the chat. The person can always decline. */
 	const offerForm = async () => {
-		if ( chat.busy || chat.over ) return; chat.busy = true; const tok = chat.tok; chat.chain = tok; chat.formOffered = true;
-		try { await say( [ pool( 'efc_f_offer' ) ], { mood: 'happy' } ); if ( ! live( tok ) ) return; setChips( [ { k: 'form', label: '📝 ' + t( 'efc_f_chip' ) }, { k: 'keep', label: '💬 ' + t( 'efc_f_keep' ) } ] ); } finally { if ( tok === chat.tok ) chat.busy = false; }
+		if ( chat.busy || chat.over ) return; chat.busy = true; const tok = chat.tok; chat.chain = tok; chat.formOffered = true; lockInput( true, t( 'efc_f_choose' ) );
+		try { await say( [ pool( 'efc_f_offer' ) ], { mood: 'happy', instant: true } ); if ( ! live( tok ) ) return; setChips( [ { k: 'form', label: '📝 ' + t( 'efc_f_chip' ) }, { k: 'keep', label: '💬 ' + t( 'efc_f_keep' ) } ] ); } finally { if ( tok === chat.tok ) chat.busy = false; }
 	};
 	const onUser = async ( text, chip ) => {
 		if ( chat.over || chat.busy ) return; chat.turns++;
@@ -1250,14 +1253,14 @@
 		chat.busy = true; const tok = chat.tok; chat.chain = tok;
 		try {
 			if ( ! force ) { const mm = { who: 'me', text: '📝 ' + t( 'efc_f_chip' ) }; chat.msgs.push( mm ); appendMsg( mm ); setChips( [] ); scrollEnd(); await wait( 500 ); }
-			await say( [ pool( 'efc_f_ask' ) ], { mood: 'cheer', delay: force ? 600 : undefined } ); if ( ! live( tok ) ) return;
+			lockInput( true, t( 'efc_f_filling' ) ); await say( [ pool( 'efc_f_ask' ) ], { mood: 'cheer', instant: true } ); if ( ! live( tok ) ) return;
 			const fm = { who: 'ef', form: true, lines: [] }; chat.msgs.push( fm ); appendMsg( fm ); scrollEnd();
 			const first = document.querySelector( '#efQForm input[name=what]' ); if ( first && ! reduceMotion() ) first.focus( { preventScroll: true } );
 		} finally { if ( tok === chat.tok ) chat.busy = false; }
 	};
 	const keepChatting = async () => {
 		if ( chat.busy || chat.over ) return; chat.busy = true; const tok = chat.tok; chat.chain = tok;
-		try { const mm = { who: 'me', text: '💬 ' + t( 'efc_f_keep' ) }; chat.msgs.push( mm ); appendMsg( mm ); setChips( [] ); scrollEnd(); chat.stuck = -3; chat.turns = 0; await wait( 500 ); await say( [ pool( 'efc_f_keepsay' ) ], { mood: 'cheer' } ); } finally { if ( tok === chat.tok ) chat.busy = false; }
+		try { const mm = { who: 'me', text: '💬 ' + t( 'efc_f_keep' ) }; chat.msgs.push( mm ); appendMsg( mm ); setChips( [] ); scrollEnd(); chat.stuck = -3; chat.turns = 0; lockInput( false ); await say( [ pool( 'efc_f_keepsay' ) ], { mood: 'cheer', instant: true } ); } finally { if ( tok === chat.tok ) chat.busy = false; }
 	};
 	document.addEventListener( 'change', ( e ) => {
 		const f = e.target.closest && e.target.closest( '#efQForm' ); if ( ! f ) return;
@@ -1270,7 +1273,7 @@
 		if ( chat.busy || chat.over ) return;
 		const what = f.elements.what.value.trim(), cost = amtCents( f.elements.cost.value ), when = f.elements.when.value, norush = f.elements.norush.checked, err = document.getElementById( 'efQErr' );
 		if ( ! what || ! cost ) { err.textContent = t( 'efc_f_err' ); err.hidden = false; return; }
-		chat.busy = true; const tok = chat.tok; chat.chain = tok;
+		chat.busy = true; const tok = chat.tok; chat.chain = tok; lockInput( false );
 		try {
 			chat.item = what.charAt( 0 ).toUpperCase() + what.slice( 1 ); chat.cost = cost; chat.who = ''; chat.by = norush || ! when ? null : Math.max( 0, diff( when, today() ) );
 			const node = f.closest( '.ef-msg' ), idx = chat.msgs.findIndex( ( x ) => x.form ); if ( idx >= 0 ) chat.msgs[ idx ] = { who: 'me', text: `${ chat.item } · ${ money$( cost ) } · ${ whenWords( chat.by ) }` };
@@ -1281,7 +1284,7 @@
 	/** Time is up (five minutes), or the app was closed mid-chat: eFriend falls asleep, and says so. */
 	const sleepChat = async ( kind ) => {
 		const box = chatBox(); if ( ! box || chat.over ) return;
-		chat.over = true; chat.tok++; chat.chain = chat.tok; chat.busy = false; chat.typing = false; clearTimeout( chat.timer ); hideTyping(); setChips( [] );
+		chat.over = true; chat.locked = false; chat.tok++; chat.chain = chat.tok; chat.busy = false; chat.typing = false; clearTimeout( chat.timer ); hideTyping(); setChips( [] );
 		const q = document.getElementById( 'efChatQ' ); if ( q ) { q.value = ''; q.disabled = true; q.placeholder = t( 'efc_zzz_ph' ); const b = q.parentNode.querySelector( 'button' ); if ( b ) b.disabled = true; }
 		setMood( 'meh' ); const m = { who: 'ef', lines: [ pool( kind === 'timeout' ? 'efc_timeout' : 'efc_sleep' ) ], mood: 'meh' }; chat.msgs.push( m ); appendMsg( m ); scrollEnd();
 		const st = document.getElementById( 'efCpStat' ); if ( st ) st.textContent = t( 'efc_asleep' );
@@ -1405,14 +1408,14 @@
 	const restartChat = async () => {
 		const box = chatBox(); if ( ! box ) return;
 		saveChat(); chat.tok++; chat.chain = chat.tok;
-		chat.restarts++; Object.assign( chat, { stuck: 0, turns: 0, formOffered: false, over: false, id: EX.uid(), ts: Date.now(), msgs: [], stage: 'what', item: '', who: '', cost: 0, by: undefined, typing: false, busy: false, ans: null, rec: null, sel: 0, mi: 0, chips: [] } );
-		const tok = chat.tok; hideTyping(); setChips( [] ); hideHist(); box.classList.add( 'clearing' ); await wait( 350 ); if ( tok !== chat.tok ) return;
+		chat.restarts++; Object.assign( chat, { locked: false, stuck: 0, turns: 0, formOffered: false, over: false, id: EX.uid(), ts: Date.now(), msgs: [], stage: 'what', item: '', who: '', cost: 0, by: undefined, typing: false, busy: false, ans: null, rec: null, sel: 0, mi: 0, chips: [] } );
+		const tok = chat.tok; lockInput( false ); hideTyping(); setChips( [] ); hideHist(); box.classList.add( 'clearing' ); await wait( 350 ); if ( tok !== chat.tok ) return;
 		box.innerHTML = ''; box.classList.remove( 'clearing' );
 		await say( [ pool( 'efc_reset' ) ], { mood: 'worried', delay: 1360 } ); if ( ! live( tok ) ) return;
 		await pickIdeas( tok ); if ( chat.restarts >= 2 && live( tok ) ) await offerForm();
 	};
 	EXA.efriendAskOpen = ( prefill ) => {
-		closeChat(); Object.assign( chat, { stuck: 0, turns: 0, formOffered: false, over: false, restarts: 0, id: EX.uid(), ts: Date.now(), msgs: [], stage: 'what', item: '', who: '', mi: 0, cost: 0, by: undefined, typing: false, busy: false, ans: null, rec: null, sel: 0, chips: [], used: {}, anim: true } );
+		closeChat(); Object.assign( chat, { locked: false, stuck: 0, turns: 0, formOffered: false, over: false, restarts: 0, id: EX.uid(), ts: Date.now(), msgs: [], stage: 'what', item: '', who: '', mi: 0, cost: 0, by: undefined, typing: false, busy: false, ans: null, rec: null, sel: 0, chips: [], used: {}, anim: true } );
 		const ov = document.createElement( 'div' ); ov.className = 'ef-cp'; ov.setAttribute( 'role', 'dialog' ); ov.setAttribute( 'aria-modal', 'true' ); ov.setAttribute( 'aria-label', 'eFriend' );
 		ov.innerHTML = `<header class="ef-cp-h"><button type="button" class="ab-btn" data-ef-cpx aria-label="${ esc( t( 'close' ) ) }">${ UI.icon( 'x', 24 ) }</button><div class="ef-cp-who"><span class="ef-cp-av">${ F.mascot( 'happy', 46 ) }</span><div><b>eFriend</b><small id="efCpStat">${ esc( t( 'efc_online' ) ) }</small></div></div><button type="button" class="ab-btn ef-cp-skip" data-ef-skip aria-label="${ esc( t( 'efc_skip' ) ) }" title="${ esc( t( 'efc_skip' ) ) }">📝</button><button type="button" class="ab-btn ef-cp-clear" data-ef-clear aria-label="${ esc( t( 'efc_clear' ) ) }" title="${ esc( t( 'efc_clear' ) ) }">🧹</button><button type="button" class="ab-btn ef-cp-hist" data-ef-hist aria-label="${ esc( t( 'efc_h_title' ) ) }" title="${ esc( t( 'efc_h_title' ) ) }">🕘</button></header>
 			<div id="efChat" class="ef-chat" aria-live="polite"></div><div class="ef-chips" id="efChips"></div>
@@ -2244,5 +2247,13 @@
 	Object.assign( window.EXPENITY_I18N.langs.el, {
 		efc_c_about: 'Πες μου για σένα',
 		efc_c_likes: 'Τι αγαπάς;',
+	} );
+	Object.assign( window.EXPENITY_I18N.langs.en, {
+		efc_f_choose: 'Pick an option above',
+		efc_f_filling: 'Fill in the form above',
+	} );
+	Object.assign( window.EXPENITY_I18N.langs.el, {
+		efc_f_choose: 'Διαλέξτε μία επιλογή παραπάνω',
+		efc_f_filling: 'Συμπληρώστε τη φόρμα παραπάνω',
 	} );
 }() );

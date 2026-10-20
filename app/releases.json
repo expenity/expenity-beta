@@ -1,6 +1,16 @@
 {
-  "version": "0.54.6",
+  "version": "0.54.7",
   "releases": [
+    {
+      "version": "0.54.7",
+      "date": "2026-10-20",
+      "en": [
+        "When eFriend offers the quick form, he now answers instantly (no typing pause) and the text box rests until you choose, or while the form is open, so there is no odd overlap."
+      ],
+      "el": [
+        "Όταν το eFriend προσφέρει τη γρήγορη φόρμα, απαντά πλέον αμέσως (χωρίς παύση πληκτρολόγησης) και το πεδίο κειμένου ξεκουράζεται μέχρι να διαλέξετε ή όσο η φόρμα είναι ανοιχτή, ώστε να μην υπάρχει περίεργη επικάλυψη."
+      ]
+    },
     {
       "version": "0.54.6",
       "date": "2026-10-20",
