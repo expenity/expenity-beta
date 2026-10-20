@@ -1,6 +1,20 @@
 {
-  "version": "0.50.2",
+  "version": "0.50.3",
   "releases": [
+    {
+      "version": "0.50.3",
+      "date": "2026-10-24",
+      "en": [
+        "eFriend now handles several plans at once. They are checked by date and share your money, so one plan never counts the same money as another. Home shows all your plans together with a verdict for each, and you can group plans (for example Summer 2027) and see an analysis for the whole group or for all plans together.",
+        "New eFriend tab in Reports: how ready you are for each plan over time, and how your weekly spending on wants compares with before you made your first plan.",
+        "Fixed: sorting your spending in eFriend's analysis now uses the same slick three-way toggle as the tour."
+      ],
+      "el": [
+        "Το eFriend πλέον χειρίζεται πολλά σχέδια ταυτόχρονα. Ελέγχονται ανά ημερομηνία και μοιράζονται τα χρήματά σας, ώστε ένα σχέδιο να μην μετράει τα ίδια χρήματα με ένα άλλο. Η Αρχική δείχνει όλα τα σχέδιά σας μαζί με ένα αποτέλεσμα για το καθένα και μπορείτε να ομαδοποιήσετε σχέδια (για παράδειγμα Καλοκαίρι 2027) και να δείτε ανάλυση για ολόκληρη την ομάδα ή για όλα τα σχέδια μαζί.",
+        "Νέα καρτέλα eFriend στις Αναφορές: πόσο έτοιμοι είστε για κάθε σχέδιο με την πάροδο του χρόνου και πώς συγκρίνονται τα εβδομαδιαία έξοδά σας για επιθυμίες με το πριν από το πρώτο σας σχέδιο.",
+        "Διορθώθηκε: η ταξινόμηση των εξόδων στην ανάλυση του eFriend χρησιμοποιεί πλέον τον ίδιο κομψό διακόπτη τριών θέσεων με την περιήγηση."
+      ]
+    },
     {
       "version": "0.50.2",
       "date": "2026-10-24",
