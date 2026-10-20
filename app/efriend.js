@@ -1067,7 +1067,7 @@
 		return { cost, days, tl: tl.slice( 0, N ), cushion, today: days[ 0 ], best: first, first, anyOk: days.some( ( x ) => x.st !== 'avoid' ), maxSafe, monthly: b.monthly, incomeMonthly: b.incomeMonthly, hasIncome: b.hasIncome };
 	};
 	/* ------------------------------------------------------------------ The chat: eFriend interviews you (what, how much, how soon), then brings the full analysis back to the app */
-	const chat = { locked: false, over: false, stuck: 0, turns: 0, formOffered: false, restarts: 0, timer: 0, chain: 0, id: '', ts: 0, msgs: [], stage: 'what', item: '', who: '', mi: 0, cost: 0, by: undefined, typing: false, busy: false, tok: 0, used: {}, ans: null, rec: null, sel: 0, chips: [], anim: true };
+	const chat = { more: false, locked: false, over: false, stuck: 0, turns: 0, formOffered: false, restarts: 0, timer: 0, chain: 0, id: '', ts: 0, msgs: [], stage: 'what', item: '', who: '', mi: 0, cost: 0, by: undefined, typing: false, busy: false, tok: 0, used: {}, ans: null, rec: null, sel: 0, chips: [], anim: true };
 	const money$ = ( c ) => money( c / 100, main() );
 	const itemName = () => chat.item || t( 'efAskThing' );
 	const forWho = () => ( chat.who ? t( 'efc_for' ) + ' ' + chat.who : '' );
@@ -1126,7 +1126,8 @@
 	const setMood = ( m ) => { const av = document.querySelector( '.ef-cp-av' ); if ( av && m ) av.innerHTML = F.mascot( m, 46 ); };
 	const setChips = ( list ) => {
 		chat.chips = list || []; const box = document.getElementById( 'efChips' ); if ( ! box ) return;
-		box.innerHTML = chat.chips.map( ( c, i ) => `<button type="button" class="ef-chipq${ c.k === 'yes' ? ' go' : '' }" style="--i:${ i }" data-ef-q="${ i }">${ esc( c.label ) }</button>` ).join( '' );
+		box.classList.toggle( 'open', !! chat.more && chat.chips.some( ( c ) => c.k === 'head' ) );
+		box.innerHTML = chat.chips.map( ( c, i ) => c.k === 'head' ? `<p class="ef-chiph">${ esc( c.label ) }</p>` : `<button type="button" class="ef-chipq${ c.k === 'yes' ? ' go' : c.k === 'more' ? ' more' : '' }" style="--i:${ i }" data-ef-q="${ i }">${ esc( c.label ) }</button>` ).join( '' );
 		requestAnimationFrame( () => scrollEnd() ); setTimeout( scrollEnd, 120 );
 	};
 	/** eFriend "types" for a moment, then speaks: the pause is part of the charm. */
@@ -1146,6 +1147,13 @@
 		chat.stage = 'confirm'; chat.stuck = 0;
 		await say( [ pool( 'efc_recap' ), `${ F.askIcon( chat.item ).em } **${ itemName() }**${ chat.who ? ' ' + forWho() : '' } · **${ money$( chat.cost ) }** · ${ whenWords( chat.by ) }`, pool( 'efc_right' ) ], { mood: 'happy' } );
 		setChips( [ { k: 'yes', label: '✅ ' + t( 'efc_yes' ) }, { k: 'fix', label: '✏️ ' + t( 'efChatFix' ) } ] );
+	};
+	/** The chips at the start: a few ideas, an About eFriend button and a More button that opens every idea and the questions to ask him. */
+	const startChips = () => {
+		const ideas = String( t( 'efc_ideas_all' ) ).split( '|' ).map( ( l ) => ( { label: l, text: l.replace( /^[^\p{L}\p{N}]+/u, '' ) } ) );
+		if ( ! chat.more ) return setChips( ideas.slice( 0, 4 ).concat( [ { k: 'persona', topic: 'story', label: '🤖 ' + t( 'efc_c_about' ), text: t( 'efc_c_about' ) }, { k: 'more', label: '➕ ' + t( 'efc_more' ) } ] ) );
+		const asks = String( t( 'efc_asks' ) ).split( '|' ).map( ( x ) => { const i = x.indexOf( ':' ); return { k: 'persona', topic: x.slice( 0, i ), label: x.slice( i + 1 ), text: x.slice( i + 1 ).replace( /^[^\p{L}\p{N}]+/u, '' ) }; } );
+		setChips( [ { k: 'head', label: t( 'efc_h_buy' ) } ].concat( ideas, [ { k: 'head', label: t( 'efc_h_know' ) } ], asks, [ { k: 'more', label: '➖ ' + t( 'efc_less' ) } ] ) );
 	};
 	const aboutChips = () => [ { k: 'persona', topic: 'story', label: '🤖 ' + t( 'efc_c_about' ), text: t( 'efc_c_about' ) }, { k: 'persona', topic: 'likes', label: '🎶 ' + t( 'efc_c_likes' ), text: t( 'efc_c_likes' ) } ];
 	const whenChips = () => setChips( [ { by: 3, label: '🔥 ' + t( 'efc_wc1' ) }, { by: 14, label: '📅 ' + t( 'efc_wc2' ) }, { by: 30, label: '🗓️ ' + t( 'efc_wc3' ) }, { by: null, label: '🕊️ ' + t( 'efc_wc4' ) } ].concat( aboutChips() ) );
@@ -1401,21 +1409,21 @@
 
 	const pickIdeas = async ( tok ) => {
 		await say( [ t( 'efc_pick' ) ], { mood: 'happy', delay: 1020 } ); if ( ! live( tok ) ) return;
-		setChips( String( t( 'efc_ideas' ) ).split( '|' ).map( ( l ) => ( { label: l, text: l.replace( /^[^\p{L}\p{N}]+/u, '' ) } ) ).concat( aboutChips() ) );
+		startChips();
 		const q = document.getElementById( 'efChatQ' ); if ( q && ! reduceMotion() ) q.focus( { preventScroll: true } );
 	};
 	/** "Start over": the chat is wiped (the old one stays in the history) and eFriend jokes about it. */
 	const restartChat = async () => {
 		const box = chatBox(); if ( ! box ) return;
 		saveChat(); chat.tok++; chat.chain = chat.tok;
-		chat.restarts++; Object.assign( chat, { locked: false, stuck: 0, turns: 0, formOffered: false, over: false, id: EX.uid(), ts: Date.now(), msgs: [], stage: 'what', item: '', who: '', cost: 0, by: undefined, typing: false, busy: false, ans: null, rec: null, sel: 0, mi: 0, chips: [] } );
+		chat.restarts++; Object.assign( chat, { more: false, locked: false, stuck: 0, turns: 0, formOffered: false, over: false, id: EX.uid(), ts: Date.now(), msgs: [], stage: 'what', item: '', who: '', cost: 0, by: undefined, typing: false, busy: false, ans: null, rec: null, sel: 0, mi: 0, chips: [] } );
 		const tok = chat.tok; lockInput( false ); hideTyping(); setChips( [] ); hideHist(); box.classList.add( 'clearing' ); await wait( 350 ); if ( tok !== chat.tok ) return;
 		box.innerHTML = ''; box.classList.remove( 'clearing' );
 		await say( [ pool( 'efc_reset' ) ], { mood: 'worried', delay: 1360 } ); if ( ! live( tok ) ) return;
 		await pickIdeas( tok ); if ( chat.restarts >= 2 && live( tok ) ) await offerForm();
 	};
 	EXA.efriendAskOpen = ( prefill ) => {
-		closeChat(); Object.assign( chat, { locked: false, stuck: 0, turns: 0, formOffered: false, over: false, restarts: 0, id: EX.uid(), ts: Date.now(), msgs: [], stage: 'what', item: '', who: '', mi: 0, cost: 0, by: undefined, typing: false, busy: false, ans: null, rec: null, sel: 0, chips: [], used: {}, anim: true } );
+		closeChat(); Object.assign( chat, { more: false, locked: false, stuck: 0, turns: 0, formOffered: false, over: false, restarts: 0, id: EX.uid(), ts: Date.now(), msgs: [], stage: 'what', item: '', who: '', mi: 0, cost: 0, by: undefined, typing: false, busy: false, ans: null, rec: null, sel: 0, chips: [], used: {}, anim: true } );
 		const ov = document.createElement( 'div' ); ov.className = 'ef-cp'; ov.setAttribute( 'role', 'dialog' ); ov.setAttribute( 'aria-modal', 'true' ); ov.setAttribute( 'aria-label', 'eFriend' );
 		ov.innerHTML = `<header class="ef-cp-h"><button type="button" class="ab-btn" data-ef-cpx aria-label="${ esc( t( 'close' ) ) }">${ UI.icon( 'x', 24 ) }</button><div class="ef-cp-who"><span class="ef-cp-av">${ F.mascot( 'happy', 46 ) }</span><div><b>eFriend</b><small id="efCpStat">${ esc( t( 'efc_online' ) ) }</small></div></div><button type="button" class="ab-btn ef-cp-skip" data-ef-skip aria-label="${ esc( t( 'efc_skip' ) ) }" title="${ esc( t( 'efc_skip' ) ) }">📝</button><button type="button" class="ab-btn ef-cp-clear" data-ef-clear aria-label="${ esc( t( 'efc_clear' ) ) }" title="${ esc( t( 'efc_clear' ) ) }">🧹</button><button type="button" class="ab-btn ef-cp-hist" data-ef-hist aria-label="${ esc( t( 'efc_h_title' ) ) }" title="${ esc( t( 'efc_h_title' ) ) }">🕘</button></header>
 			<div id="efChat" class="ef-chat" aria-live="polite"></div><div class="ef-chips" id="efChips"></div>
@@ -1458,7 +1466,7 @@
 		const ho = tg.closest( '[data-ef-hopen]' ); if ( ho ) { showHist( ho.dataset.efHopen ); return; }
 		const ha = tg.closest( '[data-ef-hagain]' ); if ( ha ) { const r = histList().find( ( x ) => x.id === ha.dataset.efHagain ); if ( r ) EXA.efriendAskOpen( { reuse: r } ); return; }
 		const hd = tg.closest( '[data-ef-hdel]' ); if ( hd ) { const l = histList(), i = l.findIndex( ( x ) => x.id === hd.dataset.efHdel ); if ( i >= 0 ) { l.splice( i, 1 ); try { EX.persist(); } catch ( x ) { /* ignore */ } } showHist(); return; }
-		const q = tg.closest( '[data-ef-q]' ); if ( q ) { const c = chat.chips[ Number( q.dataset.efQ ) ]; if ( c && c.k === 'wake' ) { EXA.efriendAskOpen(); return; } if ( c && c.k === 'hist' ) { showHist(); return; } if ( c && c.k === 'form' ) { showForm(); return; } if ( c && c.k === 'keep' ) { keepChatting(); return; } if ( c && ! chat.busy ) onUser( c.text || c.label.replace( /^[^\p{L}\p{N}]+/u, '' ), c ); return; }
+		const q = tg.closest( '[data-ef-q]' ); if ( q ) { const c = chat.chips[ Number( q.dataset.efQ ) ]; if ( c && c.k === 'more' ) { chat.more = ! chat.more; startChips(); const bx = document.getElementById( 'efChips' ); if ( bx ) bx.scrollTop = 0; return; } if ( c && c.k === 'wake' ) { EXA.efriendAskOpen(); return; } if ( c && c.k === 'hist' ) { showHist(); return; } if ( c && c.k === 'form' ) { showForm(); return; } if ( c && c.k === 'keep' ) { keepChatting(); return; } if ( c && ! chat.busy ) onUser( c.text || c.label.replace( /^[^\p{L}\p{N}]+/u, '' ), c ); return; }
 		const mo = tg.closest( '[data-ef-mon]' ); if ( mo && chat.ans ) { chat.mi = Math.max( 0, Math.min( monthsOf( chat.ans ).length - 1, chat.mi + Number( mo.dataset.efMon ) ) ); repaintResult(); return; }
 		const d = tg.closest( '[data-ef-askday]' ); if ( d && chat.ans ) { chat.sel = Number( d.dataset.efAskday ); repaintResult(); return; }
 		if ( tg.closest( '[data-ef-again]' ) ) { UI.closeSheet && UI.closeSheet( true ); setTimeout( () => EXA.efriendAskOpen(), 220 ); return; }
@@ -2255,5 +2263,21 @@
 	Object.assign( window.EXPENITY_I18N.langs.el, {
 		efc_f_choose: 'Διαλέξτε μία επιλογή παραπάνω',
 		efc_f_filling: 'Συμπληρώστε τη φόρμα παραπάνω',
+	} );
+	Object.assign( window.EXPENITY_I18N.langs.en, {
+		efc_ideas_all: '🚗 A new car|✈️ A trip|👟 Shoes|📱 A phone|🎁 A gift|💻 A laptop|⌚ A watch|🎧 Headphones|🚲 A bike|🏖️ A holiday|🛋️ A sofa|🎮 A game console|📷 A camera|👗 A dress|🎒 A backpack|🍽️ A fancy dinner|🏋️ A gym membership|🎓 A course|🐶 A pet|🪴 Plants|📺 A TV|🧥 A winter coat|💍 A ring|🎸 A guitar',
+		efc_more: 'More',
+		efc_less: 'Less',
+		efc_h_buy: '🛍️ What are you thinking of buying?',
+		efc_h_know: '🤖 Get to know eFriend',
+		efc_asks: 'age:🎂 How old are you?|from:🌍 Where did you grow up?|name:🏷️ What is your name?|how:👋 How are you?|home:🏠 Where do you live?|likes:💖 What do you love?|likes:🎯 What are your hobbies?|music:🎶 What music do you like?|music:🪩 Do you like disco?|movie:🚀 Do you like Star Wars?|movie:🎬 What is your favourite movie?|dance:🕺 Do you dance?|number:🔢 What is your favourite number?|color:🎨 What is your favourite colour?|food:⚡ What do you eat?|family:👨‍👩‍👧 Do you have a family?|shy:🙈 Are you shy?|cassette:📼 Do you miss cassettes?|cassette:🕰️ Do you like the 80s?|maker:🛠️ Who made you?|ai:🤖 Are you an AI?|joke:😄 Tell me a joke|story:📖 Tell me about yourself',
+	} );
+	Object.assign( window.EXPENITY_I18N.langs.el, {
+		efc_ideas_all: '🚗 Αυτοκίνητο|✈️ Ένα ταξίδι|👟 Παπούτσια|📱 Ένα κινητό|🎁 Ένα δώρο|💻 Ένα λάπτοπ|⌚ Ένα ρολόι|🎧 Ακουστικά|🚲 Ένα ποδήλατο|🏖️ Διακοπές|🛋️ Έναν καναπέ|🎮 Μια κονσόλα|📷 Μια κάμερα|👗 Ένα φόρεμα|🎒 Ένα σακίδιο|🍽️ Ένα καλό δείπνο|🏋️ Συνδρομή γυμναστηρίου|🎓 Ένα μάθημα|🐶 Ένα κατοικίδιο|🪴 Φυτά|📺 Μια τηλεόραση|🧥 Ένα χειμωνιάτικο μπουφάν|💍 Ένα δαχτυλίδι|🎸 Μια κιθάρα',
+		efc_more: 'Περισσότερα',
+		efc_less: 'Λιγότερα',
+		efc_h_buy: '🛍️ Τι σκέφτεστε να αγοράσετε;',
+		efc_h_know: '🤖 Γνωρίστε το eFriend',
+		efc_asks: 'age:🎂 Πόσων χρονών είσαι;|from:🌍 Πού μεγάλωσες;|name:🏷️ Πώς σε λένε;|how:👋 Τι κάνεις;|home:🏠 Πού μένεις;|likes:💖 Τι αγαπάς;|likes:🎯 Ποια είναι τα χόμπι σου;|music:🎶 Τι μουσική σου αρέσει;|music:🪩 Σου αρέσει η ντίσκο;|movie:🚀 Σου αρέσει το Star Wars;|movie:🎬 Ποια είναι η αγαπημένη σου ταινία;|dance:🕺 Χορεύεις;|number:🔢 Ποιος είναι ο αγαπημένος σου αριθμός;|color:🎨 Ποιο είναι το αγαπημένο σου χρώμα;|food:⚡ Τι τρως;|family:👨‍👩‍👧 Έχεις οικογένεια;|shy:🙈 Είσαι ντροπαλός;|cassette:📼 Σου λείπουν οι κασέτες;|cassette:🕰️ Σου αρέσουν τα ’80s;|maker:🛠️ Ποιος σε έφτιαξε;|ai:🤖 Είσαι AI;|joke:😄 Πες μου ένα αστείο|story:📖 Πες μου για σένα',
 	} );
 }() );

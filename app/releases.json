@@ -1,6 +1,16 @@
 {
-  "version": "0.54.7",
+  "version": "0.54.8",
   "releases": [
+    {
+      "version": "0.54.8",
+      "date": "2026-10-20",
+      "en": [
+        "More ways to start a chat with eFriend: at the bottom there are a few ideas, an About eFriend button and a More button that opens 24 things you might want to buy and 23 questions you can ask eFriend to get to know him (his age, where he grew up, what he loves, Star Wars, disco, cassettes, his favourite number and more)."
+      ],
+      "el": [
+        "Περισσότεροι τρόποι να ξεκινήσετε μια συζήτηση με το eFriend: στο κάτω μέρος υπάρχουν μερικές ιδέες, ένα κουμπί «Πες μου για σένα» και ένα κουμπί «Περισσότερα» που ανοίγει 24 πράγματα που μπορεί να θέλετε να αγοράσετε και 23 ερωτήσεις που μπορείτε να κάνετε στο eFriend για να τον γνωρίσετε (την ηλικία του, πού μεγάλωσε, τι αγαπά, Star Wars, ντίσκο, κασέτες, τον αγαπημένο του αριθμό και άλλα)."
+      ]
+    },
     {
       "version": "0.54.7",
       "date": "2026-10-20",

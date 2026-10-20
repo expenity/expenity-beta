@@ -1560,3 +1560,4 @@ input[type=date]::-webkit-datetime-edit{padding:0}
 .ef-qform .f { min-width: 0; } .ef-qform { width: 100%; box-sizing: border-box; }
 .ef-qdates { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; } .ef-chipq.sm { padding: 6px 12px; font-size: .85rem; animation: none; }
 .ef-cp-skip { font-size: 1.25rem; }
+.ef-chips.open { max-height: 44vh; overflow-y: auto; } .ef-chiph { width: 100%; margin: 8px 0 2px; font-weight: 800; } .ef-chipq.more { border-style: dashed; }
