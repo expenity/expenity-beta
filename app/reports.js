@@ -236,7 +236,16 @@
 		if ( id === 'where' ) {
 			const cats = byCat( homeTxs( monthRange() ) ).filter( ( [ , v ] ) => v > 0 ), total = cats.reduce( ( s, x ) => s + x[ 1 ], 0 ); if ( ! total ) return '';
 			if ( size === 'small' ) return smallTile( 'chart-donut', t( 'ovTopCats' ), EX.catInfo( cats[ 0 ][ 0 ] ).name, m$( cats[ 0 ][ 1 ] ) + ' \u00b7 ' + Math.round( cats[ 0 ][ 1 ] / total * 100 ) + '%' );
-			return `<section class="card home-report"><h2>${ esc( t( 'ovTopCats' ) ) }</h2><div class="donut-wrap2${ size === 'medium' ? ' compact' : '' }">${ donut( cats, total, '' ) }${ homeLegend( cats, total, size === 'medium' ? 3 : 5 ) }</div></section>`;
+			// The back says it in words: the biggest category, the next two, and how this month compares with the same point last month.
+			const pc = ( v ) => Math.round( v / total * 100 ), now = monthRange(), prevFull = monthRange( -1 ), day = parse( today() ).getDate();
+			const prevTo = iso( new Date( parse( prevFull.from ).getFullYear(), parse( prevFull.from ).getMonth(), Math.min( day, parse( prevFull.to ).getDate() ) ) );
+			const before = sum( homeTxs( { from: prevFull.from, to: prevTo } ), 'expense' ), cur = sum( homeTxs( now ), 'expense' ), vs = before ? Math.round( ( cur - before ) / Math.abs( before ) * 100 ) : null;
+			const lines = [ t( 'whTop', { cat: EX.catInfo( cats[ 0 ][ 0 ] ).name, sum: m$( cats[ 0 ][ 1 ] ), pct: pc( cats[ 0 ][ 1 ] ) } ) ];
+			if ( cats[ 1 ] ) lines.push( t( cats[ 2 ] ? 'whNext2' : 'whNext1', { a: EX.catInfo( cats[ 1 ][ 0 ] ).name, as: m$( cats[ 1 ][ 1 ] ), b: cats[ 2 ] ? EX.catInfo( cats[ 2 ][ 0 ] ).name : '', bs: cats[ 2 ] ? m$( cats[ 2 ][ 1 ] ) : '' } ) );
+			if ( vs !== null && vs !== 0 ) lines.push( t( vs > 0 ? 'whMore' : 'whLess', { pct: Math.abs( vs ) } ) );
+			const back = `<div class="wk-back"><span class="wk-ic bob">${ UI.icon( 'chart-donut', 34 ) }</span><h3>${ esc( t( 'whTitle', { total: m$( total ) } ) ) }</h3>${ lines.map( ( l ) => `<p class="wk-line">${ esc( l ) }</p>` ).join( '' ) }</div>`;
+			const front = `<div class="donut-wrap2${ size === 'medium' ? ' compact' : '' }">${ donut( cats, total, '' ) }${ homeLegend( cats, total, size === 'medium' ? 3 : 5 ) }</div>`;
+			return `<section class="card home-report"><h2>${ esc( t( 'ovTopCats' ) ) }</h2>${ EXA.flipCard ? EXA.flipCard( 'where', front, back, 'fc-list' ) : front }</section>`;
 		}
 		if ( id === 'trend' ) {
 			const now = monthRange(), prevFull = monthRange( -1 ), day = parse( today() ).getDate(), prevTo = iso( new Date( parse( prevFull.from ).getFullYear(), parse( prevFull.from ).getMonth(), Math.min( day, parse( prevFull.to ).getDate() ) ) );

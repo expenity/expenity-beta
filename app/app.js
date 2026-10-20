@@ -12,7 +12,7 @@
 	const $ = ( s, r = document ) => r.querySelector( s );
 	const $$ = ( s, r = document ) => [ ...r.querySelectorAll( s ) ];
 	const toast = UI.toast;
-	window.EXPENITY_VERSION = '0.48.0';
+	window.EXPENITY_VERSION = '0.48.1';
 
  const seenCharacters=new Set();try{for(const skin of JSON.parse(sessionStorage.getItem('expenity.charactersSeen')||'[]'))seenCharacters.add(skin);}catch(_){}
  const characterSeen=skin=>seenCharacters.has(skin);
@@ -299,7 +299,7 @@
 			if ( ( el = e.target.closest( '[data-period]' ) ) ) { st.repPeriod = el.dataset.period; render(); return; }
 			if ( ( el = e.target.closest( '[data-flip]' ) ) ) {
 				const inner = e.target.closest( 'button, a, input, select, .sw, [data-act], [data-calday], [data-go]' ) && ! e.target.closest( '.fc-hint' ) && ! e.target.closest( '.fc-back' );
-				if ( ! inner || el.classList.contains( 'fc-tile' ) ) { const id = el.dataset.flip; st.flips[ id ] = ! st.flips[ id ]; el.classList.toggle( 'flipped', st.flips[ id ] ); el.setAttribute( 'aria-pressed', String( !! st.flips[ id ] ) ); el.querySelector( '.fc-back' )?.setAttribute( 'aria-hidden', String( ! st.flips[ id ] ) ); return; }
+				if ( ! inner || el.classList.contains( 'fc-tile' ) ) { const id = el.dataset.flip; st.flips[ id ] = ! st.flips[ id ]; el.classList.add( 'turning' ); setTimeout( () => el.classList.remove( 'turning' ), 520 ); el.classList.toggle( 'flipped', st.flips[ id ] ); el.setAttribute( 'aria-pressed', String( !! st.flips[ id ] ) ); el.querySelector( '.fc-back' )?.setAttribute( 'aria-hidden', String( ! st.flips[ id ] ) ); if ( e.detail > 0 ) el.blur(); return; }
 			}
 			if ( ( el = e.target.closest( '[data-status-set]' ) ) ) { EXA.setStatusTint( el.dataset.statusSet ); render(); return; }
 			if ( ( el = e.target.closest( '[data-motion-set]' ) ) ) { EXA.setMotion( el.dataset.motionSet ); render(); return; }

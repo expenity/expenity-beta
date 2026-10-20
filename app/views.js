@@ -155,9 +155,14 @@
 	/* ------------------------------------------------------------------ Home: flip cards and the written week */
 	st.flips = st.flips || {};
 	/** A card with two faces. Front and back share one cell, so the card never changes size when it turns. */
-	const flipCard = ( id, front, back, cls = '' ) => `<div class="flipcard stack ${ cls }${ st.flips[ id ] ? ' flipped' : '' }" data-flip="${ id }" role="button" tabindex="0" aria-pressed="${ !! st.flips[ id ] }"><div class="fc-inner"><div class="fc-face fc-front">${ front }<i class="fc-hint" aria-hidden="true">${ UI.icon( 'refresh', 14 ) }</i></div><div class="fc-face fc-back" aria-hidden="${ ! st.flips[ id ] }">${ back }<i class="fc-hint" aria-hidden="true">${ UI.icon( 'refresh', 14 ) }</i></div></div></div>`;
+	const flipCard = ( id, front, back, cls = '' ) => `<div class="flipcard stack ${ cls }${ st.flips[ id ] ? ' flipped' : '' }" data-flip="${ id }" role="button" tabindex="0" aria-pressed="${ !! st.flips[ id ] }"><div class="fc-inner"><div class="fc-face fc-front">${ front }<i class="fc-hint" aria-hidden="true">${ UI.icon( 'refresh', 18 ) }</i></div><div class="fc-face fc-back" aria-hidden="${ ! st.flips[ id ] }">${ back }<i class="fc-hint" aria-hidden="true">${ UI.icon( 'refresh', 18 ) }</i></div></div></div>`;
 	const unpaidOccurrences = ( from, to ) => active().flatMap( ( b ) => EX.occurrences( b, to ).filter( ( d ) => d >= from || from === '' ).map( ( d ) => ( { b, d } ) ) );
 	/** The next seven days in words, from the bills that are coming up: how many, how much, the biggest, and what is left. */
+	/** The next few bills as a small list (day, name, amount), for the back of the calendar. */
+	EXA.weekList = () => {
+		const td = today(), end = addDays( td, 7 ), all = unpaidOccurrences( '', end ).sort( ( a, b ) => ( a.d < b.d ? -1 : 1 ) ).slice( 0, 4 );
+		return all.length ? `<ul class="wk-list">${ all.map( ( o ) => `<li><span>${ esc( o.d < td ? t( 'relLate', { n: diffDays( td, o.d ) } ) : EX.dayName( o.d ) ) }</span><b>${ esc( o.b.name ) }</b><em>${ esc( amountText( o.b ) ) }</em></li>` ).join( '' ) }</ul>` : '';
+	};
 	EXA.weekSummary = () => {
 		const td = today(), end = addDays( td, 7 ), all = unpaidOccurrences( '', end ).sort( ( a, b ) => ( a.d < b.d ? -1 : 1 ) );
 		const late = all.filter( ( o ) => o.d < td ), soon = all.filter( ( o ) => o.d >= td );
@@ -172,6 +177,7 @@
 		lines.push( balC >= dueC ? t( 'wkFree', { free: money( ( balC - dueC ) / 100, S().settings.currency ) } ) : t( 'wkShort' ) );
 		return lines.map( ( l ) => `<p class="wk-line">${ esc( l ) }</p>` ).join( '' );
 	};
+	EXA.flipCard = flipCard;
 	EXA.home = () => {
 		const now = new Date(), y = now.getFullYear(), m = now.getMonth();
 		const wallets = EX.activeAccounts();
@@ -212,7 +218,7 @@
 			${ lead ? `<section data-home="ideas">${EXA.ideasHome()}</section>` : `<section data-home="wallets">${WAL}</section>` }
 			${ lead ? `<section data-home="wallets">${WAL}</section>` : `<section data-home="due">${DUE}</section>` }
 			${ lead ? '' : `<section data-home="ideas">${EXA.ideasHome()}</section>` }
-			${ S().bills.length ? `<section data-home="calendar"><div class="sec-head"><h2>${ esc( t( 'tabCalendar' ) ) }</h2><button type="button" class="link" data-go="bills">${ esc( t( 'seeAll' ) ) }</button></div>${ flipCard( 'cal', billsCalendar(), `<div class="wk-back"><span class="wk-ic bob">${ UI.icon( 'calendar-event', 34 ) }</span><h3>${ esc( t( 'wkTitle' ) ) }</h3>${ EXA.weekSummary() }</div>`, 'fc-cal' ) }</section>` : '' }
+			${ S().bills.length ? `<section data-home="calendar"><div class="sec-head"><h2>${ esc( t( 'tabCalendar' ) ) }</h2><button type="button" class="link" data-go="bills">${ esc( t( 'seeAll' ) ) }</button></div>${ ( ( cp ) => flipCard( 'cal', cp[ 0 ], `<div class="wk-back"><span class="wk-ic bob">${ UI.icon( 'calendar-event', 34 ) }</span><h3>${ esc( t( 'wkTitle' ) ) }</h3>${ EXA.weekSummary() }${ EXA.weekList() }</div>`, 'fc-cal' ) + cp[ 1 ] )( billsCalendar( true ) ) }</section>` : '' }
 			<section data-home="goals">${ EXA.planHome() }</section><section data-home="recent">
 			<div class="sec-head"><h2>${ esc( t( 'ovRecent' ) ) }</h2><button type="button" class="link" data-go="activity">${ esc( t( 'seeAll' ) ) }</button></div>
 			${ recent.length ? `<ul class="list">${ recent.map( txItem ).join( '' ) }</ul>` : `<p class="muted pad">${ esc( t( 'txNoneHint' ) ) }</p>` }</section>`;
@@ -281,7 +287,7 @@
 			${ paid.length ? `<section class="grp"><h2 class="sticky">${ esc( t( 'recentlyPaid' ) ) }</h2><ul class="list">${ paid.map( txItem ).join( '' ) }</ul></section>` : '' }
 			<p class="muted small pad">${ esc( t( 'statMonth' ) ) }: <b>${ esc( EX.sumByCur( monthAll ) ) }</b></p>`;
 	}
-	function billsCalendar() {
+	function billsCalendar( parts = false ) {
 		const y = Math.floor( st.calMonth / 12 ), m = st.calMonth % 12;
 		const first = new Date( y, m, 1 );
 		const startPad = ( first.getDay() + 6 ) % 7;
@@ -302,12 +308,12 @@
 		const sel = st.calDay || ( nowMonth() === st.calMonth ? today() : null );
 		const selItems = sel ? ( map[ sel ] || [] ) : [], selPaid = sel ? ( paidMap[ sel ] || [] ) : [];
 		const monthItems = Object.values( map ).flat();
-		return `<div class="monthbar"><button type="button" class="ab-btn" data-cal="-1" aria-label="${ esc( t( 'prevMonth' ) ) }">${ UI.icon( 'chevron-left', 24 ) }</button><b>${ esc( monthName( y, m ) ) }</b><button type="button" class="ab-btn" data-cal="1" aria-label="${ esc( t( 'nextMonth' ) ) }">${ UI.icon( 'chevron-right', 24 ) }</button></div>
+		const html = `<div class="monthbar"><button type="button" class="ab-btn" data-cal="-1" aria-label="${ esc( t( 'prevMonth' ) ) }">${ UI.icon( 'chevron-left', 24 ) }</button><b>${ esc( monthName( y, m ) ) }</b><button type="button" class="ab-btn" data-cal="1" aria-label="${ esc( t( 'nextMonth' ) ) }">${ UI.icon( 'chevron-right', 24 ) }</button></div>
 			<p class="muted small center">${ esc( t( 'dueMonth' ) ) } <b>${ esc( EX.sumByCur( monthItems ) ) }</b></p>
-			<div class="cal" role="grid">${ wd.map( ( w ) => `<div class="dow" role="columnheader">${ esc( w ) }</div>` ).join( '' ) }${ cells.join( '' ) }</div>
-			<section class="grp"><h2 class="sticky">${ sel ? esc( dayName( sel ) ) : esc( t( 'pickDay' ) ) }</h2>
+			<div class="cal" role="grid">${ wd.map( ( w ) => `<div class="dow" role="columnheader">${ esc( w ) }</div>` ).join( '' ) }${ cells.join( '' ) }</div>__SPLIT__<section class="grp"><h2 class="sticky">${ sel ? esc( dayName( sel ) ) : esc( t( 'pickDay' ) ) }</h2>
 			${ selItems.length ? `<ul class="list">${ selItems.map( ( b ) => billItem( Object.assign( {}, b, { next: sel } ), { showDate: false } ) ).join( '' ) }</ul>` : `<p class="muted pad">${ esc( t( 'nothingDue' ) ) }</p>` }
 			${ selPaid.length ? `<ul class="list">${ selPaid.map( txItem ).join( '' ) }</ul>` : '' }</section>`;
+		return parts ? html.split( '__SPLIT__' ) : html.replace( '__SPLIT__', '' );
 	}
 	/* Shared by the Bills tab and Home: a bill as a card with a date tile and a clear status pill. */
 	const bmVal = ( i ) => ( i.kind === 'bill' ? { amount: Number( i.b.amount ) || 0, currency: i.b.currency } : { amount: Number( i.x.amount ) || 0, currency: ( S().accounts.find( ( a ) => a.id === i.x.account ) || {} ).currency || S().settings.currency } );

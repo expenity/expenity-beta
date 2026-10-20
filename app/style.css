@@ -981,20 +981,33 @@ button.bm-pill{cursor:pointer;min-height:34px;transition:transform .15s}button.b
 .pair-paid:has(input:focus-visible){outline:3px solid var(--accent);outline-offset:2px}
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
-/* Flip cards: two faces in one grid cell, so a card never changes size when it turns. */
-.flipcard{perspective:1000px;cursor:pointer;position:relative;-webkit-tap-highlight-color:transparent}.flipcard:focus-visible{outline:3px solid var(--accent);outline-offset:3px;border-radius:16px}
-.flipcard.stack .fc-inner{display:grid;transition:transform .55s cubic-bezier(.2,.8,.2,1);transform-style:preserve-3d}
-.flipcard.flipped .fc-inner{transform:rotateY(180deg)}
-.fc-face{grid-area:1/1;backface-visibility:hidden;-webkit-backface-visibility:hidden;position:relative;min-width:0}.fc-back{transform:rotateY(180deg)}
-.fc-hint{position:absolute;right:8px;top:8px;opacity:.45;display:grid;place-items:center;pointer-events:none}.fc-list .fc-hint,.fc-cal .fc-hint{top:-2px;right:2px}
+/* Flip cards: two faces in one grid cell, so a card never changes size when it turns. The turn is flat (no 3D), so nothing shows through on iPhone. */
+.flipcard{cursor:pointer;position:relative;-webkit-tap-highlight-color:transparent}.flipcard:focus-visible{outline:3px solid var(--accent);outline-offset:3px;border-radius:16px}
+.flipcard.stack .fc-inner{display:grid}
+.fc-face{grid-area:1/1;position:relative;min-width:0}
+.fc-back{visibility:hidden;opacity:0;pointer-events:none}.flipcard.flipped .fc-front{visibility:hidden;opacity:0;pointer-events:none}
+.flipcard.flipped .fc-back{visibility:visible;opacity:1;pointer-events:auto}
+.flipcard.turning .fc-front,.flipcard.turning .fc-back{animation:fcTurn .46s cubic-bezier(.2,.8,.2,1) both}
+@keyframes fcTurn{from{transform:perspective(700px) rotateY(-80deg) scale(.96);opacity:0}to{transform:none;opacity:1}}
+/* The flip button: big enough to see, gently moving so people find it. */
+.fc-hint{position:absolute;right:8px;top:8px;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--accent);color:var(--accent-ink,#fff);box-shadow:0 3px 10px color-mix(in srgb,var(--accent) 45%,transparent);animation:fcNudge 3.6s ease-in-out infinite;z-index:2;pointer-events:none}
+.fc-list .fc-hint,.fc-cal .fc-hint{width:36px;height:36px;top:8px;right:8px;pointer-events:auto;cursor:pointer}
+@keyframes fcNudge{0%,70%,100%{transform:rotate(0) scale(1)}80%{transform:rotate(180deg) scale(1.15)}90%{transform:rotate(360deg) scale(1)}}
 .key-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:8px;margin:0 0 10px}
 .fc-tile .fc-face{display:flex;flex-direction:column;justify-content:center;gap:3px;min-height:92px;padding:10px 12px;border-radius:calc(18px * var(--rk,1));background:var(--surface);border:1px solid var(--line);box-sizing:border-box}
 .fc-tile .fc-back{background:var(--accent-soft)}.fc-label{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--muted);font-weight:600}
 .fc-val{font-size:clamp(16px,4.6vw,20px);font-weight:800;letter-spacing:-.02em;overflow-wrap:anywhere}.fc-tile small{font-size:11.5px;color:var(--muted);line-height:1.25}
 .fc-list .fc-face,.fc-cal .fc-face{background:transparent}
-.wk-back{display:grid;gap:8px;align-content:center;min-height:100%;padding:16px;border-radius:calc(20px * var(--rk,1));background:var(--accent-soft);box-sizing:border-box}
-.wk-back h3{margin:0;font-size:17px}.wk-line{margin:0;font-size:15px;line-height:1.45}.wk-ic{display:grid;place-items:center;width:52px;height:52px;border-radius:50%;background:var(--surface);color:var(--accent)}
+.wk-back{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;min-height:100%;padding:20px 16px;border-radius:calc(20px * var(--rk,1));background:var(--accent-soft);box-sizing:border-box}
+.wk-back h3{margin:0;font-size:20px}.wk-line{margin:0;font-size:16px;line-height:1.5;max-width:30ch}.wk-ic{display:grid;place-items:center;width:52px;height:52px;border-radius:50%;background:var(--surface);color:var(--accent)}
 .wk-ic.bob{animation:wkBob 2.4s ease-in-out infinite}@keyframes wkBob{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-6px) rotate(4deg)}}
-:root[data-motion=off] .flipcard.stack .fc-inner,:root[data-motion=reduced] .flipcard.stack .fc-inner{transition:none}:root[data-motion=off] .wk-ic.bob,:root[data-motion=reduced] .wk-ic.bob{animation:none}
-@media(prefers-reduced-motion:reduce){:root:not([data-motion=full]) .flipcard.stack .fc-inner{transition:none}:root:not([data-motion=full]) .wk-ic.bob{animation:none}}
-.fc-list .fc-hint,.fc-cal .fc-hint{pointer-events:auto;width:34px;height:34px;opacity:.7;top:-4px;right:-2px;cursor:pointer}
+:root[data-motion=off] .flipcard.turning .fc-face,:root[data-motion=reduced] .flipcard.turning .fc-face,:root[data-motion=off] .fc-hint,:root[data-motion=reduced] .fc-hint,:root[data-motion=off] .wk-ic.bob,:root[data-motion=reduced] .wk-ic.bob{animation:none}
+@media(prefers-reduced-motion:reduce){:root:not([data-motion=full]) .flipcard.turning .fc-face,:root:not([data-motion=full]) .fc-hint,:root:not([data-motion=full]) .wk-ic.bob{animation:none}}
+
+.wk-list{list-style:none;margin:6px 0 0;padding:0;display:grid;gap:6px;width:100%;max-width:340px}
+.wk-list li{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;padding:8px 12px;border-radius:calc(12px * var(--rk,1));background:var(--surface);font-size:14px;text-align:left}.wk-list span{color:var(--muted);font-size:12px;white-space:nowrap}.wk-list b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.wk-list em{font-style:normal;font-weight:700}
+.fc-tile .fc-hint{width:24px;height:24px;top:6px;right:6px}.fc-tile .fc-hint svg{width:14px;height:14px}
+/* Lists and the calendar take the height of the face that is showing, so nothing leaves an empty gap and the widgets below always move up to fill it. Only the three small tiles keep both faces in one cell. */
+.flipcard:not(.fc-tile) .fc-back{display:none}
+.flipcard:not(.fc-tile).flipped .fc-front{display:none}
+.flipcard:not(.fc-tile).flipped .fc-back{display:block}

@@ -1,6 +1,20 @@
 {
-  "version": "0.48.0",
+  "version": "0.48.1",
   "releases": [
+    {
+      "version": "0.48.1",
+      "date": "2026-10-22",
+      "en": [
+        "Home cards that flip now turn flatly, with a bigger, moving flip button. The back of the Calendar is centred and lists the coming bills, and only the calendar turns, not the day list under it.",
+        "Where it went flips too: the back says in words what you spent most on and how this month compares with last month.",
+        "Lists on Home no longer leave an empty gap: widgets below move up as soon as a bill is paid."
+      ],
+      "el": [
+        "Οι κάρτες της Αρχικής που γυρίζουν τώρα γυρίζουν επίπεδα, με μεγαλύτερο κινούμενο κουμπί. Το πίσω μέρος του Ημερολογίου είναι κεντραρισμένο και δείχνει τους επόμενους λογαριασμούς και γυρίζει μόνο το ημερολόγιο, όχι η λίστα της ημέρας από κάτω.",
+        "Το «Πού πήγαν τα χρήματα» γυρίζει κι αυτό: το πίσω μέρος λέει με λόγια πού ξοδέψατε περισσότερο και πώς συγκρίνεται ο μήνας με τον προηγούμενο.",
+        "Οι λίστες στην Αρχική δεν αφήνουν πια κενό: τα widgets από κάτω ανεβαίνουν μόλις πληρωθεί ένας λογαριασμός."
+      ]
+    },
     {
       "version": "0.48.0",
       "date": "2026-10-22",
