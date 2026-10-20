@@ -1067,7 +1067,7 @@
 		return { cost, days, tl: tl.slice( 0, N ), cushion, today: days[ 0 ], best: first, first, anyOk: days.some( ( x ) => x.st !== 'avoid' ), maxSafe, monthly: b.monthly, incomeMonthly: b.incomeMonthly, hasIncome: b.hasIncome };
 	};
 	/* ------------------------------------------------------------------ The chat: eFriend interviews you (what, how much, how soon), then brings the full analysis back to the app */
-	const chat = { menuOn: false, chipsBefore: [], more: false, locked: false, over: false, stuck: 0, turns: 0, formOffered: false, restarts: 0, timer: 0, chain: 0, id: '', ts: 0, msgs: [], stage: 'what', item: '', who: '', mi: 0, cost: 0, by: undefined, typing: false, busy: false, tok: 0, used: {}, ans: null, rec: null, sel: 0, chips: [], anim: true };
+	const chat = { lastMe: null, menuOn: false, chipsBefore: [], more: false, locked: false, over: false, stuck: 0, turns: 0, formOffered: false, restarts: 0, timer: 0, chain: 0, id: '', ts: 0, msgs: [], stage: 'what', item: '', who: '', mi: 0, cost: 0, by: undefined, typing: false, busy: false, tok: 0, used: {}, ans: null, rec: null, sel: 0, chips: [], anim: true };
 	const money$ = ( c ) => money( c / 100, main() );
 	const itemName = () => chat.item || t( 'efAskThing' );
 	/** A rare surprise (about one chat in ten): if the person is named like George, his wife Olga or his daughter Danae, eFriend is thrilled. */
@@ -1115,13 +1115,13 @@
 		if ( ( q.getAttribute( 'inputmode' ) === 'decimal' ) === price ) return;
 		const n = document.createElement( 'input' ); n.name = 'q'; n.id = 'efChatQ'; n.autocomplete = 'off'; n.setAttribute( 'enterkeyhint', 'send' ); n.setAttribute( 'aria-label', q.getAttribute( 'aria-label' ) || '' );
 		if ( price ) { n.setAttribute( 'inputmode', 'decimal' ); n.placeholder = zeroPh(); } else n.placeholder = t( 'efAskPh' );
-		n.disabled = !! chat.locked; if ( chat.locked ) n.placeholder = q.placeholder; const had = document.activeElement === q; q.replaceWith( n ); if ( had ) n.focus( { preventScroll: true } );
+		n.disabled = !! chat.locked; if ( chat.locked ) n.placeholder = q.placeholder; const had = document.activeElement === q; q.replaceWith( n ); if ( had ) { if ( window.EXKB ) EXKB.allow(); n.focus( { preventScroll: true } ); }
 	};
 	const live = ( tok ) => tok === chat.tok && document.getElementById( 'efChat' );
 
 	const formCard = () => `<form id="efQForm" class="ef-qform" novalidate autocomplete="off"><label class="f"><span>${ esc( t( 'efAskWhat' ) ) }</span><input name="what" autocomplete="off" value="${ esc( chat.item ) }"></label><label class="f"><span>${ esc( t( 'efAskHow' ) ) } (${ esc( main() ) })</span><input name="cost" inputmode="decimal" autocomplete="off" placeholder="${ zeroPh() }" value="${ chat.cost ? esc( fmtCents( chat.cost ) ) : '' }"></label><label class="f"><span>${ esc( t( 'efc_f_when' ) ) }</span><input type="date" name="when" min="${ today() }"><span class="ef-qdates">${ [ 7, 14, 30, 90 ].map( ( n ) => `<button type="button" class="ef-chipq sm" data-ef-qdate="${ n }">${ esc( t( 'efc_qd' + n ) ) }</button>` ).join( '' ) }</span></label><label class="ef-qnr"><input type="checkbox" name="norush"> ${ esc( t( 'efc_wc4' ) ) }</label><p class="err" id="efQErr" role="alert" hidden></p><button type="submit" class="btn btn-primary wide">✅ ${ esc( t( 'efc_f_go' ) ) }</button></form>`;
 	const bubble = ( x ) => x.form ? `<div class="ef-msg ef wide" data-form-msg><span class="ef-av">${ F.icon( 30 ) }</span><div class="ef-mb">${ formCard() }</div></div>` : x.who === 'me'
-		? `<div class="ef-msg me"><div class="ef-mb">${ esc( x.text ) }</div></div>`
+		? `<div class="ef-msg me" data-mid="${ esc( x.id || '' ) }"><div class="ef-mb">${ esc( x.text ) }${ x.amount && ! chat.over ? `<button type="button" class="ef-edit" data-ef-amtedit="${ esc( x.id ) }" aria-label="${ esc( t( 'efc_edit' ) ) }" title="${ esc( t( 'efc_edit' ) ) }">✏️</button>` : '' }</div></div>`
 		: `<div class="ef-msg ef"><span class="ef-av">${ F.icon( 30 ) }</span><div class="ef-mb">${ x.lines.map( ( l ) => `<p class="ef-ml">${ rich( l ) }</p>` ).join( '' ) }</div></div>`;
 	const chatBox = () => document.getElementById( 'efChat' );
 	const scrollEnd = () => { const box = chatBox(); if ( box ) box.scrollTo( { top: box.scrollHeight, behavior: reduceMotion() ? 'auto' : 'smooth' } ); };
@@ -1217,10 +1217,28 @@
 		const p = PERSONA.find( ( q ) => q[ 1 ].test( x ) ); return p ? p[ 0 ] : null;
 	};
 	const sayStory = async () => { for ( const part of String( t( 'efc_story' ) ).split( '~' ) ) { await say( [ part ], { mood: 'cheer', delay: 1400 } ); if ( chat.chain !== chat.tok ) return; } };
+	/** The bubble in which the person gave the price gets a pencil, so a wrong amount can be fixed before moving on. */
+	const rerender = ( m ) => { const el = document.querySelector( `[data-mid="${ m.id }"]` ); if ( el ) el.outerHTML = bubble( m ); };
+	const markAmount = () => { const m = chat.lastMe; if ( ! m ) return; chat.msgs.forEach( ( x ) => { if ( x.amount && x !== m ) { x.amount = false; rerender( x ); } } ); m.amount = true; rerender( m ); };
+	const startEdit = ( id ) => {
+		if ( chat.busy || chat.over ) return; const m = chat.msgs.find( ( x ) => x.id === id ), el = document.querySelector( `[data-mid="${ id }"] .ef-mb` ); if ( ! m || ! el ) return;
+		el.innerHTML = `<form class="ef-editf" data-ef-editf="${ esc( id ) }" novalidate><input name="amt" inputmode="decimal" autocomplete="off" value="${ esc( String( chat.cost / 100 ) ) }" aria-label="${ esc( t( 'efc_edit' ) ) }"><button type="submit" class="btn btn-primary sm" aria-label="OK">✓</button><button type="button" class="btn btn-ghost sm" data-ef-editx="${ esc( id ) }" aria-label="${ esc( t( 'close' ) ) }">✕</button></form>`;
+		const i = el.querySelector( 'input' ); if ( window.EXKB ) EXKB.allow(); if ( i ) { i.focus( { preventScroll: true } ); try { i.select(); } catch ( x ) { /* ignore */ } }
+	};
+	document.addEventListener( 'submit', async ( e ) => {
+		const f = e.target; if ( ! f.dataset || ! f.dataset.efEditf ) return; e.preventDefault();
+		const m = chat.msgs.find( ( x ) => x.id === f.dataset.efEditf ), cost = amtCents( f.elements.amt.value ); if ( ! m ) return; if ( ! cost ) { f.elements.amt.focus(); return; }
+		if ( chat.busy || chat.over ) return; chat.busy = true; const tok = chat.tok; chat.chain = tok;
+		try {
+			chat.cost = cost; m.text = fmtCents( cost ); rerender( m ); saveChat();
+			await say( [ pool( 'efc_amt_fixed', { cost: money$( cost ) } ) ], { mood: 'cheer' } ); if ( ! live( tok ) ) return;
+			if ( chat.stage === 'confirm' ) { chat.busy = false; await recap(); }
+		} finally { if ( tok === chat.tok ) chat.busy = false; }
+	} );
 	const onUserCore = async ( text, chip ) => {
 		if ( chat.busy ) return; chat.busy = true; const tok = chat.tok; chat.chain = tok;
 		try {
-			{ const m = { who: 'me', text }; chat.msgs.push( m ); appendMsg( m ); saveChat(); } chat.menuOn = false; setChips( [] ); scrollEnd(); await wait( 600 ); if ( ! live( tok ) ) return;
+			{ const m = { who: 'me', text, id: EX.uid() }; chat.msgs.push( m ); appendMsg( m ); saveChat(); chat.lastMe = m; } chat.menuOn = false; setChips( [] ); scrollEnd(); await wait( 600 ); if ( ! live( tok ) ) return;
 			const st = chat.stage;
 			// eFriend answers about himself from his own story; anything else he cannot answer gets the retro joke
 			const asksCost = F.parseAsk( stripWhen( text ) ).cost, topic = chip && chip.k === 'persona' ? chip.topic : ! chip && ! asksCost && ! F.parseWhen( text ) ? personaTopic( text ) : null;
@@ -1250,12 +1268,12 @@
 			}
 			if ( st === 'price' ) {
 				const { p, w } = read( text, true ); if ( ! p.cost ) { chat.stuck++; return await say( [ pool( 'efc_nocost' ) ], { mood: 'meh' } ); }
-				chat.cost = p.cost; if ( p.item && ! chat.item ) { chat.item = p.item; await sayItem(); } await sayPrice(); if ( w ) { setBy( w ); await sayWhen(); } return await nextQ();
+				chat.cost = p.cost; markAmount(); if ( p.item && ! chat.item ) { chat.item = p.item; await sayItem(); } await sayPrice(); if ( w ) { setBy( w ); await sayWhen(); } return await nextQ();
 			}
 			// the first message (or an answer to "what is it?")
 			const { p, w } = read( text, false ); const hadItem = !! chat.item, hadCost = !! chat.cost;
 			if ( ! p.item && ! p.cost && ! w ) chat.stuck++;
-			if ( p.item ) chat.item = p.item; if ( p.who ) chat.who = p.who; if ( p.cost ) chat.cost = p.cost; if ( w ) setBy( w );
+			if ( p.item ) chat.item = p.item; if ( p.who ) chat.who = p.who; if ( p.cost ) { chat.cost = p.cost; markAmount(); } if ( w ) setBy( w );
 			if ( p.item && ! hadItem ) await sayItem(); if ( p.cost && ! hadCost ) await sayPrice(); if ( w ) await sayWhen();
 			return await nextQ();
 		} finally { if ( tok === chat.tok ) chat.busy = false; }
@@ -1281,8 +1299,7 @@
 			if ( ! force ) { const mm = { who: 'me', text: '📝 ' + t( 'efc_f_chip' ) }; chat.msgs.push( mm ); appendMsg( mm ); setChips( [] ); scrollEnd(); await wait( 500 ); }
 			lockInput( true, t( 'efc_f_filling' ) ); await say( [ pool( 'efc_f_ask' ) ], { mood: 'cheer', instant: true } ); if ( ! live( tok ) ) return;
 			const fm = { who: 'ef', form: true, lines: [] }; chat.msgs.push( fm ); appendMsg( fm ); scrollEnd();
-			const first = document.querySelector( '#efQForm input[name=what]' ); if ( first && ! reduceMotion() ) first.focus( { preventScroll: true } );
-		} finally { if ( tok === chat.tok ) chat.busy = false; }
+			} finally { if ( tok === chat.tok ) chat.busy = false; }
 	};
 	const keepChatting = async () => {
 		if ( chat.busy || chat.over ) return; chat.busy = true; const tok = chat.tok; chat.chain = tok;
@@ -1428,7 +1445,7 @@
 	const pickIdeas = async ( tok ) => {
 		await say( [ t( 'efc_pick' ) ], { mood: 'happy', delay: 1020 } ); if ( ! live( tok ) ) return;
 		startChips();
-		const q = document.getElementById( 'efChatQ' ); if ( q && ! reduceMotion() ) q.focus( { preventScroll: true } );
+		const q = document.getElementById( 'efChatQ' ); if ( q && ! reduceMotion() && ! matchMedia( '(pointer: coarse)' ).matches ) q.focus( { preventScroll: true } ); // desktop only: a phone keyboard never opens by itself
 	};
 	/** "Start over": the chat is wiped (the old one stays in the history) and eFriend jokes about it. */
 	const restartChat = async () => {
@@ -1479,6 +1496,8 @@
 		if ( tg.closest( '[data-ef-clear]' ) ) { restartChat(); return; }
 		if ( tg.closest( '[data-ef-skip]' ) ) { showForm( true ); return; }
 		if ( tg.closest( '[data-ef-menu]' ) ) { toggleMenu(); return; }
+		const ed = tg.closest( '[data-ef-amtedit]' ); if ( ed ) { startEdit( ed.dataset.efAmtedit ); return; }
+		const ex = tg.closest( '[data-ef-editx]' ); if ( ex ) { const m = chat.msgs.find( ( x ) => x.id === ex.dataset.efEditx ); if ( m ) rerender( m ); return; }
 		const qd = tg.closest( '[data-ef-qdate]' ); if ( qd ) { const f = document.getElementById( 'efQForm' ); if ( f ) { f.elements.norush.checked = false; f.elements.when.disabled = false; f.elements.when.value = addDays( today(), Number( qd.dataset.efQdate ) ); } return; }
 		if ( tg.closest( '[data-ef-hist]' ) ) { showHist(); return; }
 		if ( tg.closest( '[data-ef-hist-open]' ) ) { e.preventDefault(); EXA.efriendAskOpen( { hist: true } ); return; }
@@ -2318,5 +2337,13 @@
 	Object.assign( window.EXPENITY_I18N.langs.el, {
 		efc_menu: 'Ιδέες και ερωτήσεις',
 		efc_menu_close: 'Κλείσιμο',
+	} );
+	Object.assign( window.EXPENITY_I18N.langs.en, {
+		efc_edit: 'Edit the amount',
+		efc_amt_fixed: 'Fixed! The price is now **{cost}**. ✏️|Done, **{cost}** it is. 👍|Updated to **{cost}**. Thanks for catching that! 🔧',
+	} );
+	Object.assign( window.EXPENITY_I18N.langs.el, {
+		efc_edit: 'Επεξεργασία ποσού',
+		efc_amt_fixed: 'Διορθώθηκε! Η τιμή είναι πλέον **{cost}**. ✏️|Έτοιμο, **{cost}**. 👍|Ενημερώθηκε σε **{cost}**. Ευχαριστώ που το εντοπίσατε! 🔧',
 	} );
 }() );

@@ -1,6 +1,22 @@
 {
-  "version": "0.54.13",
+  "version": "0.54.14",
   "releases": [
+    {
+      "version": "0.54.14",
+      "date": "2026-10-21",
+      "en": [
+        "The keyboard never opens by itself on phones and tablets: it appears only when you tap a text field. This applies everywhere in Expenity, including the eFriend chat and every form. On a computer, the chat still focuses the text box for you.",
+        "A wrong amount in the eFriend chat can now be fixed: a pencil on the bubble with your amount opens it for editing, and eFriend carries on (or shows a fresh recap).",
+        "A layout guard on every screen keeps content inside the borders on phones, including Android, long words and large text.",
+        "Date fields highlight the day, month or year you are editing in the app’s colour instead of the system blue."
+      ],
+      "el": [
+        "Το πληκτρολόγιο δεν ανοίγει ποτέ από μόνο του σε κινητά και tablet: εμφανίζεται μόνο όταν πατήσετε ένα πεδίο κειμένου. Ισχύει παντού στο Expenity, και στη συζήτηση με το eFriend και σε κάθε φόρμα. Στον υπολογιστή, η συζήτηση εξακολουθεί να εστιάζει το πεδίο κειμένου για εσάς.",
+        "Ένα λάθος ποσό στη συζήτηση με το eFriend μπορεί πλέον να διορθωθεί: ένα μολύβι στο μήνυμα με το ποσό σας το ανοίγει για επεξεργασία και το eFriend συνεχίζει (ή δείχνει νέα σύνοψη).",
+        "Ένας κανόνας διάταξης σε κάθε οθόνη κρατά το περιεχόμενο μέσα στα όρια στα κινητά, και στο Android, με μεγάλες λέξεις και μεγάλο κείμενο.",
+        "Τα πεδία ημερομηνίας τονίζουν την ημέρα, τον μήνα ή το έτος που επεξεργάζεστε με το χρώμα της εφαρμογής αντί για το μπλε του συστήματος."
+      ]
+    },
     {
       "version": "0.54.13",
       "date": "2026-10-20",

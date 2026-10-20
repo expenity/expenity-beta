@@ -1580,3 +1580,17 @@ input[type=date]::-webkit-datetime-edit{padding:0}
 .ef-embed-load svg { width: 86px; color: #0f766e; animation: ef-bob 1.4s ease-in-out infinite; }
 .ef-embed-load .dots { display: flex; gap: 7px; } .ef-embed-load .dots i { width: 9px; height: 9px; border-radius: 50%; background: #0f766e; animation: ef-dot 1s infinite; } .ef-embed-load .dots i:nth-child(2) { animation-delay: .15s; } .ef-embed-load .dots i:nth-child(3) { animation-delay: .3s; }
 .ef-embed .ef-cp { animation: none; }
+
+/* ---- layout guard: nothing goes beyond the screen, on any device, on every page ---- */
+html, body { max-width: 100%; overflow-x: clip; }
+*, *::before, *::after { box-sizing: border-box; }
+img, svg, video, canvas, iframe, embed, object { max-width: 100%; }
+input, select, textarea, button { max-width: 100%; }
+:where(p, li, h1, h2, h3, h4, h5, h6, label, small, span, a, b, strong, em, td, th, summary, dd, dt, button) { overflow-wrap: break-word; }
+:where(div, section, article, aside, nav, header, footer, main, form, label, ul, ol, li, figure, fieldset, details) { min-width: 0; }
+pre, code { white-space: pre-wrap; overflow-wrap: anywhere; }
+.ef-edit { margin-left: 10px; border: 0; background: rgba(255,255,255,.22); color: inherit; border-radius: 50%; width: 28px; height: 28px; font-size: .9rem; cursor: pointer; vertical-align: middle; padding: 0; } .ef-editf { display: flex; gap: 6px; align-items: center; } .ef-editf input { flex: 1; min-width: 0; width: 100%; max-width: 160px; }
+
+/* date fields: the highlighted part (day, month or year) uses the app's accent, not the system blue */
+input[type="date"]::-webkit-datetime-edit-day-field:focus, input[type="date"]::-webkit-datetime-edit-month-field:focus, input[type="date"]::-webkit-datetime-edit-year-field:focus { background: color-mix(in srgb, var(--accent, #e8602c) 24%, transparent); color: inherit; outline: none; border-radius: 4px; }
+input[type="date"] { accent-color: var(--accent, #e8602c); }
