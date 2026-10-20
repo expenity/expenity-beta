@@ -18,8 +18,9 @@
 		S.goals.push( { id: 'g1', name: t( 'goalPreset_trip' ), target: '2000', deadline: X.addDays( td, 150 ), icon: 'plane' } );
 		S.txs.push( { id: 'gt1', type: 'expense', amount: '700', account: 'w1', category: 'goal', date: X.addDays( td, -20 ), name: t( 'goalPreset_trip' ), goalId: 'g1' } );
 		S.incomes.push( { id: 'i1', name: t( 'cat_salary' ), amount: '1900', currency: 'EUR', account: 'w1', repeat: 'monthly', next: X.addDays( td, 11 ), day: 1, category: 'salary' } );
-		Object.assign( S.device, { bannerDismissed: true, scanHoldHintSeen: true, installDismissed: true, tourDone: true, goalsDiscovered: true, dashboardHintSeen: true } );
+		Object.assign( S.device, { bannerDismissed: true, scanHoldHintSeen: true, installDismissed: true, tourDone: true, efOnboard: 1, goalsDiscovered: true, dashboardHintSeen: true } );
 		A.skipFlow(); A.go( 'home' );
+		if ( /[?&]ask=1/.test( location.search ) && A.efriendAskOpen ) setTimeout( () => A.efriendAskOpen(), 1800 ); // the playable chat on the eFriend page
 		document.documentElement.dataset.demoReady = '1';
 	};
 	seed();

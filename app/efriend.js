@@ -265,7 +265,10 @@
 
 	/* ------------------------------------------------------------------ Words (funny on purpose) */
 	const lastLine = {};
-	const pickLine = ( verdict ) => { const lines = t( 'ef_' + verdict ).split( '|' ); let i = Math.floor( Math.random() * lines.length ); if ( lines.length > 1 && lines[ i ] === lastLine[ verdict ] ) i = ( i + 1 ) % lines.length; lastLine[ verdict ] = lines[ i ]; return lines[ i ]; };
+	/** The person's first name, if they gave one: eFriend uses it to talk to them. */
+	F.name = () => String( S().settings.name || '' ).trim().split( /\s+/ )[ 0 ];
+	const named = ( key, vars ) => { const n = F.name(); if ( ! n ) return []; const v = t( key + '_n', Object.assign( { name: n }, vars ) ); return typeof v === 'string' && v !== key + '_n' ? String( v ).split( '|' ) : []; };
+	const pickLine = ( verdict ) => { const lines = t( 'ef_' + verdict ).split( '|' ).concat( named( 'ef_' + verdict ) ); let i = Math.floor( Math.random() * lines.length ); if ( lines.length > 1 && lines[ i ] === lastLine[ verdict ] ) i = ( i + 1 ) % lines.length; lastLine[ verdict ] = lines[ i ]; return lines[ i ]; };
 	F.line = pickLine;
 	F.sentences = ( f ) => {
 		if ( f.verdict === 'done' ) return [ t( 'efDone' ) ];
@@ -291,8 +294,10 @@
 
 	const pickGoal = () => { const l = F.all(); if ( ! l.length ) return null; return l.slice().sort( ( a, b ) => ( RANK[ a.verdict ] - RANK[ b.verdict ] ) || ( a.days - b.days ) )[ 0 ]; };
 	const askBanner = () => ( F.needAsk() ? `<div class="ef-ask"><span class="ef-ask-em">💬</span><span>${ rich( t( 'efAskBanner' ) ) }</span><button type="button" class="btn btn-primary sm" data-ef-prio>${ esc( t( 'efAskBtn' ) ) }</button></div>` : '' );
+	let bootChecked = false;
 	EXA.efriendHome = () => {
 		if ( ! on() ) return '';
+		if ( ! bootChecked ) { bootChecked = true; try { histList(); F.trimSettings(); EX.persist(); } catch ( x ) { /* ignore */ } const lv = ( S().device || {} ).efLiveChat; if ( lv && ! document.querySelector( '.ef-cp' ) ) { const r = histList().find( ( x ) => x.id === lv.id ); delete S().device.efLiveChat; try { EX.persist(); } catch ( x ) { /* ignore */ } if ( r ) setTimeout( () => EXA.efriendAskOpen( { sleep: r } ), 900 ); } }
 		try { F.tickAlloc(); } catch ( e ) { /* ignore */ }
 		const html = home0(), pr = proposalsHtml() + lowBanner();
 		if ( ! pr ) return html;
@@ -551,7 +556,8 @@
 			else if ( i >= steps.length - 1 ) finish( true ); else { if ( steps[ i ] === 'wishes' && ! commitWishes() ) { wErr = true; draw(); return; } i++; draw(); }
 		} );
 		ov.addEventListener( 'touchmove', ( e ) => { const m = e.target.closest( '.ef-ob-main' ); if ( ! m || m.scrollHeight <= m.clientHeight + 1 ) e.preventDefault(); }, { passive: false } );
-		document.body.appendChild( ov ); document.body.classList.add( 'ef-ob-open' ); draw();
+		document.body.appendChild( ov ); document.body.classList.add( 'ef-ob-open' );
+		draw();
 	};
 
 	/** The robot's bubble is a ticker: a message passes through between dots, then the next one comes. It never changes size, so the card never jumps. */
@@ -675,6 +681,22 @@
 		const m = F.cushion(), p = Math.round( posOf( m ) );
 		return `<div class="ef-risk" style="--c:${ colorAt( p ) };--p:${ p }%"><div class="ef-risk-h"><b>🎚️ ${ esc( t( 'efRiskTitle' ) ) }</b><span class="ef-risk-val">${ esc( riskWord( p ) ) } · ${ esc( monthsShort( m ) ) }</span></div><input type="range" class="ef-grad" data-ef-margin min="0" max="100" step="1" value="${ p }" aria-label="${ esc( t( 'efRiskTitle' ) ) }"><div class="ef-risk-ends"><span class="e0">${ esc( t( 'efRiskRisky' ) ) }</span><span class="e40">${ esc( t( 'efRiskBalanced' ) ) }</span><span class="e100">${ esc( t( 'efRiskVerySafe' ) ) }</span></div><div class="ef-risk-hint">${ points( riskLines( p, m ) ) }${ ( ( sc ) => sc && Math.abs( sc.m - m ) >= 0.5 ? `<div class="ef-callouts">${ points( [ t( 'efCushSteady', { m: monthsText( sc.m ), s: sc.swing } ) ] ) }<button type="button" class="btn btn-ghost sm" data-ef-cushuse="${ sc.m }">${ esc( t( 'efLimUse' ) ) }</button></div>` : '' )( F.suggestCushion2() ) }${ F.baseline().hasIncome ? '' : `<button type="button" class="btn btn-ghost sm" data-ef-income>💶 ${ esc( t( 'efAddIncome' ) ) }</button>` }</div></div>`;
 	};
+	/** eFriend rearranges your plans and moves the cushion slider in front of you, instead of everything jumping at once. */
+	const animateSuggest = ( both ) => {
+		const order = F.suggestOrder(), c = both ? F.suggestCushion( order ) : null, ol = document.querySelector( '[data-ef-prio-list]' ), slow = reduceMotion() ? 0 : 1;
+		if ( ol ) {
+			const rows = [ ...ol.children ], first = new Map( rows.map( ( li ) => [ li, li.getBoundingClientRect().top ] ) );
+			order.forEach( ( id ) => { const li = rows.find( ( x ) => x.dataset.id === id ); if ( li ) ol.appendChild( li ); } ); renumber( ol );
+			if ( slow ) rows.forEach( ( li, i ) => { const d = first.get( li ) - li.getBoundingClientRect().top; if ( ! d ) return; li.classList.add( 'ef-moving' ); li.style.transition = 'none'; li.style.transform = `translateY(${ d }px)`; requestAnimationFrame( () => requestAnimationFrame( () => { li.style.transition = `transform ${ 0.7 + i * 0.08 }s cubic-bezier(.2,.8,.2,1)`; li.style.transform = ''; } ) ); setTimeout( () => { li.style.transition = ''; li.classList.remove( 'ef-moving' ); }, 1200 ); } );
+		}
+		const r = document.querySelector( '[data-ef-margin]' ); let delay = 0;
+		if ( r && c ) {
+			const from = Number( r.value ), to = Math.round( posOf( c.m ) ), t0 = performance.now(), D = 1100;
+			const step = ( now ) => { const k = slow ? Math.min( 1, ( now - t0 ) / D ) : 1, e = 1 - Math.pow( 1 - k, 3 ); r.value = String( Math.round( from + ( to - from ) * e ) ); r.dispatchEvent( new Event( 'input', { bubbles: true } ) ); if ( k < 1 ) requestAnimationFrame( step ); };
+			setTimeout( () => requestAnimationFrame( step ), slow ? 350 : 0 ); delay = slow ? 1500 : 0;
+		}
+		setTimeout( () => F.applySuggest( both ), Math.max( delay, slow ? 1000 : 0 ) );
+	};
 	const renumber = ( ol ) => ol.querySelectorAll( ':scope > li .ef-rank' ).forEach( ( r, i ) => { r.textContent = i === 0 ? '🏆' : String( i + 1 ); } );
 	const commitOrder = ( ol ) => F.setOrder( [ ...ol.querySelectorAll( ':scope > li' ) ].map( ( li ) => li.dataset.id ) );
 	let drag = null, lp = null;
@@ -706,7 +728,7 @@
 		const ba = e.target.closest( '[data-ef-budadd]' ); if ( ba ) { const [ cat, amt ] = ba.dataset.efBudadd.split( ':' ); F.addBudgets( [ { cat, amount: Number( amt ) } ] ); return; }
 		if ( e.target.closest( '[data-ef-budall]' ) ) { F.addBudgets( F.budgetIdeas() ); return; }
 		const cu = e.target.closest( '[data-ef-cushuse]' ); if ( cu ) { S().settings.efCushion = Number( cu.dataset.efCushuse ); S().settings.u = Date.now(); EX.save(); return; }
-		const sg = e.target.closest( '[data-ef-sug]' ); if ( sg ) { const back = F.view && F.view.k === 'prio'; F.applySuggest( sg.dataset.efSug === 'both' ); if ( back ) setTimeout( () => EXA.openEfPriority(), 60 ); else UI.closeSheet(); return; }
+		const sg = e.target.closest( '[data-ef-sug]' ); if ( sg ) { const back = F.view && F.view.k === 'prio', both = sg.dataset.efSug === 'both'; if ( back ) { EXA.openEfPriority(); setTimeout( () => animateSuggest( both ), 600 ); } else { UI.closeSheet(); setTimeout( () => animateSuggest( both ), 450 ); } return; }
 		if ( e.target.closest( '[data-ef-prio-done]' ) ) { S().settings.efAsked = F.sig(); S().settings.u = Date.now(); EX.save(); UI.closeSheet(); }
 	} );
 	document.addEventListener( 'input', ( e ) => { const r = e.target.matches && e.target.matches( '[data-ef-margin]' ) ? e.target : null; if ( ! r ) return; const p = Number( r.value ), m = monthsAt( p ), box = r.closest( '.ef-risk' ); box.style.setProperty( '--c', colorAt( p ) ); box.style.setProperty( '--p', p + '%' ); box.querySelector( '.ef-risk-val' ).textContent = riskWord( p ) + ' · ' + monthsShort( m ); const hint = box.querySelector( '.ef-risk-hint' ), btn = hint.querySelector( 'button' ); hint.innerHTML = points( riskLines( p, m ) ); if ( btn ) hint.appendChild( btn ); } );
@@ -897,10 +919,19 @@
 	const REL = /(?<![\p{L}])(?:girlfriend|boyfriend|wife|husband|mom|mum|mother|dad|father|son|daughter|friend|sister|brother|kids?|baby|partner|fianc[eé]e?|grandma|grandpa|grandmother|grandfather|boss|colleague|teacher|neighbou?r|cousin|aunt|uncle|φίλη|φιλη|φίλο|φιλο|γυναίκα|γυναικα|σύζυγο|συζυγο|άντρα|αντρα|μαμά|μαμα|μητέρα|μητερα|μπαμπά|μπαμπα|πατέρα|πατερα|γιο|κόρη|κορη|αδερφή|αδερφη|αδερφό|αδερφο|παιδί|παιδι|παιδιά|παιδια|σύντροφο|συντροφο|γιαγιά|γιαγια|παππού|παππου|αφεντικό|αφεντικο|συνάδελφο|συναδελφο|δασκάλα|δασκαλα|δάσκαλο|δασκαλο)(?![\p{L}])/iu;
 	const CURMARK = /^\s*(?:[€$£]|eur\b|euros?\b|usd\b|dollars?\b|ευρώ|ευρω)/i;
 	/** "new iphone 16 1250$" -> { item: 'iphone 16', cost: 125000 } (cents). The price is the number next to a currency sign, else the biggest one; the other numbers stay in the name. English and Greek. */
+	/** "2.500", "2,500", "2.500,50", "49,5", "80.50" -> cents. One separator with exactly three digits after it (and at most three before) is a thousands mark. */
+	const amtCents = ( n ) => {
+		n = String( n ); const lastDot = n.lastIndexOf( '.' ), lastCom = n.lastIndexOf( ',' ); let dec = -1;
+		if ( lastDot >= 0 && lastCom >= 0 ) dec = Math.max( lastDot, lastCom );
+		else { const sep = lastDot >= 0 ? '.' : lastCom >= 0 ? ',' : ''; if ( sep ) { const parts = n.split( sep ); if ( parts.length === 2 && ! ( parts[ 1 ].length === 3 && parts[ 0 ].length <= 3 && parts[ 0 ] !== '0' ) ) dec = n.lastIndexOf( sep ); } }
+		const int = ( dec >= 0 ? n.slice( 0, dec ) : n ).replace( /[.,]/g, '' ), frac = dec >= 0 ? n.slice( dec + 1 ) : '';
+		return Math.round( parseFloat( int + ( frac ? '.' + frac : '' ) ) * 100 ) || 0;
+	};
+	F.amtCents = amtCents;
 	F.parseAsk = ( text, fix ) => {
 		const raw = String( text || '' ), re = /\d+(?:[.,]\d+)*/g, found = []; let m;
 		while ( ( m = re.exec( raw ) ) ) found.push( { s: m[ 0 ], i: m.index, e: m.index + m[ 0 ].length } );
-		const cents = ( n ) => { if ( /^\d{1,3}([.,]\d{3})+$/.test( n ) ) n = n.replace( /[.,]/g, '' ); else n = n.replace( ',', '.' ); return Math.round( parseFloat( n ) * 100 ) || 0; };
+		const cents = amtCents;
 		const near = ( f ) => /[€$£]\s*$/.test( raw.slice( Math.max( 0, f.i - 2 ), f.i ) ) || CURMARK.test( raw.slice( f.e, f.e + 10 ) );
 		const pick = found.filter( near ).pop() || found.slice().sort( ( x, y ) => cents( y.s ) - cents( x.s ) )[ 0 ] || null;
 		let rest = pick ? raw.slice( 0, pick.i ) + ' ' + raw.slice( pick.e ) : raw, who = '';
@@ -917,20 +948,39 @@
 		toks.forEach( ( w, k ) => { if ( ! drop( w ) ) words.push( w ); else if ( PREP.has( w.toLowerCase() ) && words.length && toks[ k + 1 ] && ! drop( toks[ k + 1 ] ) ) words.push( w ); } );
 		const item = words.join( ' ' ).trim(); return { item: item ? ( words[ 0 ] === words[ 0 ].toLowerCase() ? item.charAt( 0 ).toUpperCase() + item.slice( 1 ) : item ) : '', cost: pick ? cents( pick.s ) : 0, who };
 	};
-	/** "in 2 weeks", "right away", "no rush": how soon the person wants it. { days } (3 = right away), { none: true } for no rush, or null. English and Greek. */
+	/** How soon the person wants it, from their own words: "tomorrow", "in 2 weeks", "by Friday", "on 15 November", "before Christmas", "right away", "no rush". { days } (0 = today) or { none: true } or null. English and Greek. */
+	const WD = [ [ 'sunday|κυριακή|κυριακη', 0 ], [ 'monday|δευτέρα|δευτερα', 1 ], [ 'tuesday|τρίτη|τριτη', 2 ], [ 'wednesday|τετάρτη|τεταρτη', 3 ], [ 'thursday|πέμπτη|πεμπτη', 4 ], [ 'friday|παρασκευή|παρασκευη', 5 ], [ 'saturday|σάββατο|σαββατο', 6 ] ];
+	const MO = [ [ 'january|jan|ιανουαρίου|ιανουάριο|ιανουαριου|ιανουαριο', 0 ], [ 'february|feb|φεβρουαρίου|φεβρουάριο|φεβρουαριου|φεβρουαριο', 1 ], [ 'march|mar|μαρτίου|μάρτιο|μαρτιου|μαρτιο', 2 ], [ 'april|apr|απριλίου|απρίλιο|απριλιου|απριλιο', 3 ], [ 'may|μαΐου|μάιο|μαιου|μαιο', 4 ], [ 'june|jun|ιουνίου|ιούνιο|ιουνιου|ιουνιο', 5 ], [ 'july|jul|ιουλίου|ιούλιο|ιουλιου|ιουλιο', 6 ], [ 'august|aug|αυγούστου|αύγουστο|αυγουστου|αυγουστο', 7 ], [ 'september|sept|sep|σεπτεμβρίου|σεπτέμβριο|σεπτεμβριου|σεπτεμβριο', 8 ], [ 'october|oct|οκτωβρίου|οκτώβριο|οκτωβριου|οκτωβριο', 9 ], [ 'november|nov|νοεμβρίου|νοέμβριο|νοεμβριου|νοεμβριο', 10 ], [ 'december|dec|δεκεμβρίου|δεκέμβριο|δεκεμβριου|δεκεμβριο', 11 ] ];
+	const wdAlt = WD.map( ( x ) => x[ 0 ] ).join( '|' ), moAlt = MO.map( ( x ) => x[ 0 ] ).join( '|' );
+	const U = '(?<![\\p{L}\\p{N}])', V = '(?![\\p{L}\\p{N}])', PRE = '(?:(?:on|by|until|till|before|for|in|within|at|next|this|from|σε|έως|μέχρι|μεχρι|στις|στην|στο|στη|την|το|τον|τη|την)\\s+)?';
+	const idxOf = ( list, w ) => { const x = w.toLowerCase(); const f = list.find( ( e ) => e[ 0 ].split( '|' ).includes( x ) ); return f ? f[ 1 ] : -1; };
+	const untilDow = ( dow ) => { const cur = parse( today() ).getDay(); let d = ( dow - cur + 7 ) % 7; return d === 0 ? 7 : d; };
+	const WHEN = [
+		{ k: 'none', re: new RegExp( U + '(?:no rush|whenever|any ?time|not urgent|no hurry|can wait|καμία βιασύνη|καμια βιασυνη|όποτε|οποτε|δεν βιάζ\\p{L}*|δεν βιαζ\\p{L}*|δεν είναι επείγ\\p{L}*|δεν ειναι επειγ\\p{L}*)' + V, 'giu' ), f: () => ( { none: true } ) },
+		{ k: 'dat', re: new RegExp( U + PRE + '(?:the\\s+)?(\\d{1,2})(?:st|nd|rd|th)?\\s+(?:of\\s+)?(' + moAlt + ')' + V + '(?:\\s+(\\d{4}))?', 'giu' ), f: ( m ) => dateDays( Number( m[ 1 ] ), idxOf( MO, m[ 2 ] ), m[ 3 ] ) },
+		{ k: 'dat2', re: new RegExp( U + PRE + '(' + moAlt + ')\\s+(\\d{1,2})(?:st|nd|rd|th)?' + V, 'giu' ), f: ( m ) => dateDays( Number( m[ 2 ] ), idxOf( MO, m[ 1 ] ) ) },
+		{ k: 'slash', re: new RegExp( U + PRE + '(\\d{1,2})/(\\d{1,2})(?:/(\\d{2,4}))?' + V, 'giu' ), f: ( m ) => dateDays( Number( m[ 1 ] ), Number( m[ 2 ] ) - 1, m[ 3 ] ) },
+		{ k: 'dayafter', re: new RegExp( U + '(?:the )?day after tomorrow|μεθαύριο|μεθαυριο' + V, 'giu' ), f: () => ( { days: 2 } ) },
+		{ k: 'tomorrow', re: new RegExp( U + '(?:tomorrow|αύριο|αυριο)' + V, 'giu' ), f: () => ( { days: 1 } ) },
+		{ k: 'now', re: new RegExp( U + '(?:right away|asap|urgent(?:ly)?|immediately|today|tonight|now|τώρα|τωρα|άμεσα|αμεσα|επείγον|επειγον|σήμερα|σημερα|απόψε|αποψε)' + V, 'giu' ), f: () => ( { days: 0 } ) },
+		{ k: 'weekend', re: new RegExp( U + PRE + '(?:the |this )?(?:weekend|σαββατοκύριακο|σαββατοκυριακο)' + V, 'giu' ), f: () => ( { days: untilDow( 6 ) % 7 === 0 ? 0 : untilDow( 6 ) } ) },
+		{ k: 'wd', re: new RegExp( U + PRE + '(?:next |this |την |το )?(' + wdAlt + ')' + V, 'giu' ), f: ( m ) => ( { days: untilDow( idxOf( WD, m[ 1 ] ) ) } ) },
+		{ k: 'eom', re: new RegExp( U + '(?:(?:by |before |at )?(?:the )?end of (?:the |this )?month|τέλος (?:του )?μήνα|τελος (?:του )?μηνα)' + V, 'giu' ), f: () => { const n = parse( today() ); return { days: Math.max( 1, Math.round( ( new Date( n.getFullYear(), n.getMonth() + 1, 0 ) - n ) / 864e5 ) ) }; } },
+		{ k: 'xmas', re: new RegExp( U + PRE + '(?:christmas|xmas|χριστούγεννα|χριστουγεννα)' + V, 'giu' ), f: () => dateDays( 25, 11 ) },
+		{ k: 'num', re: new RegExp( U + PRE + '(?:in |within |σε |εντός |εντος )?(\\d+(?:[.,]\\d+)?|a|an|one|two|three|μια|μία|ένα|ενα|δύο|δυο|τρεις)\\s*(days?|weeks?|months?|ημέρ\\p{L}*|ημερ\\p{L}*|μέρ\\p{L}*|μερ\\p{L}*|εβδομ\\p{L}*|μήν\\p{L}*|μην\\p{L}*)' + V, 'giu' ), f: ( m ) => { const w = m[ 1 ].toLowerCase(), words = { a: 1, an: 1, one: 1, two: 2, three: 3, 'μια': 1, 'μία': 1, 'ένα': 1, 'ενα': 1, 'δύο': 2, 'δυο': 2, 'τρεις': 3 }, n = words[ w ] != null ? words[ w ] : parseFloat( w.replace( ',', '.' ) ), u = m[ 2 ].toLowerCase(); return { days: Math.max( 1, Math.round( n * ( /^(week|εβδομ)/.test( u ) ? 7 : /^(month|μήν|μην)/.test( u ) ? 30 : 1 ) ) ) }; } },
+		{ k: 'few', re: new RegExp( U + PRE + '(?:a couple of weeks|couple of weeks|a few weeks|few weeks|δυο εβδομάδες|δύο εβδομάδες|μερικές εβδομάδες|μερικες εβδομαδες)' + V, 'giu' ), f: ( m ) => ( { days: /few|μερικ/i.test( m[ 0 ] ) ? 21 : 14 } ) },
+		{ k: 'nw', re: new RegExp( U + PRE + '(?:(?:next|this) week|(?:την )?(?:επόμενη|επομενη|αυτή|αυτη) (?:την )?εβδομάδα|εβδομαδα)' + V, 'giu' ), f: () => ( { days: 7 } ) },
+		{ k: 'nm', re: new RegExp( U + PRE + '(?:(?:next|this) month|(?:τον )?(?:επόμενο|επομενο|αυτόν|αυτον) (?:τον )?μήνα|μηνα)' + V, 'giu' ), f: () => ( { days: 30 } ) },
+	];
+	const dateDays = ( day, mon, year ) => { if ( mon < 0 || mon > 11 || day < 1 || day > 31 ) return null; const now = parse( today() ); let y = year ? Number( year ) : now.getFullYear(); if ( y < 100 ) y += 2000; let d = new Date( y, mon, day ); if ( ! year && d < now ) d = new Date( y + 1, mon, day ); return { days: Math.max( 0, Math.round( ( d - now ) / 864e5 ) ) }; };
 	F.parseWhen = ( text ) => {
-		const x = String( text || '' ).toLowerCase();
-		if ( /no rush|whenever|any ?time|not urgent|no hurry|can wait|καμία βιασύνη|καμια βιασυνη|όποτε|οποτε|δεν βιάζ|δεν βιαζ|δεν είναι επείγ|δεν ειναι επειγ/.test( x ) ) return { none: true };
-		if ( /right away|asap|urgent|immediately|today|tonight|\bnow\b|τώρα|τωρα|άμεσα|αμεσα|επείγον|επειγον|σήμερα|σημερα/.test( x ) ) return { days: 3 };
-		const m = x.match( /(\d+(?:[.,]\d+)?)\s*(days?|weeks?|months?|ημέρ|ημερ|μέρ|μερ|εβδομ|μήν|μην)/ );
-		if ( m ) { const n = parseFloat( m[ 1 ].replace( ',', '.' ) ), u = m[ 2 ]; return { days: Math.max( 1, Math.round( n * ( /^(week|εβδομ)/.test( u ) ? 7 : /^(month|μήν|μην)/.test( u ) ? 30 : 1 ) ) ) }; }
-		if ( /couple of weeks|δυο εβδομ|δύο εβδομ/.test( x ) ) return { days: 14 }; if ( /few weeks|μερικές εβδομ|μερικες εβδομ/.test( x ) ) return { days: 21 };
-		if ( /next week|this week|επόμενη εβδομ|επομενη εβδομ|αυτή την εβδομ|αυτη την εβδομ/.test( x ) ) return { days: 7 };
-		if ( /next month|this month|επόμενο μήνα|επομενο μηνα|αυτόν τον μήνα|αυτον τον μηνα/.test( x ) ) return { days: 30 };
+		const x = String( text || '' );
+		for ( const p of WHEN ) { p.re.lastIndex = 0; const m = p.re.exec( x ); if ( m ) { const r = p.f( m ); if ( r ) return r; } }
 		return null;
 	};
-	/** The same text without the timing words, so "phone 1250 in 2 weeks" does not take the 2 for the price or the name. */
-	const stripWhen = ( text ) => String( text || '' ).replace( /\b(?:in|within|by|for|σε|εντός)?\s*(?:the\s+)?(?:next\s+)?\d+(?:[.,]\d+)?\s*(?:days?|weeks?|months?)\b/gi, ' ' ).replace( /(?:σε|εντός)?\s*\d+(?:[.,]\d+)?\s*(?:ημέρ\S*|ημερ\S*|μέρ\S*|εβδομ\S*|μήν\S*|μην\S*)/gi, ' ' ).replace( /\b(?:right away|asap|urgent(?:ly)?|immediately|no rush|whenever|next week|next month|this week|this month)\b/gi, ' ' );
+	/** The same text without the timing words, so "phone 1250 tomorrow" or "in 2 weeks" does not leak into the price or the name. */
+	const stripWhen = ( text ) => WHEN.reduce( ( t, p ) => t.replace( p.re, ' ' ), String( text || '' ) );
+	F.stripWhen = stripWhen;
 	/** Your next ~11 weeks, day by day: wallets, income dates, bills, usual spending (capped by your limits) and your plans' dates. */
 	F.timeline = ( horizon = 80 ) => {
 		const now = today(), b = F.baseline(), end = addDays( now, horizon ), idx = ( d ) => Math.max( 0, diff( d, now ) ), all = F.all();
@@ -978,7 +1028,7 @@
 	const lowBanner = () => {
 		const w = F.lowAhead(); if ( ! w || ( S().device || {} ).efLowDismiss === w.d ) return '';
 		const lines = [ t( w.kind === 'zero' ? 'efLowZero' : 'efLowCushion', { d: EX.dayName( w.d ), c: money( w.cushion / 100, main() ) } ) ].concat( w.why ? [ t( 'efLowWhy', { n: w.why } ) ] : [], [ t( 'efLowTip' ) ] );
-		return `<div class="ef-ask ef-low"><span class="ef-ask-em">${ w.kind === 'zero' ? '⚠️' : '🛡️' }</span><div>${ points( lines ) }</div><button type="button" class="btn btn-ghost sm" data-ef-lowx="${ esc( w.d ) }">${ esc( t( 'efGotIt' ) ) }</button></div>`;
+		return `<div class="ef-ask ef-low"><div>${ points( lines ) }</div><button type="button" class="btn btn-ghost sm" data-ef-lowx="${ esc( w.d ) }">${ esc( t( 'efGotIt' ) ) }</button></div>`;
 	};
 	/** Budgets worth adding, from what the person really spent per category over the last weeks (needs about six weeks of history). */
 	F.budgetIdeas = () => {
@@ -1010,14 +1060,14 @@
 		return { cost, days, tl: tl.slice( 0, N ), cushion, today: days[ 0 ], best: first, first, anyOk: days.some( ( x ) => x.st !== 'avoid' ), maxSafe, monthly: b.monthly, incomeMonthly: b.incomeMonthly, hasIncome: b.hasIncome };
 	};
 	/* ------------------------------------------------------------------ The chat: eFriend interviews you (what, how much, how soon), then brings the full analysis back to the app */
-	const chat = { chain: 0, id: '', ts: 0, msgs: [], stage: 'what', item: '', who: '', mi: 0, cost: 0, by: undefined, typing: false, busy: false, tok: 0, used: {}, ans: null, rec: null, sel: 0, chips: [], anim: true };
+	const chat = { over: false, stuck: 0, turns: 0, formOffered: false, restarts: 0, timer: 0, chain: 0, id: '', ts: 0, msgs: [], stage: 'what', item: '', who: '', mi: 0, cost: 0, by: undefined, typing: false, busy: false, tok: 0, used: {}, ans: null, rec: null, sel: 0, chips: [], anim: true };
 	const money$ = ( c ) => money( c / 100, main() );
 	const itemName = () => chat.item || t( 'efAskThing' );
 	const forWho = () => ( chat.who ? t( 'efc_for' ) + ' ' + chat.who : '' );
 	const kindOf = ( item ) => ( { '👟': 'shoes', '📱': 'phone', '💻': 'laptop', '✈️': 'trip', '🚗': 'car', '🎁': 'gift', '⌚': 'watch' }[ F.askIcon( item ).em ] || 'generic' );
 	/** One line from a pool ("a|b|c"), never the same one twice in a row, so eFriend does not repeat itself. */
 	const pool = ( key, vars ) => {
-		const list = String( t( key, vars ) ).split( '|' ), u = chat.used[ key ] = chat.used[ key ] || []; let i = 0;
+		const list = String( t( key, vars ) ).split( '|' ).concat( named( key, vars ) ), u = chat.used[ key ] = chat.used[ key ] || []; let i = 0;
 		if ( list.length > 1 ) { do { i = Math.floor( Math.random() * list.length ); } while ( u.includes( i ) ); u.push( i ); if ( u.length > Math.min( 2, list.length - 1 ) ) u.shift(); }
 		return list[ i ];
 	};
@@ -1032,9 +1082,28 @@
 	const priceSize = ( c ) => { const mo = F.baseline().monthly, r = mo > 0 ? c / mo : c / 100000; return r < 0.05 ? 'small' : r < 0.4 ? 'mid' : r < 1.5 ? 'big' : 'huge'; };
 	const reduceMotion = () => { try { return window.matchMedia( '(prefers-reduced-motion: reduce)' ).matches || navigator.webdriver; } catch ( e ) { return false; } };
 	const wait = ( ms ) => new Promise( ( r ) => setTimeout( r, reduceMotion() ? 0 : ms ) );
+	const marks = () => { const n = new Intl.NumberFormat( EX.loc() ); return { dec: n.format( 1.1 ).charAt( 1 ), grp: n.format( 1000 ).charAt( 1 ) }; };
+	/** What the person types for a price, shown as it should be read: digits and the decimal mark only, thousands grouped (2.500 or 2,500). */
+	const fmtTyped = ( raw ) => {
+		const { dec, grp } = marks(), d = dec === '.' ? '\\.' : dec; let v = String( raw ).replace( new RegExp( '[^\\d' + d + ']', 'g' ), '' );
+		const k = v.indexOf( dec ); let int = k < 0 ? v : v.slice( 0, k ), frac = k < 0 ? null : v.slice( k + 1 ).split( dec ).join( '' ).slice( 0, 2 );
+		int = int.replace( /^0+(?=\d)/, '' ).slice( 0, 10 ).replace( /\B(?=(\d{3})+(?!\d))/g, grp ); return frac === null ? int : int + dec + frac;
+	};
+	const fmtCents = ( c ) => { const { dec } = marks(), v = ( c / 100 ).toFixed( 2 ).replace( '.', dec ); return fmtTyped( c % 100 ? v : v.slice( 0, -3 ) ); };
+	const zeroPh = () => '0' + marks().dec + '00';
+	/** While eFriend waits for a price the keyboard is numeric and only numbers can be typed. */
+	/** While eFriend waits for a price, the box becomes a numeric one (decimal keyboard); Expenity's amount fields then group the digits as they are typed and refuse letters. */
+	const syncInput = () => {
+		const q = document.getElementById( 'efChatQ' ); if ( ! q || chat.over ) return; const price = chat.stage === 'price';
+		if ( ( q.getAttribute( 'inputmode' ) === 'decimal' ) === price ) return;
+		const n = document.createElement( 'input' ); n.name = 'q'; n.id = 'efChatQ'; n.autocomplete = 'off'; n.setAttribute( 'enterkeyhint', 'send' ); n.setAttribute( 'aria-label', q.getAttribute( 'aria-label' ) || '' );
+		if ( price ) { n.setAttribute( 'inputmode', 'decimal' ); n.placeholder = zeroPh(); } else n.placeholder = t( 'efAskPh' );
+		const had = document.activeElement === q; q.replaceWith( n ); if ( had ) n.focus( { preventScroll: true } );
+	};
 	const live = ( tok ) => tok === chat.tok && document.getElementById( 'efChat' );
 
-	const bubble = ( x ) => x.who === 'me'
+	const formCard = () => `<form id="efQForm" class="ef-qform" novalidate autocomplete="off"><label class="f"><span>${ esc( t( 'efAskWhat' ) ) }</span><input name="what" autocomplete="off" value="${ esc( chat.item ) }"></label><label class="f"><span>${ esc( t( 'efAskHow' ) ) } (${ esc( main() ) })</span><input name="cost" inputmode="decimal" autocomplete="off" placeholder="${ zeroPh() }" value="${ chat.cost ? esc( fmtCents( chat.cost ) ) : '' }"></label><label class="f"><span>${ esc( t( 'efc_f_when' ) ) }</span><input type="date" name="when" min="${ today() }"></label><label class="ef-qnr"><input type="checkbox" name="norush"> ${ esc( t( 'efc_wc4' ) ) }</label><p class="err" id="efQErr" role="alert" hidden></p><button type="submit" class="btn btn-primary wide">✅ ${ esc( t( 'efc_f_go' ) ) }</button></form>`;
+	const bubble = ( x ) => x.form ? `<div class="ef-msg ef wide" data-form-msg><span class="ef-av">${ F.icon( 30 ) }</span><div class="ef-mb">${ formCard() }</div></div>` : x.who === 'me'
 		? `<div class="ef-msg me"><div class="ef-mb">${ esc( x.text ) }</div></div>`
 		: `<div class="ef-msg ef"><span class="ef-av">${ F.icon( 30 ) }</span><div class="ef-mb">${ x.lines.map( ( l ) => `<p class="ef-ml">${ rich( l ) }</p>` ).join( '' ) }</div></div>`;
 	const chatBox = () => document.getElementById( 'efChat' );
@@ -1049,21 +1118,22 @@
 	const setChips = ( list ) => {
 		chat.chips = list || []; const box = document.getElementById( 'efChips' ); if ( ! box ) return;
 		box.innerHTML = chat.chips.map( ( c, i ) => `<button type="button" class="ef-chipq${ c.k === 'yes' ? ' go' : '' }" style="--i:${ i }" data-ef-q="${ i }">${ esc( c.label ) }</button>` ).join( '' );
+		requestAnimationFrame( () => scrollEnd() ); setTimeout( scrollEnd, 120 );
 	};
 	/** eFriend "types" for a moment, then speaks: the pause is part of the charm. */
 	const say = async ( lines, o = {} ) => {
 		if ( chat.chain !== chat.tok ) return;
 		const tok = chat.tok, txt = [].concat( lines ).join( ' ' ), len = txt.length;
-		await wait( 450 ); if ( ! live( tok ) ) return;
+		await wait( 380 ); if ( ! live( tok ) ) return;
 		chat.typing = true; setMood( o.mood ); showTyping(); scrollEnd();
-		await wait( o.delay || Math.max( 1300, Math.min( 4200, 1000 + len * 38 ) ) );
+		await wait( o.delay || Math.max( 1100, Math.min( 3600, 850 + len * 32 ) ) );
 		if ( ! live( tok ) ) return;
-		chat.typing = false; hideTyping(); const m = { who: 'ef', lines: [].concat( lines ), mood: o.mood }; chat.msgs.push( m ); appendMsg( m ); scrollEnd();
-		await wait( 500 );
+		chat.typing = false; hideTyping(); const m = { who: 'ef', lines: [].concat( lines ), mood: o.mood }; chat.msgs.push( m ); appendMsg( m ); scrollEnd(); syncInput(); saveChat();
+		await wait( 425 );
 	};
 
 	const recap = async () => {
-		chat.stage = 'confirm';
+		chat.stage = 'confirm'; chat.stuck = 0;
 		await say( [ pool( 'efc_recap' ), `${ F.askIcon( chat.item ).em } **${ itemName() }**${ chat.who ? ' ' + forWho() : '' } · **${ money$( chat.cost ) }** · ${ whenWords( chat.by ) }`, pool( 'efc_right' ) ], { mood: 'happy' } );
 		setChips( [ { k: 'yes', label: '✅ ' + t( 'efc_yes' ) }, { k: 'fix', label: '✏️ ' + t( 'efChatFix' ) } ] );
 	};
@@ -1082,36 +1152,92 @@
 	const setBy = ( w ) => { chat.by = w.none ? null : w.days; };
 	const yesRe = /^\s*(yes|yeah|yep|yup|ok|okay|correct|right|sure|go|ναι|ναί|σωστά|οκ)\b/i, noRe = /^\s*(no|nope|όχι|οχι)\s*[.!]?\s*$/i;
 
-	const onUser = async ( text, chip ) => {
+	const onUserCore = async ( text, chip ) => {
 		if ( chat.busy ) return; chat.busy = true; const tok = chat.tok; chat.chain = tok;
 		try {
-			{ const m = { who: 'me', text }; chat.msgs.push( m ); appendMsg( m ); } setChips( [] ); scrollEnd(); await wait( 700 ); if ( ! live( tok ) ) return;
+			{ const m = { who: 'me', text }; chat.msgs.push( m ); appendMsg( m ); saveChat(); } setChips( [] ); scrollEnd(); await wait( 600 ); if ( ! live( tok ) ) return;
 			const st = chat.stage;
+			// eFriend is no AI chatbot: a real question gets a retro joke, then the pending question again
+			if ( /[?;]/.test( text ) && ! chip && ! F.parseAsk( stripWhen( text ) ).cost && ! F.parseWhen( text ) && ! ( st === 'what' && /buy|afford|get|purchase|order|book|αγορ|πάρω|παρω/i.test( text ) ) ) {
+				await say( [ pool( 'efc_q' ) ], { mood: 'cheer', delay: 1500 } ); if ( ! live( tok ) ) return;
+				return await ( st === 'confirm' ? recap() : st === 'fix' ? say( [ pool( 'efc_fix' ) ], { mood: 'happy' } ) : nextQ() );
+			}
 			if ( st === 'confirm' || st === 'fix' ) {
 				if ( ( chip && chip.k === 'yes' ) || ( st === 'confirm' && yesRe.test( text ) && ! /\d/.test( text ) ) ) return await finish();
 				if ( ( chip && chip.k === 'fix' ) || noRe.test( text ) ) { chat.stage = 'fix'; return await say( [ pool( 'efc_fix' ) ], { mood: 'happy' } ); }
 				const { p, w } = read( text, true ); let changed = false;
 				if ( p.item ) { chat.item = p.item; changed = true; } if ( p.cost ) { chat.cost = p.cost; changed = true; } if ( w ) { setBy( w ); changed = true; }
-				if ( ! changed ) return await say( [ pool( 'efc_fix' ) ], { mood: 'happy' } );
+				if ( ! changed ) { chat.stuck++; return await say( [ pool( 'efc_fix' ) ], { mood: 'happy' } ); }
 				await say( [ pool( 'efc_changed' ) ], { mood: 'cheer' } ); return await recap();
 			}
 			if ( st === 'when' ) {
 				const w = chip && 'by' in chip ? ( chip.by == null ? { none: true } : { days: chip.by } ) : F.parseWhen( text );
-				if ( ! w ) return await say( [ pool( 'efc_nowhen' ) ], { mood: 'happy' } );
+				if ( ! w ) { chat.stuck++; return await say( [ pool( 'efc_nowhen' ) ], { mood: 'happy' } ); }
 				setBy( w ); await sayWhen(); return await nextQ();
 			}
 			if ( st === 'price' ) {
-				const { p, w } = read( text, true ); if ( ! p.cost ) return await say( [ pool( 'efc_nocost' ) ], { mood: 'meh' } );
+				const { p, w } = read( text, true ); if ( ! p.cost ) { chat.stuck++; return await say( [ pool( 'efc_nocost' ) ], { mood: 'meh' } ); }
 				chat.cost = p.cost; if ( p.item && ! chat.item ) { chat.item = p.item; await sayItem(); } await sayPrice(); if ( w ) { setBy( w ); await sayWhen(); } return await nextQ();
 			}
 			// the first message (or an answer to "what is it?")
 			const { p, w } = read( text, false ); const hadItem = !! chat.item, hadCost = !! chat.cost;
+			if ( ! p.item && ! p.cost && ! w ) chat.stuck++;
 			if ( p.item ) chat.item = p.item; if ( p.who ) chat.who = p.who; if ( p.cost ) chat.cost = p.cost; if ( w ) setBy( w );
 			if ( p.item && ! hadItem ) await sayItem(); if ( p.cost && ! hadCost ) await sayPrice(); if ( w ) await sayWhen();
 			return await nextQ();
 		} finally { if ( tok === chat.tok ) chat.busy = false; }
 	};
 
+	/** When the chat goes round in circles: offer the quick form (what, how much, when) inside the chat. The person can always decline. */
+	const offerForm = async () => {
+		if ( chat.busy || chat.over ) return; chat.busy = true; const tok = chat.tok; chat.chain = tok; chat.formOffered = true;
+		try { await say( [ pool( 'efc_f_offer' ) ], { mood: 'happy' } ); if ( ! live( tok ) ) return; setChips( [ { k: 'form', label: '📝 ' + t( 'efc_f_chip' ) }, { k: 'keep', label: '💬 ' + t( 'efc_f_keep' ) } ] ); } finally { if ( tok === chat.tok ) chat.busy = false; }
+	};
+	const onUser = async ( text, chip ) => {
+		if ( chat.over || chat.busy ) return; chat.turns++;
+		if ( chat.stage === 'price' && /^[\d.,]+$/.test( text ) ) text = fmtCents( amtCents( text ) );
+		await onUserCore( text, chip );
+		if ( chat.over || chat.busy || chat.stage === 'done' || chat.stage === 'confirm' || chat.formOffered ) return;
+		if ( chat.stuck >= 2 || chat.turns >= 7 ) await offerForm();
+	};
+	const showForm = async () => {
+		if ( chat.busy || chat.over ) return; chat.busy = true; const tok = chat.tok; chat.chain = tok;
+		try {
+			const mm = { who: 'me', text: '📝 ' + t( 'efc_f_chip' ) }; chat.msgs.push( mm ); appendMsg( mm ); setChips( [] ); scrollEnd(); await wait( 500 );
+			await say( [ pool( 'efc_f_ask' ) ], { mood: 'cheer' } ); if ( ! live( tok ) ) return;
+			const fm = { who: 'ef', form: true, lines: [] }; chat.msgs.push( fm ); appendMsg( fm ); scrollEnd();
+			const first = document.querySelector( '#efQForm input[name=what]' ); if ( first && ! reduceMotion() ) first.focus( { preventScroll: true } );
+		} finally { if ( tok === chat.tok ) chat.busy = false; }
+	};
+	const keepChatting = async () => {
+		if ( chat.busy || chat.over ) return; chat.busy = true; const tok = chat.tok; chat.chain = tok;
+		try { const mm = { who: 'me', text: '💬 ' + t( 'efc_f_keep' ) }; chat.msgs.push( mm ); appendMsg( mm ); setChips( [] ); scrollEnd(); chat.stuck = -3; chat.turns = 0; await wait( 500 ); await say( [ pool( 'efc_f_keepsay' ) ], { mood: 'cheer' } ); } finally { if ( tok === chat.tok ) chat.busy = false; }
+	};
+	document.addEventListener( 'submit', async ( e ) => {
+		const f = e.target; if ( f.id !== 'efQForm' ) return; e.preventDefault();
+		if ( chat.busy || chat.over ) return;
+		const what = f.elements.what.value.trim(), cost = amtCents( f.elements.cost.value ), when = f.elements.when.value, norush = f.elements.norush.checked, err = document.getElementById( 'efQErr' );
+		if ( ! what || ! cost ) { err.textContent = t( 'efc_f_err' ); err.hidden = false; return; }
+		chat.busy = true; const tok = chat.tok; chat.chain = tok;
+		try {
+			chat.item = what.charAt( 0 ).toUpperCase() + what.slice( 1 ); chat.cost = cost; chat.who = ''; chat.by = norush || ! when ? null : Math.max( 0, diff( when, today() ) );
+			const node = f.closest( '.ef-msg' ), idx = chat.msgs.findIndex( ( x ) => x.form ); if ( idx >= 0 ) chat.msgs[ idx ] = { who: 'me', text: `${ chat.item } · ${ money$( cost ) } · ${ whenWords( chat.by ) }` };
+			if ( node ) node.outerHTML = bubble( chat.msgs[ idx ] ); scrollEnd(); saveChat(); chat.stuck = 0; await wait( 500 );
+			await say( [ pool( 'efc_f_ok' ) ], { mood: 'cheer' } ); if ( ! live( tok ) ) return; await recap();
+		} finally { if ( tok === chat.tok ) chat.busy = false; }
+	} );
+	/** Time is up (five minutes), or the app was closed mid-chat: eFriend falls asleep, and says so. */
+	const sleepChat = async ( kind ) => {
+		const box = chatBox(); if ( ! box || chat.over ) return;
+		chat.over = true; chat.tok++; chat.chain = chat.tok; chat.busy = false; chat.typing = false; clearTimeout( chat.timer ); hideTyping(); setChips( [] );
+		const q = document.getElementById( 'efChatQ' ); if ( q ) { q.value = ''; q.disabled = true; q.placeholder = t( 'efc_zzz_ph' ); const b = q.parentNode.querySelector( 'button' ); if ( b ) b.disabled = true; }
+		setMood( 'meh' ); const m = { who: 'ef', lines: [ pool( kind === 'timeout' ? 'efc_timeout' : 'efc_sleep' ) ], mood: 'meh' }; chat.msgs.push( m ); appendMsg( m ); scrollEnd();
+		const st = document.getElementById( 'efCpStat' ); if ( st ) st.textContent = t( 'efc_asleep' );
+		setChips( [ { k: 'wake', label: '☀️ ' + t( 'efc_wake' ) }, { k: 'hist', label: '🕘 ' + t( 'efc_h_title' ) } ] );
+		delete ( S().device || {} ).efLiveChat; saveChat();
+	};
+
+	EXA.efriendChatSleep = ( kind ) => sleepChat( kind || 'timeout' );
 	/* The decision: the best day, inside the person's window when they gave one. */
 	const decide = ( a, by ) => {
 		const inWin = ( x ) => by == null || x.i <= by, good = a.days.find( ( x ) => inWin( x ) && ( x.st === 'best' || x.st === 'good' ) );
@@ -1169,31 +1295,46 @@
 	const showResult = () => {
 		const X = `<button type="button" class="ab-btn" data-close aria-label="${ esc( t( 'close' ) ) }">${ UI.icon( 'x', 24 ) }</button>`;
 		chat.anim = true; UI.openSheet( `<div class="sheet-head">${ X }<h2 id="sheetTitle">💬 ${ esc( t( 'efAskTitle' ) ) }</h2><span class="sp"></span></div><div class="sheet-pad ef-ask-sheet" id="efRes">${ resultHtml() }</div>`, { tall: true } );
+		const top = () => { const r = document.getElementById( 'efRes' ), sc = r && ( r.closest( '.sheet-scroll' ) || r.parentNode ); if ( sc ) sc.scrollTop = 0; if ( document.activeElement && document.activeElement.blur ) document.activeElement.blur(); }; top(); setTimeout( top, 120 ); setTimeout( top, 450 );
 		setTimeout( () => { const r = document.getElementById( 'efRes' ); if ( ! r ) return; countUp( r ); if ( chat.rec && chat.rec.kind === 'ok' ) burst( r ); chat.anim = false; }, 250 );
 	};
 	const repaintResult = () => { const r = document.getElementById( 'efRes' ); if ( r ) { chat.anim = false; const y = r.closest( '.sheet-scroll' ) || r.parentNode; const top = y ? y.scrollTop : 0; r.innerHTML = resultHtml(); if ( y ) y.scrollTop = top; } };
 
 	/* Past chats: every chat with at least one message from the person is kept (the last 30), so they can be read again or asked again with today's numbers. */
-	const histList = () => ( S().settings.efChats = S().settings.efChats || [] );
+	/** Chat history lives on this device only: the sync server accepts about 8,000 characters per record, and the settings record must never grow past that. */
+	const histList = () => {
+		const d = S().device, st = S().settings;
+		if ( st.efChats ) { d.efChats = ( d.efChats || [] ).concat( st.efChats ).slice( 0, 30 ); delete st.efChats; st.u = Date.now(); }
+		return ( d.efChats = d.efChats || [] );
+	};
+	/** Keep the synced settings small: older eFriend history is trimmed when they get close to the server's limit. */
+	F.trimSettings = () => {
+		const st = S().settings; let n = JSON.stringify( st ).length; if ( n < 6500 ) return false;
+		const cut = ( o, keep ) => Object.keys( o || {} ).forEach( ( k ) => { if ( Array.isArray( o[ k ] ) && o[ k ].length > keep ) o[ k ] = o[ k ].slice( -keep ); } );
+		cut( st.efHistory, 40 ); cut( st.efEvents, 10 ); if ( Array.isArray( st.efProposals ) && st.efProposals.length > 6 ) st.efProposals = st.efProposals.slice( -6 );
+		if ( JSON.stringify( st ).length >= 6500 ) { cut( st.efHistory, 15 ); cut( st.efEvents, 4 ); }
+		st.u = Date.now(); return true;
+	};
 	const saveChat = () => {
 		if ( ! chat.id || ! chat.msgs.some( ( x ) => x.who === 'me' ) ) return;
 		const rec = { id: chat.id, ts: chat.ts, item: chat.item, who: chat.who, cost: chat.cost, by: chat.by, msgs: chat.msgs.map( ( x ) => ( x.who === 'me' ? { w: 'me', t: x.text } : { w: 'ef', l: x.lines, m: x.mood } ) ), done: chat.stage === 'done', st: chat.ans ? chat.ans.today.st : '', kind: chat.rec ? chat.rec.kind : '', rd: chat.rec && chat.rec.day ? chat.rec.day.d : '' };
 		const l = histList(), i = l.findIndex( ( x ) => x.id === rec.id ); if ( i >= 0 ) l[ i ] = rec; else l.unshift( rec ); if ( l.length > 30 ) l.length = 30;
-		S().settings.u = Date.now(); try { EX.persist(); } catch ( e ) { /* ignore */ }
+		try { EX.persist(); } catch ( e ) { /* ignore */ }
 	};
 	const VERD = { best: 'comfortable', good: 'ontrack', tight: 'tight', avoid: 'atrisk' };
 	const histHtml = ( id ) => {
 		const l = histList(), r = id ? l.find( ( x ) => x.id === id ) : null, back = `<button type="button" class="btn btn-ghost sm" data-ef-hback>← ${ esc( t( 'efc_h_back' ) ) }</button>`;
-		if ( r ) return `<div class="ef-hist-h">${ back }<b>${ esc( ( F.askIcon( r.item ).em ) + ' ' + ( r.item || t( 'efAskThing' ) ) ) }</b></div><div class="ef-chat ef-hist-chat">${ r.msgs.map( ( x ) => ( x.w === 'me' ? `<div class="ef-msg me"><div class="ef-mb">${ esc( x.t ) }</div></div>` : `<div class="ef-msg ef"><span class="ef-av">${ F.icon( 30 ) }</span><div class="ef-mb">${ x.l.map( ( q ) => `<p class="ef-ml">${ rich( q ) }</p>` ).join( '' ) }</div></div>` ) ).join( '' ) }</div><div class="btn-row ef-hist-act">${ r.cost ? `<button type="button" class="btn btn-primary" data-ef-hagain="${ esc( r.id ) }">🔁 ${ esc( t( 'efc_h_again' ) ) }</button>` : '' }<button type="button" class="btn btn-ghost" data-ef-hnew>💬 ${ esc( t( 'efc_h_new' ) ) }</button></div>`;
+		if ( r ) return `<div class="ef-hist-h">${ back }<b>${ esc( ( F.askIcon( r.item ).em ) + ' ' + ( r.item || t( 'efAskThing' ) ) ) }</b></div><div class="ef-chat ef-hist-chat">${ r.msgs.filter( ( x ) => x.w === 'me' || ( x.l && x.l.length ) ).map( ( x ) => ( x.w === 'me' ? `<div class="ef-msg me"><div class="ef-mb">${ esc( x.t ) }</div></div>` : `<div class="ef-msg ef"><span class="ef-av">${ F.icon( 30 ) }</span><div class="ef-mb">${ x.l.map( ( q ) => `<p class="ef-ml">${ rich( q ) }</p>` ).join( '' ) }</div></div>` ) ).join( '' ) }</div><div class="btn-row ef-hist-act">${ r.cost ? `<button type="button" class="btn btn-primary" data-ef-hagain="${ esc( r.id ) }">🔁 ${ esc( t( 'efc_h_again' ) ) }</button>` : '' }<button type="button" class="btn btn-ghost" data-ef-hnew>💬 ${ esc( t( 'efc_h_new' ) ) }</button></div>`;
 		return `<div class="ef-hist-h">${ back }<b>🕘 ${ esc( t( 'efc_h_title' ) ) }</b></div>${ l.length ? `<ul class="ef-hist-list">${ l.map( ( x ) => `<li><button type="button" class="ef-hrow" data-ef-hopen="${ esc( x.id ) }"><span class="ef-em">${ F.askIcon( x.item ).em }</span><span><b>${ esc( x.item || t( 'efAskThing' ) ) }</b><small>${ esc( [ x.cost ? money$( x.cost ) : '', EX.dayName( new Date( x.ts ).toISOString().slice( 0, 10 ) ) ].filter( Boolean ).join( ' · ' ) ) }</small></span>${ x.done && VERD[ x.st ] ? chip( VERD[ x.st ] ) : `<span class="ef-chip">${ esc( t( 'efc_h_open' ) ) }</span>` }</button><button type="button" class="ab-btn" data-ef-hdel="${ esc( x.id ) }" aria-label="${ esc( t( 'efc_h_del' ) ) }">${ UI.icon( 'trash', 20 ) }</button></li>` ).join( '' ) }</ul>` : `<p class="muted ef-hist-empty">${ esc( t( 'efc_h_empty' ) ) }</p>` }`;
 	};
 	const showHist = ( id ) => { const ov = document.querySelector( '.ef-cp' ); if ( ! ov ) return; let p = document.getElementById( 'efHist' ); if ( ! p ) { p = document.createElement( 'div' ); p.id = 'efHist'; p.className = 'ef-hist'; ov.appendChild( p ); } p.innerHTML = histHtml( id ); };
 	const hideHist = () => { const p = document.getElementById( 'efHist' ); if ( p ) p.remove(); };
-	const closeChat = () => { saveChat(); chat.tok++; const ov = document.querySelector( '.ef-cp' ); if ( ov ) ov.remove(); document.body.classList.remove( 'ef-ob-open' ); };
+	const closeChat = () => { saveChat(); chat.tok++; clearTimeout( chat.timer ); if ( S().device && S().device.efLiveChat ) { delete S().device.efLiveChat; try { EX.persist(); } catch ( x ) { /* ignore */ } } const ov = document.querySelector( '.ef-cp' ); if ( ov ) ov.remove(); document.body.classList.remove( 'ef-ob-open' ); };
 	/** The thinking screen: the robot scans, the checklist ticks, then the page opens like a curtain on the result. */
 	const analysis = async () => {
 		const tok = chat.tok, ov = document.querySelector( '.ef-cp' ); if ( ! ov ) return;
 		chat.ans = F.answer( chat.cost ); chat.rec = decide( chat.ans, chat.by ); chat.sel = chat.rec.day ? chat.rec.day.i : 0; chat.mi = Math.max( 0, monthsOf( chat.ans ).findIndex( ( g ) => g.k === chat.ans.days[ chat.sel ].d.slice( 0, 7 ) ) );
+		ov.classList.add( 'fading' ); await wait( 1000 ); if ( tok !== chat.tok ) return; ov.classList.remove( 'fading' );
 		ov.classList.add( 'an' ); ov.innerHTML = `<div class="ef-an"><div class="ef-an-bot">${ F.mascot( 'happy', 130 ) }<i class="ef-scan"></i><i class="ef-scan s2"></i></div><h2>${ esc( pool( 'efc_think' ) ) }</h2><ul class="ef-an-steps">${ [ 1, 2, 3, 4, 5 ].map( ( n ) => `<li style="--i:${ n }"><span class="tick">✓</span>${ esc( t( 'efc_step' + n ) ) }</li>` ).join( '' ) }</ul><div class="ef-an-bar"><i></i></div></div>`;
 		const items = [ ...ov.querySelectorAll( '.ef-an-steps li' ) ], bar = ov.querySelector( '.ef-an-bar i' );
 		for ( let i = 0; i < items.length; i++ ) { await wait( 1100 + Math.random() * 600 ); if ( tok !== chat.tok ) return; items[ i ].classList.add( 'on' ); bar.style.width = Math.round( ( i + 1 ) / items.length * 100 ) + '%'; }
@@ -1201,10 +1342,10 @@
 		ov.classList.add( 'out' ); await wait( 700 ); if ( tok !== chat.tok ) return;
 		closeChat(); showResult();
 	};
-	const finish = async () => { chat.stage = 'done'; await say( [ pool( 'efc_close' ) ], { mood: 'cheer' } ); await wait( 900 ); return analysis(); };
+	const finish = async () => { chat.stage = 'done'; await say( [ pool( 'efc_close' ) ], { mood: 'cheer' } ); await wait( 2200 ); return analysis(); };
 
 	const pickIdeas = async ( tok ) => {
-		await say( [ t( 'efc_pick' ) ], { mood: 'happy', delay: 1200 } ); if ( ! live( tok ) ) return;
+		await say( [ t( 'efc_pick' ) ], { mood: 'happy', delay: 1020 } ); if ( ! live( tok ) ) return;
 		setChips( String( t( 'efc_ideas' ) ).split( '|' ).map( ( l ) => ( { label: l, text: l.replace( /^[^\p{L}\p{N}]+/u, '' ) } ) ) );
 		const q = document.getElementById( 'efChatQ' ); if ( q && ! reduceMotion() ) q.focus( { preventScroll: true } );
 	};
@@ -1212,25 +1353,33 @@
 	const restartChat = async () => {
 		const box = chatBox(); if ( ! box ) return;
 		saveChat(); chat.tok++; chat.chain = chat.tok;
-		Object.assign( chat, { id: EX.uid(), ts: Date.now(), msgs: [], stage: 'what', item: '', who: '', cost: 0, by: undefined, typing: false, busy: false, ans: null, rec: null, sel: 0, mi: 0, chips: [] } );
+		chat.restarts++; Object.assign( chat, { stuck: 0, turns: 0, formOffered: false, over: false, id: EX.uid(), ts: Date.now(), msgs: [], stage: 'what', item: '', who: '', cost: 0, by: undefined, typing: false, busy: false, ans: null, rec: null, sel: 0, mi: 0, chips: [] } );
 		const tok = chat.tok; hideTyping(); setChips( [] ); hideHist(); box.classList.add( 'clearing' ); await wait( 350 ); if ( tok !== chat.tok ) return;
 		box.innerHTML = ''; box.classList.remove( 'clearing' );
-		await say( [ pool( 'efc_reset' ) ], { mood: 'worried', delay: 1600 } ); if ( ! live( tok ) ) return;
-		return pickIdeas( tok );
+		await say( [ pool( 'efc_reset' ) ], { mood: 'worried', delay: 1360 } ); if ( ! live( tok ) ) return;
+		await pickIdeas( tok ); if ( chat.restarts >= 2 && live( tok ) ) await offerForm();
 	};
 	EXA.efriendAskOpen = ( prefill ) => {
-		closeChat(); Object.assign( chat, { id: EX.uid(), ts: Date.now(), msgs: [], stage: 'what', item: '', who: '', mi: 0, cost: 0, by: undefined, typing: false, busy: false, ans: null, rec: null, sel: 0, chips: [], used: {}, anim: true } );
+		closeChat(); Object.assign( chat, { stuck: 0, turns: 0, formOffered: false, over: false, restarts: 0, id: EX.uid(), ts: Date.now(), msgs: [], stage: 'what', item: '', who: '', mi: 0, cost: 0, by: undefined, typing: false, busy: false, ans: null, rec: null, sel: 0, chips: [], used: {}, anim: true } );
 		const ov = document.createElement( 'div' ); ov.className = 'ef-cp'; ov.setAttribute( 'role', 'dialog' ); ov.setAttribute( 'aria-modal', 'true' ); ov.setAttribute( 'aria-label', 'eFriend' );
 		ov.innerHTML = `<header class="ef-cp-h"><button type="button" class="ab-btn" data-ef-cpx aria-label="${ esc( t( 'close' ) ) }">${ UI.icon( 'x', 24 ) }</button><div class="ef-cp-who"><span class="ef-cp-av">${ F.mascot( 'happy', 46 ) }</span><div><b>eFriend</b><small id="efCpStat">${ esc( t( 'efc_online' ) ) }</small></div></div><button type="button" class="ab-btn ef-cp-clear" data-ef-clear aria-label="${ esc( t( 'efc_clear' ) ) }" title="${ esc( t( 'efc_clear' ) ) }">🧹</button><button type="button" class="ab-btn ef-cp-hist" data-ef-hist aria-label="${ esc( t( 'efc_h_title' ) ) }" title="${ esc( t( 'efc_h_title' ) ) }">🕘</button></header>
 			<div id="efChat" class="ef-chat" aria-live="polite"></div><div class="ef-chips" id="efChips"></div>
 			<form id="efChatForm" class="ef-chat-in" novalidate autocomplete="off"><input name="q" id="efChatQ" autocomplete="off" enterkeyhint="send" placeholder="${ esc( t( 'efAskPh' ) ) }" aria-label="${ esc( t( 'efAskQ' ) ) }"><button type="submit" class="btn btn-primary" aria-label="${ esc( t( 'efAskGo' ) ) }">➤</button></form>`;
 		document.body.appendChild( ov ); document.body.classList.add( 'ef-ob-open' );
+		try { new ResizeObserver( () => scrollEnd() ).observe( ov.querySelector( '#efChat' ) ); } catch ( x ) { /* ignore */ }
+		if ( prefill && prefill.sleep ) {
+			const r = prefill.sleep; chat.id = r.id; chat.ts = r.ts || Date.now(); chat.item = r.item || ''; chat.cost = r.cost || 0; chat.who = r.who || ''; chat.by = r.by;
+			chat.msgs = r.msgs.filter( ( x ) => x.w === 'me' || ( x.l && x.l.length ) ).map( ( x ) => ( x.w === 'me' ? { who: 'me', text: x.t } : { who: 'ef', lines: x.l, mood: x.m } ) ); chat.msgs.forEach( appendMsg ); scrollEnd();
+			setTimeout( () => sleepChat( 'sleep' ), reduceMotion() ? 0 : 900 ); return;
+		}
+		try { S().device.efLiveChat = { id: chat.id, ts: Date.now() }; EX.persist(); } catch ( x ) { /* ignore */ }
+		clearTimeout( chat.timer ); chat.timer = setTimeout( () => { if ( chat.stage !== 'done' ) sleepChat( 'timeout' ); }, 300000 ); 
 		ov.addEventListener( 'keydown', ( e ) => { if ( e.key === 'Escape' ) closeChat(); } );
 		const tok = chat.tok; chat.chain = tok;
 		( async () => {
 			if ( prefill && prefill.reuse ) { const r = prefill.reuse; chat.item = r.item || ''; chat.who = r.who || ''; chat.cost = r.cost || 0; chat.by = r.by; await say( [ pool( 'efc_back', { item: r.item || t( 'efAskThing' ) } ) ], { mood: 'cheer', delay: 800 } ); if ( ! live( tok ) ) return; return chat.cost ? ( chat.by === undefined ? nextQ() : recap() ) : nextQ(); }
 			if ( prefill && prefill.hist ) showHist();
-			await say( [ pool( 'efc_hi' ) ], { mood: 'cheer', delay: 1500 } ); if ( ! live( tok ) ) return;
+			await say( [ pool( 'efc_hi' ) ], { mood: 'cheer', delay: 1275 } ); if ( ! live( tok ) ) return;
 			if ( prefill && prefill.text ) return onUser( prefill.text );
 			return pickIdeas( tok );
 		} )();
@@ -1251,8 +1400,8 @@
 		if ( tg.closest( '[data-ef-hnew]' ) ) { EXA.efriendAskOpen(); return; }
 		const ho = tg.closest( '[data-ef-hopen]' ); if ( ho ) { showHist( ho.dataset.efHopen ); return; }
 		const ha = tg.closest( '[data-ef-hagain]' ); if ( ha ) { const r = histList().find( ( x ) => x.id === ha.dataset.efHagain ); if ( r ) EXA.efriendAskOpen( { reuse: r } ); return; }
-		const hd = tg.closest( '[data-ef-hdel]' ); if ( hd ) { const l = histList(), i = l.findIndex( ( x ) => x.id === hd.dataset.efHdel ); if ( i >= 0 ) { l.splice( i, 1 ); S().settings.u = Date.now(); try { EX.persist(); } catch ( x ) { /* ignore */ } } showHist(); return; }
-		const q = tg.closest( '[data-ef-q]' ); if ( q ) { const c = chat.chips[ Number( q.dataset.efQ ) ]; if ( c && ! chat.busy ) onUser( c.text || c.label.replace( /^[^\p{L}\p{N}]+/u, '' ), c ); return; }
+		const hd = tg.closest( '[data-ef-hdel]' ); if ( hd ) { const l = histList(), i = l.findIndex( ( x ) => x.id === hd.dataset.efHdel ); if ( i >= 0 ) { l.splice( i, 1 ); try { EX.persist(); } catch ( x ) { /* ignore */ } } showHist(); return; }
+		const q = tg.closest( '[data-ef-q]' ); if ( q ) { const c = chat.chips[ Number( q.dataset.efQ ) ]; if ( c && c.k === 'wake' ) { EXA.efriendAskOpen(); return; } if ( c && c.k === 'hist' ) { showHist(); return; } if ( c && c.k === 'form' ) { showForm(); return; } if ( c && c.k === 'keep' ) { keepChatting(); return; } if ( c && ! chat.busy ) onUser( c.text || c.label.replace( /^[^\p{L}\p{N}]+/u, '' ), c ); return; }
 		const mo = tg.closest( '[data-ef-mon]' ); if ( mo && chat.ans ) { chat.mi = Math.max( 0, Math.min( monthsOf( chat.ans ).length - 1, chat.mi + Number( mo.dataset.efMon ) ) ); repaintResult(); return; }
 		const d = tg.closest( '[data-ef-askday]' ); if ( d && chat.ans ) { chat.sel = Number( d.dataset.efAskday ); repaintResult(); return; }
 		if ( tg.closest( '[data-ef-again]' ) ) { UI.closeSheet && UI.closeSheet( true ); setTimeout( () => EXA.efriendAskOpen(), 220 ); return; }
@@ -1711,7 +1860,7 @@
 		efc_pr_huge: '{cost}?! 😅 Deep breath. Both of us.|Okay… {cost}. 🫣 My calculator just put on a helmet.|{cost}. 🤯 I need to sit down. I have no legs, but still.',
 		efc_askurg: 'Is this urgent? 🔥 Something you need right away, or can you live without it for a while? It helps me plan better for you.|When do you want it? ⏰ Yesterday, next week, or whenever the stars align?|One more thing: how fast do you need it? 🏃 Be honest, I will not tell anyone.|Last question, I promise! 🤞 Is there a deadline, or is it a no-rush treat?',
 		efc_ur_now: 'Right away! 🔥 Okay, I will be quick.|Urgent, got it. 🚨 Running, in spirit.|Now now now! ⚡ Understood.',
-		efc_ur_soon: '{when}, noted. 📅 Plenty of time to be clever.|Okay, {when}. 🗓️ That gives us something to work with.|Got it, {when}. ✍️ Writing it down in invisible ink.',
+		efc_ur_soon: 'Noted: {when}. 📅 Plenty of time to be clever.|Okay, {when}. 🗓️ That gives us something to work with.|Got it, {when}. ✍️ Writing it down in invisible ink.',
 		efc_ur_later: 'No rush! 🕊️ My favourite kind of plan.|Take your time. 🧘 Patience pays, literally.|Relaxed. I like it. 😌 Good things come to those who wait (and save).',
 		efc_w_none: 'no rush',
 		efc_w_now: 'right away',
@@ -1773,7 +1922,7 @@
 		efc_pr_huge: '{cost}; 😅 Βαθιά ανάσα. Και οι δύο μας.|Εντάξει… {cost}. 🫣 Το κομπιουτεράκι μου μόλις φόρεσε κράνος.|{cost}. 🤯 Πρέπει να καθίσω. Δεν έχω πόδια, αλλά ακόμα κι έτσι.',
 		efc_askurg: 'Είναι επείγον; 🔥 Κάτι που χρειάζεστε άμεσα ή μπορείτε να ζήσετε χωρίς αυτό για λίγο; Με βοηθά να σχεδιάσω καλύτερα για εσάς.|Πότε το θέλετε; ⏰ Χθες, την επόμενη εβδομάδα ή όποτε ευθυγραμμιστούν τα άστρα;|Ένα ακόμα: πόσο γρήγορα το χρειάζεστε; 🏃 Πείτε την αλήθεια, δεν θα το πω σε κανέναν.|Τελευταία ερώτηση, το υπόσχομαι! 🤞 Υπάρχει προθεσμία ή είναι ένα κέφι χωρίς βιασύνη;',
 		efc_ur_now: 'Άμεσα! 🔥 Εντάξει, θα είμαι γρήγορος.|Επείγον, το κατάλαβα. 🚨 Τρέχω, νοερά.|Τώρα τώρα τώρα! ⚡ Κατανοητό.',
-		efc_ur_soon: '{when}, σημειώθηκε. 📅 Έχουμε χρόνο να είμαστε έξυπνοι.|Εντάξει, {when}. 🗓️ Αυτό μας δίνει κάτι να δουλέψουμε.|Το κατάλαβα, {when}. ✍️ Το γράφω με αόρατο μελάνι.',
+		efc_ur_soon: 'Σημειώθηκε: {when}. 📅 Έχουμε χρόνο να είμαστε έξυπνοι.|Εντάξει, {when}. 🗓️ Αυτό μας δίνει κάτι να δουλέψουμε.|Το κατάλαβα, {when}. ✍️ Το γράφω με αόρατο μελάνι.',
 		efc_ur_later: 'Καμία βιασύνη! 🕊️ Το αγαπημένο μου είδος σχεδίου.|Πάρτε το χρόνο σας. 🧘 Η υπομονή πληρώνει, κυριολεκτικά.|Χαλαρά. Μου αρέσει. 😌 Τα καλά έρχονται σε όσους περιμένουν (και αποταμιεύουν).',
 		efc_w_none: 'καμία βιασύνη',
 		efc_w_now: 'άμεσα',
@@ -1834,7 +1983,7 @@
 	} );
 	Object.assign( window.EXPENITY_I18N.langs.en, {
 		efc_for: 'for',
-		efc_re_for: '{item} {forwho}? 🎁 Aww, somebody is lucky.|A {item} {forwho}! 🥰 Good taste, and good intentions.|{item} {forwho}… 🎀 Okay, now I am emotionally invested.',
+		efc_re_for: '{item} {forwho}? 🎁 Aww, somebody is lucky.|{item} {forwho}! 🥰 Good taste, and good intentions.|{item} {forwho}… 🎀 Okay, now I am emotionally invested.',
 		efc_re_watch: '{item}! ⌚ Time is money, so let us spend it wisely.|A watch! ⌚ Finally, something that is always on time. Unlike me.|{item}… ⌚ Tick tock, I like where this is going.',
 	} );
 	Object.assign( window.EXPENITY_I18N.langs.el, {
@@ -1849,5 +1998,103 @@
 	Object.assign( window.EXPENITY_I18N.langs.el, {
 		efc_clear: 'Ξεκινήστε από την αρχή',
 		efc_reset: 'Χμ, νομίζω ότι χαθήκαμε στη μετάφραση. 🙈 Να είστε επιεικής μαζί μου: οι σύντομες περιγραφές δουλεύουν καλύτερα.|Ουάου, καθαρή σελίδα! 🧽 Τα ξέχασα ήδη όλα. Σχεδόν. Πείτε μου ξανά, απλά και καθαρά.|Επανεκκίνηση… 🔄 μπιπ μπουπ. Εντάξει, επέστρεψα. Τι αγοράζαμε;|Ας υποθέσουμε ότι δεν έγινε ποτέ. 🤫 Νέα συζήτηση, νέος εγώ. Τι ψωνίζουμε;|Ωχ, τα μπέρδεψα; 😅 Δικό μου λάθος. Ένα πράγμα τη φορά, σύντομα και ωραία, και θα σας παρακολουθήσω.|Μνήμη σβησμένη, αξιοπρέπεια ανέπαφη. 🧠✨ Λοιπόν… τι έχετε στο μυαλό σας;|Καθαρή σελίδα, νέα αρχή! 📄 Πείτε μου τι θέλετε, όπως «ρολόι 300». Μαθαίνω γρήγορα. Μερικές φορές.',
+	} );
+	Object.assign( window.EXPENITY_I18N.langs.en, {
+		efc_hi_n: '{name}, {name}, {name}… here we go again. 😏 What do you want this time?|Well, well, well… if it is not {name}! 👋 What is the shopping fantasy today?|{name}! 🎉 My favourite human, and I have only met a few. What are we buying?|Hey {name}! 😄 I was just counting your coins. What are we dreaming about today?',
+		efc_askwhat_n: 'And what is the lucky item, {name}? 🎯|Okay {name}, but what are we buying exactly? 🛒',
+		efc_askprice_n: 'And the damage, {name}? 💸 How much does it cost?|Now the scary part, {name}… 😬 how much?',
+		efc_askurg_n: 'Is this urgent, {name}? 🔥 Right away, or can you live without it for a while?|One more thing, {name}: how fast do you need it? 🏃',
+		efc_recap_n: 'Let me say it back, {name}, so we are on the same page: 📝|Quick check before I do my magic, {name}: 🎩',
+		efc_right_n: 'Did I get this right, {name}?|Is that all correct, {name}?|Ready to go, {name}?',
+		efc_changed_n: 'Got it, {name}, changed! ✏️|Done, {name}. Updated. 🔧',
+		efc_fix_n: 'No problem, {name}! ✏️ Tell me what to change, like “it is 1250” or “in 3 weeks”.|Oops, my bad, {name}. 🙈 What should I fix?',
+		efc_close_n: 'Perfect, {name}, I have everything I need! 🎬 Give me a moment.|Brilliant, {name}. 🌟 Hold tight, I am crunching some serious numbers.',
+		efc_nocost_n: 'Hmm {name}, I did not catch a price. 🤔 Try just a number, like 49 or 1250.|I am good, {name}, but not psychic. 🔮 Give me a number.',
+		efc_nowhen_n: 'Hmm {name}, I could not tell when. 🤔 Try “in 2 weeks” or “no rush”.',
+		efc_res_best_n: 'Good news, {name}! 🎉 You can do this.|Green light, {name}! 🟢 Your wallet says yes.',
+		efc_res_good_n: 'Looking good, {name}! 🙂 It fits, with a slightly thinner cushion.',
+		efc_res_tight_n: 'Hmm, {name}. 🤏 It is possible, but you would feel it.',
+		efc_res_avoid_n: 'Not today, {name}. ✋ But let me show you when.|Easy tiger, {name}! 🐯 Today is not the day.',
+		efc_res_none_n: '{name}, I looked everywhere. 🕵️ No safe day in the next 4 months, but I have ideas.',
+		efc_reset_n: 'Hmm {name}, I think we got lost in translation. 🙈 Be gentle with me: short descriptions work best.|Rebooting for you, {name}… 🔄 beep boop. What were we buying?',
+		efc_back_n: 'Back for more, {name}? 😏 Last time we looked at **{item}**. Fresh numbers coming up.',
+		efc_ur_now_n: 'Right away, {name}! 🔥 Okay, I will be quick.',
+		efc_ur_later_n: 'No rush, {name}! 🕊️ My favourite kind of plan.',
+		efc_pr_huge_n: '{cost}?! 😅 Deep breath, {name}. Both of us.',
+		efc_pr_small_n: 'Only {cost}, {name}! 🪙 Barely a coffee habit.',
+		ef_comfortable_n: '{name}, you are on fire. The suitcase is already packing itself.|Look at you, {name}, being all responsible. I am basically crying.',
+		ef_ontrack_n: 'Nice one, {name}. Keep going and it will work out.|{name}, you are on track. Gold star. ⭐',
+		ef_tight_n: '{name}, it is tight. Not impossible, just tight.|Careful, {name}. A few small changes would help.',
+		ef_atrisk_n: '{name}, I am a little worried. Let us fix this together.|Hmm, {name}. This one needs a plan.',
+		ef_unlikely_n: 'I will be honest, {name}: this one does not fit yet. Let us change the date.|{name}, not this time. But I have ideas.',
+	} );
+	Object.assign( window.EXPENITY_I18N.langs.el, {
+		efc_hi_n: '{name}, {name}, {name}… πάλι τα ίδια. 😏 Τι θέλετε αυτή τη φορά;|Να λοιπόν ποιος ήρθε: {name}! 👋 Ποια είναι η φαντασίωση αγορών σήμερα;|{name}! 🎉 Ο αγαπημένος μου άνθρωπος, και έχω γνωρίσει λίγους. Τι αγοράζουμε;|Γεια σας, {name}! 😄 Μετρούσα τα κέρματά σας. Τι ονειρευόμαστε σήμερα;',
+		efc_askwhat_n: 'Και ποιο είναι το τυχερό αντικείμενο, {name}; 🎯|Εντάξει {name}, αλλά τι ακριβώς αγοράζουμε; 🛒',
+		efc_askprice_n: 'Και το κόστος, {name}; 💸 Πόσο κοστίζει;|Τώρα το τρομακτικό μέρος, {name}… 😬 πόσο;',
+		efc_askurg_n: 'Είναι επείγον, {name}; 🔥 Άμεσα, ή μπορείτε να ζήσετε χωρίς αυτό για λίγο;|Ένα ακόμα, {name}: πόσο γρήγορα το χρειάζεστε; 🏃',
+		efc_recap_n: 'Να σας το πω πίσω, {name}, για να είμαστε σίγουροι: 📝|Ένας γρήγορος έλεγχος πριν κάνω τη μαγεία μου, {name}: 🎩',
+		efc_right_n: 'Τα κατάλαβα σωστά, {name};|Είναι όλα σωστά, {name};|Έτοιμοι, {name};',
+		efc_changed_n: 'Κατάλαβα, {name}, άλλαξε! ✏️|Έτοιμο, {name}. Ενημερώθηκε. 🔧',
+		efc_fix_n: 'Κανένα πρόβλημα, {name}! ✏️ Πείτε μου τι να αλλάξω, όπως «είναι 1250» ή «σε 3 εβδομάδες».|Ωχ, δικό μου λάθος, {name}. 🙈 Τι να διορθώσω;',
+		efc_close_n: 'Τέλεια, {name}, έχω ό,τι χρειάζομαι! 🎬 Δώστε μου μια στιγμή.|Υπέροχα, {name}. 🌟 Κρατηθείτε, επεξεργάζομαι σοβαρούς αριθμούς.',
+		efc_nocost_n: 'Χμ {name}, δεν έπιασα κάποια τιμή. 🤔 Δοκιμάστε μόνο έναν αριθμό, όπως 49 ή 1250.|Είμαι καλός, {name}, αλλά όχι μέντιουμ. 🔮 Δώστε μου έναν αριθμό.',
+		efc_nowhen_n: 'Χμ {name}, δεν κατάλαβα πότε. 🤔 Δοκιμάστε «σε 2 εβδομάδες» ή «καμία βιασύνη».',
+		efc_res_best_n: 'Καλά νέα, {name}! 🎉 Μπορείτε να το κάνετε.|Πράσινο φως, {name}! 🟢 Το πορτοφόλι σας λέει ναι.',
+		efc_res_good_n: 'Φαίνεται καλά, {name}! 🙂 Χωράει, με λίγο λεπτότερο μαξιλάρι.',
+		efc_res_tight_n: 'Χμ, {name}. 🤏 Είναι δυνατό, αλλά θα το νιώσετε.',
+		efc_res_avoid_n: 'Όχι σήμερα, {name}. ✋ Αλλά αφήστε με να σας δείξω πότε.|Ηρεμήστε, {name}! 🐯 Σήμερα δεν είναι η ημέρα.',
+		efc_res_none_n: '{name}, έψαξα παντού. 🕵️ Δεν υπάρχει ασφαλής ημέρα στους επόμενους 4 μήνες, αλλά έχω ιδέες.',
+		efc_reset_n: 'Χμ {name}, νομίζω ότι χαθήκαμε στη μετάφραση. 🙈 Να είστε επιεικής μαζί μου: οι σύντομες περιγραφές δουλεύουν καλύτερα.|Επανεκκίνηση για εσάς, {name}… 🔄 μπιπ μπουπ. Τι αγοράζαμε;',
+		efc_back_n: 'Ξανά εδώ, {name}; 😏 Την προηγούμενη φορά κοιτάξαμε: **{item}**. Έρχονται φρέσκοι αριθμοί.',
+		efc_ur_now_n: 'Άμεσα, {name}! 🔥 Εντάξει, θα είμαι γρήγορος.',
+		efc_ur_later_n: 'Καμία βιασύνη, {name}! 🕊️ Το αγαπημένο μου είδος σχεδίου.',
+		efc_pr_huge_n: '{cost}; 😅 Βαθιά ανάσα, {name}. Και οι δύο μας.',
+		efc_pr_small_n: 'Μόλις {cost}, {name}! 🪙 Μετά βίας μια συνήθεια καφέ.',
+		ef_comfortable_n: '{name}, πετάτε! Η βαλίτσα φτιάχνεται μόνη της.|Κοιτάξτε σας, {name}, τόσο υπεύθυνος. Σχεδόν κλαίω.',
+		ef_ontrack_n: 'Μπράβο, {name}. Συνεχίστε και θα πάει καλά.|{name}, είστε στον δρόμο σας. Χρυσό αστέρι. ⭐',
+		ef_tight_n: '{name}, είναι στενά. Όχι αδύνατο, απλώς στενά.|Προσοχή, {name}. Λίγες μικρές αλλαγές θα βοηθούσαν.',
+		ef_atrisk_n: '{name}, ανησυχώ λίγο. Ας το διορθώσουμε μαζί.|Χμ, {name}. Αυτό θέλει σχέδιο.',
+		ef_unlikely_n: 'Θα είμαι ειλικρινής, {name}: αυτό δεν χωράει ακόμα. Ας αλλάξουμε την ημερομηνία.|{name}, όχι αυτή τη φορά. Αλλά έχω ιδέες.',
+	} );
+	Object.assign( window.EXPENITY_I18N.langs.en, {
+		efc_sleep: 'eFriend went to sleep… zzz 😴 You left me hanging, so I took a nap. Wake me up when you are ready.|Zzz… 💤 I dozed off waiting for you. Tap the button and I will pretend I never fell asleep.|Shhh, eFriend is sleeping. 😴 Robots need rest too. (Mostly because of the battery.)',
+		efc_timeout: 'Five minutes already! ⏱️ My circuits need a nap. Zzz… 😴 Wake me up for a fresh chat.|That was a long one. 🥱 I am going to sleep for a bit. Tap to start a fresh chat.|Time is up. 🕔 Even robots have office hours. Let us start again with a fresh chat.',
+		efc_wake: 'Wake eFriend up',
+		efc_zzz_ph: 'eFriend is sleeping… zzz',
+		efc_asleep: 'sleeping 😴',
+		efc_f_offer: 'We keep going around in circles. 🌀 Want to skip the chat? A quick form gets us rolling.|Hmm, I think I am the problem here. 🙈 Shall we try a quick form instead? Item, price and a date. Done.|Let us unstick me. 🔧 Fill in a tiny form, and I will take it from there.',
+		efc_f_chip: 'Fill in a quick form',
+		efc_f_keep: 'Keep chatting',
+		efc_f_keepsay: 'No problem, I will try harder. 💪|You got it. Back to chatting. 😊',
+		efc_f_ask: 'Here you go: tell me what it is, how much it costs and when you would like it. 📝|Three little boxes. That is all I need. 🎯',
+		efc_f_when: 'When would you like it?',
+		efc_f_go: 'Done',
+		efc_f_err: 'Please add what it is and how much it costs.',
+		efc_f_ok: 'Perfect, that is exactly what I needed! 🙌|Thanks, that makes it easy. ✅',
+	} );
+	Object.assign( window.EXPENITY_I18N.langs.el, {
+		efc_sleep: 'Το eFriend αποκοιμήθηκε… ζζζ 😴 Με αφήσατε να περιμένω, οπότε έκανα έναν υπνάκο. Ξυπνήστε με όταν είστε έτοιμοι.|Ζζζ… 💤 Με πήρε ο ύπνος περιμένοντάς σας. Πατήστε το κουμπί και θα προσποιηθώ ότι δεν κοιμήθηκα ποτέ.|Σσσς, το eFriend κοιμάται. 😴 Και τα ρομπότ χρειάζονται ξεκούραση. (Κυρίως λόγω μπαταρίας.)',
+		efc_timeout: 'Πέντε λεπτά ήδη! ⏱️ Τα κυκλώματά μου χρειάζονται υπνάκο. Ζζζ… 😴 Ξυπνήστε με για μια νέα συζήτηση.|Ήταν μεγάλη. 🥱 Θα κοιμηθώ για λίγο. Πατήστε για να ξεκινήσετε νέα συζήτηση.|Ο χρόνος τελείωσε. 🕔 Ακόμα και τα ρομπότ έχουν ωράριο. Ας ξεκινήσουμε ξανά με νέα συζήτηση.',
+		efc_wake: 'Ξυπνήστε το eFriend',
+		efc_zzz_ph: 'Το eFriend κοιμάται… ζζζ',
+		efc_asleep: 'κοιμάται 😴',
+		efc_f_offer: 'Γυρνάμε γύρω γύρω. 🌀 Θέλετε να παραλείψουμε τη συζήτηση; Μια γρήγορη φόρμα θα μας βάλει σε τροχιά.|Χμ, νομίζω ότι εγώ φταίω. 🙈 Να δοκιμάσουμε μια γρήγορη φόρμα; Αντικείμενο, τιμή και ημερομηνία. Και τέλος.|Ας με ξεκολλήσουμε. 🔧 Συμπληρώστε μια μικρή φόρμα και θα αναλάβω εγώ από εκεί.',
+		efc_f_chip: 'Συμπληρώστε μια γρήγορη φόρμα',
+		efc_f_keep: 'Συνεχίστε τη συζήτηση',
+		efc_f_keepsay: 'Κανένα πρόβλημα, θα προσπαθήσω περισσότερο. 💪|Όπως θέλετε. Πίσω στη συζήτηση. 😊',
+		efc_f_ask: 'Ορίστε: πείτε μου τι είναι, πόσο κοστίζει και πότε θα το θέλατε. 📝|Τρία μικρά πεδία. Αυτά χρειάζομαι. 🎯',
+		efc_f_when: 'Πότε θα το θέλατε;',
+		efc_f_go: 'Έτοιμο',
+		efc_f_err: 'Προσθέστε τι είναι και πόσο κοστίζει.',
+		efc_f_ok: 'Τέλεια, αυτό ακριβώς χρειαζόμουν! 🙌|Ευχαριστώ, έτσι είναι εύκολο. ✅',
+	} );
+	Object.assign( window.EXPENITY_I18N.langs.en, {
+		efc_q: 'I ask the questions around here. 🕵️ That is how 1985 worked, and it was glorious.|Questions? 🤖 I am not one of those chatty AI things. I am a proper 80s bot: blinking lights, a calculator and zero small talk.|Beep boop. 📟 Rule-based, hand-wound and proudly retro. I do not answer questions, I ask them. It is a whole philosophy.|I was built in the golden age of robots. 💾 We did not talk back, we did arithmetic. Let us get back to yours.|Plot twist: I am not AI. 🕹️ I run on clear rules and a little bit of 80s magic, so I cannot answer that. But “can I afford it?” I can answer all day.|Dial-up detected… 📞 Just kidding. I am old school: I ask, you answer, I calculate. Tell me about the purchase!|Tape deck says no. 📼 No questions allowed, only prices. Those I understand perfectly.',
+		efc_q_n: '{name}, I ask the questions around here. 🕵️ Welcome to 1985.|Nice try, {name}! 😎 I am a real 80s bot, not one of those chatty AIs. I ask, you answer.',
+	} );
+	Object.assign( window.EXPENITY_I18N.langs.el, {
+		efc_q: 'Εδώ τις ερωτήσεις τις κάνω εγώ. 🕵️ Έτσι δούλευε το 1985, και ήταν υπέροχα.|Ερωτήσεις; 🤖 Δεν είμαι από αυτά τα ομιλητικά AI. Είμαι γνήσιο ρομπότ των \'80s: λαμπάκια που αναβοσβήνουν, ένα κομπιουτεράκι και καθόλου κουβεντούλα.|Μπιπ μπουπ. 📟 Βασισμένο σε κανόνες, κουρδιστό στο χέρι και περήφανα ρετρό. Δεν απαντώ σε ερωτήσεις, τις κάνω. Είναι ολόκληρη φιλοσοφία.|Φτιάχτηκα στη χρυσή εποχή των ρομπότ. 💾 Δεν αντιμιλούσαμε, κάναμε αριθμητική. Ας γυρίσουμε στη δική σας.|Ανατροπή: δεν είμαι AI. 🕹️ Τρέχω με σαφείς κανόνες και λίγη μαγεία των \'80s, οπότε δεν μπορώ να το απαντήσω. Το «μπορώ να το αντέξω;» όμως το απαντώ όλη μέρα.|Εντοπίστηκε dial-up… 📞 Πλάκα κάνω. Είμαι παλιάς κοπής: ρωτάω εγώ, απαντάτε εσείς, υπολογίζω εγώ. Πείτε μου για την αγορά!|Το κασετόφωνο λέει όχι. 📼 Ερωτήσεις δεν επιτρέπονται, μόνο τιμές. Αυτές τις καταλαβαίνω τέλεια.',
+		efc_q_n: '{name}, εδώ τις ερωτήσεις τις κάνω εγώ. 🕵️ Καλώς ήρθατε στο 1985.|Καλή προσπάθεια, {name}! 😎 Είμαι γνήσιο ρομπότ των \'80s, όχι από αυτά τα ομιλητικά AI. Ρωτάω εγώ, απαντάτε εσείς.',
 	} );
 }() );

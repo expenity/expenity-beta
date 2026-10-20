@@ -1,9 +1,41 @@
 {
-  "version": "0.53.1",
+  "version": "0.54.0",
   "releases": [
     {
+      "version": "0.54.0",
+      "date": "2026-10-20",
+      "en": [
+        "Fixed: sync could get stuck on “changes waiting” once eFriend’s chat history had grown. Past chats now stay on your device only, and your synced settings are kept small. Open Expenity once and your waiting changes will sync.",
+        "eFriend now uses your name. If you gave Expenity your name, eFriend uses your first name in its greetings, questions and verdicts, in the chat and on Home.",
+        "Let eFriend suggest now moves things in front of you: your plans slide into the new order and the safety cushion slider glides to its new place. In the chat, eFriend replies a little faster, the result opens at the top, and the last message fades gently into the thinking screen so you can read it.",
+        "eFriend understands dates in your sentence: “tomorrow”, “by Friday”, “on 15 November”, “before Christmas”, “in a week”, “this weekend”. And the chat keeps its last message in view above the answer buttons.",
+        "The website has a playable eFriend chat, a Help center guide for eFriend (in English and Greek) and a changelog page.",
+        "Fixes: a few lines no longer start in lower case, and the Home warning shows one icon instead of two.",
+        "eFriend understands dates in your sentence: “tomorrow”, “by Friday”, “on 15 November”, “before Christmas”, “in a week”, “this weekend”.",
+        "When eFriend asks for a price, the keyboard is numeric and the number is grouped as you type, like 2.500.",
+        "If the chat goes round in circles, or you clear it twice, eFriend offers a quick form (what, how much and when) inside the chat. You can always decline and keep chatting.",
+        "A chat lasts at most five minutes. After that, or if you close the app mid-chat, eFriend falls asleep and tells you so, and you can wake it for a fresh chat.",
+        "Ask eFriend a question and it answers with a joke: it is an old-school 80s bot, not an AI chatbot, and it asks the questions around here.",
+        "In the chat, the last message now stays in view above the answer buttons."
+      ],
+      "el": [
+        "Διόρθωση: ο συγχρονισμός μπορούσε να κολλήσει στο «αλλαγές σε αναμονή» όταν είχε μεγαλώσει το ιστορικό συζητήσεων του eFriend. Οι προηγούμενες συζητήσεις μένουν πλέον μόνο στη συσκευή σας και οι συγχρονισμένες ρυθμίσεις κρατιούνται μικρές. Ανοίξτε το Expenity μία φορά και οι αλλαγές σας θα συγχρονιστούν.",
+        "Το eFriend χρησιμοποιεί πλέον το όνομά σας. Αν έχετε δώσει στο Expenity το όνομά σας, το eFriend χρησιμοποιεί το μικρό σας όνομα στους χαιρετισμούς, τις ερωτήσεις και τις εκτιμήσεις του, στη συζήτηση και στην Αρχική.",
+        "Το «Να προτείνει το eFriend» κινεί πλέον τα πράγματα μπροστά σας: τα σχέδιά σας γλιστρούν στη νέα σειρά και ο δείκτης του μαξιλαριού ασφαλείας μετακινείται ομαλά. Στη συζήτηση, το eFriend απαντά λίγο πιο γρήγορα, το αποτέλεσμα ανοίγει από την κορυφή και το τελευταίο μήνυμα σβήνει απαλά προς την οθόνη σκέψης ώστε να προλαβαίνετε να το διαβάσετε.",
+        "Το eFriend καταλαβαίνει ημερομηνίες μέσα στην πρότασή σας: «αύριο», «μέχρι την Παρασκευή», «στις 15 Νοεμβρίου», «πριν τα Χριστούγεννα», «σε μια εβδομάδα», «το Σαββατοκύριακο». Επιπλέον, η συζήτηση κρατά το τελευταίο μήνυμα ορατό πάνω από τα κουμπιά απάντησης.",
+        "Ο ιστότοπος έχει μια συζήτηση με το eFriend που μπορείτε να δοκιμάσετε, έναν οδηγό για το eFriend στο Κέντρο βοήθειας (στα αγγλικά και στα ελληνικά) και μια σελίδα με το ιστορικό αλλαγών.",
+        "Διορθώσεις: μερικές φράσεις δεν ξεκινούν πια με μικρό γράμμα και η προειδοποίηση στην Αρχική δείχνει ένα εικονίδιο αντί για δύο.",
+        "Το eFriend καταλαβαίνει ημερομηνίες μέσα στην πρότασή σας: «αύριο», «μέχρι την Παρασκευή», «στις 15 Νοεμβρίου», «πριν τα Χριστούγεννα», «σε μια εβδομάδα», «το Σαββατοκύριακο».",
+        "Όταν το eFriend ζητά τιμή, το πληκτρολόγιο είναι αριθμητικό και ο αριθμός ομαδοποιείται όπως πληκτρολογείτε, π.χ. 2.500.",
+        "Αν η συζήτηση γυρίζει γύρω γύρω ή την καθαρίσετε δύο φορές, το eFriend προσφέρει μια γρήγορη φόρμα (τι, πόσο και πότε) μέσα στη συζήτηση. Μπορείτε πάντα να αρνηθείτε και να συνεχίσετε.",
+        "Μια συζήτηση διαρκεί το πολύ πέντε λεπτά. Μετά, ή αν κλείσετε την εφαρμογή στη μέση, το eFriend αποκοιμιέται και σας το λέει, και μπορείτε να το ξυπνήσετε για νέα συζήτηση.",
+        "Κάντε μια ερώτηση στο eFriend και θα απαντήσει με αστείο: είναι ρομπότ παλιάς κοπής των '80s, όχι chatbot τεχνητής νοημοσύνης, και τις ερωτήσεις τις κάνει εκείνο.",
+        "Στη συζήτηση, το τελευταίο μήνυμα μένει πλέον ορατό πάνω από τα κουμπιά απάντησης."
+      ]
+    },
+    {
       "version": "0.53.1",
-      "date": "2026-11-02",
+      "date": "2026-10-20",
       "en": [
         "eFriend understands sentences better: “I want to buy a new watch for my girlfriend” is read as a watch, for your girlfriend, not as a pile of words.",
         "The chat is calmer: messages no longer flicker, eFriend types at a natural pace, and the analysis takes its time.",
@@ -21,7 +53,7 @@
     },
     {
       "version": "0.53.0",
-      "date": "2026-11-01",
+      "date": "2026-10-20",
       "en": [
         "Ask eFriend is now a real chat. eFriend asks what you want, how much it costs and how soon, repeats it back so you can correct it, then thinks for a moment and brings you back with the full picture: today's answer, a four-month calendar of best days, and a graph of your money with and without the purchase. Past chats are kept, so you can reopen them or ask again.",
         "eFriend now does the thinking for you. In setup, the spending limits are filled in from your real spending when there is enough history (two weeks or more), and when there is not, type one limit and it fills the other two.",
@@ -41,7 +73,7 @@
     },
     {
       "version": "0.52.0",
-      "date": "2026-10-31",
+      "date": "2026-10-20",
       "en": [
         "Ask eFriend: type a question like “Can I buy shoes that cost 49?” (from the Ask link on the Home card, or More → eFriend). It answers for today and shows the next six weeks on a calendar, coloured by how safe each day is. It counts your income dates, bills, usual spending, spending limits and your other plans, marks paydays and bills, and stars the first safe day. Tap a day to see why, and turn it into a plan with one tap.",
         "Stricter verdicts when you spend more than you earn: eFriend now looks at how long what is left would last at your real monthly loss, and says so plainly. A plan can no longer look comfortable on a salary that does not cover your spending.",

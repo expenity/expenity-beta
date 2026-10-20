@@ -1550,3 +1550,7 @@ input[type=date]::-webkit-datetime-edit{padding:0}
 .ef-cp-clear { margin-left: auto; font-size: 1.25rem; } .ef-cp-clear + .ef-cp-hist { margin-left: 0; }
 .ef-chat { transition: opacity .3s, transform .3s; } .ef-chat.clearing { opacity: 0; transform: scale(.97); }
 .ef-ico { color: #0f766e; flex: none; } .ef-av .ef-ico { width: 34px; height: auto; margin-bottom: 4px; } .ef-av { width: 34px; }
+.ef-prio-i.ef-moving { position: relative; z-index: 2; box-shadow: 0 8px 24px rgba(15, 118, 110, .25); background: var(--card, #fff); }
+.ef-cp.fading > *:not(.ef-an) { opacity: 0; transition: opacity 1s ease; }
+.ef-an { animation: ef-fade 1s both; }
+.ef-qform { display: grid; gap: 10px; min-width: 240px; } .ef-qnr { display: flex; align-items: center; gap: 8px; } .ef-chat-in input:disabled { opacity: .6; }
