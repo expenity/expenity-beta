@@ -1021,14 +1021,18 @@
 		for ( const [ kind, th ] of [ [ 'zero', 0 ], [ 'cushion', cushion ] ] ) {
 			if ( kind === 'cushion' && th <= 0 ) continue; if ( tl[ 0 ].bal < th ) continue;
 			const hit = tl.find( ( x ) => x.k > 0 && x.bal < th ); if ( ! hit ) continue;
-			const why = tl.slice( Math.max( 1, hit.k - 3 ), hit.k + 1 ).reverse().find( ( x ) => x.bills.length );
-			return { kind, d: hit.d, k: hit.k, bal: hit.bal, cushion, why: why ? why.bills[ 0 ] : '' };
+			// what pulls the money down before that day: the biggest bill or plan date
+			const end = hit.d, now = today(), cands = [];
+			S().bills.filter( ( x ) => ! x.done && x.next ).forEach( ( x ) => EX.occurrences( x, end ).forEach( ( d ) => { if ( d > now && d <= end ) cands.push( { n: x.name, a: centsOf( x.amount, x.currency ), kind: 'bill' } ); } ) );
+			F.all().forEach( ( f ) => { if ( ! f.done && ! f.late && f.goal.deadline > now && f.goal.deadline <= end ) cands.push( { n: f.goal.name, a: f.remaining, kind: 'plan' } ); } );
+			const big = cands.sort( ( x, y ) => y.a - x.a )[ 0 ];
+			return { kind, d: hit.d, k: hit.k, bal: hit.bal, cushion, why: big ? big.n : '', whyKind: big ? big.kind : '', whyAmt: big ? big.a : 0 };
 		}
 		return null;
 	};
 	const lowBanner = () => {
 		const w = F.lowAhead(); if ( ! w || ( S().device || {} ).efLowDismiss === w.d ) return '';
-		const lines = [ t( w.kind === 'zero' ? 'efLowZero' : 'efLowCushion', { d: EX.dayName( w.d ), c: money( w.cushion / 100, main() ) } ) ].concat( w.why ? [ t( 'efLowWhy', { n: w.why } ) ] : [], [ t( 'efLowTip' ) ] );
+		const lines = [ t( w.kind === 'zero' ? 'efLowZero' : 'efLowCushion', { d: EX.dayName( w.d ), c: money( w.cushion / 100, main() ) } ) ].concat( w.why ? [ t( w.whyKind === 'plan' ? 'efLowWhyPlan' : 'efLowWhyBill', { n: w.why, a: money( w.whyAmt / 100, main() ) } ) ] : [], [ t( w.whyKind === 'bill' ? 'efLowTip' : w.whyKind === 'plan' ? 'efLowTipPlan' : 'efLowTipSpend' ) ] );
 		return `<div class="ef-ask ef-low"><div>${ points( lines ) }</div><button type="button" class="btn btn-ghost sm" data-ef-lowx="${ esc( w.d ) }">${ esc( t( 'efGotIt' ) ) }</button></div>`;
 	};
 	/** Budgets worth adding, from what the person really spent per category over the last weeks (needs about six weeks of history). */
@@ -2177,5 +2181,19 @@
 		efc_p_cassette: 'Α, οι κασέτες. 📼 Τις γύριζες πίσω με ένα μολύβι και κάθε mixtape ήταν ένα ερωτικό γράμμα. Μου λείπει αυτό.|Μου λείπει η αναλογική εποχή. 💾 Ζεστός ήχος, χοντρά κουμπιά και κασέτες που μπορούσες να κρατήσεις.',
 		efc_p_how: 'Τέλεια! 🕺 Μπαταρία γεμάτη, η μπάλα disco γυρίζει. Κι εσείς;|Μια χαρά, ευχαριστώ. 😎 Αστραφτερός σαν φρέσκια κασέτα.',
 		efc_p_joke: 'Γιατί η κασέτα πήγε σχολείο; 📼 Για να μάθει να γυρίζει πίσω. …Είμαι εδώ όλη την εβδομάδα.|Πώς λέγεται ένα ρομπότ που λατρεύει την ντίσκο; 🪩 Μπούγκι-μπορντ. Θα με συνοδεύσετε μόνοι σας στην έξοδο.',
+	} );
+	Object.assign( window.EXPENITY_I18N.langs.en, {
+		efLowWhyBill: '🧾 The biggest payment before then: **{n}** ({a}).',
+		efLowWhyPlan: '🎯 The biggest plan before then: **{n}** ({a}).',
+		efLowTip: '💡 Moving that payment, or a plan, a few days later would help.',
+		efLowTipPlan: '💡 Moving that plan a few days later would help.',
+		efLowTipSpend: '💡 Spending a little less until then, or moving a plan later, would help.',
+	} );
+	Object.assign( window.EXPENITY_I18N.langs.el, {
+		efLowWhyBill: '🧾 Η μεγαλύτερη πληρωμή μέχρι τότε: **{n}** ({a}).',
+		efLowWhyPlan: '🎯 Το μεγαλύτερο σχέδιο μέχρι τότε: **{n}** ({a}).',
+		efLowTip: '💡 Θα βοηθούσε να μετακινήσετε αυτή την πληρωμή, ή ένα σχέδιο, λίγες ημέρες αργότερα.',
+		efLowTipPlan: '💡 Θα βοηθούσε να μετακινήσετε αυτό το σχέδιο λίγες ημέρες αργότερα.',
+		efLowTipSpend: '💡 Θα βοηθούσε να ξοδέψετε λίγο λιγότερο μέχρι τότε ή να μετακινήσετε ένα σχέδιο αργότερα.',
 	} );
 }() );

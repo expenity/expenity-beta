@@ -1,6 +1,16 @@
 {
-  "version": "0.54.2",
+  "version": "0.54.3",
   "releases": [
+    {
+      "version": "0.54.3",
+      "date": "2026-10-20",
+      "en": [
+        "The warning on Home now says what it is about: the biggest payment or plan before the day your money runs short, with its amount, and a suggestion that fits (move that payment, move that plan, or spend a little less)."
+      ],
+      "el": [
+        "Η προειδοποίηση στην Αρχική λέει πλέον σε τι αναφέρεται: τη μεγαλύτερη πληρωμή ή το μεγαλύτερο σχέδιο πριν από την ημέρα που τα χρήματα θα τελειώσουν, με το ποσό, και μια πρόταση που ταιριάζει (μετακινήστε την πληρωμή, μετακινήστε το σχέδιο ή ξοδέψτε λίγο λιγότερο)."
+      ]
+    },
     {
       "version": "0.54.2",
       "date": "2026-10-20",
