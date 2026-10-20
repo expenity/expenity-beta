@@ -1,6 +1,18 @@
 {
-  "version": "0.50.5",
+  "version": "0.50.6",
   "releases": [
+    {
+      "version": "0.50.6",
+      "date": "2026-10-27",
+      "en": [
+        "eFriend's full analysis is now clearly structured: the verdict at the top, four number tiles (cost, likely free, short or to spare, days left), short callouts, and titled sections for smart tips, what would help, bills that cannot be skipped and how your spending is sorted (folded away until you open it).",
+        "Fixed: the cost and free lines no longer run together, a bill that repeats is listed once with how many times (for example Rent ×3), and the Edit button says Edit plan."
+      ],
+      "el": [
+        "Η πλήρης ανάλυση του eFriend είναι πλέον σαφώς δομημένη: η εκτίμηση στην κορυφή, τέσσερα πλακίδια αριθμών (κόστος, πιθανώς ελεύθερα, λείπουν ή περισσεύουν, ημέρες), σύντομες επισημάνσεις και τίτλοι ενοτήτων για έξυπνες συμβουλές, τι θα βοηθούσε, λογαριασμούς που δεν παραλείπονται και πώς ταξινομούνται τα έξοδά σας (κρυμμένα μέχρι να τα ανοίξετε).",
+        "Διορθώθηκε: οι γραμμές κόστους και ελεύθερων χρημάτων δεν συγχωνεύονται πια, ένας λογαριασμός που επαναλαμβάνεται εμφανίζεται μία φορά με τον αριθμό επαναλήψεων (για παράδειγμα Ενοίκιο ×3) και το κουμπί λέει Επεξεργασία σχεδίου."
+      ]
+    },
     {
       "version": "0.50.5",
       "date": "2026-10-26",

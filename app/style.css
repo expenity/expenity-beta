@@ -1318,3 +1318,20 @@ input[type=date]::-webkit-datetime-edit{padding:0}
 @keyframes ef-budfill{from{width:6%}to{width:78%}}
 @keyframes ef-gainpop{0%{opacity:0;transform:translateY(10px) scale(.6)}70%{opacity:1;transform:translateY(-4px) scale(1.1)}100%{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){.ef-bud-card,.ef-bud-fill,.ef-bud-ok,.ef-bud-gain{animation:none;opacity:1}.ef-bud-fill{width:78%}}
+
+/* structured analysis: header, number tiles, callouts, titled sections */
+.ef-tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 6px}
+.ef-tile{display:flex;flex-direction:column;gap:2px;padding:12px;border-radius:16px;border:1px solid var(--line);background:var(--surface);min-width:0}
+.ef-tile-em{font-size:1.3rem;line-height:1}.ef-tile small{color:var(--muted);font-size:.78rem}.ef-tile b{font-size:1.2rem;line-height:1.2;overflow-wrap:anywhere}
+.ef-tile.bad{background:color-mix(in srgb,var(--late) 10%,var(--surface));border-color:color-mix(in srgb,var(--late) 35%,var(--line))}.ef-tile.bad b{color:color-mix(in srgb,var(--late) 55%,var(--ink))}
+.ef-tile.good{background:color-mix(in srgb,#0b7a58 10%,var(--surface));border-color:color-mix(in srgb,#0b7a58 35%,var(--line))}.ef-tile.good b{color:#0b7a58}
+.ef-conf{margin:2px 2px 8px;font-size:.85rem;color:var(--muted)}
+.ef-callouts{margin:8px 0;padding:10px 12px;border-radius:14px;background:color-mix(in srgb,var(--accent) 8%,var(--surface))}
+.ef-callouts .ef-points{margin:0}
+.ef-sec{margin:14px 0;padding:14px;border:1px solid var(--line);border-radius:18px;background:var(--surface)}
+.ef-sec .ef-h{margin:0 0 8px;font-size:1.05rem;display:flex;align-items:center;gap:8px}.ef-sec-em{font-size:1.2rem}
+.ef-sec .ef-list li:last-child{border-bottom:0}
+.ef-det summary{display:flex;align-items:center;gap:8px;cursor:pointer;list-style:none;font-size:1.05rem}.ef-det summary::-webkit-details-marker{display:none}
+.ef-det summary::after{content:"";margin-left:auto;width:9px;height:9px;border-right:2.5px solid var(--muted);border-bottom:2.5px solid var(--muted);transform:rotate(45deg);transition:transform .2s}
+.ef-det[open] summary::after{transform:rotate(-135deg)}.ef-det[open] summary{margin-bottom:8px}
+.ef-disc{margin-top:16px}
