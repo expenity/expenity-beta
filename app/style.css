@@ -1404,3 +1404,12 @@ input[type=date]::-webkit-datetime-edit{padding:0}
 
 .ef-datehelp{display:flex;flex-direction:column;align-items:flex-start;gap:6px;margin:-4px 0 12px}.ef-datehelp #efDateNote .ef-points{margin:0}
 .ef-lim{display:flex;flex-direction:column;gap:6px;width:100%;max-width:340px;text-align:left}.ef-lim-note{width:100%;max-width:340px}
+
+/* tour: nothing in a step may shrink or overlap, and the slider area keeps a fixed size while the words change */
+.ef-ob-main>*{flex-shrink:0}
+.ef-shuf{flex:none}
+.ef-risk-h{flex-wrap:nowrap;white-space:nowrap;min-height:1.6em}.ef-risk-h b{min-width:0;overflow:hidden;text-overflow:ellipsis}.ef-risk-val{flex:none}
+.ef-risk-hint{min-height:11em}
+
+.ef-prio-i{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.ef-prio-i.drag{transform:scale(1.02);z-index:2}

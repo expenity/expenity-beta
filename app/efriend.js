@@ -647,26 +647,41 @@
 	const posOf = ( m ) => { for ( let i = 1; i < STOPS.length; i++ ) if ( m <= STOPS[ i ][ 1 ] ) { const a = STOPS[ i - 1 ], b = STOPS[ i ]; return lerp( a[ 0 ], b[ 0 ], ( m - a[ 1 ] ) / ( b[ 1 ] - a[ 1 ] ) ); } return 100; };
 	const colorAt = ( p ) => { const [ a, b ] = segAt( p ), k = ( p - a[ 0 ] ) / ( b[ 0 ] - a[ 0 ] ); return 'rgb(' + [ 0, 1, 2 ].map( ( i ) => Math.round( lerp( a[ 2 ][ i ], b[ 2 ][ i ], k ) ) ).join( ',' ) + ')'; };
 	const riskWord = ( p ) => { const near = STOPS.reduce( ( m, x ) => ( Math.abs( x[ 0 ] - p ) < Math.abs( m[ 0 ] - p ) ? x : m ) ); return t( [ 'efRiskRisky', 'efRiskBold', 'efRiskBalanced', 'efRiskCareful', 'efRiskSafe', 'efRiskVerySafe' ][ STOPS.indexOf( near ) ] ); };
+	const monthsShort = ( n ) => ( Math.round( n * 10 ) / 10 ).toLocaleString( EX.loc(), { maximumFractionDigits: 1 } ) + ' ' + t( Math.abs( n - 1 ) < 0.05 ? 'efMonthWord' : 'efMonthsWord' );
 	const monthsText = ( n ) => t( 'efMonthsN', { n: ( Math.round( n * 10 ) / 10 ).toLocaleString( EX.loc(), { maximumFractionDigits: 1 } ), one: Math.abs( n - 1 ) < 0.05 ? 1 : 0 } );
 	const riskLines = ( p, m ) => { const b = F.baseline(), a = money( Math.round( m * b.monthly ) / 100, main() ); return [ m < 0.1 ? t( 'efCushionZero', { word: riskWord( p ) } ) : t( 'efCushionHint', { word: riskWord( p ), a, m: monthsText( m ), s: money( b.monthly / 100, main() ) } ), t( 'efAccuracy', { d: b.history } ) ].concat( b.hasIncome ? [] : [ t( 'efNoIncomeAsk' ) ] ); };
 	const riskHtml = () => {
 		const m = F.cushion(), p = Math.round( posOf( m ) );
-		return `<div class="ef-risk" style="--c:${ colorAt( p ) }"><div class="ef-risk-h"><b>🎚️ ${ esc( t( 'efRiskTitle' ) ) }</b><span class="ef-risk-val">${ esc( riskWord( p ) ) } · ${ esc( monthsText( m ) ) }</span></div><input type="range" class="ef-grad" data-ef-margin min="0" max="100" step="1" value="${ p }" aria-label="${ esc( t( 'efRiskTitle' ) ) }"><div class="ef-risk-ends"><span>🔴 ${ esc( t( 'efRiskRisky' ) ) }</span><span>🟢 ${ esc( t( 'efRiskBalanced' ) ) }</span><span>🔵 ${ esc( t( 'efRiskVerySafe' ) ) }</span></div><div class="ef-risk-hint">${ points( riskLines( p, m ) ) }${ F.baseline().hasIncome ? '' : `<button type="button" class="btn btn-ghost sm" data-ef-income>💶 ${ esc( t( 'efAddIncome' ) ) }</button>` }</div></div>`;
+		return `<div class="ef-risk" style="--c:${ colorAt( p ) }"><div class="ef-risk-h"><b>🎚️ ${ esc( t( 'efRiskTitle' ) ) }</b><span class="ef-risk-val">${ esc( riskWord( p ) ) } · ${ esc( monthsShort( m ) ) }</span></div><input type="range" class="ef-grad" data-ef-margin min="0" max="100" step="1" value="${ p }" aria-label="${ esc( t( 'efRiskTitle' ) ) }"><div class="ef-risk-ends"><span>🔴 ${ esc( t( 'efRiskRisky' ) ) }</span><span>🟢 ${ esc( t( 'efRiskBalanced' ) ) }</span><span>🔵 ${ esc( t( 'efRiskVerySafe' ) ) }</span></div><div class="ef-risk-hint">${ points( riskLines( p, m ) ) }${ F.baseline().hasIncome ? '' : `<button type="button" class="btn btn-ghost sm" data-ef-income>💶 ${ esc( t( 'efAddIncome' ) ) }</button>` }</div></div>`;
 	};
 	const renumber = ( ol ) => ol.querySelectorAll( ':scope > li .ef-rank' ).forEach( ( r, i ) => { r.textContent = i === 0 ? '🏆' : String( i + 1 ); } );
 	const commitOrder = ( ol ) => F.setOrder( [ ...ol.querySelectorAll( ':scope > li' ) ].map( ( li ) => li.dataset.id ) );
-	let drag = null;
-	document.addEventListener( 'pointerdown', ( e ) => { const g = e.target.closest && e.target.closest( '[data-grip]' ); if ( ! g ) return; e.preventDefault(); const li = g.closest( 'li' ); drag = { li, ol: li.parentNode }; li.classList.add( 'drag' ); try { g.setPointerCapture( e.pointerId ); } catch ( x ) { /* ignore */ } } );
-	document.addEventListener( 'pointermove', ( e ) => { if ( ! drag ) return; const sib = [ ...drag.ol.children ].filter( ( x ) => x !== drag.li ), next = sib.find( ( x ) => { const r = x.getBoundingClientRect(); return e.clientY < r.top + r.height / 2; } ); if ( next ) { if ( drag.li.nextSibling !== next ) drag.ol.insertBefore( drag.li, next ); } else if ( drag.ol.lastElementChild !== drag.li ) drag.ol.appendChild( drag.li ); renumber( drag.ol ); } );
+	let drag = null, lp = null;
+	/** Dragging a plan to a new place: from the grip with a finger or mouse, or by pressing and holding anywhere on the row (a quick swipe still scrolls). */
+	const startDrag = ( li ) => { drag = { li, ol: li.parentNode }; li.classList.add( 'drag' ); try { UI.haptic && UI.haptic(); } catch ( x ) { /* ignore */ } };
+	const moveDrag = ( y ) => { if ( ! drag ) return; const sc = drag.ol.closest( '.sheet-scroll, .ef-ob-main' ); if ( sc ) { const r = sc.getBoundingClientRect(); if ( y < r.top + 70 ) sc.scrollTop -= 12; else if ( y > r.bottom - 70 ) sc.scrollTop += 12; } const sib = [ ...drag.ol.children ].filter( ( x ) => x !== drag.li ), next = sib.find( ( x ) => { const r = x.getBoundingClientRect(); return y < r.top + r.height / 2; } ); if ( next ) { if ( drag.li.nextSibling !== next ) drag.ol.insertBefore( drag.li, next ); } else if ( drag.ol.lastElementChild !== drag.li ) drag.ol.appendChild( drag.li ); renumber( drag.ol ); };
 	const endDrag = () => { if ( ! drag ) return; const d = drag; drag = null; d.li.classList.remove( 'drag' ); commitOrder( d.ol ); };
-	document.addEventListener( 'pointerup', endDrag ); document.addEventListener( 'pointercancel', endDrag );
+	document.addEventListener( 'pointerdown', ( e ) => { const g = e.target.closest && e.target.closest( '[data-grip]' ); if ( ! g ) return; e.preventDefault(); startDrag( g.closest( 'li' ) ); try { g.setPointerCapture( e.pointerId ); } catch ( x ) { /* ignore */ } } );
+	document.addEventListener( 'pointermove', ( e ) => { if ( drag && ! lp ) moveDrag( e.clientY ); } );
+	document.addEventListener( 'pointerup', () => { if ( ! lp ) endDrag(); } ); document.addEventListener( 'pointercancel', () => { if ( ! lp ) endDrag(); } );
+	document.addEventListener( 'touchstart', ( e ) => {
+		const li = e.target.closest && e.target.closest( '.ef-prio-i' ); if ( ! li || e.target.closest( '[data-up],[data-down],[data-grip]' ) ) return;
+		const t0 = e.touches[ 0 ]; lp = { li, x: t0.clientX, y: t0.clientY, on: false }; lp.timer = setTimeout( () => { if ( lp ) { lp.on = true; startDrag( li ); } }, 300 );
+	}, { passive: true } );
+	document.addEventListener( 'touchmove', ( e ) => {
+		if ( ! lp ) return; const t0 = e.touches[ 0 ];
+		if ( ! lp.on ) { if ( Math.abs( t0.clientY - lp.y ) > 10 || Math.abs( t0.clientX - lp.x ) > 10 ) { clearTimeout( lp.timer ); lp = null; } return; } // moved before the hold: it is a scroll
+		e.preventDefault(); moveDrag( t0.clientY );
+	}, { passive: false } );
+	const endTouch = () => { if ( ! lp ) return; clearTimeout( lp.timer ); const was = lp.on; lp = null; if ( was ) endDrag(); };
+	document.addEventListener( 'touchend', endTouch ); document.addEventListener( 'touchcancel', endTouch );
 	document.addEventListener( 'click', ( e ) => {
 		const up = e.target.closest && e.target.closest( '[data-up],[data-down]' ); if ( up ) { const li = up.closest( 'li' ), ol = li.parentNode; if ( up.hasAttribute( 'data-up' ) ) { if ( li.previousElementSibling ) ol.insertBefore( li, li.previousElementSibling ); } else if ( li.nextElementSibling ) ol.insertBefore( li.nextElementSibling, li ); renumber( ol ); commitOrder( ol ); return; }
 		if ( e.target.closest( '[data-ef-prio]' ) ) { e.preventDefault(); UI.closeSheet && UI.closeSheet(); setTimeout( () => EXA.openEfPriority(), 220 ); return; }
 		if ( e.target.closest( '[data-ef-suggest]' ) ) { F.setOrder( F.suggestOrder() ); return; }
 		if ( e.target.closest( '[data-ef-prio-done]' ) ) { S().settings.efAsked = F.sig(); S().settings.u = Date.now(); EX.save(); UI.closeSheet(); }
 	} );
-	document.addEventListener( 'input', ( e ) => { const r = e.target.matches && e.target.matches( '[data-ef-margin]' ) ? e.target : null; if ( ! r ) return; const p = Number( r.value ), m = monthsAt( p ), box = r.closest( '.ef-risk' ); box.style.setProperty( '--c', colorAt( p ) ); box.querySelector( '.ef-risk-val' ).textContent = riskWord( p ) + ' · ' + monthsText( m ); const hint = box.querySelector( '.ef-risk-hint' ), btn = hint.querySelector( 'button' ); hint.innerHTML = points( riskLines( p, m ) ); if ( btn ) hint.appendChild( btn ); } );
+	document.addEventListener( 'input', ( e ) => { const r = e.target.matches && e.target.matches( '[data-ef-margin]' ) ? e.target : null; if ( ! r ) return; const p = Number( r.value ), m = monthsAt( p ), box = r.closest( '.ef-risk' ); box.style.setProperty( '--c', colorAt( p ) ); box.querySelector( '.ef-risk-val' ).textContent = riskWord( p ) + ' · ' + monthsShort( m ); const hint = box.querySelector( '.ef-risk-hint' ), btn = hint.querySelector( 'button' ); hint.innerHTML = points( riskLines( p, m ) ); if ( btn ) hint.appendChild( btn ); } );
 	document.addEventListener( 'change', ( e ) => { if ( e.target.matches && e.target.matches( '[data-ef-margin]' ) ) { S().settings.efCushion = monthsAt( Number( e.target.value ) ); S().settings.u = Date.now(); EX.save(); } } );
 	EXA.openEfPriority = () => {
 		const list = F.all(); if ( ! list.length ) return; F.view = { k: 'prio' };
@@ -1194,4 +1209,6 @@
 		efLimTitle: 'Ποιο είναι το μέγιστο που νιώθετε άνετα να ξοδεύετε;', efLimText: '🛡️ Πείτε μου τα δικά σας όρια και θα σχεδιάζω με βάση αυτά\n📊 Χρησιμοποιώ το χαμηλότερο ανάμεσα στο όριό σας και στις συνήθειές σας\n⏭️ Αφήστε κενό όποιο δεν θέλετε να ορίσετε', efLimDay: 'Μέγιστο ανά ημέρα', efLimWeek: 'Μέγιστο ανά εβδομάδα', efLimMonth: 'Μέγιστο ανά μήνα', efLimSaved: '✅ Αποθηκεύονται στους στόχους εξόδων σας, ώστε να τα αλλάζετε και από εκεί.',
 		targetLimits: 'Όρια εξόδων', targetLimitsHelp: 'Το μέγιστο που νιώθετε άνετα να ξοδεύετε. Το eFriend σχεδιάζει με βάση το χαμηλότερο από αυτά και τις συνήθειές σας.',
 	} );
+	Object.assign( window.EXPENITY_I18N.langs.en, { efMonthWord: 'month', efMonthsWord: 'months' } );
+	Object.assign( window.EXPENITY_I18N.langs.el, { efMonthWord: 'μήνας', efMonthsWord: 'μήνες' } );
 }() );

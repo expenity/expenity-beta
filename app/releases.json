@@ -1,6 +1,18 @@
 {
-  "version": "0.51.0",
+  "version": "0.51.1",
   "releases": [
+    {
+      "version": "0.51.1",
+      "date": "2026-10-29",
+      "en": [
+        "Ranking your plans: press and hold a plan anywhere on its row and it lifts so you can drag it to its place. A quick swipe still scrolls the page. The list also scrolls itself when you drag near the edge.",
+        "Fixed: in the tour, the animated plans no longer cover the text, and the cushion slider no longer makes the screen jump while you move it."
+      ],
+      "el": [
+        "Κατάταξη των σχεδίων σας: πατήστε παρατεταμένα ένα σχέδιο οπουδήποτε στη γραμμή του και σηκώνεται για να το σύρετε στη θέση του. Ένα γρήγορο σύρσιμο συνεχίζει να κυλά τη σελίδα. Η λίστα κυλά και μόνη της όταν σύρετε κοντά στην άκρη.",
+        "Διορθώθηκε: στην περιήγηση, τα κινούμενα σχέδια δεν καλύπτουν πια το κείμενο και το ρυθμιστικό περιθωρίου δεν κάνει την οθόνη να πηδά όταν το μετακινείτε."
+      ]
+    },
     {
       "version": "0.51.0",
       "date": "2026-10-28",
