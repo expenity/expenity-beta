@@ -1,6 +1,24 @@
 {
-  "version": "0.50.4",
+  "version": "0.50.5",
   "releases": [
+    {
+      "version": "0.50.5",
+      "date": "2026-10-26",
+      "en": [
+        "eFriend now suggests budgets, its best friend. When a plan is off target it proposes monthly budgets for the categories that cost you the most, with how much they could add, and a button that opens the budget form already filled in. It also shares other tips, such as no-spend days and the 24-hour rule. The tour has a new, fun step about budgets.",
+        "Anything that affects a plan now means a fresh analysis: an open analysis updates by itself when you change a date, a cost, a bill, a wallet or how your spending is sorted.",
+        "Reports mark your edits on the eFriend graph with numbered points, and say whether each one moved you closer to or further from your plan.",
+        "The robot's message now passes through its bubble between dots, one after another, so the card never changes size.",
+        "Fields side by side always line up, in every form. Editing a plan shows its name as the title."
+      ],
+      "el": [
+        "Το eFriend πλέον προτείνει προϋπολογισμούς, τον καλύτερό του φίλο. Όταν ένα σχέδιο είναι εκτός στόχου, προτείνει μηνιαίους προϋπολογισμούς για τις κατηγορίες που σας κοστίζουν περισσότερο, με το πόσα θα μπορούσαν να προσθέσουν, και ένα κουμπί που ανοίγει τη φόρμα προϋπολογισμού ήδη συμπληρωμένη. Μοιράζεται και άλλες συμβουλές, όπως ημέρες χωρίς έξοδα και τον κανόνα των 24 ωρών. Η περιήγηση έχει ένα νέο, διασκεδαστικό βήμα για τους προϋπολογισμούς.",
+        "Οτιδήποτε επηρεάζει ένα σχέδιο σημαίνει πλέον νέα ανάλυση: μια ανοιχτή ανάλυση ενημερώνεται μόνη της όταν αλλάζετε ημερομηνία, κόστος, λογαριασμό, πορτοφόλι ή τον τρόπο ταξινόμησης των εξόδων σας.",
+        "Οι Αναφορές σημειώνουν τις αλλαγές σας στο γράφημα του eFriend με αριθμημένα σημεία και λένε αν η καθεμία σας έφερε πιο κοντά ή πιο μακριά από το σχέδιό σας.",
+        "Το μήνυμα του ρομπότ περνά πλέον μέσα από το συννεφάκι του ανάμεσα σε τελείες, ένα μετά το άλλο, ώστε η κάρτα να μην αλλάζει μέγεθος.",
+        "Τα πεδία που βρίσκονται δίπλα-δίπλα ευθυγραμμίζονται πάντα, σε κάθε φόρμα. Η επεξεργασία ενός σχεδίου δείχνει το όνομά του ως τίτλο."
+      ]
+    },
     {
       "version": "0.50.4",
       "date": "2026-10-25",

@@ -179,9 +179,9 @@
 	const wallets = () => EX.writableAccounts();
 	const walletOpts = ( sel ) => wallets().map( ( a ) => `<option value="${ esc( a.id ) }"${ sel === a.id ? ' selected' : '' }>${ esc( EX.accountName( a ) ) } (${ esc( a.currency ) })</option>` ).join( '' );
 	let editing = null;
-	function openBudget( b ) {
+	function openBudget( b, pre ) {
 		editing = b || null;
-		const v = b || { category: 'food', amount: '', period: 'monthly', rollover: false };
+		const v = b || Object.assign( { category: 'food', amount: '', period: 'monthly', rollover: false }, pre || {} );
 		const cats = EX.catList( 'expense' );
 		UI.openSheet( `${ head( t( b ? 'budgetEdit' : 'budgetAdd' ) ) }<form id="budgetForm" novalidate class="sheet-pad">
 			<label class="f"><span>${ esc( t( 'budgetCat' ) ) }</span><select name="category"><option value="all"${ v.category === 'all' ? ' selected' : '' }>${ esc( t( 'budgetAll' ) ) }</option>${ cats.map( ( c ) => `<option value="${ esc( c.key ) }"${ v.category === c.key ? ' selected' : '' }>${ esc( c.name ) }</option>` ).join( '' ) }</select></label>

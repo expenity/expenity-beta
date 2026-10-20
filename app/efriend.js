@@ -223,7 +223,7 @@
 		const all = F.all();
 		if ( all.length > 1 ) {
 			const sm = F.summary( all ), v = sm.verdict, m = ( c ) => money( c / 100, main() );
-			const front = `<div class="ef-card ef-${ v }"><div class="ef-top">${ F.mascot( v ) }<div class="ef-bubble" data-ef-bubble="${ v }"><b>${ esc( pickLine( v ) ) }</b></div></div>
+			const front = `<div class="ef-card ef-${ v }"><div class="ef-top">${ F.mascot( v ) }<div class="ef-bubble ef-tkb" data-ef-bubble="${ v }"><div class="ef-ticker"><span class="ef-tk">${ esc( pickLine( v ) ) }</span></div></div></div>
 				<div class="ef-meta">${ chip( v ) }<span>${ esc( t( 'efPlansN', { n: sm.n } ) ) }</span></div>
 				<ul class="ef-mini-list">${ all.slice( 0, 4 ).map( ( x ) => `<li role="button" tabindex="0" data-ef-open="${ esc( x.goal.id ) }"><span class="ef-mi">${ UI.icon( x.goal.icon || 'plane', 18 ) }</span><b>${ esc( x.goal.name ) }</b>${ chip( x.verdict ) }</li>` ).join( '' ) }</ul>
 				${ all.length > 4 ? `<small>${ esc( t( 'efMorePlans', { n: all.length - 4 } ) ) }</small>` : '' }<small>${ esc( t( 'efTogether', { a: m( sm.cost ), b: m( sm.free ) } ) ) }</small></div>`;
@@ -231,17 +231,44 @@
 			return `<section data-home="efriend"><div class="sec-head"><h2>${ esc( t( 'efAllPlans' ) ) }</h2><span class="sec-acts">${ EXA.flipBtn( 'efriend' ) }</span></div>${ EXA.flipCard( 'efriend', front, back, 'fc-ef' ) }</section>`;
 		}
 		const g = f.goal, have = Math.max( 0, ( f.projectedFree || 0 ) + f.saved ), pct = f.done ? 100 : f.target ? Math.min( 100, Math.round( have / f.target * 100 ) ) : 0, label = { comfortable: 'Comfortable', ontrack: 'On track', tight: 'Tight', atrisk: 'At risk', unlikely: 'Unlikely', done: 'Done' }[ f.verdict ];
-		const front = `<div class="ef-card ef-${ f.verdict }"><div class="ef-top">${ F.mascot( f.verdict ) }<div class="ef-bubble" data-ef-bubble="${ f.verdict }"><b>${ esc( pickLine( f.verdict ) ) }</b></div></div>
+		const front = `<div class="ef-card ef-${ f.verdict }"><div class="ef-top">${ F.mascot( f.verdict ) }<div class="ef-bubble ef-tkb" data-ef-bubble="${ f.verdict }"><div class="ef-ticker"><span class="ef-tk">${ esc( pickLine( f.verdict ) ) }</span></div></div></div>
 			<div class="ef-meta"><span class="ef-chip">${ label }</span><span>${ esc( t( 'efDaysLeft', { n: Math.max( 0, f.days ) } ) ) }</span></div>
 			<div class="ef-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${ pct }"><i style="width:${ pct }%"></i><span class="ef-suit" style="left:${ pct }%">${ UI.icon( g.icon || 'plane', 18 ) }</span></div>
 			<small>${ esc( t( 'efFreeOf', { a: money( have / 100, main() ), b: money( f.target / 100, main() ) } ) ) }</small></div>`;
-		const back = `<div class="wk-back ef-back"><span class="wk-ic bob">${ UI.icon( 'sparkles', 30 ) }</span><h3>${ esc( g.name ) }</h3>${ points( F.sentences( f ) ) }<button type="button" class="btn btn-primary" data-ef-open="${ esc( g.id ) }">${ esc( t( 'efOpen' ) ) }</button><button type="button" class="btn btn-ghost sm" data-ef-edit="${ esc( g.id ) }">${ UI.icon( 'pencil', 18 ) } ${ esc( t( 'efEdit' ) ) }</button></div>`;
+		const back = `<div class="wk-back ef-back"><span class="wk-ic bob">${ UI.icon( 'sparkles', 30 ) }</span><h3>${ esc( g.name ) }</h3>${ points( F.sentences( f ).concat( F.tips( f ).slice( 0, 1 ).map( ( x ) => x.text ) ) ) }<button type="button" class="btn btn-primary" data-ef-open="${ esc( g.id ) }">${ esc( t( 'efOpen' ) ) }</button><button type="button" class="btn btn-ghost sm" data-ef-edit="${ esc( g.id ) }">${ UI.icon( 'pencil', 18 ) } ${ esc( t( 'efEdit' ) ) }</button></div>`;
 		return `<section data-home="efriend"><div class="sec-head"><h2>${ esc( g.name ) }</h2><span class="sec-acts">${ EXA.flipBtn( 'efriend' ) }</span></div>${ EXA.flipCard( 'efriend', front, back, 'fc-ef' ) }</section>`;
 	};
+
+	/** Smart tips. A budget is eFriend's best friend: off target, it proposes budgets for the categories that cost the most and links straight to the form. */
+	const monthlyOf = ( b ) => num( b.amount ) * ( b.period === 'weekly' ? 52 / 12 : b.period === 'yearly' ? 1 / 12 : 1 );
+	F.tips = ( f ) => {
+		if ( ! f || f.done || f.late || ! f.cats ) return [];
+		const m = ( c ) => money( c / 100, main() ), months = Math.max( 0.3, f.days / 30 ), off = RANK[ f.verdict ] <= 2, out = [], budgets = S().budgets || [];
+		const cand = f.cats.filter( ( c ) => c.level === 'want' ).concat( f.cats.filter( ( c ) => c.level === 'need' ) ).slice( 0, off ? 2 : 1 );
+		cand.forEach( ( c ) => {
+			const habit = c.perDay * 30 / 100, suggested = Math.max( 5, Math.round( habit * 0.75 / 5 ) * 5 ), name = EX.catInfo( c.cat ).name, ex = budgets.find( ( b ) => b.category === c.cat ), gain = Math.round( Math.max( 0, habit - suggested ) * months * 100 );
+			if ( ! ex ) out.push( { k: 'budget', text: off ? t( 'efTipBudgetNew', { name, a: money( suggested, main() ), g: m( gain ) } ) : t( 'efTipBudgetFriend', { name, a: money( suggested, main() ) } ), act: { type: 'new', cat: c.cat, amount: suggested }, gain } );
+			else if ( monthlyOf( ex ) > suggested * 1.15 ) out.push( { k: 'budget', text: t( 'efTipBudgetLower', { name, a: money( suggested, main() ), g: m( gain ) } ), act: { type: 'edit', id: ex.id }, gain } );
+			else if ( off ) out.push( { k: 'budget', text: t( 'efTipBudgetKeep', { name } ), act: { type: 'edit', id: ex.id }, gain: 0 } );
+		} );
+		if ( off ) {
+			const perDay = ( f.level.want || 0 ) / Math.max( 1, f.days ), weeks = f.days / 7;
+			if ( perDay > 0 ) out.push( { k: 'tip', text: t( 'efTipNoSpend', { a: m( Math.round( perDay * 2 * weeks ) ) } ), gain: Math.round( perDay * 2 * weeks ) } );
+			out.push( { k: 'tip', text: t( 'efTipWait' ), gain: 0 } );
+		}
+		return out;
+	};
+	const tipsHtml = ( tips ) => tips.length ? `<ul class="ef-points ef-tips">${ tips.map( ( x ) => { const mm = String( x.text ).match( /^((?:\p{Extended_Pictographic}\uFE0F?\u200D?)+)\s*(.*)$/u ), body = mm ? mm[ 2 ] : x.text, em = mm ? mm[ 1 ] : '💡'; return `<li><span class="ef-em" aria-hidden="true">${ em }</span><span>${ rich( body ) }${ x.act ? `<br><button type="button" class="btn btn-ghost sm" ${ x.act.type === 'new' ? `data-ef-budget="${ esc( x.act.cat ) }" data-amt="${ x.act.amount }"` : `data-ef-budget-edit="${ esc( x.act.id ) }"` }>${ UI.icon( 'target', 16 ) } ${ esc( t( x.act.type === 'new' ? 'efSetBudget' : 'efOpenBudget' ) ) }</button>` : '' }</span></li>`; } ).join( '' ) }</ul>` : '';
+	document.addEventListener( 'click', ( e ) => {
+		const nb = e.target.closest( '[data-ef-budget]' ), eb = e.target.closest( '[data-ef-budget-edit]' );
+		if ( nb ) { e.preventDefault(); UI.closeSheet(); setTimeout( () => EXA.openBudget( null, { category: nb.dataset.efBudget, amount: nb.dataset.amt, period: 'monthly' } ), 220 ); }
+		else if ( eb ) { e.preventDefault(); const b = ( S().budgets || [] ).find( ( x ) => x.id === eb.dataset.efBudgetEdit ); UI.closeSheet(); if ( b ) setTimeout( () => EXA.openBudget( b ), 220 ); }
+	}, true );
 
 	/* ------------------------------------------------------------------ Full analysis */
 	EXA.openEfriend = ( id ) => {
 		const g = S().goals.find( ( x ) => x.id === id ); if ( ! g ) return;
+		F.view = { k: 'one', id };
 		const f = F.of( id ) || F.forecast( g ), m = ( c ) => money( c / 100, main() ), label = { comfortable: 'Comfortable', ontrack: 'On track', tight: 'Tight', atrisk: 'At risk', unlikely: 'Unlikely', done: 'Done' }[ f.verdict ];
 		const why = ( k ) => t( 'efWhy_' + k ) || t( 'efWhy_must' );
 		const mustRows = ( f.mustList || [] ).map( ( x ) => `<li><div><b>${ esc( x.b.name ) }</b><small>${ esc( why( x.why ) ) }</small></div><span>${ x.late ? '<i class="ef-late">Overdue</i> ' : '' }${ esc( m( x.c ) ) }</span></li>` ).join( '' );
@@ -253,12 +280,13 @@
 			<div class="sheet-pad ef-sheet"><div class="ef-editrow"><button type="button" class="btn btn-ghost sm" data-ef-edit="${ esc( id ) }">${ UI.icon( 'pencil', 18 ) } ${ esc( t( 'efEdit' ) ) }</button></div><div class="ef-top">${ F.mascot( f.verdict, 84 ) }<div class="ef-bubble"><b>${ esc( pickLine( f.verdict ) ) }</b><span class="ef-chip">${ label }</span></div></div>
 			${ f.verdict === 'done' ? '' : `<ul class="ef-kv"><li><span>${ esc( t( 'efStillNeed' ) ) }</span><b>${ esc( m( f.remaining ) ) }</b></li><li><span>${ esc( t( 'efProjected' ) ) }</span><b>${ esc( m( Math.max( 0, f.projectedFree || 0 ) ) ) }</b></li><li><span>${ esc( t( 'efDays' ) ) }</span><b>${ Math.max( 0, f.days ) }</b></li><li><span>${ esc( t( 'efConfidence' ) ) }</span><b>${ esc( t( 'efConf_' + f.confidence ) ) }</b></li></ul>` }
 			${ points( F.sentences( f ) ) }
+			${ ( () => { const tp = F.tips( f ); return tp.length ? `<h3>${ esc( t( 'efTipsTitle' ) ) }</h3>${ tipsHtml( tp ) }` : ''; } )() }
 			${ suggRows ? `<h3>${ esc( t( 'efHelps' ) ) }</h3><ul class="ef-list">${ suggRows }</ul>${ points( [ t( 'efHelpsNote', { a: m( f.gain ) } ) ] ) }` : '' }
 			${ alt.length ? `<h3>${ esc( t( 'efOtherWays' ) ) }</h3>${ points( alt ) }` : '' }
 			${ mustRows ? `<h3>${ esc( t( 'efMustTitle' ) ) }</h3><ul class="ef-list">${ mustRows }</ul>` : '' }
 			${ catRows ? `<h3>${ esc( t( 'efSortTitle' ) ) }</h3>${ para( 'efSortText' ) }<ul class="ef-list">${ catRows }</ul>` : '' }
 			<button type="button" class="btn btn-ghost wide" data-ef-redo="${ esc( id ) }">${ esc( t( 'efRedo' ) ) }</button><p class="muted small">${ esc( t( 'efDisclaimer' ) ) }</p></div>`, { tall: true } );
-		document.querySelector( '.ef-sheet' ).addEventListener( 'click', ( e ) => { const s = e.target.closest( '[data-ef-to]' ); if ( ! s ) return; const o = S().settings.importance = S().settings.importance || {}; o[ 'cat:' + s.dataset.efLevel ] = s.dataset.efTo; S().settings.u = Date.now(); EX.save(); EXA.openEfriend( id ); EXA.render(); } );
+		document.querySelector( '.ef-sheet' ).addEventListener( 'click', ( e ) => { const s = e.target.closest( '[data-ef-to]' ); if ( ! s ) return; const o = S().settings.importance = S().settings.importance || {}, bef = F.measure(); o[ 'cat:' + s.dataset.efLevel ] = s.dataset.efTo; F.logChange( bef, [ [ 'sort', s.dataset.efLevel, s.dataset.efTo ] ] ); EX.save(); EXA.render(); } );
 	};
 	document.addEventListener( 'click', ( e ) => { const ed = e.target.closest( '[data-ef-edit]' ); if ( ed ) { e.preventDefault(); e.stopImmediatePropagation(); const g = S().goals.find( ( x ) => x.id === ed.dataset.efEdit ); if ( g ) { UI.closeSheet(); setTimeout( () => EXA.openEfPlan( g ), 220 ); } return; } const tr = e.target.closest( '[data-ef-try]' ); if ( tr ) { e.preventDefault(); EXA.openEfPlan( S().goals.find( ( x ) => x.id === tr.dataset.efTry ) ); return; } const r = e.target.closest( '[data-ef-redo]' ); if ( r ) { UI.closeSheet(); setTimeout( () => EXA.efriendOnboard( r.dataset.efRedo, 'sort' ), 200 ); return; } const b = e.target.closest( '[data-ef-open]' ); if ( b ) { e.preventDefault(); e.stopImmediatePropagation(); EXA.openEfriend( b.dataset.efOpen ); } }, true );
 
@@ -268,7 +296,7 @@
 		const ws = EX.writableAccounts(), chosen = p && p.wallets && p.wallets.length ? p.wallets : ws.map( ( w ) => w.id );
 		const goals = S().goals.filter( ( x ) => ! isPlan( x ) ), v = p || { name: '', target: '', deadline: '', icon: 'plane' };
 		const X = `<button type="button" class="ab-btn" data-close aria-label="${ esc( t( 'close' ) ) }">${ UI.icon( 'x', 24 ) }</button>`;
-		UI.openSheet( `<div class="sheet-head">${ X }<h2 id="sheetTitle">${ esc( t( p ? 'efPlanEdit' : 'efPlanNew' ) ) }</h2><span class="sp"></span></div>
+		UI.openSheet( `<div class="sheet-head">${ X }<h2 id="sheetTitle">${ esc( p ? p.name : t( 'efPlanNew' ) ) }</h2><span class="sp"></span></div>
 			<form id="efPlanForm" novalidate class="sheet-pad"><div class="ef-intro"><span class="ef-mini">${ F.mascot( 'happy', 44 ) }</span><div><small>${ esc( t( 'efMeetText' ) ) }</small></div></div>
 			<label class="f"><span>${ esc( t( 'efPlanName' ) ) }</span><input name="pname" maxlength="60" autocomplete="off" placeholder="${ esc( t( 'efPlanNamePh' ) ) }" value="${ esc( v.name ) }"></label>
 			<div class="grid2"><label class="f"><span>${ esc( t( 'efPlanCost' ) ) } (${ esc( main() ) })</span><input name="pcost" inputmode="decimal" autocomplete="off" placeholder="0.00" value="${ esc( v.target ) }"></label>
@@ -292,7 +320,10 @@
 		if ( ! name ) return err( 'efNeedName' ); if ( ! ( cost > 0 ) ) return err( 'efNeedCost' ); if ( ! date || date <= today() ) return err( 'efNeedFuture' ); if ( ! wallets.length ) return err( 'efNeedWallet' );
 		const v = { name, target: String( cost ), deadline: date, icon: el.picon.value || 'plane', wallets, linkedGoal: el.plink ? el.plink.value : '', group: el.pgroup.value.trim(), kind: 'efriend' }, id = f.dataset.id;
 		if ( ! id ) v.created = today();
-		let rec = id && S().goals.find( ( g ) => g.id === id ); if ( rec ) { delete rec.coach; Object.assign( rec, v ); } else { rec = Object.assign( { id: EX.uid() }, v ); S().goals.push( rec ); }
+		let rec = id && S().goals.find( ( g ) => g.id === id ), before = null, changes = [];
+		if ( rec ) { before = F.measure(); if ( String( rec.target ) !== v.target ) changes.push( [ 'cost', rec.target, v.target ] ); if ( rec.deadline !== v.deadline ) changes.push( [ 'date', rec.deadline, v.deadline ] ); if ( ( rec.wallets || [] ).join() !== v.wallets.join() ) changes.push( [ 'wallets', ( rec.wallets || [] ).length, v.wallets.length ] ); if ( ( rec.linkedGoal || '' ) !== v.linkedGoal ) changes.push( [ 'link', '', '' ] ); }
+		if ( rec ) { delete rec.coach; Object.assign( rec, v ); } else { rec = Object.assign( { id: EX.uid() }, v ); S().goals.push( rec ); }
+		if ( before && changes.length ) F.logChange( before, changes, [ rec.id ] );
 		S().settings.u = Date.now(); EX.save(); UI.closeSheet(); EXA.render();
 		setTimeout( () => ( ( S().device || {} ).efOnboard ? EXA.openEfriend( rec.id ) : EXA.efriendOnboard( rec.id ) ), 350 );
 	} );
@@ -340,7 +371,7 @@
 		if ( document.querySelector( '.ef-ob' ) ) return;
 		try { S().device.efOnboard = 1; EX.persist(); } catch ( e ) { /* ignore */ }
 		const rows = F.sortRows(), pick = {}; rows.forEach( ( r ) => { pick[ r.cat ] = r.level; } );
-		const steps = only === 'sort' ? [ 'sort' ] : [ 'meet', 'how', 'see', 'sort', 'where' ];
+		const steps = only === 'sort' ? [ 'sort' ] : [ 'meet', 'how', 'budgets', 'see', 'sort', 'where' ];
 		let i = 0;
 		const ov = document.createElement( 'div' ); ov.className = 'ef-ob'; ov.setAttribute( 'role', 'dialog' ); ov.setAttribute( 'aria-modal', 'true' ); ov.setAttribute( 'aria-label', 'eFriend' );
 		const mock = ( kind ) => kind === 'see'
@@ -352,16 +383,18 @@
 		const body = ( id ) => {
 			if ( id === 'meet' ) return `${ F.logoWord( 'play' ) }<div class="ef-hop">${ F.mascot( 'cheer', 110 ) }</div>${ para( 'efMeetText' ) }`;
 			if ( id === 'how' ) { const m = ( n ) => money( n, main() ), row = ( cls, k, v, i ) => `<li class="ef-how-${ cls }" style="--i:${ i }"><span>${ esc( t( k ) ) }</span><b>${ v }</b></li>`; return `<h2>${ esc( t( 'efObHowTitle' ) ) }</h2><ul class="ef-how">${ row( 'plus', 'efHowWallets', '+ ' + m( 900 ), 0 ) }${ row( 'plus', 'efHowIncome', '+ ' + m( 300 ), 1 ) }${ row( 'minus', 'efHowBills', '− ' + m( 300 ), 2 ) }${ row( 'minus', 'efHowSpend', '− ' + m( 350 ), 3 ) }${ row( 'total', 'efHowFree', '= ' + m( 550 ), 4 ) }<li class="ef-how-cmp" style="--i:5"><span>${ F.mascot( 'comfortable', 40 ) }</span><b>${ m( 550 ) } &gt; ${ m( 400 ) } ✓</b></li></ul>${ para( 'efObHowText' ) }${ para( 'efObHowLink' ) }`; }
+			if ( id === 'budgets' ) return `<h2>${ esc( t( 'efObBudTitle' ) ) }</h2><div class="ef-bud-demo"><div class="ef-bud-card"><div class="ef-bud-top"><b>🍕 ${ esc( t( 'efObBudCat' ) ) }</b><span>${ money( 120, main() ) } / ${ esc( t( 'efObBudMonth' ) ) }</span></div><div class="ef-bar"><i class="ef-bud-fill"></i></div><div class="ef-bud-ok">✅ ${ esc( t( 'efObBudInside' ) ) }</div></div><div class="ef-bud-bot">${ F.mascot( 'cheer', 70 ) }<span class="ef-bud-gain">+${ money( 45, main() ) } ✈️</span></div></div>${ para( 'efObBudText' ) }`;
 			if ( id === 'see' ) return `<h2>${ esc( t( 'efObSeeTitle' ) ) }</h2>${ mock( 'see' ) }${ para( 'efObSeeText' ) }`;
 			if ( id === 'where' ) return `<h2>${ esc( t( 'efObWhereTitle' ) ) }</h2>${ mock( 'where' ) }${ para( 'efObWhereText' ) }`;
 			const row = ( r ) => `<li data-ef-row="${ esc( r.cat ) }"><div><b>${ esc( EX.catInfo( r.cat ).name ) }</b>${ r.spent ? `<small>${ esc( money( r.spent / 100, main() ) ) }</small>` : '' }</div><div class="ef-tri" role="group" aria-label="${ esc( EX.catInfo( r.cat ).name ) }">${ LVL.map( ( l ) => `<button type="button" data-ef-set="${ l }" aria-pressed="${ pick[ r.cat ] === l }" class="${ pick[ r.cat ] === l ? 'on ' : '' }ef-l-${ l }">${ esc( t( 'ef_lvl_' + l ) ) }</button>` ).join( '' ) }</div></li>`;
 			return `<div class="ef-top">${ F.mascot( 'happy', 72 ) }<div class="ef-bubble"><b>${ esc( t( 'efOnbHi' ) ) }</b></div></div>${ para( 'efSortText' ) }${ rows.length ? `<ul class="ef-list">${ rows.map( row ).join( '' ) }</ul>` : `<p class="muted">${ esc( t( 'efNoSpend' ) ) }</p>` }`;
 		};
 		const finish = ( save ) => {
-			if ( save && rows.length ) { const o = S().settings.importance = S().settings.importance || {}; rows.forEach( ( r ) => { if ( pick[ r.cat ] === r.auto ) delete o[ 'cat:' + r.cat ]; else o[ 'cat:' + r.cat ] = pick[ r.cat ]; } ); S().settings.u = Date.now(); EX.save(); }
+			if ( save && rows.length ) { const o = S().settings.importance = S().settings.importance || {}, bef = F.measure(), ch = rows.filter( ( r ) => pick[ r.cat ] !== r.level ).map( ( r ) => [ 'sort', r.cat, pick[ r.cat ] ] ); rows.forEach( ( r ) => { if ( pick[ r.cat ] === r.auto ) delete o[ 'cat:' + r.cat ]; else o[ 'cat:' + r.cat ] = pick[ r.cat ]; } ); if ( ch.length ) F.logChange( bef, ch ); S().settings.u = Date.now(); EX.save(); }
 			ov.remove(); document.body.classList.remove( 'ef-ob-open' ); EXA.render();
 			if ( goalId ) setTimeout( () => EXA.openEfriend( goalId ), 250 );
-			else if ( only !== 'sort' && ! F.plans().length ) setTimeout( () => EXA.openEfPlan(), 300 );
+			else if ( only === 'sort' ) setTimeout( () => { const l = F.all(); if ( l.length > 1 ) EXA.openEfriendAll(); else if ( l.length === 1 ) EXA.openEfriend( l[ 0 ].goal.id ); }, 250 );
+			else if ( ! F.plans().length ) setTimeout( () => EXA.openEfPlan(), 300 );
 		};
 		const draw = () => {
 			const id = steps[ i ], last = i === steps.length - 1;
@@ -382,13 +415,26 @@
 		document.body.appendChild( ov ); document.body.classList.add( 'ef-ob-open' ); draw();
 	};
 
-	/** New line in a bubble: fades out, swaps the text, fades back. */
-	const refresh = ( b ) => { const el = b.querySelector( 'b' ); if ( ! el ) return; b.classList.add( 'swap' ); setTimeout( () => { el.textContent = pickLine( b.dataset.efBubble ); b.classList.remove( 'swap' ); }, 220 ); };
-	setInterval( () => { if ( document.hidden ) return; document.querySelectorAll( '[data-ef-bubble]' ).forEach( ( b ) => { if ( b.getBoundingClientRect().height > 0 ) refresh( b ); } ); }, 9000 );
-	document.addEventListener( 'click', ( e ) => { const b = e.target.closest( '[data-ef-bubble]' ); if ( b ) refresh( b ); } );
+	/** The robot's bubble is a ticker: a message passes through between dots, then the next one comes. It never changes size, so the card never jumps. */
+	const REDUCED = window.matchMedia && window.matchMedia( '(prefers-reduced-motion: reduce)' ).matches, DOTS = '\u00b7 \u00b7 \u00b7 \u00b7 \u00b7';
+	const tickNext = ( b ) => {
+		if ( ! b.isConnected ) return; const el = b.querySelector( '.ef-tk' ); if ( ! el ) return;
+		el.textContent = pickLine( b.dataset.efBubble ); el.onanimationend = null; clearTimeout( b._tkTimer );
+		if ( REDUCED ) { b.classList.add( 'still' ); b._tkTimer = setTimeout( () => tickNext( b ), 9000 ); return; }
+		el.textContent = DOTS + '   ' + el.textContent + '   ' + DOTS;
+		const box = b.querySelector( '.ef-ticker' ), cw = box.clientWidth || 260, tw = el.scrollWidth;
+		el.style.animation = 'none'; void el.offsetWidth; el.style.setProperty( '--cw', cw + 'px' );
+		el.style.animation = `ef-tick ${ Math.max( 6, ( cw + tw ) / 52 ).toFixed( 1 ) }s linear 1 forwards`;
+		el.onanimationend = () => { b._tkTimer = setTimeout( () => tickNext( b ), 350 ); };
+	};
+	F.tick = tickNext;
+	const initTickers = () => document.querySelectorAll( '[data-ef-bubble]:not([data-tk])' ).forEach( ( b ) => { b.dataset.tk = '1'; tickNext( b ); } );
+	setInterval( initTickers, 600 ); F.initTickers = initTickers;
+	document.addEventListener( 'click', ( e ) => { const b = e.target.closest( '[data-ef-bubble]' ); if ( b ) tickNext( b ); } );
 
 	/** The analysis of several plans together (all of them, or one group): one verdict, who fits and who does not, and what would help. */
 	EXA.openEfriendAll = ( group ) => {
+		F.view = { k: 'all', group };
 		const all = F.all(), list = group ? all.filter( ( f ) => ( f.goal.group || '' ).trim() === group ) : all; if ( ! list.length ) return;
 		const sm = F.summary( list ), v = sm.verdict, m = ( c ) => money( c / 100, main() ), bad = sm.firstBad;
 		const rows = list.map( ( f ) => `<li role="button" tabindex="0" data-ef-open="${ esc( f.goal.id ) }"><div class="ef-gtop"><span class="ef-mi">${ UI.icon( f.goal.icon || 'plane', 20 ) }</span><div><b>${ esc( f.goal.name ) }</b><small>${ esc( EX.dayName( f.goal.deadline ) ) } · ${ esc( m( f.remaining ) ) }${ f.reserved > 0 ? ' · ' + esc( t( 'efReservedShort', { a: m( f.reserved ) } ) ) : '' }</small></div></div>${ chip( f.verdict ) }</li>` ).join( '' );
@@ -399,9 +445,19 @@
 			<ul class="ef-kv"><li><span>${ esc( t( 'efPlansN', { n: sm.n } ) ) }</span><b>${ esc( m( sm.cost ) ) }</b></li><li><span>${ esc( t( 'efProjected' ) ) }</span><b>${ esc( m( sm.free ) ) }</b></li></ul>
 			${ points( F.allSentences( sm ) ) }
 			<h3>${ esc( t( 'efPlansByDate' ) ) }</h3><ul class="ef-list ef-plan-rows">${ rows }</ul><p class="muted small">${ esc( t( 'efOrderNote' ) ) }</p>
+			${ ( () => { const tp = F.tips( bad || list[ 0 ] ); return tp.length ? `<h3>${ esc( t( 'efTipsTitle' ) ) }</h3>${ tipsHtml( tp ) }` : ''; } )() }
 			${ tips ? `<h3>${ esc( t( 'efHelps' ) ) }</h3><ul class="ef-list">${ tips }</ul>` : '' }
 			<p class="muted small">${ esc( t( 'efDisclaimer' ) ) }</p></div>`, { tall: true } );
 	};
+
+	/** Anything that changes the numbers (a bill, income, a wallet, the sorting, the plan itself) means a new analysis: an open analysis redraws itself. */
+	EX.on( 'change', () => {
+		const v = F.view, sheet = document.getElementById( 'sheet' ); if ( ! v || ! sheet || ! sheet.open || ! sheet.querySelector( '.ef-sheet' ) ) return;
+		const sc = sheet.querySelector( '.sheet-scroll' ), y = sc ? sc.scrollTop : 0;
+		if ( v.k === 'one' ) { if ( S().goals.some( ( g ) => g.id === v.id ) ) EXA.openEfriend( v.id ); else UI.closeSheet(); } else EXA.openEfriendAll( v.group );
+		if ( sc ) sc.scrollTop = y;
+	} );
+	document.addEventListener( 'close', ( e ) => { if ( e.target && e.target.id === 'sheet' ) F.view = null; }, true );
 
 	/* ------------------------------------------------------------------ Its own page: More, eFriend */
 	EXA.efriendPage = () => {
@@ -445,18 +501,36 @@
 
 	/* ------------------------------------------------------------------ Progress: what eFriend can honestly show */
 	// A snapshot per plan per day (how ready you are), so Reports can draw the journey. Small on purpose: at most 120 points per plan.
-	F.snapshot = () => {
+	const pctOf = ( f ) => ( f.target ? Math.max( 0, Math.min( 300, Math.round( ( ( ( f.projectedFree || 0 ) + f.saved ) / f.target ) * 100 ) ) ) : 0 );
+	F.snapshot = ( force ) => {
 		const h = S().settings.efHistory = S().settings.efHistory || {}, td = today(); let changed = false;
-		F.all().forEach( ( f ) => { const id = f.goal.id, list = h[ id ] = h[ id ] || []; if ( list.length && list[ list.length - 1 ].d === td ) return; const pct = f.target ? Math.round( ( ( ( f.projectedFree || 0 ) + f.saved ) / f.target ) * 100 ) : 0; list.push( { d: td, v: f.verdict, p: Math.max( -50, Math.min( 300, pct ) ) } ); if ( list.length > 120 ) list.splice( 0, list.length - 120 ); changed = true; } );
+		F.all().forEach( ( f ) => { const id = f.goal.id, list = h[ id ] = h[ id ] || []; if ( list.length && list[ list.length - 1 ].d === td ) { if ( force ) { list[ list.length - 1 ] = { d: td, v: f.verdict, p: pctOf( f ) }; changed = true; } return; } const pct = f.target ? Math.round( ( ( ( f.projectedFree || 0 ) + f.saved ) / f.target ) * 100 ) : 0; list.push( { d: td, v: f.verdict, p: Math.max( -50, Math.min( 300, pct ) ) } ); if ( list.length > 120 ) list.splice( 0, list.length - 120 ); changed = true; } );
 		if ( changed ) { try { EX.persist(); } catch ( e ) { /* ignore */ } }
+	};
+	/** Change points: every edit that moves a plan is remembered with how ready you were before and after, so Reports can mark it on the graph. */
+	F.measure = () => { const m = {}; F.all().forEach( ( f ) => { m[ f.goal.id ] = pctOf( f ); } ); return m; };
+	F.logChange = ( before, changes, onlyIds ) => {
+		const after = F.measure(), ev = S().settings.efEvents = S().settings.efEvents || {};
+		Object.keys( after ).forEach( ( id ) => { if ( before[ id ] == null || ( onlyIds && ! onlyIds.includes( id ) ) || ( ! onlyIds && before[ id ] === after[ id ] ) ) return; const list = ev[ id ] = ev[ id ] || []; list.push( { d: today(), c: changes, p0: before[ id ], p1: after[ id ] } ); if ( list.length > 60 ) list.splice( 0, list.length - 60 ); } );
+		F.snapshot( true ); S().settings.u = Date.now(); try { EX.persist(); } catch ( e ) { /* ignore */ }
 	};
 	const wantPerWeek = ( from, to ) => {
 		const days = Math.max( 1, diff( to, from ) ), tot = S().txs.filter( ( x ) => x.type === 'expense' && ! x.goalId && x.date >= from && x.date < to ).reduce( ( s, x ) => ( F.importance( { category: x.category, name: x.name || '' } ).level === 'want' ? s + centsOf( x.amount, EX.txCurrency( x ) ) : s ), 0 );
 		return { perWeek: tot / days * 7, any: S().txs.some( ( x ) => x.date >= from && x.date < to ) };
 	};
-	const spark = ( pts ) => {
-		const w = 260, h = 70, max = Math.max( 120, ...pts.map( ( x ) => x.p ) ), min = Math.min( 0, ...pts.map( ( x ) => x.p ) ), X = ( i ) => ( pts.length < 2 ? w / 2 : 6 + ( w - 12 ) * i / ( pts.length - 1 ) ), Y = ( p ) => h - 6 - ( h - 12 ) * ( p - min ) / ( max - min );
-		return `<svg class="ef-spark-chart" viewBox="0 0 ${ w } ${ h }" role="img" aria-label="${ esc( t( 'efTab' ) ) }"><line x1="0" x2="${ w }" y1="${ Y( 100 ) }" y2="${ Y( 100 ) }" stroke="#0b7a58" stroke-dasharray="4 4" opacity=".6"/><polyline fill="none" stroke="#0f766e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" points="${ pts.map( ( x, i ) => X( i ).toFixed( 1 ) + ',' + Y( x.p ).toFixed( 1 ) ).join( ' ' ) }"/>${ pts.map( ( x, i ) => `<circle cx="${ X( i ).toFixed( 1 ) }" cy="${ Y( x.p ).toFixed( 1 ) }" r="3" fill="#0f766e"/>` ).join( '' ) }</svg>`;
+	const spark = ( pts, evs = [] ) => {
+		const w = 280, h = 90, d0 = pts.length ? parse( pts[ 0 ].d ).getTime() : 0, span = Math.max( 864e5, ( pts.length ? parse( pts[ pts.length - 1 ].d ).getTime() : 0 ) - d0 );
+		const max = Math.max( 120, ...pts.map( ( x ) => x.p ), ...evs.map( ( e ) => Math.max( e.p0, e.p1 ) ) ), min = Math.min( 0, ...pts.map( ( x ) => x.p ), ...evs.map( ( e ) => Math.min( e.p0, e.p1 ) ) );
+		const X = ( d ) => 8 + ( w - 16 ) * ( ( parse( d ).getTime() - d0 ) / span ), Y = ( p ) => h - 8 - ( h - 16 ) * ( p - min ) / ( max - min );
+		const marks = evs.filter( ( e ) => e.d >= pts[ 0 ].d ).map( ( e, i ) => `<g class="ef-ev ${ e.p1 >= e.p0 ? 'up' : 'down' }"><line x1="${ X( e.d ).toFixed( 1 ) }" x2="${ X( e.d ).toFixed( 1 ) }" y1="6" y2="${ h - 6 }" stroke="#c98a00" stroke-width="1.5" stroke-dasharray="3 3"/><circle cx="${ X( e.d ).toFixed( 1 ) }" cy="${ Y( e.p1 ).toFixed( 1 ) }" r="6" fill="#ffc94d" stroke="#8a5a00" stroke-width="1.5"/><text x="${ X( e.d ).toFixed( 1 ) }" y="${ ( Y( e.p1 ) + 3.5 ).toFixed( 1 ) }" font-size="9" font-weight="700" text-anchor="middle" fill="#3b2600">${ i + 1 }</text></g>` ).join( '' );
+		return `<svg class="ef-spark-chart" viewBox="0 0 ${ w } ${ h }" role="img" aria-label="${ esc( t( 'efTab' ) ) }"><line x1="0" x2="${ w }" y1="${ Y( 100 ).toFixed( 1 ) }" y2="${ Y( 100 ).toFixed( 1 ) }" stroke="#0b7a58" stroke-dasharray="4 4" opacity=".6"/><polyline fill="none" stroke="#0f766e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" points="${ pts.map( ( x ) => X( x.d ).toFixed( 1 ) + ',' + Y( x.p ).toFixed( 1 ) ).join( ' ' ) }"/>${ pts.map( ( x ) => `<circle cx="${ X( x.d ).toFixed( 1 ) }" cy="${ Y( x.p ).toFixed( 1 ) }" r="2.6" fill="#0f766e"/>` ).join( '' ) }${ marks }</svg>`;
+	};
+	/** What an edit was, in words, and whether it moved you closer to the plan or further away. */
+	const evText = ( e ) => {
+		const m = ( c ) => money( EX.cents( c ) / 100, main() ), lvl = ( l ) => t( 'ef_lvl_' + l );
+		const what = e.c.map( ( [ k, a, b ] ) => k === 'cost' ? t( 'efEvCost', { a: m( a ), b: m( b ) } ) : k === 'date' ? t( 'efEvDate', { a: EX.dayName( a ), b: EX.dayName( b ) } ) : k === 'wallets' ? t( 'efEvWallets' ) : k === 'link' ? t( 'efEvLink' ) : t( 'efEvSort', { name: EX.catInfo( a ).name, level: lvl( b ) } ) ).join( ' · ' );
+		const eff = e.p1 > e.p0 ? t( 'efEvCloser', { a: e.p0, b: e.p1 } ) : e.p1 < e.p0 ? t( 'efEvFurther', { a: e.p0, b: e.p1 } ) : t( 'efEvSame' );
+		return { what, eff };
 	};
 	EXA.efriendReport = () => {
 		F.snapshot();
@@ -464,8 +538,8 @@
 		if ( ! all.length ) return `<section class="card"><div class="ef-top">${ F.mascot( 'happy', 72 ) }<div class="ef-bubble"><b>${ esc( t( 'efRepNone' ) ) }</b></div></div></section>`;
 		const sm = F.summary( all ), fits = all.filter( ( f ) => RANK[ f.verdict ] >= 3 ).length;
 		const plansHtml = all.map( ( f ) => {
-			const pts = hist[ f.goal.id ] || [], first = pts[ 0 ], note = pts.length > 1 ? t( 'efRepFromTo', { a: LABEL[ first.v ], b: LABEL[ f.verdict ], d: EX.dayName( first.d ) } ) : t( 'efRepCheckBack' );
-			return `<li class="ef-rep-plan"><div class="ef-gtop"><span class="ef-mi">${ UI.icon( f.goal.icon || 'plane', 20 ) }</span><div><b>${ esc( f.goal.name ) }</b><small>${ esc( note ) }</small></div>${ chip( f.verdict ) }</div>${ pts.length > 1 ? spark( pts ) : '' }</li>`;
+			const pts = hist[ f.goal.id ] || [], evs = ( S().settings.efEvents || {} )[ f.goal.id ] || [], first = pts[ 0 ], note = pts.length > 1 ? t( 'efRepFromTo', { a: LABEL[ first.v ], b: LABEL[ f.verdict ], d: EX.dayName( first.d ) } ) : t( 'efRepCheckBack' );
+			return `<li class="ef-rep-plan"><div class="ef-gtop"><span class="ef-mi">${ UI.icon( f.goal.icon || 'plane', 20 ) }</span><div><b>${ esc( f.goal.name ) }</b><small>${ esc( note ) }</small></div>${ chip( f.verdict ) }</div>${ pts.length > 1 ? spark( pts, evs ) : '' }${ evs.length ? `<ol class="ef-evlist">${ evs.map( ( e, i ) => { const x = evText( e ); return `<li><span class="ef-evn">${ i + 1 }</span><span>✏️ <b>${ esc( EX.dayName( e.d ) ) }</b> ${ esc( x.what ) }<br>${ esc( x.eff ) }</span></li>`; } ).join( '' ) }</ol>` : '' }</li>`;
 		} ).join( '' );
 		// Wants per week: before the first plan was made, and since.
 		const created = all.map( ( f ) => f.goal.created || ( hist[ f.goal.id ] && hist[ f.goal.id ][ 0 ] && hist[ f.goal.id ][ 0 ].d ) ).filter( Boolean ).sort()[ 0 ], td = today();
@@ -476,7 +550,7 @@
 		} else if ( created ) wants = `<section class="card"><h2>${ esc( t( 'efRepWantsTitle' ) ) }</h2><p class="muted">${ esc( t( 'efRepWait', { n: Math.max( 1, 14 - diff( td, created ) ) } ) ) }</p></section>`;
 		const worst = sm.firstBad, tip = worst && worst.suggestions && worst.suggestions.length ? `<section class="card"><h2>${ esc( t( 'efHelps' ) ) }</h2><ul class="ef-list">${ worst.suggestions.slice( 0, 3 ).map( ( x ) => `<li><div><b>${ esc( x.kind === 'cut' ? t( 'efCutLabel', { name: EX.catInfo( x.cat ).name } ) : t( 'efPauseLabel', { name: x.name } ) ) }</b></div><span class="ef-gain">+${ esc( m( x.gain ) ) }</span></li>` ).join( '' ) }</ul></section>` : '';
 		return `<section class="card ef-rep"><div class="ef-top">${ F.mascot( sm.verdict, 64 ) }<div class="ef-bubble"><b>${ esc( t( 'efRepHeadline', { a: fits, b: all.length } ) ) }</b>${ chip( sm.verdict ) }</div></div><ul class="ef-kv"><li><span>${ esc( t( 'efPlansN', { n: sm.n } ) ) }</span><b>${ esc( m( sm.cost ) ) }</b></li><li><span>${ esc( t( 'efProjected' ) ) }</span><b>${ esc( m( sm.free ) ) }</b></li></ul></section>
-			<section class="card"><h2>${ esc( t( 'efRepJourney' ) ) }</h2><ul class="ef-list">${ plansHtml }</ul></section>${ wants }${ tip }`;
+			<section class="card"><h2>${ esc( t( 'efRepJourney' ) ) }</h2><ul class="ef-list">${ plansHtml }</ul><p class="muted small">${ esc( t( 'efRepEvents' ) ) }</p></section>${ wants }${ tip }`;
 	};
 
 	/* ------------------------------------------------------------------ Strings */
@@ -639,5 +713,31 @@
 		efRepLess: '📉 Ξοδεύετε περίπου **{a}** λιγότερα την εβδομάδα σε επιθυμίες από πριν.', efRepMore: '📈 Ξοδεύετε περίπου **{a}** περισσότερα την εβδομάδα σε επιθυμίες από πριν.', efRepSame: '➖ Τα έξοδά σας για επιθυμίες έμειναν περίπου ίδια.', efRepNotProof: 'ℹ️ Σύγκριση των δικών σας αριθμών και όχι απόδειξη για το τι προκάλεσε την αλλαγή.',
 		efPlanLinkHint: '🙌 Δεν χρειάζεται: το υπολογίζω από τα πορτοφόλια, τα έσοδα, τους λογαριασμούς και τις συνήθειες εξόδων σας.\n🔗 Διαλέξτε στόχο μόνο αν βάζετε και χρήματα σε αυτόν για αυτό. Όσα έχουν αποταμιευτεί εκεί υπολογίζονται ως ήδη στην άκρη.', efGroupHint: '🗂️ Τα σχέδια της ίδιας ομάδας ελέγχονται και μαζί.',
 		efSoundTitle: 'Ήχοι ρομπότ', efSoundHint: 'Μικροί ήχοι όταν πατάτε το eFriend.',
+	} );
+	Object.assign( window.EXPENITY_I18N.langs.en, {
+		efEvCost: 'Cost changed from {a} to {b}', efEvDate: 'Date moved from {a} to {b}', efEvWallets: 'Wallets changed', efEvLink: 'Savings goal link changed', efEvSort: '{name} set as {level}',
+		efEvCloser: '📈 Closer to your plan ({a}% → {b}% ready)', efEvFurther: '📉 Further from your plan ({a}% → {b}% ready)', efEvSame: '➖ No change in how ready you are',
+		efRepEvents: 'Numbered gold points on the line are edits you made.',
+	} );
+	Object.assign( window.EXPENITY_I18N.langs.el, {
+		efEvCost: 'Το κόστος άλλαξε από {a} σε {b}', efEvDate: 'Η ημερομηνία μετακινήθηκε από {a} σε {b}', efEvWallets: 'Τα πορτοφόλια άλλαξαν', efEvLink: 'Η σύνδεση με στόχο αποταμίευσης άλλαξε', efEvSort: 'Το «{name}» ορίστηκε ως {level}',
+		efEvCloser: '📈 Πιο κοντά στο σχέδιό σας ({a}% → {b}% έτοιμοι)', efEvFurther: '📉 Πιο μακριά από το σχέδιό σας ({a}% → {b}% έτοιμοι)', efEvSame: '➖ Καμία αλλαγή στο πόσο έτοιμοι είστε',
+		efRepEvents: 'Τα αριθμημένα χρυσά σημεία στη γραμμή είναι αλλαγές που κάνατε.',
+	} );
+	Object.assign( window.EXPENITY_I18N.langs.en, {
+		efTipsTitle: 'Smart tips', efSetBudget: 'Set this budget', efOpenBudget: 'Open budget',
+		efTipBudgetNew: '🎯 A monthly **{name}** budget of about **{a}** would help. It could add about **{g}** by the date.', efTipBudgetFriend: '🤝 Budgets keep you on track. A monthly **{name}** budget of about **{a}** would be a good friend.',
+		efTipBudgetLower: '🎯 Lower your **{name}** budget to about **{a}**. That could add about **{g}** by the date.', efTipBudgetKeep: '✅ Your **{name}** budget is already helping. Stay inside it!',
+		efTipNoSpend: '🛑 Two no-spend days a week on wants could add about **{a}**.', efTipWait: '⏳ Try the 24-hour rule: wait a day before any want over a small amount. Many urges simply fade.',
+		efObBudTitle: 'Budgets are my best friend', efObBudCat: 'Takeaway', efObBudMonth: 'month', efObBudInside: 'Inside the budget',
+		efObBudText: '🎯 A budget is a monthly limit for a category\n📊 I keep an eye on it for you\n💪 Staying inside it frees money for your plans\n🤝 If a plan is off target, I suggest budgets and link you straight to them\n💡 I also share other tips, even for a trip without me',
+	} );
+	Object.assign( window.EXPENITY_I18N.langs.el, {
+		efTipsTitle: 'Έξυπνες συμβουλές', efSetBudget: 'Ορίστε αυτόν τον προϋπολογισμό', efOpenBudget: 'Άνοιγμα προϋπολογισμού',
+		efTipBudgetNew: '🎯 Ένας μηνιαίος προϋπολογισμός **{name}** περίπου **{a}** θα βοηθούσε. Θα μπορούσε να προσθέσει περίπου **{g}** μέχρι την ημερομηνία.', efTipBudgetFriend: '🤝 Οι προϋπολογισμοί σας κρατούν στον δρόμο. Ένας μηνιαίος προϋπολογισμός **{name}** περίπου **{a}** θα ήταν καλός φίλος.',
+		efTipBudgetLower: '🎯 Χαμηλώστε τον προϋπολογισμό **{name}** στα **{a}** περίπου. Θα μπορούσε να προσθέσει περίπου **{g}** μέχρι την ημερομηνία.', efTipBudgetKeep: '✅ Ο προϋπολογισμός **{name}** ήδη βοηθά. Μείνετε μέσα σε αυτόν!',
+		efTipNoSpend: '🛑 Δύο ημέρες την εβδομάδα χωρίς έξοδα για επιθυμίες θα μπορούσαν να προσθέσουν περίπου **{a}**.', efTipWait: '⏳ Δοκιμάστε τον κανόνα των 24 ωρών: περιμένετε μία ημέρα πριν από κάθε επιθυμία πάνω από ένα μικρό ποσό. Πολλές παρορμήσεις απλώς περνούν.',
+		efObBudTitle: 'Οι προϋπολογισμοί είναι ο καλύτερός μου φίλος', efObBudCat: 'Delivery', efObBudMonth: 'μήνα', efObBudInside: 'Μέσα στον προϋπολογισμό',
+		efObBudText: '🎯 Ο προϋπολογισμός είναι ένα μηνιαίο όριο για μια κατηγορία\n📊 Το παρακολουθώ εγώ για εσάς\n💪 Αν μένετε μέσα του, ελευθερώνονται χρήματα για τα σχέδιά σας\n🤝 Αν ένα σχέδιο είναι εκτός στόχου, προτείνω προϋπολογισμούς και σας πάω κατευθείαν σε αυτούς\n💡 Μοιράζομαι και άλλες συμβουλές, ακόμα και για ένα ταξίδι χωρίς εμένα',
 	} );
 }() );
