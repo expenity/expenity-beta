@@ -1,6 +1,26 @@
 {
-  "version": "0.52.0",
+  "version": "0.53.0",
   "releases": [
+    {
+      "version": "0.53.0",
+      "date": "2026-11-01",
+      "en": [
+        "Ask eFriend is now a real chat. eFriend asks what you want, how much it costs and how soon, repeats it back so you can correct it, then thinks for a moment and brings you back with the full picture: today's answer, a four-month calendar of best days, and a graph of your money with and without the purchase. Past chats are kept, so you can reopen them or ask again.",
+        "eFriend now does the thinking for you. In setup, the spending limits are filled in from your real spending when there is enough history (two weeks or more), and when there is not, type one limit and it fills the other two.",
+        "A gentle note before you save an expense that would put you over your daily, weekly or monthly limit. You can still save anyway.",
+        "A warning on Home when your money is likely to run out, or drop below your safety cushion, in the next two months, with the payment behind it.",
+        "Budget ideas: after about six weeks, eFriend suggests budgets for the categories you spend most on, a little below what you usually spend, and adds them in one tap.",
+        "The safety cushion slider can now suggest a cushion based on how much your income changes from month to month."
+      ],
+      "el": [
+        "Το «Ρωτήστε το eFriend» είναι πλέον πραγματική συζήτηση. Το eFriend ρωτά τι θέλετε, πόσο κοστίζει και πόσο σύντομα το χρειάζεστε, σας το επαναλαμβάνει για να το διορθώσετε, σκέφτεται λίγο και σας επιστρέφει στην εφαρμογή με την πλήρη εικόνα: την απάντηση για σήμερα, ημερολόγιο τεσσάρων μηνών με τις καλύτερες ημέρες και γράφημα των χρημάτων σας με και χωρίς την αγορά. Οι προηγούμενες συζητήσεις αποθηκεύονται, ώστε να τις ανοίξετε ξανά ή να ρωτήσετε πάλι.",
+        "Το eFriend τώρα σκέφτεται για εσάς. Στη ρύθμιση, τα όρια δαπανών συμπληρώνονται από τις πραγματικές σας δαπάνες όταν υπάρχει αρκετό ιστορικό (δύο εβδομάδες ή περισσότερο), και όταν δεν υπάρχει, γράφετε ένα όριο και συμπληρώνει τα άλλα δύο.",
+        "Μια διακριτική ειδοποίηση πριν αποθηκεύσετε ένα έξοδο που θα σας βάλει πάνω από το ημερήσιο, εβδομαδιαίο ή μηνιαίο όριό σας. Μπορείτε πάντα να το αποθηκεύσετε.",
+        "Προειδοποίηση στην Αρχική όταν τα χρήματά σας πιθανότατα θα τελειώσουν, ή θα πέσουν κάτω από το μαξιλάρι ασφαλείας σας, μέσα στους επόμενους δύο μήνες, με την πληρωμή που το προκαλεί.",
+        "Ιδέες για προϋπολογισμούς: μετά από περίπου έξι εβδομάδες, το eFriend προτείνει προϋπολογισμούς για τις κατηγορίες που ξοδεύετε περισσότερο, λίγο κάτω από όσα συνήθως ξοδεύετε, και τους προσθέτει με ένα πάτημα.",
+        "Ο δείκτης του μαξιλαριού ασφαλείας μπορεί πλέον να προτείνει μαξιλάρι ανάλογα με το πόσο αλλάζει το εισόδημά σας από μήνα σε μήνα."
+      ]
+    },
     {
       "version": "0.52.0",
       "date": "2026-10-31",

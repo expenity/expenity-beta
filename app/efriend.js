@@ -292,7 +292,7 @@
 	EXA.efriendHome = () => {
 		if ( ! on() ) return '';
 		try { F.tickAlloc(); } catch ( e ) { /* ignore */ }
-		const html = home0(), pr = proposalsHtml();
+		const html = home0(), pr = proposalsHtml() + lowBanner();
 		if ( ! pr ) return html;
 		return html ? html.replace( '<section data-home="efriend">', '<section data-home="efriend">' + pr ) : `<section data-home="efriend">${ pr }</section>`;
 	};
@@ -497,11 +497,11 @@
 			if ( id === 'meet' ) return `${ F.logoWord( 'play' ) }<div class="ef-hop">${ F.mascot( 'cheer', 110 ) }</div>${ para( 'efMeetText' ) }`;
 			if ( id === 'how' ) { const m = ( n ) => money( n, main() ), row = ( cls, k, v, i ) => `<li class="ef-how-${ cls }" style="--i:${ i }"><span>${ esc( t( k ) ) }</span><b>${ v }</b></li>`; return `<h2>${ esc( t( 'efObHowTitle' ) ) }</h2><ul class="ef-how">${ row( 'plus', 'efHowWallets', '+ ' + m( 900 ), 0 ) }${ row( 'plus', 'efHowIncome', '+ ' + m( 300 ), 1 ) }${ row( 'minus', 'efHowBills', '− ' + m( 300 ), 2 ) }${ row( 'minus', 'efHowSpend', '− ' + m( 350 ), 3 ) }${ row( 'total', 'efHowFree', '= ' + m( 550 ), 4 ) }<li class="ef-how-cmp" style="--i:5"><span>${ F.mascot( 'comfortable', 40 ) }</span><b>${ m( 550 ) } &gt; ${ m( 400 ) } ✓</b></li></ul>${ para( 'efObHowText' ) }${ para( 'efObHowLink' ) }`; }
 			if ( id === 'income' ) return `<h2>${ esc( t( 'efObIncTitle' ) ) }</h2><div class="ef-inc-demo"><span class="ef-inc-pay">💶</span><span class="ef-inc-arrow">➜</span>${ F.mascot( 'cheer', 70 ) }</div>${ para( 'efObIncText' ) }${ S().incomes.length ? `<div class="ef-callouts">${ points( [ t( 'efObIncDone' ) ] ) }</div>` : `<button type="button" class="btn btn-primary" data-ef-ob-income>💶 ${ esc( t( 'efAddIncome' ) ) }</button><p class="muted small">${ esc( t( 'efObIncSkip' ) ) }</p>` }`;
-			if ( id === 'limits' ) { const L = ( S().settings.targets || {} ).limits || {}; return `<h2>${ esc( t( 'efLimTitle' ) ) }</h2>${ para( 'efLimText' ) }<div class="ef-lim">${ [ [ 'day', 'efLimDay' ], [ 'week', 'efLimWeek' ], [ 'month', 'efLimMonth' ] ].map( ( [ k, lab ] ) => `<label class="f"><span>${ esc( t( lab ) ) } (${ esc( main() ) })</span><input data-lim="${ k }" inputmode="decimal" autocomplete="off" placeholder="0" value="${ esc( L[ k ] || '' ) }"></label>` ).join( '' ) }</div><div class="ef-lim-note">${ points( F.limitNotes() ) }</div><p class="muted small">${ esc( t( 'efLimSaved' ) ) }</p>`; }
+			if ( id === 'limits' ) { const L = ( S().settings.targets || {} ).limits || {}; const sg = F.suggestLimits(), none = ! L.day && ! L.week && ! L.month, mm = ( c ) => money( c / 100, main() ); return `<h2>${ esc( t( 'efLimTitle' ) ) }</h2>${ para( 'efLimText' ) }${ none ? ( sg ? `<div class="ef-callouts">${ points( [ t( 'efLimSuggest', { n: sg.days, d: mm( sg.day ), w: mm( sg.week ), m: mm( sg.month ) } ) ] ) }<button type="button" class="btn btn-primary sm" data-ef-limuse>${ esc( t( 'efLimUse' ) ) }</button></div>` : `<div class="ef-callouts">${ points( [ t( 'efLimNoData' ) ] ) }</div>` ) : '' }<div class="ef-lim">${ [ [ 'day', 'efLimDay' ], [ 'week', 'efLimWeek' ], [ 'month', 'efLimMonth' ] ].map( ( [ k, lab ] ) => `<label class="f"><span>${ esc( t( lab ) ) } (${ esc( main() ) })</span><input data-lim="${ k }" inputmode="decimal" autocomplete="off" placeholder="0" value="${ esc( L[ k ] || '' ) }"></label>` ).join( '' ) }</div><div class="ef-lim-note">${ points( F.limitNotes() ) }</div><p class="muted small">${ esc( t( 'efLimSaved' ) ) }</p>`; }
 			if ( id === 'wishes' ) return `<h2>${ esc( t( 'efWishTitle' ) ) }</h2>${ para( 'efWishText' ) }${ added.length ? points( [ t( 'efWishAdded', { names: added.join( ', ' ) } ) ] ) : '' }${ wishChips( wr.map( ( r ) => r.k ) ) }<button type="button" class="ef-wish ef-wish-other" data-ef-wish-other>＋ ${ esc( t( 'efWishOther' ) ) }</button><div class="ef-wish-rows">${ wr.map( ( r, n ) => `<div class="ef-wish-row" data-n="${ n }"><div class="ef-wish-head"><span>${ r.em }</span><input data-w="name" maxlength="60" autocomplete="off" placeholder="${ esc( t( 'efWishName' ) ) }" value="${ esc( r.name ) }"><button type="button" class="ef-wish-del" data-w-del aria-label="${ esc( t( 'efWishRemove' ) ) }">✕</button></div><div class="grid2"><label class="f"><span>${ esc( t( 'efPlanCost' ) ) } (${ esc( main() ) })</span><input data-w="cost" inputmode="decimal" autocomplete="off" placeholder="0.00" value="${ esc( r.cost ) }"></label><label class="f"><span>${ esc( t( 'efPlanDate' ) ) }</span><input data-w="date" type="date" value="${ esc( r.date ) }"></label></div></div>` ).join( '' ) }</div>${ wErr ? `<p class="err">${ esc( t( 'efWishIncomplete' ) ) }</p>` : '' }`;
 			if ( id === 'priority' ) { const list = F.all(); return `<h2>${ esc( t( 'efObPrioTitle' ) ) }</h2><div class="ef-shuf" aria-hidden="true"><span class="s1">✈️ ${ esc( t( 'efWishTrip' ) ) }</span><span class="s2">👟 ${ esc( t( 'efWishShoes' ) ) }</span><span class="s3"><i>🏆</i> 🚗 ${ esc( t( 'efWishCar' ) ) }</span></div>${ para( 'efObPrioText' ) }${ list.length > 1 ? prioList( list ) : '' }${ riskHtml() }`; }
 			if ( id === 'moves' ) return `<h2>${ esc( t( 'efObMovesTitle' ) ) }</h2><div class="ef-moves-demo"><span class="ef-md-a">💰</span><span class="ef-md-ar">➜</span><span class="ef-md-b">🎯</span><span class="ef-md-ok">✋ ✅</span></div>${ para( 'efObMovesText' ) }<p class="muted small">${ esc( t( 'efObMovesLater' ) ) }</p>`;
-			if ( id === 'budgets' ) return `<h2>${ esc( t( 'efObBudTitle' ) ) }</h2><div class="ef-bud-demo"><div class="ef-bud-card"><div class="ef-bud-top"><b>🍕 ${ esc( t( 'efObBudCat' ) ) }</b><span>${ money( 120, main() ) } / ${ esc( t( 'efObBudMonth' ) ) }</span></div><div class="ef-bar"><i class="ef-bud-fill"></i></div><div class="ef-bud-ok">✅ ${ esc( t( 'efObBudInside' ) ) }</div></div><div class="ef-bud-bot">${ F.mascot( 'cheer', 70 ) }<span class="ef-bud-gain">+${ money( 45, main() ) } ✈️</span></div></div>${ para( 'efObBudText' ) }`;
+			if ( id === 'budgets' ) return `<h2>${ esc( t( 'efObBudTitle' ) ) }</h2><div class="ef-bud-demo"><div class="ef-bud-card"><div class="ef-bud-top"><b>🍕 ${ esc( t( 'efObBudCat' ) ) }</b><span>${ money( 120, main() ) } / ${ esc( t( 'efObBudMonth' ) ) }</span></div><div class="ef-bar"><i class="ef-bud-fill"></i></div><div class="ef-bud-ok">✅ ${ esc( t( 'efObBudInside' ) ) }</div></div><div class="ef-bud-bot">${ F.mascot( 'cheer', 70 ) }<span class="ef-bud-gain">+${ money( 45, main() ) } ✈️</span></div></div>${ para( 'efObBudText' ) }${ budIdeasHtml() }`;
 			if ( id === 'see' ) return `<h2>${ esc( t( 'efObSeeTitle' ) ) }</h2>${ mock( 'see' ) }${ para( 'efObSeeText' ) }`;
 			if ( id === 'where' ) return `<h2>${ esc( t( 'efObWhereTitle' ) ) }</h2>${ mock( 'where' ) }${ para( 'efObWhereText' ) }`;
 			const row = ( r ) => `<li data-ef-row="${ esc( r.cat ) }"><div><b>${ esc( EX.catInfo( r.cat ).name ) }</b>${ r.spent ? `<small>${ esc( money( r.spent / 100, main() ) ) }</small>` : '' }</div><div class="ef-tri" role="group" aria-label="${ esc( EX.catInfo( r.cat ).name ) }">${ LVL.map( ( l ) => `<button type="button" data-ef-set="${ l }" aria-pressed="${ pick[ r.cat ] === l }" class="${ pick[ r.cat ] === l ? 'on ' : '' }ef-l-${ l }">${ esc( t( 'ef_lvl_' + l ) ) }</button>` ).join( '' ) }</div></li>`;
@@ -622,9 +622,9 @@
 		const achievements = ( ach.length || plans.length ) ? `<section class="card ef-ach"><h2>🏆 ${ esc( t( 'efAchTitle' ) ) }</h2>${ ach.length ? points( [ t( 'efAchLine', { n: ach.length, a: m( totalDone ) } ) ] ) + `<ul class="ef-list">${ ach.map( ( g ) => `<li><div><b>${ esc( g.name ) }</b><small>${ esc( EX.dayName( g.doneOn || g.deadline ) ) } · ${ esc( m( EX.cents( g.doneAmount || g.target ) ) ) }</small></div><span class="ef-ach-ic">${ UI.icon( g.icon || 'trophy', 22 ) } ✅</span></li>` ).join( '' ) }</ul>` : points( [ t( 'efAchNone' ) ] ) }</section>` : '';
 		const pastHtml = pastList.length ? `<details class="card ef-sec ef-det"><summary><span class="ef-sec-em">🗄️</span><b>${ esc( t( 'efPast' ) ) }</b></summary><ul class="ef-list">${ pastList.map( ( g ) => `<li><div><b>${ esc( g.name ) }</b><small>${ esc( m( EX.cents( g.target ) ) ) }</small></div><button type="button" class="btn btn-ghost sm" data-ef-reopen="${ esc( g.id ) }">${ esc( t( 'efReopen' ) ) }</button></li>` ).join( '' ) }</ul></details>` : '';
 		const worst = all.length ? F.summary( all ) : null;
-		const askCard = `<section class="card ef-askcard"><div class="ef-top">${ F.mascot( 'happy', 64 ) }<div class="ef-bubble"><b>${ esc( t( 'efAskCardTitle' ) ) }</b>${ esc( t( 'efAskCardText' ) ) }</div></div><div class="btn-row"><button type="button" class="btn btn-primary" data-ef-ask>💬 ${ esc( t( 'efAskGo' ) ) }</button></div></section>`;
+		const askCard = `<section class="card ef-askcard"><div class="ef-top">${ F.mascot( 'happy', 64 ) }<div class="ef-bubble"><b>${ esc( t( 'efAskCardTitle' ) ) }</b>${ esc( t( 'efAskCardText' ) ) }</div></div><div class="btn-row"><button type="button" class="btn btn-primary" data-ef-ask>💬 ${ esc( t( 'efAskGo' ) ) }</button>${ histList().length ? `<button type="button" class="btn btn-ghost" data-ef-hist-open>🕘 ${ esc( t( 'efc_h_title' ) ) }</button>` : '' }</div></section>`;
 		return `${ askCard }<section class="card ef-page"><div class="ef-top">${ F.mascot( 'happy', 84 ) }<div class="ef-bubble"><b>${ esc( t( 'efMeet' ) ) }</b></div></div>${ para( 'efMeetText' ) }</section>
-			${ proposalsHtml() }${ overview }${ achievements }${ askBanner() ? `<section class="card">${ askBanner() }</section>` : '' }${ all.length > 1 ? `<section class="card"><h2>🏆 ${ esc( t( 'efPrioSection' ) ) }</h2>${ para( 'efPrioTextShort' ) }${ prioList( all ) }<div class="btn-row"><button type="button" class="btn btn-ghost" data-ef-suggest>✨ ${ esc( t( 'efSuggestOrder' ) ) }</button></div></section>` : '' }${ all.length ? `<section class="card">${ riskHtml() }</section>` : '' }${ buckets.length ? buckets.map( section ).join( '' ) : `<section class="card"><h2>${ esc( t( 'efYourGoals' ) ) }</h2><p class="muted">${ esc( t( 'efNoGoals' ) ) }</p></section>` }
+			${ proposalsHtml() }${ overview }${ achievements }${ askBanner() ? `<section class="card">${ askBanner() }</section>` : '' }${ all.length > 1 ? `<section class="card"><h2>🏆 ${ esc( t( 'efPrioSection' ) ) }</h2>${ para( 'efPrioTextShort' ) }${ prioList( all ) }<div class="btn-row"><button type="button" class="btn btn-ghost" data-ef-suggest>✨ ${ esc( t( 'efSuggestOrder' ) ) }</button></div></section>` : '' }${ all.length ? `<section class="card">${ riskHtml() }</section>` : '' }${ budIdeasHtml() }${ buckets.length ? buckets.map( section ).join( '' ) : `<section class="card"><h2>${ esc( t( 'efYourGoals' ) ) }</h2><p class="muted">${ esc( t( 'efNoGoals' ) ) }</p></section>` }
 			${ allocCard() }${ pastHtml }<section class="card"><div class="btn-row"><button type="button" class="btn btn-primary" data-ef-new>${ UI.icon( 'plus', 20 ) } ${ esc( t( 'efNewGoal' ) ) }</button></div></section>
 			<section class="card"><label class="fx-row"><span class="mid"><b>${ esc( t( 'efSoundTitle' ) ) }</b><small>${ esc( t( 'efSoundHint' ) ) }</small></span><span class="switch"><input type="checkbox" data-ef-sound${ S().settings.efSound !== false ? ' checked' : '' } aria-label="${ esc( t( 'efSoundTitle' ) ) }"><i></i></span></label></section>
 			<section class="card"><div class="list mlist"><button type="button" class="mrow" data-ef-sort>${ UI.ci( 'adjustments-horizontal', 'teal', 40 ) }<span class="mid"><b>${ esc( t( 'efSortTitle' ) ) }</b><small>${ esc( t( 'efSortSub' ) ) }</small></span>${ UI.icon( 'chevron-right', 18 ) }</button><button type="button" class="mrow" data-ef-intro>${ UI.ci( 'player-play', 'purple', 40 ) }<span class="mid"><b>${ esc( t( 'efReplay' ) ) }</b><small>${ esc( t( 'efReplaySub' ) ) }</small></span>${ UI.icon( 'chevron-right', 18 ) }</button></div></section>`;
@@ -671,7 +671,7 @@
 	const riskLines = ( p, m ) => { const b = F.baseline(), a = money( Math.round( m * b.monthly ) / 100, main() ); return [ m < 0.1 ? t( 'efCushionZero', { word: riskWord( p ) } ) : t( 'efCushionHint', { word: riskWord( p ), a, m: monthsText( m ), s: money( b.monthly / 100, main() ) } ), t( 'efAccuracy', { d: b.history } ) ].concat( b.hasIncome ? [] : [ t( 'efNoIncomeAsk' ) ] ); };
 	const riskHtml = () => {
 		const m = F.cushion(), p = Math.round( posOf( m ) );
-		return `<div class="ef-risk" style="--c:${ colorAt( p ) };--p:${ p }%"><div class="ef-risk-h"><b>🎚️ ${ esc( t( 'efRiskTitle' ) ) }</b><span class="ef-risk-val">${ esc( riskWord( p ) ) } · ${ esc( monthsShort( m ) ) }</span></div><input type="range" class="ef-grad" data-ef-margin min="0" max="100" step="1" value="${ p }" aria-label="${ esc( t( 'efRiskTitle' ) ) }"><div class="ef-risk-ends"><span class="e0">${ esc( t( 'efRiskRisky' ) ) }</span><span class="e40">${ esc( t( 'efRiskBalanced' ) ) }</span><span class="e100">${ esc( t( 'efRiskVerySafe' ) ) }</span></div><div class="ef-risk-hint">${ points( riskLines( p, m ) ) }${ F.baseline().hasIncome ? '' : `<button type="button" class="btn btn-ghost sm" data-ef-income>💶 ${ esc( t( 'efAddIncome' ) ) }</button>` }</div></div>`;
+		return `<div class="ef-risk" style="--c:${ colorAt( p ) };--p:${ p }%"><div class="ef-risk-h"><b>🎚️ ${ esc( t( 'efRiskTitle' ) ) }</b><span class="ef-risk-val">${ esc( riskWord( p ) ) } · ${ esc( monthsShort( m ) ) }</span></div><input type="range" class="ef-grad" data-ef-margin min="0" max="100" step="1" value="${ p }" aria-label="${ esc( t( 'efRiskTitle' ) ) }"><div class="ef-risk-ends"><span class="e0">${ esc( t( 'efRiskRisky' ) ) }</span><span class="e40">${ esc( t( 'efRiskBalanced' ) ) }</span><span class="e100">${ esc( t( 'efRiskVerySafe' ) ) }</span></div><div class="ef-risk-hint">${ points( riskLines( p, m ) ) }${ ( ( sc ) => sc && Math.abs( sc.m - m ) >= 0.5 ? `<div class="ef-callouts">${ points( [ t( 'efCushSteady', { m: monthsText( sc.m ), s: sc.swing } ) ] ) }<button type="button" class="btn btn-ghost sm" data-ef-cushuse="${ sc.m }">${ esc( t( 'efLimUse' ) ) }</button></div>` : '' )( F.suggestCushion2() ) }${ F.baseline().hasIncome ? '' : `<button type="button" class="btn btn-ghost sm" data-ef-income>💶 ${ esc( t( 'efAddIncome' ) ) }</button>` }</div></div>`;
 	};
 	const renumber = ( ol ) => ol.querySelectorAll( ':scope > li .ef-rank' ).forEach( ( r, i ) => { r.textContent = i === 0 ? '🏆' : String( i + 1 ); } );
 	const commitOrder = ( ol ) => F.setOrder( [ ...ol.querySelectorAll( ':scope > li' ) ].map( ( li ) => li.dataset.id ) );
@@ -698,11 +698,17 @@
 		const up = e.target.closest && e.target.closest( '[data-up],[data-down]' ); if ( up ) { const li = up.closest( 'li' ), ol = li.parentNode; if ( up.hasAttribute( 'data-up' ) ) { if ( li.previousElementSibling ) ol.insertBefore( li, li.previousElementSibling ); } else if ( li.nextElementSibling ) ol.insertBefore( li.nextElementSibling, li ); renumber( ol ); commitOrder( ol ); return; }
 		if ( e.target.closest( '[data-ef-prio]' ) ) { e.preventDefault(); UI.closeSheet && UI.closeSheet(); setTimeout( () => EXA.openEfPriority(), 220 ); return; }
 		if ( e.target.closest( '[data-ef-suggest]' ) ) { EXA.efSuggestOpen(); return; }
+		if ( e.target.closest( '[data-ef-limfill]' ) ) { if ( F.pendingFill ) limFill( F.pendingFill, true ); const bx = document.querySelector( '.ef-lim-fill' ); if ( bx ) bx.remove(); return; }
+		if ( e.target.closest( '[data-ef-limuse]' ) ) { const sg = F.suggestLimits(); if ( sg ) limFill( sg, false ); const b = e.target.closest( '[data-ef-limuse]' ); if ( b && b.parentNode ) b.parentNode.remove(); return; }
+		const lx = e.target.closest( '[data-ef-lowx]' ); if ( lx ) { S().device.efLowDismiss = lx.dataset.efLowx; try { EX.persist(); } catch ( x ) { /* ignore */ } const bx = lx.closest( '.ef-low' ); if ( bx ) bx.remove(); return; }
+		const ba = e.target.closest( '[data-ef-budadd]' ); if ( ba ) { const [ cat, amt ] = ba.dataset.efBudadd.split( ':' ); F.addBudgets( [ { cat, amount: Number( amt ) } ] ); return; }
+		if ( e.target.closest( '[data-ef-budall]' ) ) { F.addBudgets( F.budgetIdeas() ); return; }
+		const cu = e.target.closest( '[data-ef-cushuse]' ); if ( cu ) { S().settings.efCushion = Number( cu.dataset.efCushuse ); S().settings.u = Date.now(); EX.save(); return; }
 		const sg = e.target.closest( '[data-ef-sug]' ); if ( sg ) { const back = F.view && F.view.k === 'prio'; F.applySuggest( sg.dataset.efSug === 'both' ); if ( back ) setTimeout( () => EXA.openEfPriority(), 60 ); else UI.closeSheet(); return; }
 		if ( e.target.closest( '[data-ef-prio-done]' ) ) { S().settings.efAsked = F.sig(); S().settings.u = Date.now(); EX.save(); UI.closeSheet(); }
 	} );
 	document.addEventListener( 'input', ( e ) => { const r = e.target.matches && e.target.matches( '[data-ef-margin]' ) ? e.target : null; if ( ! r ) return; const p = Number( r.value ), m = monthsAt( p ), box = r.closest( '.ef-risk' ); box.style.setProperty( '--c', colorAt( p ) ); box.style.setProperty( '--p', p + '%' ); box.querySelector( '.ef-risk-val' ).textContent = riskWord( p ) + ' · ' + monthsShort( m ); const hint = box.querySelector( '.ef-risk-hint' ), btn = hint.querySelector( 'button' ); hint.innerHTML = points( riskLines( p, m ) ); if ( btn ) hint.appendChild( btn ); } );
-	document.addEventListener( 'change', ( e ) => { if ( e.target.matches && e.target.matches( '[data-ef-margin]' ) ) { S().settings.efCushion = monthsAt( Number( e.target.value ) ); S().settings.u = Date.now(); EX.save(); } } );
+	document.addEventListener( 'change', ( e ) => { const li = e.target.matches && e.target.matches( '[data-lim]' ) ? e.target : null; if ( li ) { const L = F.limits(), k = li.dataset.lim, v = L[ k ], old = document.querySelector( '.ef-lim-fill' ); if ( old ) old.remove(); if ( v && ! F.limitsSet().other( k ) ) { const month = k === 'month' ? v : k === 'week' ? v * 30 / 7 : v * 30, sg = F.limitsFrom( month ); sg[ k ] = 0; F.pendingFill = sg; const box = document.createElement( 'div' ); box.className = 'ef-callouts ef-lim-fill'; box.innerHTML = points( [ t( 'efLimFillOthers' ) ] ) + `<button type="button" class="btn btn-ghost sm" data-ef-limfill>${ esc( t( 'efLimUse' ) ) }</button>`; const host = document.querySelector( '.ef-lim-note' ); if ( host ) host.after( box ); } return; } if ( e.target.matches && e.target.matches( '[data-ef-margin]' ) ) { S().settings.efCushion = monthsAt( Number( e.target.value ) ); S().settings.u = Date.now(); EX.save(); } } );
 	/** "Let eFriend suggest": the person chooses whether it may touch only the order, or the order and the safety cushion. */
 	EXA.efSuggestOpen = () => {
 		const c = F.suggestCushion( F.suggestOrder() ), X = `<button type="button" class="ab-btn" data-close aria-label="${ esc( t( 'close' ) ) }">${ UI.icon( 'x', 24 ) }</button>`;
@@ -885,14 +891,33 @@
 	const STOP = new Set( 'can could may i we you buy get purchase afford a an the that which cost costs costing for to is it be would should do does about my me on of at with euro euros eur dollar dollars usd and or please new'.split( ' ' ).concat( 'μπορώ να αγοράσω αγοράσουμε αγοράσει που κοστίζει κοστίζουν ένα μία μια ένας για το τα την τον με στο ευρώ ευρω και ή παρακαλώ νέο νέα νέος είναι θα πρέπει'.split( ' ' ) ) );
 	const ASK_ICONS = [ [ /shoe|sneaker|boot|sandal|παπούτσ|μπότ/i, 'heart', '👟' ], [ /phone|mobile|κινητ|τηλέφων/i, 'device-mobile', '📱' ], [ /laptop|computer|tablet|υπολογ/i, 'device-laptop', '💻' ], [ /trip|flight|holiday|vacation|hotel|ταξίδ|διακοπ|ξενοδοχ/i, 'plane', '✈️' ], [ /car|bike|scooter|αυτοκ|μηχαν|ποδήλατ/i, 'car', '🚗' ], [ /gift|present|δώρο|δωρο/i, 'gift', '🎁' ], [ /dinner|lunch|restaurant|coffee|φαγητ|δείπν|εστιατ|καφέ/i, 'trophy', '🍽️' ], [ /sofa|furniture|table|chair|καναπ|έπιπλ/i, 'home', '🛋️' ], [ /course|book|school|μάθημα|βιβλί|σχολ/i, 'school', '📚' ] ];
 	F.askIcon = ( item ) => { const x = ASK_ICONS.find( ( r ) => r[ 0 ].test( item || '' ) ); return x ? { icon: x[ 1 ], em: x[ 2 ] } : { icon: 'gift', em: '🛍️' }; };
-	/** "Can I buy shoes that cost $49?" -> { item: 'Shoes', cost: 4900 } (cents). Works in English and Greek. */
-	F.parseAsk = ( text ) => {
-		const raw = String( text || '' ), nums = raw.match( /\d+(?:[.,]\d+)*/g ) || [];
-		let cost = 0;
-		if ( nums.length ) { let n = nums[ 0 ]; if ( /^\d{1,3}([.,]\d{3})+$/.test( n ) ) n = n.replace( /[.,]/g, '' ); else n = n.replace( ',', '.' ); cost = Math.round( parseFloat( n ) * 100 ) || 0; }
-		const words = raw.toLowerCase().replace( /\d+(?:[.,]\d+)*/g, ' ' ).replace( /[€$£?!.,;:()"“”]/g, ' ' ).split( /\s+/ ).filter( ( w ) => w && ! STOP.has( w ) );
-		const item = words.join( ' ' ).trim(); return { item: item ? item.charAt( 0 ).toUpperCase() + item.slice( 1 ) : '', cost };
+	const FIXSTOP = new Set( 'no nope not its it is the price cost costs actually instead sorry yes right correct wrong i mean meant thing item called name should be was it’s όχι οχι είναι ειναι η τιμή τιμη κοστίζει πραγματικά ήθελα να πω λάθος σωστό'.split( ' ' ) );
+	const CURMARK = /^\s*(?:[€$£]|eur\b|euros?\b|usd\b|dollars?\b|ευρώ|ευρω)/i;
+	/** "new iphone 16 1250$" -> { item: 'iphone 16', cost: 125000 } (cents). The price is the number next to a currency sign, else the biggest one; the other numbers stay in the name. English and Greek. */
+	F.parseAsk = ( text, fix ) => {
+		const raw = String( text || '' ), re = /\d+(?:[.,]\d+)*/g, found = []; let m;
+		while ( ( m = re.exec( raw ) ) ) found.push( { s: m[ 0 ], i: m.index, e: m.index + m[ 0 ].length } );
+		const cents = ( n ) => { if ( /^\d{1,3}([.,]\d{3})+$/.test( n ) ) n = n.replace( /[.,]/g, '' ); else n = n.replace( ',', '.' ); return Math.round( parseFloat( n ) * 100 ) || 0; };
+		const near = ( f ) => /[€$£]\s*$/.test( raw.slice( Math.max( 0, f.i - 2 ), f.i ) ) || CURMARK.test( raw.slice( f.e, f.e + 10 ) );
+		const pick = found.filter( near ).pop() || found.slice().sort( ( x, y ) => cents( y.s ) - cents( x.s ) )[ 0 ] || null;
+		const rest = pick ? raw.slice( 0, pick.i ) + ' ' + raw.slice( pick.e ) : raw;
+		const words = rest.replace( /['’]/g, '' ).replace( /[€$£?!.,;:()"“”]/g, ' ' ).split( /\s+/ ).filter( ( w ) => w && ! STOP.has( w.toLowerCase() ) && ! ( fix && FIXSTOP.has( w.toLowerCase() ) ) );
+		const item = words.join( ' ' ).trim(); return { item: item ? ( words[ 0 ] === words[ 0 ].toLowerCase() ? item.charAt( 0 ).toUpperCase() + item.slice( 1 ) : item ) : '', cost: pick ? cents( pick.s ) : 0 };
 	};
+	/** "in 2 weeks", "right away", "no rush": how soon the person wants it. { days } (3 = right away), { none: true } for no rush, or null. English and Greek. */
+	F.parseWhen = ( text ) => {
+		const x = String( text || '' ).toLowerCase();
+		if ( /no rush|whenever|any ?time|not urgent|no hurry|can wait|καμία βιασύνη|καμια βιασυνη|όποτε|οποτε|δεν βιάζ|δεν βιαζ|δεν είναι επείγ|δεν ειναι επειγ/.test( x ) ) return { none: true };
+		if ( /right away|asap|urgent|immediately|today|tonight|\bnow\b|τώρα|τωρα|άμεσα|αμεσα|επείγον|επειγον|σήμερα|σημερα/.test( x ) ) return { days: 3 };
+		const m = x.match( /(\d+(?:[.,]\d+)?)\s*(days?|weeks?|months?|ημέρ|ημερ|μέρ|μερ|εβδομ|μήν|μην)/ );
+		if ( m ) { const n = parseFloat( m[ 1 ].replace( ',', '.' ) ), u = m[ 2 ]; return { days: Math.max( 1, Math.round( n * ( /^(week|εβδομ)/.test( u ) ? 7 : /^(month|μήν|μην)/.test( u ) ? 30 : 1 ) ) ) }; }
+		if ( /couple of weeks|δυο εβδομ|δύο εβδομ/.test( x ) ) return { days: 14 }; if ( /few weeks|μερικές εβδομ|μερικες εβδομ/.test( x ) ) return { days: 21 };
+		if ( /next week|this week|επόμενη εβδομ|επομενη εβδομ|αυτή την εβδομ|αυτη την εβδομ/.test( x ) ) return { days: 7 };
+		if ( /next month|this month|επόμενο μήνα|επομενο μηνα|αυτόν τον μήνα|αυτον τον μηνα/.test( x ) ) return { days: 30 };
+		return null;
+	};
+	/** The same text without the timing words, so "phone 1250 in 2 weeks" does not take the 2 for the price or the name. */
+	const stripWhen = ( text ) => String( text || '' ).replace( /\b(?:in|within|by|for|σε|εντός)?\s*(?:the\s+)?(?:next\s+)?\d+(?:[.,]\d+)?\s*(?:days?|weeks?|months?)\b/gi, ' ' ).replace( /(?:σε|εντός)?\s*\d+(?:[.,]\d+)?\s*(?:ημέρ\S*|ημερ\S*|μέρ\S*|εβδομ\S*|μήν\S*|μην\S*)/gi, ' ' ).replace( /\b(?:right away|asap|urgent(?:ly)?|immediately|no rush|whenever|next week|next month|this week|this month)\b/gi, ' ' );
 	/** Your next ~11 weeks, day by day: wallets, income dates, bills, usual spending (capped by your limits) and your plans' dates. */
 	F.timeline = ( horizon = 80 ) => {
 		const now = today(), b = F.baseline(), end = addDays( now, horizon ), idx = ( d ) => Math.max( 0, diff( d, now ) ), all = F.all();
@@ -906,65 +931,300 @@
 		for ( let k = 0; k <= horizon; k++ ) { bal += delta[ k ] - habit + b.otherPD; out.push( { k, d: addDays( now, k ), bal, inc: inc[ k ], bills: bil[ k ] } ); }
 		return out;
 	};
-	/** For each of the next 42 days: if you bought it that day, how low would your money go afterwards (the next 30 days)? */
-	F.answer = ( cost ) => {
-		const tl = F.timeline( 80 ), b = F.baseline(), cushion = Math.round( F.cushion() * b.monthly ), days = [];
-		for ( let i = 0; i <= 41; i++ ) { let low = Infinity; for ( let k = i; k <= Math.min( i + 30, tl.length - 1 ); k++ ) low = Math.min( low, tl[ k ].bal - cost ); days.push( { i, d: tl[ i ].d, low, st: low >= cushion ? 'best' : low >= cushion / 2 ? 'good' : low >= 0 ? 'tight' : 'avoid', inc: tl[ i ].inc, bills: tl[ i ].bills, near: [ 0, 1, 2 ].map( ( o ) => ( tl[ Math.max( 0, i - o ) ].inc || [] ) ).flat() } ); }
-		let best = days.find( ( x ) => x.st === 'best' ) || days.find( ( x ) => x.st === 'good' ) || null; if ( ! best ) days.forEach( ( x ) => { if ( x.low >= 0 && ( ! best || x.low > best.low ) ) best = x; } );
-		return { cost, days, cushion, today: days[ 0 ], best: best && best.low >= 0 ? best : null, first: days.find( ( x ) => x.st === 'best' || x.st === 'good' ) || null, monthly: b.monthly, hasIncome: b.hasIncome };
+
+	/* ------------------------------------------------------------------ Suggestions from what eFriend already knows */
+	const nice = ( c, dir = 0 ) => { const v = c / 100, step = v < 50 ? 5 : v < 500 ? 10 : v < 5000 ? 50 : 100, r = dir < 0 ? Math.floor( v / step ) : Math.round( v / step ); return Math.max( step, r * step ) * 100; };
+	/** Day, week and month limits from the person's real spending (the limits include bills), a little below the usual so there is room to improve. Needs two weeks of history. */
+	F.limitsSet = () => ( { other: ( k ) => { const L = F.limits(); return [ 'day', 'week', 'month' ].some( ( x ) => x !== k && L[ x ] ); } } );
+	F.limitsFrom = ( monthCents ) => ( { month: nice( monthCents ), day: nice( monthCents / 30, -1 ), week: nice( monthCents * 7 / 30, -1 ) } );
+	F.suggestLimits = () => { const b = F.baseline(); if ( b.history < 14 || b.habitPD <= 0 ) return null; return Object.assign( F.limitsFrom( b.habitPD * 30 * 0.9 + b.billsMonth ), { days: b.history } ); };
+	const limStr = ( c ) => String( Math.round( c / 100 ) );
+	const limFill = ( s, onlyEmpty ) => { const L = F.limits(); [ 'day', 'week', 'month' ].forEach( ( k ) => { if ( s[ k ] && ! ( onlyEmpty && L[ k ] ) ) F.saveLimits( k, limStr( s[ k ] ) ); } ); document.querySelectorAll( '[data-lim]' ).forEach( ( i ) => { const v = ( F.limits()[ i.dataset.lim ] || 0 ); i.value = v ? limStr( v ) : ''; } ); const nb = document.querySelector( '.ef-lim-note' ); if ( nb ) nb.innerHTML = points( F.limitNotes() ); };
+	/** Would saving this expense push today, this week or this month over a limit the person set? Returns the sentence to show, or null. */
+	EXA.efLimitWarn = ( tx ) => {
+		if ( ! on() || tx.type !== 'expense' || S().settings.efLimitWarn === false || tx.date > today() ) return null;
+		const L = F.limits(); if ( ! L.day && ! L.week && ! L.month ) return null;
+		const cost = centsOf( tx.amount, EX.txCurrency( tx ) ), d = parse( tx.date ), mon = addDays( tx.date, -( ( d.getDay() + 6 ) % 7 ) ), m1 = EX.iso( new Date( d.getFullYear(), d.getMonth(), 1 ) ), m2 = EX.iso( new Date( d.getFullYear(), d.getMonth() + 1, 0 ) );
+		const spent = ( from, to ) => S().txs.filter( ( x ) => x.type === 'expense' && ! x.goalId && ! x.efPlan && x.date >= from && x.date <= to ).reduce( ( n, x ) => n + centsOf( x.amount, EX.txCurrency( x ) ), 0 );
+		const ranges = { day: [ tx.date, tx.date ], week: [ mon, addDays( mon, 6 ) ], month: [ m1, m2 ] };
+		for ( const k of [ 'day', 'week', 'month' ] ) { if ( ! L[ k ] ) continue; const after = spent( ranges[ k ][ 0 ], ranges[ k ][ 1 ] ) + cost; if ( after > L[ k ] ) return t( 'efLimWarn_' + k, { a: money( after / 100, main() ), b: money( L[ k ] / 100, main() ) } ); }
+		return null;
 	};
-	const askState = { text: '', item: '', cost: '', ans: null, sel: 0 };
+	/** The first day in the next two months when the money is likely to run out, or drop below the safety cushion, and the bill behind it. */
+	F.lowAhead = () => {
+		const b = F.baseline(); if ( ! on() || b.history < 7 || ! S().bills.length && ! S().incomes.length ) return null;
+		const tl = F.timeline( 60 ), cushion = Math.round( F.cushion() * b.monthly );
+		for ( const [ kind, th ] of [ [ 'zero', 0 ], [ 'cushion', cushion ] ] ) {
+			if ( kind === 'cushion' && th <= 0 ) continue; if ( tl[ 0 ].bal < th ) continue;
+			const hit = tl.find( ( x ) => x.k > 0 && x.bal < th ); if ( ! hit ) continue;
+			const why = tl.slice( Math.max( 1, hit.k - 3 ), hit.k + 1 ).reverse().find( ( x ) => x.bills.length );
+			return { kind, d: hit.d, k: hit.k, bal: hit.bal, cushion, why: why ? why.bills[ 0 ] : '' };
+		}
+		return null;
+	};
+	const lowBanner = () => {
+		const w = F.lowAhead(); if ( ! w || ( S().device || {} ).efLowDismiss === w.d ) return '';
+		const lines = [ t( w.kind === 'zero' ? 'efLowZero' : 'efLowCushion', { d: EX.dayName( w.d ), c: money( w.cushion / 100, main() ) } ) ].concat( w.why ? [ t( 'efLowWhy', { n: w.why } ) ] : [], [ t( 'efLowTip' ) ] );
+		return `<div class="ef-ask ef-low"><span class="ef-ask-em">${ w.kind === 'zero' ? '⚠️' : '🛡️' }</span><div>${ points( lines ) }</div><button type="button" class="btn btn-ghost sm" data-ef-lowx="${ esc( w.d ) }">${ esc( t( 'efGotIt' ) ) }</button></div>`;
+	};
+	/** Budgets worth adding, from what the person really spent per category over the last weeks (needs about six weeks of history). */
+	F.budgetIdeas = () => {
+		const b = F.baseline(); if ( b.history < 45 ) return [];
+		const now = today(), win = Math.min( 90, b.history ), since = addDays( now, -win ), have = new Set( S().budgets.map( ( x ) => x.category ) ), sum = {};
+		S().txs.filter( ( x ) => x.type === 'expense' && ! x.goalId && ! x.efPlan && x.date >= since && x.date <= now && x.category && x.category !== 'uncategorized' && ! have.has( x.category ) ).forEach( ( x ) => { sum[ x.category ] = ( sum[ x.category ] || 0 ) + centsOf( x.amount, EX.txCurrency( x ) ); } );
+		return Object.keys( sum ).map( ( c ) => { const usual = sum[ c ] / ( win / 30 ); return { cat: c, usual: Math.round( usual ), amount: nice( usual * 0.95 ) }; } ).filter( ( x ) => x.usual >= 2000 ).sort( ( a, c ) => c.usual - a.usual ).slice( 0, 5 );
+	};
+	F.addBudgets = ( list ) => { list.forEach( ( x ) => S().budgets.push( { id: EX.uid(), category: x.cat, amount: limStr( x.amount ), period: 'monthly', rollover: false, tags: [], photo: '' } ) ); if ( list.length ) { S().settings.u = Date.now(); EX.save(); } };
+	const budIdeasHtml = () => {
+		const l = F.budgetIdeas(); if ( ! l.length ) return '';
+		const m = ( c ) => money( c / 100, main() );
+		return `<section class="card ef-budideas"><h2>💡 ${ esc( t( 'efBudIdeas' ) ) }</h2>${ para( 'efBudIdeasText' ) }<ul class="ef-list">${ l.map( ( x ) => { const ci = EX.catInfo( x.cat ); return `<li class="ef-bi"><span class="ef-mi">${ UI.icon( ci.iconName || 'tag', 20 ) }</span><div><b>${ esc( ci.name ) }</b><small>${ esc( t( 'efBudIdeaRow', { a: m( x.usual ), b: m( x.amount ) } ).replace( /\*\*/g, '' ) ) }</small></div><button type="button" class="btn btn-ghost sm" data-ef-budadd="${ esc( x.cat ) }:${ x.amount }">${ esc( t( 'efBudAdd' ) ) }</button></li>`; } ).join( '' ) }</ul><div class="btn-row"><button type="button" class="btn btn-primary" data-ef-budall>${ esc( t( 'efBudAddAll' ) ) }</button></div></section>`;
+	};
+	/** How many months of cushion fit how steady the income is: the monthly income over the last three 30-day blocks, from what was really received. */
+	F.suggestCushion2 = () => {
+		const now = today(), blocks = [ 0, 0, 0 ]; let first = now;
+		S().txs.filter( ( x ) => x.type === 'income' && ! x.goalId && x.date <= now ).forEach( ( x ) => { const k = Math.floor( diff( now, x.date ) / 30 ); if ( k >= 0 && k < 3 ) blocks[ k ] += centsOf( x.amount, EX.txCurrency( x ) ); if ( x.date < first ) first = x.date; } );
+		const used = blocks.filter( ( v, i ) => v > 0 || ( i * 30 < diff( now, first ) ) ); if ( diff( now, first ) < 60 || used.length < 2 ) return null;
+		const mean = used.reduce( ( a, v ) => a + v, 0 ) / used.length; if ( mean <= 0 ) return { m: 3, swing: 100 };
+		const swing = Math.round( ( Math.max( ...used ) - Math.min( ...used ) ) / mean * 100 );
+		return { m: swing < 10 ? 1 : swing < 30 ? 2 : 3, swing };
+	};
+	/** For each of the next 120 days: if you bought it that day, how low would your money go afterwards (the next 30 days)? */
+	F.answer = ( cost ) => {
+		const N = 120, tl = F.timeline( N + 31 ), b = F.baseline(), cushion = Math.round( F.cushion() * b.monthly ), days = [];
+		for ( let i = 0; i < N; i++ ) { let low = Infinity; for ( let k = i; k <= Math.min( i + 30, tl.length - 1 ); k++ ) low = Math.min( low, tl[ k ].bal - cost ); days.push( { i, d: tl[ i ].d, low, st: low >= cushion ? 'best' : low >= cushion / 2 ? 'good' : low >= 0 ? 'tight' : 'avoid', inc: tl[ i ].inc, bills: tl[ i ].bills, near: [ 0, 1, 2 ].map( ( o ) => ( tl[ Math.max( 0, i - o ) ].inc || [] ) ).flat() } ); }
+		const first = days.find( ( x ) => x.st === 'best' ) || days.find( ( x ) => x.st === 'good' ) || null, maxSafe = Math.max( 0, ...days.map( ( x ) => x.low + cost - cushion ) );
+		return { cost, days, tl: tl.slice( 0, N ), cushion, today: days[ 0 ], best: first, first, anyOk: days.some( ( x ) => x.st !== 'avoid' ), maxSafe, monthly: b.monthly, incomeMonthly: b.incomeMonthly, hasIncome: b.hasIncome };
+	};
+	/* ------------------------------------------------------------------ The chat: eFriend interviews you (what, how much, how soon), then brings the full analysis back to the app */
+	const chat = { id: '', ts: 0, msgs: [], stage: 'what', item: '', cost: 0, by: undefined, typing: false, busy: false, tok: 0, used: {}, ans: null, rec: null, sel: 0, chips: [], anim: true };
+	const money$ = ( c ) => money( c / 100, main() );
+	const itemName = () => chat.item || t( 'efAskThing' );
+	const kindOf = ( item ) => ( { '👟': 'shoes', '📱': 'phone', '💻': 'laptop', '✈️': 'trip', '🚗': 'car', '🎁': 'gift' }[ F.askIcon( item ).em ] || 'generic' );
+	/** One line from a pool ("a|b|c"), never the same one twice in a row, so eFriend does not repeat itself. */
+	const pool = ( key, vars ) => {
+		const list = String( t( key, vars ) ).split( '|' ), u = chat.used[ key ] = chat.used[ key ] || []; let i = 0;
+		if ( list.length > 1 ) { do { i = Math.floor( Math.random() * list.length ); } while ( u.includes( i ) ); u.push( i ); if ( u.length > Math.min( 2, list.length - 1 ) ) u.shift(); }
+		return list[ i ];
+	};
 	const askLine = ( a, item ) => {
-		const m = ( c ) => money( c / 100, main() ), it = item || t( 'efAskThing' ), t0 = a.today;
-		if ( t0.st === 'best' ) return t( 'efAskYes', { item: it, a: m( a.cost ) } );
+		const it = item || t( 'efAskThing' ), t0 = a.today;
+		if ( t0.st === 'best' ) return t( 'efAskYes', { item: it, a: money$( a.cost ) } );
 		if ( t0.st === 'good' ) return t( 'efAskThin', { item: it } );
 		if ( t0.st === 'tight' ) return a.best && a.best.i > 0 ? t( 'efAskTightWait', { d: EX.dayName( a.best.d ) } ) : t( 'efAskTight' );
 		return a.first ? t( 'efAskNotToday', { d: EX.dayName( a.first.d ) } ) : t( 'efAskNever' );
 	};
+	const whenWords = ( d ) => ( d == null ? t( 'efc_w_none' ) : d <= 3 ? t( 'efc_w_now' ) : d < 14 ? t( 'efc_w_d', { n: d } ) : d < 60 ? t( 'efc_w_w', { n: Math.round( d / 7 ) } ) : t( 'efc_w_m', { n: Math.round( d / 30 ) } ) );
+	const priceSize = ( c ) => { const mo = F.baseline().monthly, r = mo > 0 ? c / mo : c / 100000; return r < 0.05 ? 'small' : r < 0.4 ? 'mid' : r < 1.5 ? 'big' : 'huge'; };
+	const reduceMotion = () => { try { return window.matchMedia( '(prefers-reduced-motion: reduce)' ).matches || navigator.webdriver; } catch ( e ) { return false; } };
+	const wait = ( ms ) => new Promise( ( r ) => setTimeout( r, reduceMotion() ? 0 : ms ) );
+	const live = ( tok ) => tok === chat.tok && document.getElementById( 'efChat' );
+
+	const bubble = ( x ) => x.who === 'me'
+		? `<div class="ef-msg me"><div class="ef-mb">${ esc( x.text ) }</div></div>`
+		: `<div class="ef-msg ef"><span class="ef-av">${ F.mascot( x.mood || 'happy', 34 ) }</span><div class="ef-mb">${ x.lines.map( ( l ) => `<p class="ef-ml">${ rich( l ) }</p>` ).join( '' ) }</div></div>`;
+	const paint = ( scroll ) => {
+		const box = document.getElementById( 'efChat' ); if ( ! box ) return false;
+		box.innerHTML = chat.msgs.map( bubble ).join( '' ) + ( chat.typing ? `<div class="ef-msg ef"><span class="ef-av">${ F.mascot( 'happy', 34 ) }</span><div class="ef-mb ef-typing" aria-label="${ esc( t( 'efc_typing' ) ) }"><i></i><i></i><i></i></div></div>` : '' );
+		const st = document.getElementById( 'efCpStat' ); if ( st ) st.textContent = chat.typing ? t( 'efc_typing' ) : t( 'efc_online' );
+		if ( scroll ) box.scrollTo( { top: box.scrollHeight, behavior: reduceMotion() ? 'auto' : 'smooth' } );
+		return true;
+	};
+	const setMood = ( m ) => { const av = document.querySelector( '.ef-cp-av' ); if ( av && m ) av.innerHTML = F.mascot( m, 46 ); };
+	const setChips = ( list ) => {
+		chat.chips = list || []; const box = document.getElementById( 'efChips' ); if ( ! box ) return;
+		box.innerHTML = chat.chips.map( ( c, i ) => `<button type="button" class="ef-chipq${ c.k === 'yes' ? ' go' : '' }" style="--i:${ i }" data-ef-q="${ i }">${ esc( c.label ) }</button>` ).join( '' );
+	};
+	/** eFriend "types" for a moment, then speaks: the pause is part of the charm. */
+	const say = async ( lines, o = {} ) => {
+		const tok = chat.tok, txt = [].concat( lines ).join( ' ' ), len = txt.length;
+		chat.typing = true; setMood( o.mood ); if ( ! paint( true ) ) return;
+		await wait( o.delay || Math.max( 700, Math.min( 1900, 450 + len * 16 ) ) );
+		if ( ! live( tok ) ) return;
+		chat.typing = false; chat.msgs.push( { who: 'ef', lines: [].concat( lines ), mood: o.mood } ); paint( true );
+		await wait( 250 );
+	};
+
+	const recap = async () => {
+		chat.stage = 'confirm';
+		await say( [ pool( 'efc_recap' ), `${ F.askIcon( chat.item ).em } **${ itemName() }** · **${ money$( chat.cost ) }** · ${ whenWords( chat.by ) }`, pool( 'efc_right' ) ], { mood: 'happy' } );
+		setChips( [ { k: 'yes', label: '✅ ' + t( 'efc_yes' ) }, { k: 'fix', label: '✏️ ' + t( 'efChatFix' ) } ] );
+	};
+	const whenChips = () => setChips( [ { by: 3, label: '🔥 ' + t( 'efc_wc1' ) }, { by: 14, label: '📅 ' + t( 'efc_wc2' ) }, { by: 30, label: '🗓️ ' + t( 'efc_wc3' ) }, { by: null, label: '🕊️ ' + t( 'efc_wc4' ) } ] );
+	const nextQ = async () => {
+		if ( ! chat.item ) { chat.stage = 'what'; return say( [ pool( 'efc_askwhat' ) ], { mood: 'happy' } ); }
+		if ( ! chat.cost ) { chat.stage = 'price'; return say( [ pool( 'efc_askprice' ) ], { mood: 'happy' } ); }
+		if ( chat.by === undefined ) { chat.stage = 'when'; await say( [ pool( 'efc_askurg' ) ], { mood: 'happy' } ); return whenChips(); }
+		return recap();
+	};
+	const urgencyKey = ( d ) => ( d == null ? 'later' : d <= 3 ? 'now' : 'soon' );
+	const sayItem = () => say( [ pool( 'efc_re_' + kindOf( chat.item ), { item: itemName() } ) ], { mood: 'cheer' } );
+	const sayPrice = () => { const z = priceSize( chat.cost ); return say( [ pool( 'efc_pr_' + z, { cost: money$( chat.cost ) } ) ], { mood: z === 'huge' ? 'atrisk' : z === 'big' ? 'cheer' : 'happy' } ); };
+	const sayWhen = () => say( [ pool( 'efc_ur_' + urgencyKey( chat.by ), { when: whenWords( chat.by ) } ) ], { mood: chat.by != null && chat.by <= 3 ? 'tight' : 'happy' } );
+	const read = ( text, fix ) => ( { p: F.parseAsk( stripWhen( text ), fix ), w: F.parseWhen( text ) } );
+	const setBy = ( w ) => { chat.by = w.none ? null : w.days; };
+	const yesRe = /^\s*(yes|yeah|yep|yup|ok|okay|correct|right|sure|go|ναι|ναί|σωστά|οκ)\b/i, noRe = /^\s*(no|nope|όχι|οχι)\s*[.!]?\s*$/i;
+
+	const onUser = async ( text, chip ) => {
+		if ( chat.busy ) return; chat.busy = true; const tok = chat.tok;
+		try {
+			chat.msgs.push( { who: 'me', text } ); setChips( [] ); paint( true ); await wait( 350 ); if ( ! live( tok ) ) return;
+			const st = chat.stage;
+			if ( st === 'confirm' || st === 'fix' ) {
+				if ( ( chip && chip.k === 'yes' ) || ( st === 'confirm' && yesRe.test( text ) && ! /\d/.test( text ) ) ) return await finish();
+				if ( ( chip && chip.k === 'fix' ) || noRe.test( text ) ) { chat.stage = 'fix'; return await say( [ pool( 'efc_fix' ) ], { mood: 'happy' } ); }
+				const { p, w } = read( text, true ); let changed = false;
+				if ( p.item ) { chat.item = p.item; changed = true; } if ( p.cost ) { chat.cost = p.cost; changed = true; } if ( w ) { setBy( w ); changed = true; }
+				if ( ! changed ) return await say( [ pool( 'efc_fix' ) ], { mood: 'happy' } );
+				await say( [ pool( 'efc_changed' ) ], { mood: 'cheer' } ); return await recap();
+			}
+			if ( st === 'when' ) {
+				const w = chip && 'by' in chip ? ( chip.by == null ? { none: true } : { days: chip.by } ) : F.parseWhen( text );
+				if ( ! w ) return await say( [ pool( 'efc_nowhen' ) ], { mood: 'happy' } );
+				setBy( w ); await sayWhen(); return await nextQ();
+			}
+			if ( st === 'price' ) {
+				const { p, w } = read( text, true ); if ( ! p.cost ) return await say( [ pool( 'efc_nocost' ) ], { mood: 'meh' } );
+				chat.cost = p.cost; if ( p.item && ! chat.item ) { chat.item = p.item; await sayItem(); } await sayPrice(); if ( w ) { setBy( w ); await sayWhen(); } return await nextQ();
+			}
+			// the first message (or an answer to "what is it?")
+			const { p, w } = read( text, false ); const hadItem = !! chat.item, hadCost = !! chat.cost;
+			if ( p.item ) chat.item = p.item; if ( p.cost ) chat.cost = p.cost; if ( w ) setBy( w );
+			if ( p.item && ! hadItem ) await sayItem(); if ( p.cost && ! hadCost ) await sayPrice(); if ( w ) await sayWhen();
+			return await nextQ();
+		} finally { chat.busy = false; }
+	};
+
+	/* The decision: the best day, inside the person's window when they gave one. */
+	const decide = ( a, by ) => {
+		const inWin = ( x ) => by == null || x.i <= by, good = a.days.find( ( x ) => inWin( x ) && ( x.st === 'best' || x.st === 'good' ) );
+		if ( good ) return { kind: 'ok', day: good };
+		const tight = by != null ? a.days.find( ( x ) => x.i <= by && x.st === 'tight' ) : null;
+		if ( tight ) return { kind: 'tight', day: tight, alt: a.first };
+		if ( a.first ) return { kind: 'late', day: a.first };
+		return { kind: 'none', day: null };
+	};
 	const calHtml = ( a ) => {
-		const first = parse( a.days[ 0 ].d ), lead = ( first.getDay() + 6 ) % 7, cells = []; for ( let i = 0; i < lead; i++ ) cells.push( '<i class="ef-cal-x"></i>' );
-		const wd = Array.from( { length: 7 }, ( _, i ) => new Intl.DateTimeFormat( EX.loc(), { weekday: 'short' } ).format( new Date( 2024, 0, 1 + i ) ).slice( 0, 2 ) );
-		a.days.forEach( ( x ) => { const dt = parse( x.d ), isBest = a.best && a.best.i === x.i; cells.push( `<button type="button" class="ef-cal-d st-${ x.st }${ x.i === askState.sel ? ' sel' : '' }${ x.i === 0 ? ' now' : '' }" data-ef-askday="${ x.i }" aria-label="${ esc( EX.dayName( x.d ) ) }"><b>${ dt.getDate() === 1 ? dt.toLocaleDateString( EX.loc(), { month: 'short' } ) + ' ' + dt.getDate() : dt.getDate() }</b><span class="mk">${ x.inc.length ? '💶' : '' }${ x.bills.length ? '🧾' : '' }</span>${ isBest ? '<em>⭐</em>' : '' }</button>` ); } );
-		return `<div class="ef-cal" role="group" aria-label="${ esc( t( 'efAskCalTitle' ) ) }"><div class="ef-cal-wd">${ wd.map( ( w ) => `<span>${ w }</span>` ).join( '' ) }</div><div class="ef-cal-g">${ cells.join( '' ) }</div></div><div class="ef-cal-legend"><span class="st-best">${ esc( t( 'efAskLBest' ) ) }</span><span class="st-good">${ esc( t( 'efAskLGood' ) ) }</span><span class="st-tight">${ esc( t( 'efAskLTight' ) ) }</span><span class="st-avoid">${ esc( t( 'efAskLAvoid' ) ) }</span><span>💶 ${ esc( t( 'efAskLPay' ) ) }</span><span>🧾 ${ esc( t( 'efAskLBill' ) ) }</span><span>⭐ ${ esc( t( 'efAskLStar' ) ) }</span></div>`;
+		const wd = Array.from( { length: 7 }, ( _, i ) => new Intl.DateTimeFormat( EX.loc(), { weekday: 'short' } ).format( new Date( 2024, 0, 1 + i ) ).slice( 0, 2 ) ), months = [];
+		a.days.forEach( ( x ) => { let g = months[ months.length - 1 ]; if ( ! g || g.k !== x.d.slice( 0, 7 ) ) { g = { k: x.d.slice( 0, 7 ), days: [] }; months.push( g ); } g.days.push( x ); } );
+		const star = chat.rec && chat.rec.day ? chat.rec.day.i : -1;
+		const grid = months.map( ( g ) => { const first = parse( g.days[ 0 ].d ), cells = []; for ( let i = 0; i < ( first.getDay() + 6 ) % 7; i++ ) cells.push( '<i class="ef-cal-x"></i>' );
+			g.days.forEach( ( x ) => { cells.push( `<button type="button" class="ef-cal-d st-${ x.st }${ x.i === chat.sel ? ' sel' : '' }${ x.i === 0 ? ' now' : '' }" style="--i:${ x.i }" data-ef-askday="${ x.i }" aria-label="${ esc( EX.dayName( x.d ) ) }"><b>${ parse( x.d ).getDate() }</b><span class="mk">${ x.inc.length ? '💶' : '' }${ x.bills.length ? '🧾' : '' }</span>${ star === x.i ? '<em>⭐</em>' : '' }</button>` ); } );
+			return `<h4 class="ef-cal-mh">${ esc( first.toLocaleDateString( EX.loc(), { month: 'long', year: 'numeric' } ) ) }</h4><div class="ef-cal-g">${ cells.join( '' ) }</div>`; } ).join( '' );
+		return `<div class="ef-cal" role="group" aria-label="${ esc( t( 'efAskCalTitle' ) ) }"><div class="ef-cal-wd">${ wd.map( ( w ) => `<span>${ w }</span>` ).join( '' ) }</div>${ grid }</div><div class="ef-cal-legend"><span class="st-best">${ esc( t( 'efAskLBest' ) ) }</span><span class="st-good">${ esc( t( 'efAskLGood' ) ) }</span><span class="st-tight">${ esc( t( 'efAskLTight' ) ) }</span><span class="st-avoid">${ esc( t( 'efAskLAvoid' ) ) }</span><span>💶 ${ esc( t( 'efAskLPay' ) ) }</span><span>🧾 ${ esc( t( 'efAskLBill' ) ) }</span><span>⭐ ${ esc( t( 'efAskLStar' ) ) }</span></div>`;
 	};
 	const dayDetail = ( a ) => {
-		const x = a.days[ askState.sel ] || a.days[ 0 ], m = ( c ) => money( c / 100, main() ), mk = [];
+		const x = a.days[ chat.sel ] || a.days[ 0 ], mk = [];
 		if ( x.inc.length ) mk.push( t( 'efAskMkPay', { n: x.inc.join( ', ' ) } ) ); if ( x.bills.length ) mk.push( t( 'efAskMkBill', { n: x.bills.join( ', ' ) } ) );
-		return points( [ t( 'efAskDay_' + x.st, { d: EX.dayName( x.d ), a: m( Math.max( 0, x.low ) ) } ) ].concat( x.low < 0 ? [ t( 'efAskDayShort', { a: m( -x.low ) } ) ] : [] ).concat( mk ) );
+		return points( [ t( 'efAskDay_' + x.st, { d: EX.dayName( x.d ), a: money$( Math.max( 0, x.low ) ) } ) ].concat( x.low < 0 ? [ t( 'efAskDayShort', { a: money$( -x.low ) } ) ] : [] ).concat( mk ) );
 	};
-	const askBody = () => {
-		const a = askState.ans, m = ( c ) => money( c / 100, main() ), em = F.askIcon( askState.item ).em;
-		const mood = a.today.st === 'best' ? 'comfortable' : a.today.st === 'good' ? 'ontrack' : a.today.st === 'tight' ? 'tight' : 'atrisk';
-		const why = a.best && a.best.i > 0 ? ( a.best.near.length ? t( 'efAskWhyPay', { n: a.best.near[ 0 ] } ) : t( 'efAskWhyLow' ) ) : '';
-		const sel = a.days[ askState.sel ] || a.days[ 0 ], planDate = sel.i > 0 ? sel.d : ( a.best && a.best.i > 0 ? a.best.d : addDays( today(), 7 ) );
-		const small = a.monthly > 0 && a.cost < a.monthly * 0.04;
-		const lines = [ askLine( a, askState.item ), a.best && a.best.i > 0 ? t( 'efAskBest', { d: EX.dayName( a.best.d ), a: m( a.best.low ) } ) : '', why, small ? t( 'efAskSmall' ) : '', ! a.hasIncome ? t( 'efNoIncomeAsk' ) : '' ];
-		return `<div class="ef-askres"><div class="ef-top">${ F.mascot( mood, 80 ) }<div class="ef-bubble"><b>${ esc( em + ' ' + ( askState.item || t( 'efAskThing' ) ) + ' · ' + m( a.cost ) ) }</b></div></div>${ points( lines ) }
-			<ul class="ef-tiles ef-tiles3"><li class="ef-tile"><span class="ef-tile-em">🛍️</span><small>${ esc( t( 'efTileCost' ) ) }</small><b>${ esc( m( a.cost ) ) }</b></li><li class="ef-tile ${ a.today.low >= a.cushion ? 'good' : a.today.low < 0 ? 'bad' : '' }"><span class="ef-tile-em">📉</span><small>${ esc( t( 'efAskLow' ) ) }</small><b>${ esc( ( a.today.low < 0 ? '−' : '' ) + m( Math.abs( a.today.low ) ) ) }</b></li><li class="ef-tile ${ a.best ? 'good' : '' }"><span class="ef-tile-em">⭐</span><small>${ esc( t( 'efAskBestDay' ) ) }</small><b>${ esc( a.best ? EX.dayName( a.best.d ) : '–' ) }</b></li></ul>
+	const planDate = ( a ) => { const sel = a.days[ chat.sel ] || a.days[ 0 ]; return sel.st === 'best' || sel.st === 'good' ? sel.d : chat.rec && chat.rec.day ? chat.rec.day.d : ''; };
+	/** The balance, day by day for four months: without the purchase, with it on the chosen day, and the safety cushion. The lines draw themselves. */
+	const graphHtml = ( a ) => {
+		const N = a.days.length, W = 320, H = 150, P = 12, r = chat.rec && chat.rec.day ? chat.rec.day.i : 0, base = a.tl.map( ( x ) => x.bal ), withp = base.map( ( v, k ) => ( k >= r ? v - a.cost : v ) );
+		const vals = base.concat( withp, [ 0, a.cushion ] ), lo = Math.min( ...vals ), hi = Math.max( ...vals ), span = Math.max( 1, hi - lo );
+		const X = ( k ) => P + ( W - 2 * P ) * k / ( N - 1 ), Y = ( v ) => H - P - ( H - 2 * P ) * ( v - lo ) / span, path = ( arr ) => arr.map( ( v, k ) => ( k ? 'L' : 'M' ) + X( k ).toFixed( 1 ) + ' ' + Y( v ).toFixed( 1 ) ).join( '' );
+		const bad = Math.min( ...withp ) < 0, zero = lo < 0 && hi > 0 ? `<line x1="${ P }" x2="${ W - P }" y1="${ Y( 0 ).toFixed( 1 ) }" y2="${ Y( 0 ).toFixed( 1 ) }" class="ef-g0"/>` : '', cush = a.cushion > 0 ? `<line x1="${ P }" x2="${ W - P }" y1="${ Y( a.cushion ).toFixed( 1 ) }" y2="${ Y( a.cushion ).toFixed( 1 ) }" class="ef-gc"/>` : '';
+		return `<svg class="ef-graph" viewBox="0 0 ${ W } ${ H }" role="img" aria-label="${ esc( t( 'efc_g_title' ) ) }">${ zero }${ cush }<path d="${ path( base ) }" pathLength="1" class="ef-gl base"/><path d="${ path( withp ) }" pathLength="1" class="ef-gl with${ bad ? ' bad' : '' }"/><line x1="${ X( r ).toFixed( 1 ) }" x2="${ X( r ).toFixed( 1 ) }" y1="${ P - 4 }" y2="${ H - P }" class="ef-gm"/><text x="${ X( r ).toFixed( 1 ) }" y="${ P + 4 }" class="ef-gt" text-anchor="${ r > N / 2 ? 'end' : 'start' }" dx="${ r > N / 2 ? -4 : 4 }">🛍️</text></svg>
+			<div class="ef-g-leg"><span class="a">${ esc( t( 'efc_g_base' ) ) }</span><span class="b${ bad ? ' bad' : '' }">${ esc( t( 'efc_g_with' ) ) }</span>${ a.cushion > 0 ? `<span class="c">${ esc( t( 'efc_g_cush' ) ) }</span>` : '' }</div><div class="ef-g-dates"><span>${ esc( EX.dayName( a.days[ 0 ].d ) ) }</span><span>${ esc( EX.dayName( a.days[ N - 1 ].d ) ) }</span></div>`;
+	};
+	const resultHtml = () => {
+		const a = chat.ans, rec = chat.rec, em = F.askIcon( chat.item ).em, st = a.today.st, mood = st === 'best' ? 'comfortable' : st === 'good' ? 'ontrack' : st === 'tight' ? 'tight' : 'atrisk';
+		const head = pool( 'efc_res_' + ( st === 'avoid' && rec.kind === 'none' ? 'none' : st ) ), lines = [ askLine( a, chat.item ) ];
+		if ( chat.by != null ) lines.push( rec.kind === 'ok' ? t( 'efc_fit_ok', { d: EX.dayName( rec.day.d ) } ) : rec.kind === 'tight' ? t( 'efc_fit_tight', { d: EX.dayName( rec.day.d ) } ) : rec.kind === 'late' ? t( 'efc_fit_late', { d: EX.dayName( rec.day.d ) } ) : t( 'efc_fit_none' ) );
+		if ( ! a.hasIncome ) lines.push( t( 'efNoIncomeAsk' ) );
+		if ( rec.kind !== 'ok' ) { const win = chat.by != null ? a.days.filter( ( x ) => x.i <= chat.by ) : a.days, gap = a.cushion - Math.max( ...win.map( ( x ) => x.low ) ); if ( gap > 0 ) { const months = Math.max( 1, chat.by != null ? chat.by / 30 : 4 ); lines.push( t( 'efc_help_gap', { a: money$( gap ) } ), t( 'efc_help_save', { a: money$( gap / months ) } ) ); } }
+		const lowShown = rec.day ? rec.day.low : a.today.low, d = planDate( a );
+		return `<div class="ef-res${ chat.anim ? ' anim' : '' }"><div class="ef-burst" aria-hidden="true"></div><div class="ef-top">${ F.mascot( mood, 84 ) }<div class="ef-bubble"><b>${ esc( head ) }</b></div></div>
+			<div class="ef-res-item"><span class="ef-em">${ em }</span><div><b>${ esc( itemName() ) }</b><small>${ esc( whenWords( chat.by ) ) }</small></div><b class="ef-res-cost" data-count="${ a.cost }">${ esc( money$( a.cost ) ) }</b></div>
+			<div class="ef-res-lines">${ points( lines ) }</div>
+			<ul class="ef-tiles ef-tiles3"><li class="ef-tile"><span class="ef-tile-em">🛍️</span><small>${ esc( t( 'efTileCost' ) ) }</small><b data-count="${ a.cost }">${ esc( money$( a.cost ) ) }</b></li><li class="ef-tile ${ lowShown >= a.cushion ? 'good' : lowShown < 0 ? 'bad' : '' }"><span class="ef-tile-em">📉</span><small>${ esc( t( 'efAskLow' ) ) }</small><b data-count="${ lowShown }">${ esc( ( lowShown < 0 ? '−' : '' ) + money$( Math.abs( lowShown ) ) ) }</b></li><li class="ef-tile ${ rec.day ? 'good' : '' }"><span class="ef-tile-em">⭐</span><small>${ esc( t( 'efAskBestDay' ) ) }</small><b>${ esc( rec.day ? EX.dayName( rec.day.d ) : '–' ) }</b></li></ul>
+			<h3 class="ef-h">📈 ${ esc( t( 'efc_g_title' ) ) }</h3>${ graphHtml( a ) }
 			<h3 class="ef-h">📅 ${ esc( t( 'efAskCalTitle' ) ) }</h3>${ calHtml( a ) }<div class="ef-callouts" id="efAskDetail">${ dayDetail( a ) }</div>
-			<div class="btn-row ef-ask-btns"><button type="button" class="btn btn-primary" data-ef-askplan="${ esc( planDate ) }">🎯 ${ esc( t( 'efAskMakePlan', { d: EX.dayName( planDate ) } ) ) }</button></div><p class="muted small">${ esc( t( 'efAskNote' ) ) }</p></div>`;
+			<div class="btn-row ef-ask-btns"><button type="button" class="btn btn-primary" data-ef-askplan="${ esc( d ) }">🎯 ${ esc( d ? t( 'efAskMakePlan', { d: EX.dayName( d ) } ) : t( 'efChatPlan' ) ) }</button><button type="button" class="btn btn-ghost" data-ef-again>💬 ${ esc( t( 'efChatAgain' ) ) }</button></div><p class="muted small">${ esc( t( 'efAskNote' ) ) }</p></div>`;
 	};
-	EXA.efriendAskOpen = ( prefill ) => {
-		if ( prefill ) Object.assign( askState, prefill );
+	const countUp = ( root ) => root.querySelectorAll( '[data-count]' ).forEach( ( el ) => {
+		const v = Number( el.dataset.count ); if ( reduceMotion() || ! v ) return; const t0 = performance.now(), D = 900;
+		const tick = ( now ) => { const k = Math.min( 1, ( now - t0 ) / D ), e = 1 - Math.pow( 1 - k, 3 ), x = Math.round( v * e ); el.textContent = ( x < 0 ? '−' : '' ) + money$( Math.abs( x ) ); if ( k < 1 ) requestAnimationFrame( tick ); }; requestAnimationFrame( tick );
+	} );
+	const burst = ( root ) => { const b = root.querySelector( '.ef-burst' ); if ( ! b || reduceMotion() ) return; b.innerHTML = Array.from( { length: 18 }, ( _, i ) => `<i style="--x:${ ( Math.random() * 100 ).toFixed( 0 ) }%;--r:${ Math.round( Math.random() * 360 ) }deg;--d:${ ( Math.random() * .6 ).toFixed( 2 ) }s">${ [ '🎉', '✨', '⭐', '💚' ][ i % 4 ] }</i>` ).join( '' ); setTimeout( () => { b.innerHTML = ''; }, 2600 ); };
+	/** Back in the app: the result opens as a sheet that rises over the app, and its numbers, line and calendar animate in. */
+	const showResult = () => {
 		const X = `<button type="button" class="ab-btn" data-close aria-label="${ esc( t( 'close' ) ) }">${ UI.icon( 'x', 24 ) }</button>`;
-		UI.openSheet( `<div class="sheet-head">${ X }<h2 id="sheetTitle">💬 ${ esc( t( 'efAskTitle' ) ) }</h2><span class="sp"></span></div><div class="sheet-pad ef-ask-sheet"><div class="ef-top">${ F.mascot( 'happy', 72 ) }<div class="ef-bubble"><b>${ esc( t( 'efAskHi' ) ) }</b></div></div>
-			<form id="efAskForm" novalidate><label class="f"><span>${ esc( t( 'efAskQ' ) ) }</span><input name="q" id="efAskQ" autocomplete="off" placeholder="${ esc( t( 'efAskPh' ) ) }" value="${ esc( askState.text ) }"></label>
-			<div class="grid2"><label class="f"><span>${ esc( t( 'efAskWhat' ) ) }</span><input name="what" autocomplete="off" value="${ esc( askState.item ) }"></label><label class="f"><span>${ esc( t( 'efAskHow' ) ) } (${ esc( main() ) })</span><input name="cost" inputmode="decimal" autocomplete="off" placeholder="0.00" value="${ esc( askState.cost ) }"></label></div>
-			<p class="err" id="efAskErr" role="alert" hidden></p><div class="btn-row"><button type="submit" class="btn btn-primary wide">💬 ${ esc( t( 'efAskGo' ) ) }</button></div></form>
-			<div id="efAskOut">${ askState.ans ? askBody() : '' }</div></div>`, { tall: true } );
+		chat.anim = true; UI.openSheet( `<div class="sheet-head">${ X }<h2 id="sheetTitle">💬 ${ esc( t( 'efAskTitle' ) ) }</h2><span class="sp"></span></div><div class="sheet-pad ef-ask-sheet" id="efRes">${ resultHtml() }</div>`, { tall: true } );
+		setTimeout( () => { const r = document.getElementById( 'efRes' ); if ( ! r ) return; countUp( r ); if ( chat.rec && chat.rec.kind === 'ok' ) burst( r ); chat.anim = false; }, 250 );
+	};
+	const repaintResult = () => { const r = document.getElementById( 'efRes' ); if ( r ) { chat.anim = false; const y = r.closest( '.sheet-scroll' ) || r.parentNode; const top = y ? y.scrollTop : 0; r.innerHTML = resultHtml(); if ( y ) y.scrollTop = top; } };
+
+	/* Past chats: every chat with at least one message from the person is kept (the last 30), so they can be read again or asked again with today's numbers. */
+	const histList = () => ( S().settings.efChats = S().settings.efChats || [] );
+	const saveChat = () => {
+		if ( ! chat.id || ! chat.msgs.some( ( x ) => x.who === 'me' ) ) return;
+		const rec = { id: chat.id, ts: chat.ts, item: chat.item, cost: chat.cost, by: chat.by, msgs: chat.msgs.map( ( x ) => ( x.who === 'me' ? { w: 'me', t: x.text } : { w: 'ef', l: x.lines, m: x.mood } ) ), done: chat.stage === 'done', st: chat.ans ? chat.ans.today.st : '', kind: chat.rec ? chat.rec.kind : '', rd: chat.rec && chat.rec.day ? chat.rec.day.d : '' };
+		const l = histList(), i = l.findIndex( ( x ) => x.id === rec.id ); if ( i >= 0 ) l[ i ] = rec; else l.unshift( rec ); if ( l.length > 30 ) l.length = 30;
+		S().settings.u = Date.now(); try { EX.persist(); } catch ( e ) { /* ignore */ }
+	};
+	const VERD = { best: 'comfortable', good: 'ontrack', tight: 'tight', avoid: 'atrisk' };
+	const histHtml = ( id ) => {
+		const l = histList(), r = id ? l.find( ( x ) => x.id === id ) : null, back = `<button type="button" class="btn btn-ghost sm" data-ef-hback>← ${ esc( t( 'efc_h_back' ) ) }</button>`;
+		if ( r ) return `<div class="ef-hist-h">${ back }<b>${ esc( ( F.askIcon( r.item ).em ) + ' ' + ( r.item || t( 'efAskThing' ) ) ) }</b></div><div class="ef-chat ef-hist-chat">${ r.msgs.map( ( x ) => ( x.w === 'me' ? `<div class="ef-msg me"><div class="ef-mb">${ esc( x.t ) }</div></div>` : `<div class="ef-msg ef"><span class="ef-av">${ F.mascot( x.m || 'happy', 34 ) }</span><div class="ef-mb">${ x.l.map( ( q ) => `<p class="ef-ml">${ rich( q ) }</p>` ).join( '' ) }</div></div>` ) ).join( '' ) }</div><div class="btn-row ef-hist-act">${ r.cost ? `<button type="button" class="btn btn-primary" data-ef-hagain="${ esc( r.id ) }">🔁 ${ esc( t( 'efc_h_again' ) ) }</button>` : '' }<button type="button" class="btn btn-ghost" data-ef-hnew>💬 ${ esc( t( 'efc_h_new' ) ) }</button></div>`;
+		return `<div class="ef-hist-h">${ back }<b>🕘 ${ esc( t( 'efc_h_title' ) ) }</b></div>${ l.length ? `<ul class="ef-hist-list">${ l.map( ( x ) => `<li><button type="button" class="ef-hrow" data-ef-hopen="${ esc( x.id ) }"><span class="ef-em">${ F.askIcon( x.item ).em }</span><span><b>${ esc( x.item || t( 'efAskThing' ) ) }</b><small>${ esc( [ x.cost ? money$( x.cost ) : '', EX.dayName( new Date( x.ts ).toISOString().slice( 0, 10 ) ) ].filter( Boolean ).join( ' · ' ) ) }</small></span>${ x.done && VERD[ x.st ] ? chip( VERD[ x.st ] ) : `<span class="ef-chip">${ esc( t( 'efc_h_open' ) ) }</span>` }</button><button type="button" class="ab-btn" data-ef-hdel="${ esc( x.id ) }" aria-label="${ esc( t( 'efc_h_del' ) ) }">${ UI.icon( 'trash', 20 ) }</button></li>` ).join( '' ) }</ul>` : `<p class="muted ef-hist-empty">${ esc( t( 'efc_h_empty' ) ) }</p>` }`;
+	};
+	const showHist = ( id ) => { const ov = document.querySelector( '.ef-cp' ); if ( ! ov ) return; let p = document.getElementById( 'efHist' ); if ( ! p ) { p = document.createElement( 'div' ); p.id = 'efHist'; p.className = 'ef-hist'; ov.appendChild( p ); } p.innerHTML = histHtml( id ); };
+	const hideHist = () => { const p = document.getElementById( 'efHist' ); if ( p ) p.remove(); };
+	const closeChat = () => { saveChat(); chat.tok++; const ov = document.querySelector( '.ef-cp' ); if ( ov ) ov.remove(); document.body.classList.remove( 'ef-ob-open' ); };
+	/** The thinking screen: the robot scans, the checklist ticks, then the page opens like a curtain on the result. */
+	const analysis = async () => {
+		const tok = chat.tok, ov = document.querySelector( '.ef-cp' ); if ( ! ov ) return;
+		chat.ans = F.answer( chat.cost ); chat.rec = decide( chat.ans, chat.by ); chat.sel = chat.rec.day ? chat.rec.day.i : 0;
+		ov.classList.add( 'an' ); ov.innerHTML = `<div class="ef-an"><div class="ef-an-bot">${ F.mascot( 'happy', 130 ) }<i class="ef-scan"></i><i class="ef-scan s2"></i></div><h2>${ esc( pool( 'efc_think' ) ) }</h2><ul class="ef-an-steps">${ [ 1, 2, 3, 4, 5 ].map( ( n ) => `<li style="--i:${ n }"><span class="tick">✓</span>${ esc( t( 'efc_step' + n ) ) }</li>` ).join( '' ) }</ul><div class="ef-an-bar"><i></i></div></div>`;
+		const items = [ ...ov.querySelectorAll( '.ef-an-steps li' ) ], bar = ov.querySelector( '.ef-an-bar i' );
+		for ( let i = 0; i < items.length; i++ ) { await wait( 650 ); if ( tok !== chat.tok ) return; items[ i ].classList.add( 'on' ); bar.style.width = Math.round( ( i + 1 ) / items.length * 100 ) + '%'; }
+		await wait( 600 ); if ( tok !== chat.tok ) return;
+		ov.classList.add( 'out' ); await wait( 600 ); if ( tok !== chat.tok ) return;
+		closeChat(); showResult();
+	};
+	const finish = async () => { chat.stage = 'done'; await say( [ pool( 'efc_close' ) ], { mood: 'cheer' } ); await wait( 400 ); return analysis(); };
+
+	EXA.efriendAskOpen = ( prefill ) => {
+		closeChat(); Object.assign( chat, { id: EX.uid(), ts: Date.now(), msgs: [], stage: 'what', item: '', cost: 0, by: undefined, typing: false, busy: false, ans: null, rec: null, sel: 0, chips: [], used: {}, anim: true } );
+		const ov = document.createElement( 'div' ); ov.className = 'ef-cp'; ov.setAttribute( 'role', 'dialog' ); ov.setAttribute( 'aria-modal', 'true' ); ov.setAttribute( 'aria-label', 'eFriend' );
+		ov.innerHTML = `<header class="ef-cp-h"><button type="button" class="ab-btn" data-ef-cpx aria-label="${ esc( t( 'close' ) ) }">${ UI.icon( 'x', 24 ) }</button><div class="ef-cp-who"><span class="ef-cp-av">${ F.mascot( 'happy', 46 ) }</span><div><b>eFriend</b><small id="efCpStat">${ esc( t( 'efc_online' ) ) }</small></div></div><button type="button" class="ab-btn ef-cp-hist" data-ef-hist aria-label="${ esc( t( 'efc_h_title' ) ) }" title="${ esc( t( 'efc_h_title' ) ) }">🕘</button></header>
+			<div id="efChat" class="ef-chat" aria-live="polite"></div><div class="ef-chips" id="efChips"></div>
+			<form id="efChatForm" class="ef-chat-in" novalidate autocomplete="off"><input name="q" id="efChatQ" autocomplete="off" enterkeyhint="send" placeholder="${ esc( t( 'efAskPh' ) ) }" aria-label="${ esc( t( 'efAskQ' ) ) }"><button type="submit" class="btn btn-primary" aria-label="${ esc( t( 'efAskGo' ) ) }">➤</button></form>`;
+		document.body.appendChild( ov ); document.body.classList.add( 'ef-ob-open' );
+		ov.addEventListener( 'keydown', ( e ) => { if ( e.key === 'Escape' ) closeChat(); } );
+		const tok = chat.tok;
+		( async () => {
+			if ( prefill && prefill.reuse ) { const r = prefill.reuse; chat.item = r.item || ''; chat.cost = r.cost || 0; chat.by = r.by; await say( [ pool( 'efc_back', { item: r.item || t( 'efAskThing' ) } ) ], { mood: 'cheer', delay: 800 } ); if ( ! live( tok ) ) return; return chat.cost ? ( chat.by === undefined ? nextQ() : recap() ) : nextQ(); }
+			if ( prefill && prefill.hist ) showHist();
+			await say( [ pool( 'efc_hi' ) ], { mood: 'cheer', delay: 800 } ); if ( ! live( tok ) ) return;
+			if ( prefill && prefill.text ) return onUser( prefill.text );
+			await say( [ t( 'efc_pick' ) ], { mood: 'happy', delay: 600 } ); if ( ! live( tok ) ) return;
+			setChips( String( t( 'efc_ideas' ) ).split( '|' ).map( ( l ) => ( { label: l, text: l.replace( /^[^\p{L}\p{N}]+/u, '' ) } ) ) );
+			const q = document.getElementById( 'efChatQ' ); if ( q && ! reduceMotion() ) q.focus( { preventScroll: true } );
+		} )();
 	};
 	document.addEventListener( 'submit', ( e ) => {
-		const f = e.target; if ( f.id !== 'efAskForm' ) return; e.preventDefault();
-		const el = f.elements, q = el.q.value.trim(), err = document.getElementById( 'efAskErr' ); let item = el.what.value.trim(), cost = num( el.cost.value );
-		if ( q && ( ! cost || ! item ) ) { const p = F.parseAsk( q ); if ( ! item ) item = p.item; if ( ! cost && p.cost ) cost = p.cost / 100; el.what.value = item; el.cost.value = cost ? String( cost ) : ''; }
-		if ( ! ( cost > 0 ) ) { err.textContent = t( 'efAskNeedCost' ); err.hidden = false; return; } err.hidden = true;
-		askState.text = q; askState.item = item; askState.cost = String( cost ); askState.ans = F.answer( Math.round( cost * 100 ) ); askState.sel = ( askState.ans.best && askState.ans.best.i ) || 0;
-		document.getElementById( 'efAskOut' ).innerHTML = askBody(); document.getElementById( 'efAskOut' ).scrollIntoView( { block: 'start', behavior: 'smooth' } );
+		const f = e.target; if ( f.id !== 'efChatForm' ) return; e.preventDefault();
+		const q = f.elements.q.value.trim(); if ( ! q || chat.busy ) return; f.elements.q.value = ''; onUser( q );
 	} );
+	const openPlan = ( dl ) => { const ic = F.askIcon( chat.item ); UI.closeSheet && UI.closeSheet( true ); setTimeout( () => EXA.openEfPlan( null, Object.assign( { name: chat.item || t( 'efAskThing' ), target: String( chat.cost / 100 ), icon: ic.icon }, dl ? { deadline: dl > today() ? dl : addDays( today(), 1 ) } : {} ) ), 220 ); };
 	document.addEventListener( 'click', ( e ) => {
-		if ( e.target.closest && e.target.closest( '[data-ef-ask]' ) ) { e.preventDefault(); EXA.efriendAskOpen(); return; }
-		const d = e.target.closest && e.target.closest( '[data-ef-askday]' ); if ( d && askState.ans ) { askState.sel = Number( d.dataset.efAskday ); document.getElementById( 'efAskOut' ).innerHTML = askBody(); return; }
-		const pl = e.target.closest && e.target.closest( '[data-ef-askplan]' ); if ( pl ) { const ic = F.askIcon( askState.item ), dl = pl.dataset.efAskplan; UI.closeSheet && UI.closeSheet( true ); setTimeout( () => EXA.openEfPlan( null, { name: askState.item || t( 'efAskThing' ), target: askState.cost, deadline: dl > today() ? dl : addDays( today(), 1 ), icon: ic.icon } ), 220 ); }
+		const tg = e.target.closest ? e.target : null; if ( ! tg ) return;
+		if ( tg.closest( '[data-ef-ask]' ) ) { e.preventDefault(); EXA.efriendAskOpen(); return; }
+		if ( tg.closest( '[data-ef-cpx]' ) ) { closeChat(); return; }
+		if ( tg.closest( '[data-ef-hist]' ) ) { showHist(); return; }
+		if ( tg.closest( '[data-ef-hist-open]' ) ) { e.preventDefault(); EXA.efriendAskOpen( { hist: true } ); return; }
+		if ( tg.closest( '[data-ef-hback]' ) ) { const open = document.querySelector( '.ef-hist .ef-hist-chat' ); if ( open ) showHist(); else hideHist(); return; }
+		if ( tg.closest( '[data-ef-hnew]' ) ) { EXA.efriendAskOpen(); return; }
+		const ho = tg.closest( '[data-ef-hopen]' ); if ( ho ) { showHist( ho.dataset.efHopen ); return; }
+		const ha = tg.closest( '[data-ef-hagain]' ); if ( ha ) { const r = histList().find( ( x ) => x.id === ha.dataset.efHagain ); if ( r ) EXA.efriendAskOpen( { reuse: r } ); return; }
+		const hd = tg.closest( '[data-ef-hdel]' ); if ( hd ) { const l = histList(), i = l.findIndex( ( x ) => x.id === hd.dataset.efHdel ); if ( i >= 0 ) { l.splice( i, 1 ); S().settings.u = Date.now(); try { EX.persist(); } catch ( x ) { /* ignore */ } } showHist(); return; }
+		const q = tg.closest( '[data-ef-q]' ); if ( q ) { const c = chat.chips[ Number( q.dataset.efQ ) ]; if ( c && ! chat.busy ) onUser( c.text || c.label.replace( /^[^\p{L}\p{N}]+/u, '' ), c ); return; }
+		const d = tg.closest( '[data-ef-askday]' ); if ( d && chat.ans ) { chat.sel = Number( d.dataset.efAskday ); repaintResult(); return; }
+		if ( tg.closest( '[data-ef-again]' ) ) { UI.closeSheet && UI.closeSheet( true ); setTimeout( () => EXA.efriendAskOpen(), 220 ); return; }
+		const pl = tg.closest( '[data-ef-askplan]' ); if ( pl ) openPlan( pl.dataset.efAskplan );
 	} );
 
 	/* ------------------------------------------------------------------ Progress: what eFriend can honestly show */
@@ -1092,7 +1352,7 @@
 		efPlanNew: 'New eFriend plan', efPlanEdit: 'Edit plan', efPlanName: 'What are you planning?', efPlanNamePh: 'Trip to Italy', efPlanCost: 'How much will it cost?', efPlanDate: 'By when?',
 		efPlanWallets: 'Money I can use', efPlanLink: 'Money already set aside', efPlanLinkNone: 'None', efPlanLinkHint: 'Optional: count what you saved in one of your goals towards this plan.',
 		efNeedName: 'Give your plan a name.', efNeedCost: 'Enter how much it will cost.', efNeedFuture: 'Pick a date in the future.', efNeedWallet: 'Choose at least one wallet.',
-		tut_efriend_1: 'Open **More**, then **eFriend**.', tut_efriend_2: 'Tap **New plan with eFriend**, then enter what you are planning, how much it will cost and the date.', tut_efriend_3: 'Choose the wallets it can use. On Home, tap **Full analysis** to see whether you can afford it, what would help, and how your spending is sorted. Thinking of buying something? Tap **Ask** and eFriend finds the best day.',
+		tut_efriend_1: 'Open **More**, then **eFriend**.', tut_efriend_2: 'Tap **New plan with eFriend**, then enter what you are planning, how much it will cost and the date.', tut_efriend_3: 'Choose the wallets it can use. On Home, tap **Full analysis** to see whether you can afford it, what would help, and how your spending is sorted. Thinking of buying something? Tap **Ask** and eFriend finds the best day. It also fills in your limits from your real spending and warns you before money runs short.',
 		tutD_efriend: 'A robot that checks if you can afford it', tutEx_efriend: 'Maria wants to take a 400 trip by December. eFriend checks her wallets, her rent and phone bill, and how much she spends on takeaway, and says: cut it by a quarter and you can afford it, with money to spare.',
 	} );
 	Object.assign( window.EXPENITY_I18N.langs.el, {
@@ -1108,7 +1368,7 @@
 		efPlanNew: 'Νέο σχέδιο eFriend', efPlanEdit: 'Επεξεργασία σχεδίου', efPlanName: 'Τι σχεδιάζετε;', efPlanNamePh: 'Ταξίδι στην Ιταλία', efPlanCost: 'Πόσο θα κοστίσει;', efPlanDate: 'Μέχρι πότε;',
 		efPlanWallets: 'Χρήματα που μπορώ να χρησιμοποιήσω', efPlanLink: 'Χρήματα που έχετε ήδη στην άκρη', efPlanLinkNone: 'Κανένα', efPlanLinkHint: 'Προαιρετικό: υπολογίστε όσα έχετε αποταμιεύσει σε έναν στόχο σας για αυτό το σχέδιο.',
 		efNeedName: 'Δώστε ένα όνομα στο σχέδιό σας.', efNeedCost: 'Συμπληρώστε πόσο θα κοστίσει.', efNeedFuture: 'Διαλέξτε μια μελλοντική ημερομηνία.', efNeedWallet: 'Διαλέξτε τουλάχιστον ένα πορτοφόλι.',
-		tut_efriend_1: 'Ανοίξτε το **Περισσότερα** και μετά το **eFriend**.', tut_efriend_2: 'Πατήστε **Νέο σχέδιο με το eFriend** και συμπληρώστε τι σχεδιάζετε, πόσο θα κοστίσει και την ημερομηνία.', tut_efriend_3: 'Διαλέξτε τα πορτοφόλια που μπορεί να χρησιμοποιήσει. Στην Αρχική, πατήστε **Πλήρης ανάλυση** για να δείτε αν μπορείτε να το αντέξετε, τι θα βοηθούσε και πώς ταξινομούνται τα έξοδά σας. Σκέφτεστε να αγοράσετε κάτι; Πατήστε **Ρωτήστε** και το eFriend βρίσκει την καλύτερη ημέρα.',
+		tut_efriend_1: 'Ανοίξτε το **Περισσότερα** και μετά το **eFriend**.', tut_efriend_2: 'Πατήστε **Νέο σχέδιο με το eFriend** και συμπληρώστε τι σχεδιάζετε, πόσο θα κοστίσει και την ημερομηνία.', tut_efriend_3: 'Διαλέξτε τα πορτοφόλια που μπορεί να χρησιμοποιήσει. Στην Αρχική, πατήστε **Πλήρης ανάλυση** για να δείτε αν μπορείτε να το αντέξετε, τι θα βοηθούσε και πώς ταξινομούνται τα έξοδά σας. Σκέφτεστε να αγοράσετε κάτι; Πατήστε **Ρωτήστε** και το eFriend βρίσκει την καλύτερη ημέρα. Συμπληρώνει επίσης τα όριά σας από τις πραγματικές δαπάνες και σας προειδοποιεί πριν τελειώσουν τα χρήματα.',
 		tutD_efriend: 'Ένα ρομπότ που ελέγχει αν μπορείτε να το αντέξετε', tutEx_efriend: 'Η Μαρία θέλει να κάνει ένα ταξίδι 400 μέχρι τον Δεκέμβριο. Το eFriend ελέγχει τα πορτοφόλια της, το ενοίκιο και τον λογαριασμό τηλεφώνου, και πόσα ξοδεύει σε delivery, και λέει: κόψτε το κατά ένα τέταρτο και μπορείτε να το αντέξετε, με χρήματα να περισσεύουν.',
 	} );
 	Object.assign( window.EXPENITY_I18N.langs.en, {
@@ -1361,5 +1621,183 @@
 		efSugAsk: 'Τι να προσαρμόσω για το καλύτερο αποτέλεσμα;', efSugOrder: 'Μόνο τη σειρά των σχεδίων σας', efSugOrderText: '📋 Πρώτα το φθηνότερο, ώστε να γίνουν όσο το δυνατόν περισσότερα σχέδια.\n🛡️ Το μαξιλάρι ασφαλείας σας μένει ως έχει.',
 		efSugBoth: 'Τη σειρά και το μαξιλάρι ασφαλείας', efSugBothText: '📋 Πρώτα το φθηνότερο, και ελέγχω ποιο μαξιλάρι ταιριάζει καλύτερα.', efSugBothCushion: '🛡️ Μαξιλάρι: από **{a}** σε **{b}**.', efSugBothFit: '✅ Τα **{n}** από **{all}** σχέδια θα χωρούσαν.',
 		efSugMenu: 'Ρωτήστε το eFriend', efSugMenuSub: 'Μπορώ να το αγοράσω; Οι καλύτερες μέρες',
+	} );
+	Object.assign( window.EXPENITY_I18N.langs.en, {
+		efLimSuggest: '📊 From your last **{n}** days, I suggest **{d}** a day, **{w}** a week and **{m}** a month.\n🧾 That includes your bills, and leaves a little room to improve.', efLimUse: 'Use this', efLimNoData: '🌱 I do not have enough history yet.\n💬 Tell me what you are comfortable spending, in any one box, and I will fill the others.',
+		efLimWarn_day: '📅 With this, today comes to **{a}**, above your **{b}** daily limit.', efLimWarn_week: '🗓️ With this, this week comes to **{a}**, above your **{b}** weekly limit.', efLimWarn_month: '📆 With this, this month comes to **{a}**, above your **{b}** monthly limit.', efLimSaveAnyway: 'Save anyway', efLimWarnTitle: 'Over your limit',
+		efLowZero: '⚠️ Around **{d}** your money is likely to run out.', efLowCushion: '🛡️ Around **{d}** your money is likely to drop below your safety cushion of **{c}**.', efLowWhy: '🧾 The big payment around then: **{n}**.', efLowTip: '💡 Moving that payment, or a plan, a few days later would help.', efGotIt: 'Got it',
+		efBudIdeas: 'Budget ideas', efBudIdeasText: '📊 These are the categories where you spend the most and have no budget yet.\n💡 My suggestion is a little below what you usually spend.', efBudIdeaRow: 'You usually spend **{a}** a month. Suggested: **{b}**.', efBudAdd: 'Add', efBudAddAll: 'Add all',
+		efCushSteady: '💡 Your income changed by about **{s}%** from month to month, so I would keep **{m}** untouched.',
+	} );
+	Object.assign( window.EXPENITY_I18N.langs.el, {
+		efLimSuggest: '📊 Από τις τελευταίες σας **{n}** ημέρες, προτείνω **{d}** την ημέρα, **{w}** την εβδομάδα και **{m}** τον μήνα.\n🧾 Περιλαμβάνει τους λογαριασμούς σας και αφήνει λίγο περιθώριο βελτίωσης.', efLimUse: 'Χρήση', efLimNoData: '🌱 Δεν έχω ακόμα αρκετό ιστορικό.\n💬 Πείτε μου πόσο άνετα θέλετε να ξοδεύετε, σε οποιοδήποτε πεδίο, και θα συμπληρώσω τα υπόλοιπα.',
+		efLimWarn_day: '📅 Με αυτό, η σημερινή ημέρα φτάνει τα **{a}**, πάνω από το ημερήσιο όριό σας των **{b}**.', efLimWarn_week: '🗓️ Με αυτό, η εβδομάδα φτάνει τα **{a}**, πάνω από το εβδομαδιαίο όριό σας των **{b}**.', efLimWarn_month: '📆 Με αυτό, ο μήνας φτάνει τα **{a}**, πάνω από το μηνιαίο όριό σας των **{b}**.', efLimSaveAnyway: 'Αποθήκευση παρ’ όλα αυτά', efLimWarnTitle: 'Πάνω από το όριό σας',
+		efLowZero: '⚠️ Γύρω στις **{d}** τα χρήματά σας πιθανότατα θα τελειώσουν.', efLowCushion: '🛡️ Γύρω στις **{d}** τα χρήματά σας πιθανότατα θα πέσουν κάτω από το μαξιλάρι ασφαλείας σας των **{c}**.', efLowWhy: '🧾 Η μεγάλη πληρωμή τότε: **{n}**.', efLowTip: '💡 Θα βοηθούσε να μετακινήσετε αυτή την πληρωμή, ή ένα σχέδιο, λίγες ημέρες αργότερα.', efGotIt: 'Κατάλαβα',
+		efBudIdeas: 'Ιδέες για προϋπολογισμούς', efBudIdeasText: '📊 Αυτές είναι οι κατηγορίες όπου ξοδεύετε περισσότερο και δεν έχετε ακόμα προϋπολογισμό.\n💡 Η πρότασή μου είναι λίγο κάτω από όσα συνήθως ξοδεύετε.', efBudIdeaRow: 'Συνήθως ξοδεύετε **{a}** τον μήνα. Πρόταση: **{b}**.', efBudAdd: 'Προσθήκη', efBudAddAll: 'Προσθήκη όλων',
+		efCushSteady: '💡 Το εισόδημά σας άλλαζε κατά περίπου **{s}%** από μήνα σε μήνα, οπότε θα κρατούσα **{m}** ανέγγιχτους.',
+	} );
+	Object.assign( window.EXPENITY_I18N.langs.en, {
+		efChatHi: '👋 Hi! Tell me what you would like to buy and what it costs, for example “new shoes 49”.', efChatTyping: 'eFriend is typing', efChatNeedCost: '💶 How much does **{item}** cost?', efChatNeedCost0: '💶 How much does it cost?',
+		efChatGot: '🧐 Let me check I understood you:', efChatGot2: '👍 Got it, I changed it:', efChatRight: '❓ Is that right?', efChatYes: 'Yes, that is right', efChatFix: 'Let me fix it', efChatFixAsk: '✏️ No problem. Tell me the right item or price, for example “it is 1250”.',
+		efChatThinking: '🔎 Let me look at your money, bills, income and plans…', efChatCal: 'Show me the best days', efChatPlan: 'Make it a plan', efChatAgain: 'Ask something else', efChatAgainSay: '😊 Sure! What would you like to check next?', efChatCalSay: '📅 Here are the best days for **{item}**. Tap a day to see why.',
+		efChatNoDay: '🗓️ I cannot find a safe day in the next **4 months**.', efChatWhyDeficit: '🔥 You spend about **{a}** a month more than you earn.', efChatWhyMax: '📉 At best, I could call about **{a}** safe to spend in one go.', efChatNoDayTip: '💡 Make it a plan and I will keep watching, and find the earliest safe date as things change.',
+		efAskNever: '❌ Not within the next **4 months** at your current pace.',
+	} );
+	Object.assign( window.EXPENITY_I18N.langs.el, {
+		efChatHi: '👋 Γεια σας! Πείτε μου τι θα θέλατε να αγοράσετε και πόσο κοστίζει, για παράδειγμα «νέα παπούτσια 49».', efChatTyping: 'Το eFriend πληκτρολογεί', efChatNeedCost: '💶 Πόσο κοστίζει: **{item}**;', efChatNeedCost0: '💶 Πόσο κοστίζει;',
+		efChatGot: '🧐 Να βεβαιωθώ ότι κατάλαβα σωστά:', efChatGot2: '👍 Κατάλαβα, το άλλαξα:', efChatRight: '❓ Είναι σωστό;', efChatYes: 'Ναι, είναι σωστό', efChatFix: 'Θέλω να το διορθώσω', efChatFixAsk: '✏️ Κανένα πρόβλημα. Πείτε μου το σωστό προϊόν ή την τιμή, για παράδειγμα «είναι 1250».',
+		efChatThinking: '🔎 Να δω τα χρήματά σας, τους λογαριασμούς, το εισόδημα και τα σχέδιά σας…', efChatCal: 'Δείξτε μου τις καλύτερες ημέρες', efChatPlan: 'Κάντε το σχέδιο', efChatAgain: 'Ρωτήστε κάτι άλλο', efChatAgainSay: '😊 Βεβαίως! Τι θα θέλατε να ελέγξουμε στη συνέχεια;', efChatCalSay: '📅 Αυτές είναι οι καλύτερες ημέρες για: **{item}**. Πατήστε μια ημέρα για να δείτε το γιατί.',
+		efChatNoDay: '🗓️ Δεν βρίσκω ασφαλή ημέρα στους επόμενους **4 μήνες**.', efChatWhyDeficit: '🔥 Ξοδεύετε περίπου **{a}** τον μήνα περισσότερα από όσα κερδίζετε.', efChatWhyMax: '📉 Στην καλύτερη περίπτωση, θα θεωρούσα ασφαλή μια δαπάνη περίπου **{a}** εφάπαξ.', efChatNoDayTip: '💡 Κάντε το σχέδιο και θα το παρακολουθώ, βρίσκοντας την πρώτη ασφαλή ημερομηνία όσο αλλάζουν τα πράγματα.',
+		efAskNever: '❌ Όχι μέσα στους επόμενους **4 μήνες** με τον τρέχοντα ρυθμό σας.',
+	} );
+	Object.assign( window.EXPENITY_I18N.langs.en, {
+		efLimFillOthers: '✨ I can fill the other boxes from this one.',
+	} );
+	Object.assign( window.EXPENITY_I18N.langs.el, {
+		efLimFillOthers: '✨ Μπορώ να συμπληρώσω τα άλλα πεδία από αυτό.',
+	} );
+	Object.assign( window.EXPENITY_I18N.langs.en, {
+		efc_online: 'online',
+		efc_typing: 'typing…',
+		efc_hi: 'Well, well, well… look who is here! 👋 What is on your mind today? A sports car? A trip? Shoes you definitely do not need? Tell me everything.|Hey you! 😄 I was just counting your coins. It took four seconds. What are we dreaming about today?|Ding ding! 🔔 eFriend is open for business. What would you like to buy? I promise not to judge. Much.|Psst… 🤫 thinking of buying something? Good. Ask me first. I am cheaper than regret.|Hello! 🤖 Fresh batteries, sharp mind, a calculator I never put down. What is the shopping fantasy of the day?|You again! 🎉 My favourite human. Tell me what you are eyeing, and I will tell you if your wallet agrees.',
+		efc_pick: 'Pick one, or just tell me in your own words 👇',
+		efc_ideas: '🚗 A new car|✈️ A trip|👟 Shoes|📱 A phone|🎁 A gift|💻 A laptop',
+		efc_askwhat: 'And what is the lucky item? 🎯|Okay, but what are we buying exactly? 🛒|A number with no object! 🕵️ What is it for?',
+		efc_askprice: 'And the damage? 💸 How much does it cost?|Now the scary part… 😬 how much does it cost?|What does the price tag say? 🏷️ Do not be shy.|Spill it: how much are we talking? 💶',
+		efc_nocost: 'Hmm, I did not catch a price there. 🤔 Try just a number, like 49 or 1250.|I am good, but not psychic. 🔮 Give me a number, like 120.|Numbers are my love language. 💕 Just type the price, for example 899.',
+		efc_nowhen: 'Hmm, I could not tell when. 🤔 Try “in 2 weeks”, “right away” or “no rush”.|Not sure I got the timing. ⏰ You can say things like “within a month” or “whenever”.|My clock is confused. 🕰️ Try “in 3 weeks”, or tap one of the buttons.',
+		efc_re_phone: '{item}? Ooh, shiny! 📱 My circuits are jealous.|A new phone! 📱 Your old one is probably listening and feeling very sad.|{item}… 📱 Say no more. Everyone needs a rectangle that does everything.',
+		efc_re_car: '{item}! 🚗 Vroom vroom! Windows down, bills up?|A car! 🚗 Okay, now we are talking real money. I like it. I am nervous, but I like it.|{item}? 🏎️ I have goosebumps. And I do not even have skin.',
+		efc_re_trip: '{item}! ✈️ Pack the sunscreen, I will pack the spreadsheets.|A trip! 🌴 Finally, someone with a good idea.|{item}… 🧳 I am already picturing you with a cocktail. Let us make it happen.',
+		efc_re_shoes: '{item}! 👟 Because your feet deserve the finest. Obviously.|Shoes! 👟 The only thing that makes you taller and happier at the same time.|{item}… 👞 Step by step, we will find the right day to step in.',
+		efc_re_laptop: '{item}! 💻 Work hard, play hard, charge often.|A laptop! 💻 Finally something I can relate to.|{item}… 🖥️ I hope it has a good battery. Mine never runs out.',
+		efc_re_gift: '{item}! 🎁 Someone special is about to be very happy.|A gift! 🎁 You are the kind of person I like on my team.|{item}… 🎀 Do not tell me who it is for. Okay, tell me later.',
+		efc_re_generic: '{item}! 🛍️ Interesting choice. I like your style.|{item}? 🤔 Okay, I am intrigued.|Ooh, {item}! ✨ Tell me more.',
+		efc_pr_small: '{cost}? 😌 Pocket change. Almost.|Only {cost}! 🪙 That is barely a coffee habit.|{cost}. Easy peasy. 🍋',
+		efc_pr_mid: '{cost}, okay. 💪 Respectable.|{cost}… 🤔 Not nothing, not scary.|Fair enough, {cost}. 👌',
+		efc_pr_big: '{cost}! 😎 Fancy stuff!|Whoa, {cost}. 💎 Somebody has taste.|{cost}… 😮 Okay okay okay. Big player move.',
+		efc_pr_huge: '{cost}?! 😅 Deep breath. Both of us.|Okay… {cost}. 🫣 My calculator just put on a helmet.|{cost}. 🤯 I need to sit down. I have no legs, but still.',
+		efc_askurg: 'Is this urgent? 🔥 Something you need right away, or can you live without it for a while? It helps me plan better for you.|When do you want it? ⏰ Yesterday, next week, or whenever the stars align?|One more thing: how fast do you need it? 🏃 Be honest, I will not tell anyone.|Last question, I promise! 🤞 Is there a deadline, or is it a no-rush treat?',
+		efc_ur_now: 'Right away! 🔥 Okay, I will be quick.|Urgent, got it. 🚨 Running, in spirit.|Now now now! ⚡ Understood.',
+		efc_ur_soon: '{when}, noted. 📅 Plenty of time to be clever.|Okay, {when}. 🗓️ That gives us something to work with.|Got it, {when}. ✍️ Writing it down in invisible ink.',
+		efc_ur_later: 'No rush! 🕊️ My favourite kind of plan.|Take your time. 🧘 Patience pays, literally.|Relaxed. I like it. 😌 Good things come to those who wait (and save).',
+		efc_w_none: 'no rush',
+		efc_w_now: 'right away',
+		efc_w_d: 'within {n} days',
+		efc_w_w: 'within about {n} weeks',
+		efc_w_m: 'within about {n} months',
+		efc_wc1: 'Right away',
+		efc_wc2: 'In 2 weeks',
+		efc_wc3: 'In 1 month',
+		efc_wc4: 'No rush',
+		efc_recap: 'Let me say it back so we are on the same page: 📝|Quick check before I do my magic: 🎩|Okay, did I get this right? 🧐',
+		efc_right: 'Did I get it right?|Is that all correct?|Ready to go?',
+		efc_yes: 'Perfect, go!',
+		efc_changed: 'Got it, changed! ✏️|Done, updated. 🔧|Fixed! 🛠️ Better?',
+		efc_fix: 'No problem! ✏️ Tell me what to change. For example: “it is 1250” or “in 3 weeks”.|Oops, my bad. 🙈 What should I fix? You can say the price, the item or the timing.|Sure thing. 🔧 What is wrong? Just type the correct bit.',
+		efc_close: 'Perfect, I have everything I need! 🎬 Give me a moment while I do my thing.|Brilliant. 🌟 Hold tight, I am going to crunch some serious numbers.|Done asking! 🙌 Stay right there, I will be back with the full picture.|That is all I need. 🤝 Time to put on my thinking cap (it is imaginary).',
+		efc_think: 'Crunching your numbers…|Consulting my tiny crystal ball… 🔮|Doing the maths so you do not have to…|Looking at everything, twice…|Asking the spreadsheet gods…',
+		efc_step1: 'Counting your wallets',
+		efc_step2: 'Reading your bills',
+		efc_step3: 'Seeing when money arrives',
+		efc_step4: 'Weighing your other plans',
+		efc_step5: 'Finding your best days',
+		efc_res_best: 'Good news! 🎉 You can do this.|Green light! 🟢 Your wallet says yes.|Told you I was good. 😎 This works.',
+		efc_res_good: 'Looking good! 🙂 It fits, with a slightly thinner cushion.|Mostly green. 🌿 Doable, with a little care.',
+		efc_res_tight: 'Hmm. 🤏 It is possible, but you would feel it.|Tight, but not impossible. 😬',
+		efc_res_avoid: 'Not today, my friend. ✋ But let me show you when.|Easy tiger! 🐯 Today is not the day. Look at the calendar.|Ouch. 🙈 Today would hurt. Better days ahead.',
+		efc_res_none: 'I looked everywhere. 🕵️ There is no safe day in the next 4 months, but I have ideas.|Honest answer: not yet. 🌱 Let me show you why, and what would help.',
+		efc_fit_ok: '✅ This fits your wish: **{d}** is inside your window.',
+		efc_fit_tight: '⚠️ Inside your window only **{d}** is possible, and it is tight.',
+		efc_fit_late: '⏰ Not safely inside your window. The earliest safe day is **{d}**.',
+		efc_fit_none: '⏰ Nothing safe inside your window, and nothing in the next 4 months.',
+		efc_help_gap: '📉 You would need about **{a}** more to do it safely.',
+		efc_help_save: '💰 Setting aside about **{a}** a month would get you there.',
+		efc_g_title: 'Your money, next 4 months',
+		efc_g_base: 'Without it',
+		efc_g_with: 'With it',
+		efc_g_cush: 'Safety cushion',
+	} );
+	Object.assign( window.EXPENITY_I18N.langs.el, {
+		efc_online: 'συνδεδεμένο',
+		efc_typing: 'πληκτρολογεί…',
+		efc_hi: 'Να λοιπόν ποιος ήρθε! 👋 Τι έχετε στο μυαλό σας σήμερα; Ένα σπορ αυτοκίνητο; Ένα ταξίδι; Παπούτσια που σίγουρα δεν χρειάζεστε; Πείτε μου τα πάντα.|Γεια σας! 😄 Μετρούσα τα κέρματά σας. Μου πήρε τέσσερα δευτερόλεπτα. Τι ονειρευόμαστε σήμερα;|Ντινγκ ντονγκ! 🔔 Το eFriend είναι ανοιχτό. Τι θα θέλατε να αγοράσετε; Υπόσχομαι να μην κρίνω. Πολύ.|Ψιτ… 🤫 Σκέφτεστε να αγοράσετε κάτι; Ωραία. Ρωτήστε με πρώτα. Κοστίζω λιγότερο από τη μετάνοια.|Γεια σας! 🤖 Φρέσκιες μπαταρίες, ξυπνητό μυαλό, κομπιουτεράκι πάντα στο χέρι. Ποια είναι η φαντασίωση αγορών της ημέρας;|Πάλι εσείς! 🎉 Ο αγαπημένος μου άνθρωπος. Πείτε μου τι έχετε βάλει στο μάτι και θα σας πω αν συμφωνεί το πορτοφόλι σας.',
+		efc_pick: 'Διαλέξτε ένα ή πείτε μου με δικά σας λόγια 👇',
+		efc_ideas: '🚗 Αυτοκίνητο|✈️ Ένα ταξίδι|👟 Παπούτσια|📱 Ένα κινητό|🎁 Ένα δώρο|💻 Ένα λάπτοπ',
+		efc_askwhat: 'Και ποιο είναι το τυχερό αντικείμενο; 🎯|Εντάξει, αλλά τι ακριβώς αγοράζουμε; 🛒|Ένας αριθμός χωρίς αντικείμενο! 🕵️ Για τι πράγμα;',
+		efc_askprice: 'Και το κόστος; 💸 Πόσο κοστίζει;|Τώρα το τρομακτικό μέρος… 😬 πόσο κοστίζει;|Τι λέει η ετικέτα; 🏷️ Μην ντρέπεστε.|Πείτε το: για πόσα μιλάμε; 💶',
+		efc_nocost: 'Χμ, δεν έπιασα κάποια τιμή. 🤔 Δοκιμάστε μόνο έναν αριθμό, όπως 49 ή 1250.|Είμαι καλός, αλλά όχι μέντιουμ. 🔮 Δώστε μου έναν αριθμό, όπως 120.|Οι αριθμοί είναι η γλώσσα της αγάπης μου. 💕 Γράψτε απλώς την τιμή, για παράδειγμα 899.',
+		efc_nowhen: 'Χμ, δεν κατάλαβα πότε. 🤔 Δοκιμάστε «σε 2 εβδομάδες», «άμεσα» ή «καμία βιασύνη».|Δεν είμαι σίγουρος ότι έπιασα το χρόνο. ⏰ Μπορείτε να πείτε «σε ένα μήνα» ή «όποτε».|Το ρολόι μου μπερδεύτηκε. 🕰️ Δοκιμάστε «σε 3 εβδομάδες» ή πατήστε ένα από τα κουμπιά.',
+		efc_re_phone: '{item}; Ωχ, γυαλιστερό! 📱 Τα κυκλώματά μου ζηλεύουν.|Νέο κινητό! 📱 Το παλιό σας μάλλον σας ακούει και στεναχωριέται πολύ.|{item}… 📱 Δεν χρειάζονται περισσότερα. Όλοι χρειαζόμαστε ένα ορθογώνιο που κάνει τα πάντα.',
+		efc_re_car: '{item}! 🚗 Βρουμ βρουμ! Παράθυρα κάτω, λογαριασμοί πάνω;|Αυτοκίνητο! 🚗 Εντάξει, τώρα μιλάμε για σοβαρά χρήματα. Μου αρέσει. Αγχώνομαι, αλλά μου αρέσει.|{item}; 🏎️ Μου σηκώθηκε η τρίχα. Και δεν έχω καν δέρμα.',
+		efc_re_trip: '{item}! ✈️ Πάρτε το αντηλιακό, εγώ θα πάρω τα λογιστικά φύλλα.|Ταξίδι! 🌴 Επιτέλους, κάποιος με καλή ιδέα.|{item}… 🧳 Σας φαντάζομαι ήδη με ένα κοκτέιλ. Ας το κάνουμε πραγματικότητα.',
+		efc_re_shoes: '{item}! 👟 Γιατί τα πόδια σας αξίζουν τα καλύτερα. Προφανώς.|Παπούτσια! 👟 Το μόνο που σας κάνει ψηλότερους και πιο ευτυχισμένους ταυτόχρονα.|{item}… 👞 Βήμα βήμα, θα βρούμε τη σωστή ημέρα για να μπείτε.',
+		efc_re_laptop: '{item}! 💻 Δουλέψτε σκληρά, παίξτε σκληρά, φορτίστε συχνά.|Λάπτοπ! 💻 Επιτέλους κάτι που καταλαβαίνω.|{item}… 🖥️ Ελπίζω να έχει καλή μπαταρία. Η δική μου δεν τελειώνει ποτέ.',
+		efc_re_gift: '{item}! 🎁 Κάποιος ξεχωριστός πρόκειται να χαρεί πολύ.|Δώρο! 🎁 Είστε από τους ανθρώπους που θέλω στην ομάδα μου.|{item}… 🎀 Μη μου πείτε για ποιον είναι. Εντάξει, πείτε μου αργότερα.',
+		efc_re_generic: '{item}! 🛍️ Ενδιαφέρουσα επιλογή. Μου αρέσει το στιλ σας.|{item}; 🤔 Εντάξει, με έχετε φέρει σε περιέργεια.|Ωχ, {item}! ✨ Πείτε μου περισσότερα.',
+		efc_pr_small: '{cost}; 😌 Ψιλά. Σχεδόν.|Μόλις {cost}! 🪙 Μετά βίας μια συνήθεια καφέ.|{cost}. Παιχνιδάκι. 🍋',
+		efc_pr_mid: '{cost}, εντάξει. 💪 Αξιοπρεπές.|{cost}… 🤔 Ούτε τίποτα, ούτε τρομακτικό.|Δίκαιο, {cost}. 👌',
+		efc_pr_big: '{cost}! 😎 Φίνα πράγματα!|Ουάου, {cost}. 💎 Κάποιος έχει γούστο.|{cost}… 😮 Εντάξει εντάξει. Κίνηση μεγάλου παίκτη.',
+		efc_pr_huge: '{cost}; 😅 Βαθιά ανάσα. Και οι δύο μας.|Εντάξει… {cost}. 🫣 Το κομπιουτεράκι μου μόλις φόρεσε κράνος.|{cost}. 🤯 Πρέπει να καθίσω. Δεν έχω πόδια, αλλά ακόμα κι έτσι.',
+		efc_askurg: 'Είναι επείγον; 🔥 Κάτι που χρειάζεστε άμεσα ή μπορείτε να ζήσετε χωρίς αυτό για λίγο; Με βοηθά να σχεδιάσω καλύτερα για εσάς.|Πότε το θέλετε; ⏰ Χθες, την επόμενη εβδομάδα ή όποτε ευθυγραμμιστούν τα άστρα;|Ένα ακόμα: πόσο γρήγορα το χρειάζεστε; 🏃 Πείτε την αλήθεια, δεν θα το πω σε κανέναν.|Τελευταία ερώτηση, το υπόσχομαι! 🤞 Υπάρχει προθεσμία ή είναι ένα κέφι χωρίς βιασύνη;',
+		efc_ur_now: 'Άμεσα! 🔥 Εντάξει, θα είμαι γρήγορος.|Επείγον, το κατάλαβα. 🚨 Τρέχω, νοερά.|Τώρα τώρα τώρα! ⚡ Κατανοητό.',
+		efc_ur_soon: '{when}, σημειώθηκε. 📅 Έχουμε χρόνο να είμαστε έξυπνοι.|Εντάξει, {when}. 🗓️ Αυτό μας δίνει κάτι να δουλέψουμε.|Το κατάλαβα, {when}. ✍️ Το γράφω με αόρατο μελάνι.',
+		efc_ur_later: 'Καμία βιασύνη! 🕊️ Το αγαπημένο μου είδος σχεδίου.|Πάρτε το χρόνο σας. 🧘 Η υπομονή πληρώνει, κυριολεκτικά.|Χαλαρά. Μου αρέσει. 😌 Τα καλά έρχονται σε όσους περιμένουν (και αποταμιεύουν).',
+		efc_w_none: 'καμία βιασύνη',
+		efc_w_now: 'άμεσα',
+		efc_w_d: 'εντός {n} ημερών',
+		efc_w_w: 'εντός περίπου {n} εβδομάδων',
+		efc_w_m: 'εντός περίπου {n} μηνών',
+		efc_wc1: 'Άμεσα',
+		efc_wc2: 'Σε 2 εβδομάδες',
+		efc_wc3: 'Σε 1 μήνα',
+		efc_wc4: 'Καμία βιασύνη',
+		efc_recap: 'Να σας το πω πίσω για να είμαστε σίγουροι: 📝|Ένας γρήγορος έλεγχος πριν κάνω τη μαγεία μου: 🎩|Εντάξει, τα κατάλαβα σωστά; 🧐',
+		efc_right: 'Τα κατάλαβα σωστά;|Είναι όλα σωστά;|Έτοιμοι;',
+		efc_yes: 'Τέλεια, προχωρήστε!',
+		efc_changed: 'Κατάλαβα, άλλαξε! ✏️|Έτοιμο, ενημερώθηκε. 🔧|Διορθώθηκε! 🛠️ Καλύτερα;',
+		efc_fix: 'Κανένα πρόβλημα! ✏️ Πείτε μου τι να αλλάξω. Για παράδειγμα: «είναι 1250» ή «σε 3 εβδομάδες».|Ωχ, δικό μου λάθος. 🙈 Τι να διορθώσω; Μπορείτε να πείτε την τιμή, το αντικείμενο ή το χρόνο.|Βεβαίως. 🔧 Τι είναι λάθος; Γράψτε απλώς το σωστό κομμάτι.',
+		efc_close: 'Τέλεια, έχω ό,τι χρειάζομαι! 🎬 Δώστε μου μια στιγμή να κάνω τη δουλειά μου.|Υπέροχα. 🌟 Κρατηθείτε, θα επεξεργαστώ σοβαρούς αριθμούς.|Τέλος οι ερωτήσεις! 🙌 Μείνετε εκεί, θα επιστρέψω με την πλήρη εικόνα.|Αυτά χρειάζομαι. 🤝 Ώρα να βάλω το καπέλο της σκέψης (είναι φανταστικό).',
+		efc_think: 'Επεξεργάζομαι τους αριθμούς σας…|Συμβουλεύομαι τη μικρή μου κρυστάλλινη σφαίρα… 🔮|Κάνω τα μαθηματικά για να μην τα κάνετε εσείς…|Κοιτάζω τα πάντα, δύο φορές…|Ρωτάω τους θεούς των λογιστικών φύλλων…',
+		efc_step1: 'Μετράω τα πορτοφόλια σας',
+		efc_step2: 'Διαβάζω τους λογαριασμούς σας',
+		efc_step3: 'Βλέπω πότε έρχονται χρήματα',
+		efc_step4: 'Ζυγίζω τα άλλα σας σχέδια',
+		efc_step5: 'Βρίσκω τις καλύτερες ημέρες σας',
+		efc_res_best: 'Καλά νέα! 🎉 Μπορείτε να το κάνετε.|Πράσινο φως! 🟢 Το πορτοφόλι σας λέει ναι.|Σας το είπα ότι είμαι καλός. 😎 Αυτό δουλεύει.',
+		efc_res_good: 'Φαίνεται καλά! 🙂 Χωράει, με λίγο λεπτότερο μαξιλάρι.|Κυρίως πράσινο. 🌿 Εφικτό, με λίγη προσοχή.',
+		efc_res_tight: 'Χμ. 🤏 Είναι δυνατό, αλλά θα το νιώσετε.|Στενά, αλλά όχι αδύνατο. 😬',
+		efc_res_avoid: 'Όχι σήμερα, φίλε μου. ✋ Αλλά αφήστε με να σας δείξω πότε.|Ηρεμήστε, τιγράκι! 🐯 Σήμερα δεν είναι η ημέρα. Κοιτάξτε το ημερολόγιο.|Άουτς. 🙈 Σήμερα θα πονούσε. Καλύτερες ημέρες έρχονται.',
+		efc_res_none: 'Έψαξα παντού. 🕵️ Δεν υπάρχει ασφαλής ημέρα στους επόμενους 4 μήνες, αλλά έχω ιδέες.|Ειλικρινής απάντηση: όχι ακόμα. 🌱 Αφήστε με να σας δείξω το γιατί και τι θα βοηθούσε.',
+		efc_fit_ok: '✅ Αυτό ταιριάζει με την επιθυμία σας: η **{d}** είναι μέσα στο χρονικό σας περιθώριο.',
+		efc_fit_tight: '⚠️ Μέσα στο περιθώριό σας είναι δυνατή μόνο η **{d}**, και είναι στενά.',
+		efc_fit_late: '⏰ Όχι με ασφάλεια μέσα στο περιθώριό σας. Η πρώτη ασφαλής ημέρα είναι η **{d}**.',
+		efc_fit_none: '⏰ Τίποτα ασφαλές μέσα στο περιθώριό σας, και τίποτα στους επόμενους 4 μήνες.',
+		efc_help_gap: '📉 Θα χρειαζόσασταν περίπου **{a}** ακόμα για να το κάνετε με ασφάλεια.',
+		efc_help_save: '💰 Αν κρατούσατε περίπου **{a}** τον μήνα, θα φτάνατε εκεί.',
+		efc_g_title: 'Τα χρήματά σας, επόμενοι 4 μήνες',
+		efc_g_base: 'Χωρίς αυτό',
+		efc_g_with: 'Με αυτό',
+		efc_g_cush: 'Μαξιλάρι ασφαλείας',
+	} );
+	Object.assign( window.EXPENITY_I18N.langs.en, {
+		efc_h_title: 'Past chats',
+		efc_h_empty: 'No chats yet. Ask me about something you want to buy!',
+		efc_h_again: 'Ask again',
+		efc_h_new: 'New chat',
+		efc_h_open: 'Unfinished',
+		efc_h_back: 'Back',
+		efc_h_del: 'Delete',
+		efc_back: 'Back for more? 😏 Last time we looked at **{item}**. Let us check it again with today’s numbers.|Ooh, round two! 🥊 **{item}** again. Things may have changed, let us see.|Déjà vu! 🔁 **{item}** is back. I have fresher numbers now.',
+	} );
+	Object.assign( window.EXPENITY_I18N.langs.el, {
+		efc_h_title: 'Προηγούμενες συζητήσεις',
+		efc_h_empty: 'Δεν υπάρχουν ακόμα συζητήσεις. Ρωτήστε με για κάτι που θέλετε να αγοράσετε!',
+		efc_h_again: 'Ρωτήστε ξανά',
+		efc_h_new: 'Νέα συζήτηση',
+		efc_h_open: 'Ημιτελής',
+		efc_h_back: 'Πίσω',
+		efc_h_del: 'Διαγραφή',
+		efc_back: 'Ξανά εδώ; 😏 Την προηγούμενη φορά κοιτάξαμε: **{item}**. Ας το ελέγξουμε ξανά με τους σημερινούς αριθμούς.|Ωχ, δεύτερος γύρος! 🥊 Πάλι **{item}**. Τα πράγματα μπορεί να άλλαξαν, ας δούμε.|Ντεζαβού! 🔁 Το **{item}** επέστρεψε. Τώρα έχω φρεσκότερους αριθμούς.',
 	} );
 }() );

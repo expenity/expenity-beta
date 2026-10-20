@@ -1443,3 +1443,101 @@ input[type=date]::-webkit-datetime-edit{padding:0}
 .ef-sugopt.ef-sugbest { border-color: #0f766e; background: color-mix(in srgb, #0f766e 8%, var(--card, #fff)); }
 .ef-sugopt:active { transform: scale(.99); }
 .entry-add-row > .ef-addicon { flex: 0 0 44px; width: 44px; min-width: 44px; max-width: 44px; height: 44px; }
+.ef-low { align-items: flex-start; }
+.ef-low > div { flex: 1; min-width: 0; }
+.ef-bi { display: flex; align-items: center; gap: 12px; }
+.ef-bi > div { flex: 1; min-width: 0; }
+.ef-bi small { display: block; color: var(--muted, #8a7568); }
+.ef-lim-sug, .ef-callouts .btn.sm { margin-top: 8px; }
+.ef-chatwrap { display: flex; flex-direction: column; min-height: 60vh; }
+.ef-chat { flex: 1; display: flex; flex-direction: column; gap: 12px; padding-bottom: 12px; }
+.ef-msg { display: flex; gap: 8px; align-items: flex-end; max-width: 100%; animation: ef-msgin .3s ease-out; }
+.ef-msg.me { justify-content: flex-end; }
+.ef-msg.ef .ef-mb { background: color-mix(in srgb, var(--primary, #f58220) 12%, var(--card, #fff)); border-radius: 18px 18px 18px 6px; }
+.ef-msg.me .ef-mb { background: #0f766e; color: #fff; border-radius: 18px 18px 6px 18px; max-width: 80%; }
+.ef-mb { padding: 10px 14px; min-width: 0; max-width: calc(100% - 44px); }
+.ef-msg.wide .ef-mb { width: calc(100% - 44px); }
+.ef-av { flex: none; width: 40px; }
+.ef-av .ef-mascot { width: 40px; height: auto; animation: none; }
+.ef-mb .ef-points { margin: 0; }
+.ef-chat-btns { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.ef-chat-in { position: sticky; bottom: 0; display: flex; gap: 8px; padding: 10px 0 4px; background: var(--bg, #fffaf6); }
+.ef-chat-in input { flex: 1; min-width: 0; }
+.ef-chat-in .btn { flex: none; width: 48px; padding: 0; }
+.ef-typing { display: flex; gap: 5px; padding: 14px 16px; }
+.ef-typing i { width: 8px; height: 8px; border-radius: 50%; background: #0f766e; opacity: .35; animation: ef-dot 1s infinite; }
+.ef-typing i:nth-child(2) { animation-delay: .15s; } .ef-typing i:nth-child(3) { animation-delay: .3s; }
+.ef-cal-mh { margin: 14px 0 6px; font-size: 1rem; text-transform: capitalize; }
+@keyframes ef-dot { 0%, 100% { opacity: .3; transform: translateY(0); } 50% { opacity: 1; transform: translateY(-4px); } }
+@keyframes ef-msgin { from { opacity: 0; transform: translateY(8px); } }
+@media (prefers-reduced-motion: reduce) { .ef-msg, .ef-typing i { animation: none; } }
+
+/* eFriend chat page: full screen, then the analysis curtain */
+.ef-cp { position: fixed; inset: 0; z-index: 10000; height: 100dvh; background: var(--bg, #fffaf6); display: flex; flex-direction: column; padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom); animation: ef-cpin .5s cubic-bezier(.2, .8, .2, 1) both; max-width: 760px; margin: 0 auto; }
+@media (min-width: 900px) { .ef-cp { inset: 3vh 0; height: 94vh; border-radius: 28px; box-shadow: 0 30px 90px rgba(0,0,0,.35); } }
+.ef-cp-h { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-bottom: 1px solid var(--line, #ecdccf); background: linear-gradient(180deg, color-mix(in srgb, #0f766e 10%, var(--bg, #fffaf6)), var(--bg, #fffaf6)); }
+.ef-cp-who { display: flex; align-items: center; gap: 10px; }
+.ef-cp-who small { display: block; color: #0f766e; font-weight: 700; }
+.ef-cp-who small::before { content: ''; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #16a34a; margin-right: 6px; animation: ef-pulse 1.6s infinite; }
+.ef-cp-av .ef-mascot { width: 56px; height: auto; }
+.ef-cp .ef-chat { flex: 1; overflow-y: auto; padding: 16px 14px 8px; display: flex; flex-direction: column; gap: 12px; overscroll-behavior: contain; }
+.ef-cp .ef-chat-in { position: static; padding: 8px 12px 12px; background: var(--bg, #fffaf6); }
+.ef-chips { display: flex; flex-wrap: wrap; gap: 8px; padding: 4px 12px 6px; }
+.ef-chips:empty { display: none; }
+.ef-chipq { border: 1.5px solid #0f766e; background: var(--card, #fff); color: #0f766e; border-radius: 999px; padding: 10px 16px; font: inherit; font-weight: 700; cursor: pointer; animation: ef-chipin .45s cubic-bezier(.2, 1.4, .4, 1) both; animation-delay: calc(var(--i) * 70ms); }
+.ef-chipq:active { transform: scale(.95); }
+.ef-chipq.go { background: linear-gradient(135deg, #ff9a3c, #f47a14); border-color: transparent; color: #fff; }
+.ef-cp.out { animation: ef-cpout .6s cubic-bezier(.6, 0, .2, 1) forwards; }
+.ef-an { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; padding: 24px; text-align: center; animation: ef-fade .5s both; background: radial-gradient(circle at 50% 28%, color-mix(in srgb, #14b8a6 22%, transparent), transparent 60%); }
+.ef-an h2 { margin: 0; font-size: 1.35rem; }
+.ef-an-bot { position: relative; display: grid; place-items: center; width: 190px; height: 170px; }
+.ef-an-bot .ef-mascot { position: relative; z-index: 2; animation: ef-bob 1.4s ease-in-out infinite; }
+.ef-scan { position: absolute; inset: 20px; border-radius: 50%; border: 3px solid #14b8a6; opacity: 0; animation: ef-ring 1.8s ease-out infinite; }
+.ef-scan.s2 { animation-delay: .9s; }
+.ef-an-steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; text-align: left; min-width: 240px; }
+.ef-an-steps li { display: flex; align-items: center; gap: 10px; opacity: .35; transition: opacity .3s, transform .3s; font-weight: 600; }
+.ef-an-steps li .tick { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; background: color-mix(in srgb, var(--muted, #999) 30%, transparent); color: transparent; font-size: .8rem; transition: all .35s; }
+.ef-an-steps li.on { opacity: 1; transform: translateX(4px); }
+.ef-an-steps li.on .tick { background: #16a34a; color: #fff; animation: ef-tickpop .4s cubic-bezier(.2, 1.6, .4, 1); }
+.ef-an-bar { width: min(280px, 70%); height: 8px; border-radius: 99px; background: color-mix(in srgb, #0f766e 15%, transparent); overflow: hidden; }
+.ef-an-bar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #14b8a6, #ff9a3c); border-radius: 99px; transition: width .6s ease; }
+.ef-res { position: relative; }
+.ef-res-item { display: flex; align-items: center; gap: 12px; margin: 10px 0; padding: 12px 14px; border-radius: 18px; background: color-mix(in srgb, #0f766e 8%, var(--card, #fff)); }
+.ef-res-item > div { flex: 1; min-width: 0; } .ef-res-item small { display: block; color: var(--muted, #8a7568); }
+.ef-res-item .ef-em { font-size: 1.8rem; } .ef-res-cost { font-size: 1.15rem; }
+.ef-graph { width: 100%; height: auto; border-radius: 16px; background: var(--card, #fff); border: 1px solid var(--line, #ecdccf); }
+.ef-gl { fill: none; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+.ef-gl.base { stroke: #0f766e; } .ef-gl.with { stroke: #f47a14; } .ef-gl.with.bad { stroke: #d92d20; }
+.ef-res.anim .ef-gl { stroke-dasharray: 1; stroke-dashoffset: 1; animation: ef-draw 1.6s .3s ease forwards; } .ef-res.anim .ef-gl.with { animation-delay: .9s; }
+.ef-g0 { stroke: #d92d20; stroke-dasharray: 3 3; opacity: .55; } .ef-gc { stroke: #2563eb; stroke-dasharray: 5 4; opacity: .7; } .ef-gm { stroke: #8a7568; stroke-dasharray: 2 3; } .ef-gt { font-size: 13px; }
+.ef-g-leg { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 6px 0 0; font-size: .85rem; color: var(--muted, #8a7568); }
+.ef-g-leg span::before { content: ''; display: inline-block; width: 18px; height: 3px; border-radius: 3px; margin-right: 6px; vertical-align: middle; }
+.ef-g-leg .a::before { background: #0f766e; } .ef-g-leg .b::before { background: #f47a14; } .ef-g-leg .b.bad::before { background: #d92d20; } .ef-g-leg .c::before { background: repeating-linear-gradient(90deg, #2563eb 0 5px, transparent 5px 8px); }
+.ef-g-dates { display: flex; justify-content: space-between; font-size: .8rem; color: var(--muted, #8a7568); }
+.ef-res.anim .ef-cal-d { animation: ef-chipin .4s both; animation-delay: calc(var(--i) * 9ms + .4s); }
+.ef-res.anim .ef-tile, .ef-res.anim .ef-res-item { animation: ef-msgin .5s both; }
+.ef-res.anim .ef-tile:nth-child(2) { animation-delay: .1s; } .ef-res.anim .ef-tile:nth-child(3) { animation-delay: .2s; }
+.ef-burst { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 3; }
+.ef-burst i { position: absolute; top: -10px; left: var(--x); font-style: normal; font-size: 1.4rem; animation: ef-fall 2.2s var(--d) ease-in forwards; transform: rotate(var(--r)); }
+@keyframes ef-cpin { from { transform: translateY(100%); opacity: .4; } }
+@keyframes ef-cpout { to { clip-path: circle(0% at 50% 45%); opacity: 0; transform: scale(.94); } }
+@keyframes ef-chipin { from { opacity: 0; transform: translateY(12px) scale(.8); } }
+@keyframes ef-pulse { 50% { opacity: .35; transform: scale(.8); } }
+@keyframes ef-ring { 0% { transform: scale(.6); opacity: .8; } 100% { transform: scale(1.5); opacity: 0; } }
+@keyframes ef-tickpop { 0% { transform: scale(.3); } 100% { transform: scale(1); } }
+@keyframes ef-draw { to { stroke-dashoffset: 0; } }
+@keyframes ef-fall { to { transform: translateY(520px) rotate(calc(var(--r) + 300deg)); opacity: 0; } }
+@keyframes ef-bob { 50% { transform: translateY(-8px); } }
+@media (prefers-reduced-motion: reduce) { .ef-cp, .ef-cp.out, .ef-chipq, .ef-an *, .ef-res * { animation: none !important; } .ef-res.anim .ef-gl { stroke-dasharray: none; stroke-dashoffset: 0; } }
+.ef-ml { margin: 0; line-height: 1.45; } .ef-ml + .ef-ml { margin-top: 6px; }
+
+.ef-cp-hist { margin-left: auto; font-size: 1.3rem; }
+.ef-hist { position: absolute; inset: 0; top: 0; z-index: 5; background: var(--bg, #fffaf6); display: flex; flex-direction: column; padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom); animation: ef-cpin .35s cubic-bezier(.2, .8, .2, 1) both; overflow: hidden; }
+.ef-hist-h { display: flex; align-items: center; gap: 12px; padding: 12px; border-bottom: 1px solid var(--line, #ecdccf); }
+.ef-hist-list { list-style: none; margin: 0; padding: 8px 12px; overflow: auto; display: flex; flex-direction: column; gap: 8px; }
+.ef-hist-list li { display: flex; align-items: center; gap: 4px; }
+.ef-hrow { flex: 1; min-width: 0; display: flex; align-items: center; gap: 12px; text-align: left; padding: 12px; border-radius: 16px; border: 1px solid var(--line, #ecdccf); background: var(--card, #fff); font: inherit; color: inherit; cursor: pointer; }
+.ef-hrow > span:nth-child(2) { flex: 1; min-width: 0; } .ef-hrow small { display: block; color: var(--muted, #8a7568); } .ef-hrow .ef-em { font-size: 1.6rem; }
+.ef-hist-empty { padding: 24px; text-align: center; }
+.ef-hist-chat { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 12px; }
+.ef-hist-act { padding: 10px 12px 12px; display: flex; gap: 8px; }
