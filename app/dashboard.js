@@ -35,7 +35,7 @@
    return html||'';}
   if(id==='streak'){const tmp=document.createElement('template');tmp.innerHTML=html||A.streakHome();const copy=$('.streak-copy',tmp.content);if(!copy)return html||'';
    return `<div class="dash-summary"><span>${UI.icon('flame',20)} ${L('streak')}</span><strong>${esc($('strong',copy)?.textContent||'')}</strong><small>${esc($('small',copy)?.textContent||'')}</small></div>`;}
-  const stats={balance:[moneyTotal(),'wallet',''],wallets:[String(EX.activeAccounts().length),'wallet','data-more="wallets"'],due:[String(A.active().length),'calendar-event','data-go="bills"'],recent:[String(S().txs.length),'arrows-sort','data-go="activity"'],goals:[String(S().budgets.length+S().goals.length),'target','data-go="plan"'],ideas:['','info-circle','data-home-ideas'],welcome:['','user-circle','data-more="account"']};
+  const stats={balance:[moneyTotal(),'wallet',''],wallets:[String(EX.activeAccounts().length),'wallet','data-more="wallets"'],due:[String(A.active().length),'calendar-event','data-go="bills"'],recent:[String(S().txs.length),'arrows-sort','data-go="activity"'],goals:[String(S().budgets.length+EX.plan.list().length),'target','data-go="plan"'],ideas:['','info-circle','data-home-ideas'],welcome:['','user-circle','data-more="account"']};
   const [value,icon,action]=stats[id];return `<div class="dash-summary${id==='balance'?' dash-summary-balance':''}"><span>${UI.icon(icon,20)} ${L(id)}</span><strong>${esc(value)}</strong>${id==='balance'?`<small>${esc(EX.t('ovBalance'))}</small>`:`<button type="button" class="link" ${action}>${esc(EX.t('seeAll'))} ${UI.icon('chevron-right',16)}</button>`}</div>`;
  }
  function sizedContent(id,size,html){

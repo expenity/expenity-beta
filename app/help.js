@@ -18,7 +18,7 @@
 		if(q('[data-advanced-group="splits"][open]'))return live('split');if(q('[data-advanced-group="reimbursement"][open],#amPayment'))return live('reimburse');
 		if ( sh.classList.contains( 'entry-composer' ) ) return live( q( '[data-entry=schedule-back]' ) ? 'recurring' : q( '#txQuick' ) ? 'quick' : ( live( 'smart' ) || 'quick' ) );
 		if ( q( '#billForm' ) ) return live( 'bills' ); if ( q( '#walletForm' ) ) return live( 'wallets' );
-		if ( q( '#goalForm' ) ) return live( 'efriend' ) || live( 'budgets' ); if ( q( '#budgetForm,#contribForm' ) ) return live( 'budgets' ); if ( q( '#incomeForm' ) ) return live( 'recurring' );
+		if ( q( '#efPlanForm' ) ) return live( 'efriend' ); if ( q( '#budgetForm,#goalForm,#contribForm' ) ) return live( 'budgets' ); if ( q( '#incomeForm' ) ) return live( 'recurring' );
 		if ( q( '#customThemeForm' ) ) return live( 'themes' ); if ( q( '.safe-details' ) ) return live( 'daily' );
 		if ( q( '.av-grid' ) ) return live( 'avatar' ); if ( q( '.rm' ) ) return live( 'swipe' );
 		return '';

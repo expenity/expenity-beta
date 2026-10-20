@@ -33,7 +33,7 @@
 	const EATOUT = /(restaurant|resto|cafe|café|coffee|starbucks|mcdonald|burger|pizza|fast ?food|bar\b|pub\b|εστιατ|ταβέρνα|ψητοπωλ|καφ|γεύμα)/i;
 
 	const goalLine = ( yearly ) => {
-		const g = S().goals.map( ( x ) => ( { x, i: EX.plan.goal( x ) } ) ).find( ( o ) => o.i.remaining > 0 );
+		const g = EX.plan.list().map( ( x ) => ( { x, i: EX.plan.goal( x ) } ) ).find( ( o ) => o.i.remaining > 0 );
 		if ( ! g || ! yearly ) return '';
 		const pct = Math.min( 100, Math.round( ( yearly / g.i.remaining ) * 100 ) );
 		return ' ' + t( 'ideaGoalLine', { pct, name: g.x.name } );
@@ -78,7 +78,7 @@
 		if ( inc > 0 && spent > 0 && ( inc - spent ) / inc < 0.1 && hasData ) { const tenth = Math.round( inc * 0.1 ); add( { id: 'rate', icon: 'pig-money', color: 'green', score: 40 + ( wants( 'future', 'save' ) ? 30 : 0 ), title: t( 'ideaRateTitle', { p: Math.max( 0, Math.round( ( ( inc - spent ) / inc ) * 100 ) ) } ), text: t( 'ideaRateText', { a: m$( tenth ), y: m$( tenth * 12 ) } ), go: 'plan' } ); }
 
 		// 6. Setting things up
-		if ( wants( 'save', 'future' ) && ! S().goals.length ) add( { id: 'first-goal', icon: 'target', color: 'pink', score: 90, title: t( 'ideaGoalTitle' ), text: t( 'ideaGoalText' ), go: 'goal' } );
+		if ( wants( 'save', 'future' ) && ! EX.plan.list().length ) add( { id: 'first-goal', icon: 'target', color: 'pink', score: 90, title: t( 'ideaGoalTitle' ), text: t( 'ideaGoalText' ), go: 'goal' } );
 		if ( ! S().incomes.length && hasData ) add( { id: 'first-income', icon: 'briefcase', color: 'green', score: 35, title: t( 'ideaIncTitle' ), text: t( 'ideaIncText' ), go: 'income' } );
 		if ( wants( 'spend' ) && ! S().budgets.length && hasData ) add( { id: 'first-budget', icon: 'chart-donut', color: 'amber', score: 60, title: t( 'ideaBudTitle' ), text: t( 'ideaBudText' ), go: 'budget' } );
 		return out.sort( ( a, b ) => b.score - a.score );

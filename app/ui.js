@@ -193,3 +193,49 @@ document.addEventListener('toggle',event=>{
  const scope=parent||current.closest('dialog,#view')||current.parentElement;
  scope.querySelectorAll('details[open]').forEach(other=>{if(other!==current&&!other.contains(current)&&other.parentElement.closest('details')===parent)other.open=false;});
 },true);
+
+/* Dropdowns: every <select> looks the same (see style.css), and on a computer its list is a slick menu instead of the browser's plain one.
+   On touch screens the phone's own picker is kept, because it is the best one there is. */
+( function () {
+	'use strict';
+	if ( ! window.matchMedia || ! window.matchMedia( '(hover: hover) and (pointer: fine)' ).matches ) return;
+	let menu = null, owner = null, cursor = -1, openedAt = 0;
+	const close = () => { if ( ! menu ) return; try { if ( menu.matches( ':popover-open' ) ) menu.hidePopover(); } catch ( e ) { /* ignore */ } menu.remove(); menu = null; if ( owner ) owner.classList.remove( 'dd-open' ); owner = null; cursor = -1; };
+	const items = () => [ ...menu.querySelectorAll( '[role=option]' ) ];
+	const mark = ( i ) => { const l = items(); if ( ! l.length ) return; cursor = ( i + l.length ) % l.length; l.forEach( ( x, n ) => x.classList.toggle( 'cur', n === cursor ) ); const el = l[ cursor ]; if ( el.offsetTop < menu.scrollTop ) menu.scrollTop = el.offsetTop - 6; else if ( el.offsetTop + el.offsetHeight > menu.scrollTop + menu.clientHeight ) menu.scrollTop = el.offsetTop + el.offsetHeight - menu.clientHeight + 6; };
+	const choose = ( opt ) => { const sel = owner; close(); if ( ! sel || opt.disabled ) return; if ( sel.value !== opt.value ) { sel.value = opt.value; sel.dispatchEvent( new Event( 'input', { bubbles: true } ) ); sel.dispatchEvent( new Event( 'change', { bubbles: true } ) ); } sel.focus( { preventScroll: true } ); };
+	const open = ( sel ) => {
+		close(); owner = sel; openedAt = Date.now(); sel.classList.add( 'dd-open' );
+		const esc = ( s ) => String( s ).replace( /&/g, '&amp;' ).replace( /</g, '&lt;' ).replace( />/g, '&gt;' );
+		const row = ( o, i ) => `<div role="option" class="dd-opt${ o.selected ? ' sel' : '' }${ o.disabled ? ' off' : '' }" data-i="${ i }" aria-selected="${ o.selected }">${ esc( o.textContent ) }${ o.selected ? '<i class="dd-tick" aria-hidden="true"></i>' : '' }</div>`;
+		let html = '', n = 0; const opts = [ ...sel.options ];
+		[ ...sel.children ].forEach( ( c ) => { if ( c.tagName === 'OPTGROUP' ) { html += `<div class="dd-group">${ esc( c.label ) }</div>`; [ ...c.children ].forEach( ( o ) => { html += row( o, opts.indexOf( o ) ); n++; } ); } else { html += row( c, opts.indexOf( c ) ); n++; } } );
+		menu = document.createElement( 'div' ); menu.className = 'dd-menu'; menu.setAttribute( 'role', 'listbox' ); menu.setAttribute( 'popover', 'manual' ); menu.innerHTML = html;
+		( sel.closest( 'dialog' ) || document.body ).appendChild( menu );
+		const r = sel.getBoundingClientRect(); menu.style.minWidth = r.width + 'px';
+		try { menu.showPopover(); } catch ( e ) { /* older browsers: still shown in place */ }
+		const h = Math.min( menu.scrollHeight, 288 ), below = innerHeight - r.bottom - 12, up = below < h && r.top > below;
+		menu.style.left = Math.max( 8, Math.min( r.left, innerWidth - menu.offsetWidth - 8 ) ) + 'px'; menu.style.top = ( up ? Math.max( 8, r.top - h - 6 ) : r.bottom + 6 ) + 'px'; menu.style.maxHeight = ( up ? r.top - 14 : below ) + 'px';
+		mark( sel.selectedIndex >= 0 ? items().findIndex( ( x ) => Number( x.dataset.i ) === sel.selectedIndex ) : 0 );
+		menu.addEventListener( 'mousedown', ( e ) => e.preventDefault() );
+		menu.addEventListener( 'click', ( e ) => { const o = e.target.closest( '[role=option]' ); if ( o ) choose( sel.options[ Number( o.dataset.i ) ] ); } );
+		menu.addEventListener( 'mousemove', ( e ) => { const o = e.target.closest( '[role=option]' ); if ( o ) mark( items().indexOf( o ) ); } );
+	};
+	document.addEventListener( 'mousedown', ( e ) => {
+		const sel = e.target.closest && e.target.closest( 'select' );
+		if ( sel && ! sel.multiple && ! sel.disabled && sel.size <= 1 && e.button === 0 ) { e.preventDefault(); if ( owner === sel ) close(); else { sel.focus( { preventScroll: true } ); open( sel ); } return; }
+		if ( menu && ! e.target.closest( '.dd-menu' ) ) close();
+	}, true );
+	document.addEventListener( 'keydown', ( e ) => {
+		if ( menu ) {
+			if ( e.key === 'Escape' ) { e.preventDefault(); e.stopPropagation(); const s = owner; close(); s && s.focus(); }
+			else if ( e.key === 'ArrowDown' ) { e.preventDefault(); mark( cursor + 1 ); } else if ( e.key === 'ArrowUp' ) { e.preventDefault(); mark( cursor - 1 ); }
+			else if ( e.key === 'Enter' || e.key === ' ' ) { e.preventDefault(); const o = items()[ cursor ]; if ( o ) choose( owner.options[ Number( o.dataset.i ) ] ); }
+			else if ( e.key === 'Tab' ) close();
+			return;
+		}
+		const sel = e.target.closest && e.target.closest( 'select' );
+		if ( sel && ! sel.multiple && ( e.key === 'Enter' || e.key === ' ' || ( e.altKey && e.key === 'ArrowDown' ) ) ) { e.preventDefault(); open( sel ); }
+	}, true );
+	window.addEventListener( 'resize', close ); document.addEventListener( 'scroll', ( e ) => { if ( menu && Date.now() - openedAt > 300 && ! e.target.closest?.( '.dd-menu' ) ) close(); }, true );
+}() );

@@ -45,6 +45,8 @@
 		return { limit, carry, eff, spent, left: eff - spent, pct: eff ? Math.min( 999, Math.round( ( spent / eff ) * 100 ) ) : 0, daysLeft, perDay: Math.max( 0, Math.floor( ( eff - spent ) / daysLeft ) ), per };
 	};
 	/** Cents set aside for a goal so far (contributions minus withdrawals), in the main currency. */
+	/** Savings goals only: eFriend plans (a trip to check, not money to collect) live in the same list but are shown by eFriend. */
+	P.list = () => S().goals.filter( ( g ) => ! ( EX.isEfPlan && EX.isEfPlan( g ) ) );
 	P.saved = ( g ) => EX.reportTxs().reduce( ( sum, x ) => {
 		if ( x.goalId !== g.id ) return sum;
 		const v = EX.convert( num( x.amount ), EX.txCurrency( x ), main() );
@@ -120,7 +122,7 @@
 		const eta = i.remaining === 0 ? t( 'goalReached' ) : i.eta ? t( 'goalEta', { date: dateShort( i.eta ) } ) : t( 'goalNoEta' );
 		return `<div class="gcard">${ ring( i.pct, 72, UI.icon( g.icon || 'target', 26 ) ) }
 			<button type="button" class="mid" data-plan="edit-goal" data-id="${ esc( g.id ) }"><b>${ esc( g.name ) }</b>${EXA.tagsInline(g.tags)}<small>${ esc( t( 'goalSaved', { a: m$( i.saved ), b: m$( i.target ) } ) ) }</small><small class="st">${ i.pct }% · ${ esc( eta ) }${ i.needMonthly ? ' · ' + esc( t( 'goalNeed', { a: m$( i.needMonthly ) } ) ) : '' }</small></button>
-			<button type="button" class="btn btn-ghost sm" data-plan="goal-money" data-id="${ esc( g.id ) }">${ UI.icon( 'plus', 18 ) } ${ esc( t( 'goalAddMoney' ) ) }</button>${ EXA.efriendChip ? EXA.efriendChip( g ) : '' }</div>`;
+			<button type="button" class="btn btn-ghost sm" data-plan="goal-money" data-id="${ esc( g.id ) }">${ UI.icon( 'plus', 18 ) } ${ esc( t( 'goalAddMoney' ) ) }</button></div>`;
 	}
 	function incomeRow( i ) {
 		const days = Math.round( ( parse( i.next ) - parse( today() ) ) / 864e5 );
@@ -149,7 +151,7 @@
 			body = `${ list.length ? `<div class="bgrid">${ list.map( budgetCard ).join( '' ) }</div>` : `<div class="empty small">${ UI.ci( 'chart-donut', 'amber', 64 ) }<p>${ esc( t( 'budgetNone' ) ) }</p></div>` }
 				<div class="btn-row"><button type="button" class="btn btn-primary" data-plan="add-budget">${ UI.icon( 'plus', 22 ) } ${ esc( t( 'budgetAdd' ) ) }</button></div>${ all.length ? '' : `<p class="muted small center">${ esc( t( 'budgetThisMonth', { a: m$( tot.spent ) } ) ) }</p>` }`;
 		} else if ( tab === 'goals' ) {
-			const goals = S().goals;
+			const goals = P.list();
 			const saved = goals.reduce( ( s, g ) => s + P.saved( g ), 0 ), target = goals.reduce( ( s, g ) => s + EX.cents( g.target ), 0 );
 			const sav = EX.activeAccounts().filter( ( a ) => a.type === 'savings' );
 			const savBal = EX.mainCents( sav.map( ( a ) => ( { amount: EX.balance( a ) / 100, currency: a.currency } ) ) );
@@ -163,7 +165,7 @@
 	/** A short summary for Home: the three tightest budgets and the goals. Empty until something is set up. */
 	EXA.planHome = () => {
 		const bs = S().budgets.slice().sort( ( a, b ) => P.budget( b ).pct - P.budget( a ).pct ).slice( 0, 3 );
-		const gs = S().goals.slice( 0, 4 );
+		const gs = P.list().slice( 0, 4 );
 		const exp = P.expectedIncome( 30 );
 		if ( ! bs.length && ! gs.length && ! S().incomes.length ) return `<div class="sec-head"><h2>${ esc( t( 'planTitle' ) ) }${ EXA.goalsDiscovery() }</h2><button type="button" class="link" data-go="plan">${ esc( t( 'seeAll' ) ) }</button></div><button type="button" class="promo-plan" data-go="plan">${ UI.ci( 'target', 'pink', 44 ) }<span class="mid"><b>${ esc( t( 'planPromoTitle' ) ) }</b><small>${ esc( t( 'planPromoText' ) ) }</small></span>${ UI.icon( 'chevron-right', 22 ) }</button>`;
 		return `<div class="sec-head"><h2>${ esc( t( 'planTitle' ) ) }${ EXA.goalsDiscovery() }</h2><button type="button" class="link" data-go="plan">${ esc( t( 'seeAll' ) ) }</button></div>
@@ -198,7 +200,6 @@
 			<div class="grid2"><label class="f"><span>${ esc( t( 'goalTarget' ) ) } (${ esc( main() ) })</span><input name="target" inputmode="decimal" autocomplete="off" placeholder="0.00" value="${ esc( v.target ) }"></label>
 			<label class="f"><span>${ esc( t( 'goalDeadline' ) ) }</span><input name="deadline" type="date" value="${ esc( v.deadline || '' ) }"></label></div>
 			<div class="lbl">${ esc( t( 'goalIcon' ) ) }</div><div class="icon-pick" id="goalIcons">${ GOAL_ICONS.map( ( n ) => `<button type="button" class="ipick${ v.icon === n ? ' on' : '' }" data-plan="pick-icon" data-icon="${ n }" aria-label="${ n }">${ UI.icon( n, 24 ) }</button>` ).join( '' ) }</div><input type="hidden" name="icon" value="${ esc( v.icon ) }">
-			${ EXA.efriendGoalFields ? EXA.efriendGoalFields( g ) : '' }
 			${ EXA.tagsField(typeof v !== 'undefined' ? v.tags : g.tags) }${ EXA.photos.slot( typeof v !== 'undefined' ? v.photo : '' ) }<p class="err" id="planErr" role="alert" hidden></p>
 			<div class="btn-row sticky-actions">${ g ? `<button type="button" class="btn btn-danger" data-plan="del-goal">${ esc( t( 'del' ) ) }</button>` : '' }<span class="sp"></span><button type="submit" class="btn btn-primary">${ esc( t( 'saveTx' ) ) }</button></div></form>`, { cls: 'small' } );
 	}
@@ -266,10 +267,8 @@
 			const name = el.gname.value.trim(), target = amt( el.target.value );
 			if ( ! name ) return err( 'errNameReq' );
 			if ( ! ok( target ) ) return err( 'errAmount' );
-			if ( f.elements.coach?.checked && ! el.deadline.value ) return err( 'efNeedDate' );
-			const v = { tags: EXA.readTags(f), photo: el.photo.value, name, target, deadline: el.deadline.value || '', icon: el.icon.value, ...( EXA.efriendReadFields ? EXA.efriendReadFields( f ) : {} ) };
+			const v = { tags: EXA.readTags(f), photo: el.photo.value, name, target, deadline: el.deadline.value || '', icon: el.icon.value };
 			if ( editing ) Object.assign( editing, v ); else S().goals.push( Object.assign( { id: uid() }, v ) );
-			if ( EXA.efriendAfterSave && v.coach ) setTimeout( EXA.efriendAfterSave, 0 );
 		} else if ( f.id === 'contribForm' ) {
 			const amount = amt( el.amount.value );
 			if ( ! ok( amount ) ) return err( 'errAmount' );

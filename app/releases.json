@@ -1,6 +1,28 @@
 {
-  "version": "0.50.1",
+  "version": "0.50.2",
   "releases": [
+    {
+      "version": "0.50.2",
+      "date": "2026-10-24",
+      "en": [
+        "eFriend now checks plans instead of savings goals. Tell it what you are planning (a trip, a big purchase), how much it costs and by when, and it works out whether you can afford it from your wallets, income, bills and spending habits. You do not need to put money aside. Plans live in More, then eFriend. A plan can optionally be linked to a savings goal to count what is saved there.",
+        "A new step in the eFriend tour explains how it works out the answer, with a short animation.",
+        "The eFriend welcome animation now turns the logo's E into an e and its tick into an F, then types the rest. The robot raises its hands to wave, reacts when you tap it, and has many more (and funnier) things to say.",
+        "eFriend has its own panel on the More page, and the onboarding can be repeated from there.",
+        "Fixed: Skip and Let's go no longer restart the tour; the Must button is visible; date fields match the size of the fields next to them.",
+        "Dropdowns look the same everywhere, and on a computer they open as a slick menu.",
+        "eFriend stays on Home after you delete a plan, and invites you to plan something."
+      ],
+      "el": [
+        "Το eFriend πλέον ελέγχει σχέδια αντί για στόχους αποταμίευσης. Πείτε του τι σχεδιάζετε (ένα ταξίδι, μια μεγάλη αγορά), πόσο κοστίζει και μέχρι πότε, και υπολογίζει αν μπορείτε να το αντέξετε από τα πορτοφόλια, τα έσοδα, τους λογαριασμούς και τις συνήθειες εξόδων σας. Δεν χρειάζεται να βάλετε χρήματα στην άκρη. Τα σχέδια βρίσκονται στο Περισσότερα, μετά eFriend. Ένα σχέδιο μπορεί προαιρετικά να συνδεθεί με στόχο αποταμίευσης, ώστε να υπολογίζονται όσα έχουν αποταμιευτεί εκεί.",
+        "Ένα νέο βήμα στην περιήγηση του eFriend εξηγεί πώς καταλήγει στην απάντηση, με μια σύντομη κινούμενη εικόνα.",
+        "Η εισαγωγή του eFriend μετατρέπει το E του λογοτύπου σε e και το τικ σε F και μετά γράφει τα υπόλοιπα. Το ρομπότ σηκώνει τα χέρια για να χαιρετήσει, αντιδρά όταν το πατάτε και έχει πολύ περισσότερα (και αστειότερα) να πει.",
+        "Το eFriend έχει δικό του πλαίσιο στη σελίδα Περισσότερα και η περιήγηση μπορεί να επαναληφθεί από εκεί.",
+        "Διορθώθηκαν: το Παράλειψη και το Πάμε δεν ξαναρχίζουν την περιήγηση, το κουμπί Αναγκαίο φαίνεται και τα πεδία ημερομηνίας έχουν το ίδιο μέγεθος με τα διπλανά τους.",
+        "Οι αναπτυσσόμενες λίστες έχουν παντού την ίδια όψη και, σε υπολογιστή, ανοίγουν ως κομψό μενού.",
+        "Το eFriend παραμένει στην Αρχική και μετά τη διαγραφή ενός σχεδίου και σας προσκαλεί να σχεδιάσετε κάτι."
+      ]
+    },
     {
       "version": "0.50.1",
       "date": "2026-10-23",
