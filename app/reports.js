@@ -245,7 +245,7 @@
 			if ( vs !== null && vs !== 0 ) lines.push( t( vs > 0 ? 'whMore' : 'whLess', { pct: Math.abs( vs ) } ) );
 			const back = `<div class="wk-back"><span class="wk-ic bob">${ UI.icon( 'chart-donut', 34 ) }</span><h3>${ esc( t( 'whTitle', { total: m$( total ) } ) ) }</h3>${ lines.map( ( l ) => `<p class="wk-line">${ esc( l ) }</p>` ).join( '' ) }</div>`;
 			const front = `<div class="donut-wrap2${ size === 'medium' ? ' compact' : '' }">${ donut( cats, total, '' ) }${ homeLegend( cats, total, size === 'medium' ? 3 : 5 ) }</div>`;
-			return `<section class="card home-report"><h2>${ esc( t( 'ovTopCats' ) ) }</h2>${ EXA.flipCard ? EXA.flipCard( 'where', front, back, 'fc-list' ) : front }</section>`;
+			return `<section class="card home-report"><div class="sec-head"><h2>${ esc( t( 'ovTopCats' ) ) }</h2>${ EXA.flipBtn ? `<span class="sec-acts">${ EXA.flipBtn( 'where' ) }</span>` : '' }</div>${ EXA.flipCard ? EXA.flipCard( 'where', front, back, 'fc-list' ) : front }</section>`;
 		}
 		if ( id === 'trend' ) {
 			const now = monthRange(), prevFull = monthRange( -1 ), day = parse( today() ).getDate(), prevTo = iso( new Date( parse( prevFull.from ).getFullYear(), parse( prevFull.from ).getMonth(), Math.min( day, parse( prevFull.to ).getDate() ) ) );

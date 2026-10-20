@@ -34,7 +34,8 @@
 	const btn = ( id ) => `<button type="button" class="ab-btn help-ic" data-help="${ id }" aria-label="${ esc( t( 'helpIcon' ) ) }" title="${ esc( t( 'helpIcon' ) ) }">${ UI.icon( 'help-circle', 24 ) }</button>`;
 	// Pages: the icon sits in the top bar.
 	const appbar = EXA.appbar;
-	EXA.appbar = () => { const html = appbar(), id = H.enabled() ? H.forPage() : ''; if ( id && H.hidden( id ) ) return html; return id ? html.replace( '<span class="sp"></span>', '<span class="sp"></span>' + btn( id ) ) : html; };
+	EXA.appbar = () => appbar(); // the page's help icon now lives in the top bar's menu (see EXA.barMenu)
+	H.pageHelp = () => { const id = H.enabled() ? H.forPage() : ''; return id && ! H.hidden( id ) ? id : ''; };
 	// Sheets: the icon sits in the sheet's header.
 	const place = () => {
 		const sh = document.getElementById( 'sheet' ); if ( ! sh ) return;

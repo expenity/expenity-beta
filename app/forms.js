@@ -205,7 +205,7 @@
 		<details class="entry-more" data-entry-more${T.moreOpen||(T.missing||[]).includes('wallet')?' open':''}><summary>${UI.ci('dots','gray',36)}<span class="entry-group-copy"><b>${esc(t('entryMoreDetails'))}</b><small>${esc(t('entryMoreHint'))}</small></span>${UI.icon('chevron-down',18)}</summary><div class="entry-more-body">${sentenceBtn}${T.type==='expense'?EXA.servicePicker():''}`:'';
 		return `<div class="sheet-head entry-head">${X}<h2 id="sheetTitle">${esc(t(titleKey()))}</h2><button type="button" class="btn btn-ghost entry-change"${T.scheduleKind||T.editId||fresh?' hidden':''} data-entry="type" aria-expanded="${!!T.typeOpen}">${esc(t('entryChange'))}</button></div>
 		<div class="tx-scroll entry-scroll${T.quick?' sentence-entry-mode':''}">
-		${T.discard?`<section class="entry-alert" role="alertdialog" aria-labelledby="discardTitle"><h3 id="discardTitle">${esc(t('entryCloseTitle'))}</h3><p>${esc(t('entryCloseText'))}</p><div class="btn-row">${entryButton('keep','entryKeep')}${entryButton('discard','entryDiscard')}</div></section>`:''}
+		${T.discard?`<section class="entry-alert" role="alertdialog" aria-labelledby="discardTitle"><h3 id="discardTitle">${esc(t('entryCloseTitle'))}</h3><p>${esc(t('entryCloseText'))}</p><div class="btn-row">${entryButton('keep','entryKeep')}${entryButton('later','entryLater')}${entryButton('discard','entryDiscard')}</div></section>`:''}
 		${T.pendingShortcut!==undefined?`<section class="entry-alert" role="alert"><p>${esc(t('entryReplace'))}</p>${entryButton('apply-shortcut','entryApply')}${entryButton('cancel-shortcut','cancel')}</section>`:''}
 		${T.pendingSchedule?`<section class="entry-alert" role="alert"><p>${esc(t('entryLeaveSchedule'))}</p>${entryButton('schedule-go','entryContinue')}${entryButton('schedule-cancel','cancel')}</section>`:''}
 		${fresh?typeBar:T.typeOpen?`<div class="entry-type-picker" role="group" aria-label="${esc(t('entryChange'))}">${['expense','income','transfer'].map(type=>`<button type="button" class="chip${type===T.type?' on':''}" data-tx-type="${type}">${esc(t('type'+type[0].toUpperCase()+type.slice(1)))}</button>`).join('')}</div>`:''}
@@ -554,6 +554,7 @@
          if(a==='delete-confirm'){const list=T.scheduleKind==='bill'?S().bills:S().incomes,index=list.findIndex(x=>x.id===T.editScheduleId);if(index>=0&&writable(list[index].account)){list.splice(index,1);T.committed=true;dropDraft();UI.closeSheet(true);EX.save();EXA.playSound?.('success');}return true;}
          if(a==='duplicate-record'){EXA.duplicateRecord(T.scheduleKind,T.editScheduleId);return true;}
 		 if(a==='discard'){dropDraft();T.committed=true;UI.closeSheet(true);return true;}
+		 if(a==='later'){readTxFields();storeDraft();T.committed=true;UI.closeSheet(true);UI.toast(t('entryLaterDone'));return true;}
 		 if(a==='keep'){T.discard=false;drawTx(true,false);return true;}
 		 if(a==='apply-shortcut'){applyShortcut(T.pendingShortcut);return true;}
 		 if(a==='cancel-shortcut'){delete T.pendingShortcut;drawTx(true,false);return true;}

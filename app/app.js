@@ -12,7 +12,7 @@
 	const $ = ( s, r = document ) => r.querySelector( s );
 	const $$ = ( s, r = document ) => [ ...r.querySelectorAll( s ) ];
 	const toast = UI.toast;
-	window.EXPENITY_VERSION = '0.48.1';
+	window.EXPENITY_VERSION = '0.49.0';
 
  const seenCharacters=new Set();try{for(const skin of JSON.parse(sessionStorage.getItem('expenity.charactersSeen')||'[]'))seenCharacters.add(skin);}catch(_){}
  const characterSeen=skin=>seenCharacters.has(skin);
@@ -218,6 +218,15 @@
 			case 'auth-recover': EXA.openAuth( 'recover' ); break;
 			case 'sync-now': EX.sync.run().then( () => toast( t( 'syncDone' ) ) ); break;
 			case 'recover-email': { const f = $( '#recoverForm' ), email = f.elements.email.value.trim(); if ( ! email ) { f.elements.email.focus(); break; } const r = await EX.auth.recoverEmailStart( email ); const note = $( '#recoverNote' ), er = $( '#authErr' ); er.hidden = true; if ( r.ok ) { f.dataset.viaEmail = '1'; note.textContent = t( 'recoverEmailSent' ); note.hidden = false; f.elements.code.focus(); } else { note.hidden = true; er.textContent = t( r.error === 'email_unavailable' ? 'recoverEmailOff' : 'err_generic' ); er.hidden = false; } break; }
+			case 'bar-menu': EXA.barMenu(); break;
+			case 'toggle-filters': st.filtersPanel = ! st.filtersPanel; render(); break;
+			case 'jump-overdue': st.billMonth = st.nowMonth(); st.billsMode = 'list'; render(); setTimeout( () => document.querySelector( '.bm-row.late' )?.scrollIntoView( { block: 'center', behavior: 'smooth' } ), 60 ); break;
+			case 'jump-month': {
+				const y = Math.floor( st.txMonth / 12 ), m = st.txMonth % 12;
+				UI.openSheet( `<div class="sheet-head"><h2>${ EX.esc( t( 'jumpMonth' ) ) }</h2><span class="sp"></span><button type="button" class="ab-btn" data-close aria-label="${ EX.esc( t( 'close' ) ) }">${ UI.icon( 'x', 24 ) }</button></div><div class="sheet-pad"><label class="f"><span>${ EX.esc( t( 'jumpMonth' ) ) }</span><input type="month" id="jumpMonth" value="${ y }-${ String( m + 1 ).padStart( 2, '0' ) }"></label></div>`, { cls: 'small' } );
+				$( '#jumpMonth' ).addEventListener( 'change', ( ev ) => { const [ yy, mm ] = ev.target.value.split( '-' ).map( Number ); if ( yy && mm ) { st.txMonth = yy * 12 + ( mm - 1 ); UI.closeSheet( true ); render(); } } );
+				break;
+			}
 			case 'reset-passkeys': { if ( ! await EXA.confirm( { title: t( 'pkResetTitle' ), text: t( 'pkResetConfirm' ), confirm: t( 'pkResetBtn' ) } ) ) break; const r = await EX.auth.resetPasskeys(); if ( r.ok ) { toast( t( 'pkResetDone' ) ); loadDevices(); if ( r.recoveryCodes ) EXA.showCodes( r.recoveryCodes, () => {} ); } else toast( EXA.errText( r.error ) ); break; }
 			case 'add-passkey': { const r = await EX.auth.addPasskey(); if ( r.ok ) { toast( t( 'tPasskeyAdded' ) ); loadDevices(); } else toast( EXA.errText( r.error ) ); break; }
 			case 'rm-passkey': { const r = await EX.auth.removePasskey( el.dataset.id ); if ( r.ok ) { toast( t( 'tPasskeyRemoved' ) ); loadDevices(); } else toast( EXA.errText( r.error ) ); break; }
@@ -253,6 +262,7 @@
 		EXA.readJoinLink();
 		EX.sync.init();
 		EXA.applyMotion();
+		{ const v = $( '#view' ), bar = $( '#appbar' ); if ( v && bar ) v.addEventListener( 'scroll', () => bar.classList.toggle( 'shrunk', v.scrollTop > 12 ), { passive: true } ); } // the title shrinks as the page scrolls
 		EXA.updateTrails && EXA.updateTrails();
 		render();
 		EXA.flow.init();
@@ -297,9 +307,10 @@
 			if ( ( el = e.target.closest( '[data-cal]' ) ) ) { const n = Number( el.dataset.cal ); st.calMonth = n === 0 ? st.nowMonth() : st.calMonth + n; st.calDay = null; render(); return; }
 			if ( ( el = e.target.closest( '[data-day]' ) ) ) { st.calDay = el.dataset.day; render(); return; }
 			if ( ( el = e.target.closest( '[data-period]' ) ) ) { st.repPeriod = el.dataset.period; render(); return; }
+			if ( ( el = e.target.closest( '[data-flip-btn]' ) ) ) { const fc = document.querySelector( '[data-flip="' + el.dataset.flipBtn + '"]' ); if ( fc ) { fc.dataset.viaBtn = '1'; fc.click(); delete fc.dataset.viaBtn; } return; }
 			if ( ( el = e.target.closest( '[data-flip]' ) ) ) {
-				const inner = e.target.closest( 'button, a, input, select, .sw, [data-act], [data-calday], [data-go]' ) && ! e.target.closest( '.fc-hint' ) && ! e.target.closest( '.fc-back' );
-				if ( ! inner || el.classList.contains( 'fc-tile' ) ) { const id = el.dataset.flip; st.flips[ id ] = ! st.flips[ id ]; el.classList.add( 'turning' ); setTimeout( () => el.classList.remove( 'turning' ), 520 ); el.classList.toggle( 'flipped', st.flips[ id ] ); el.setAttribute( 'aria-pressed', String( !! st.flips[ id ] ) ); el.querySelector( '.fc-back' )?.setAttribute( 'aria-hidden', String( ! st.flips[ id ] ) ); if ( e.detail > 0 ) el.blur(); return; }
+				const inner = ! el.dataset.viaBtn && e.target.closest( 'button, a, input, select, .sw, [data-act], [data-calday], [data-go]' ) && ! e.target.closest( '.fc-back' );
+				if ( el.classList.contains( 'fc-tile' ) || el.dataset.viaBtn || ( e.target.closest( '.fc-back' ) && ! inner ) ) { const id = el.dataset.flip; st.flips[ id ] = ! st.flips[ id ]; el.classList.add( 'turning' ); setTimeout( () => el.classList.remove( 'turning' ), 520 ); el.classList.toggle( 'flipped', st.flips[ id ] ); el.setAttribute( 'aria-pressed', String( !! st.flips[ id ] ) ); el.querySelector( '.fc-back' )?.setAttribute( 'aria-hidden', String( ! st.flips[ id ] ) ); if ( e.detail > 0 ) el.blur(); return; }
 			}
 			if ( ( el = e.target.closest( '[data-status-set]' ) ) ) { EXA.setStatusTint( el.dataset.statusSet ); render(); return; }
 			if ( ( el = e.target.closest( '[data-motion-set]' ) ) ) { EXA.setMotion( el.dataset.motionSet ); render(); return; }

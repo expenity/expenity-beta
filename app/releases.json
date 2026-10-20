@@ -1,6 +1,22 @@
 {
-  "version": "0.48.1",
+  "version": "0.49.0",
   "releases": [
+    {
+      "version": "0.49.0",
+      "date": "2026-10-22",
+      "en": [
+        "A smarter top bar: big quick actions that follow the bottom menu. Home has Reports and Customise Home, Activity has Search, Filters and Jump to month, Bills has Calendar/List and an Overdue shortcut, Plan has New budget and New goal. Reports now appears only on Home, and the help icon moved into the ⋯ menu.",
+        "The title shrinks as you scroll.",
+        "Flip buttons now sit in the card header, never over an amount or the calendar arrows. The Home calendar is about 20% smaller.",
+        "Fixed: closing a draft in Smart entry now shows the Keep editing / Finish later / Discard choices."
+      ],
+      "el": [
+        "Πιο έξυπνη επάνω γραμμή: μεγάλες γρήγορες ενέργειες που ακολουθούν το κάτω μενού. Η Αρχική έχει Αναφορές και Προσαρμογή Αρχικής, οι Κινήσεις έχουν Αναζήτηση, Φίλτρα και Μετάβαση σε μήνα, οι Λογαριασμοί έχουν Ημερολόγιο/Λίστα και συντόμευση για τα εκπρόθεσμα, το Πλάνο έχει Νέο προϋπολογισμό και Νέο στόχο. Οι Αναφορές εμφανίζονται πλέον μόνο στην Αρχική και το εικονίδιο βοήθειας μεταφέρθηκε στο μενού ⋯.",
+        "Ο τίτλος μικραίνει καθώς κάνετε κύλιση.",
+        "Τα κουμπιά αναστροφής βρίσκονται πλέον στην κεφαλίδα της κάρτας, ποτέ πάνω από ποσό ή τα βέλη του ημερολογίου. Το ημερολόγιο της Αρχικής είναι περίπου 20% μικρότερο.",
+        "Διορθώθηκε: το κλείσιμο ενός πρόχειρου στην Έξυπνη προσθήκη δείχνει πλέον τις επιλογές Συνέχεια, Συνέχεια αργότερα και Απόρριψη."
+      ]
+    },
     {
       "version": "0.48.1",
       "date": "2026-10-22",

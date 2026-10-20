@@ -105,9 +105,28 @@
 		const title = { home: null, activity: t( 'tabActivity' ), bills: t( 'tabBills' ), plan: t( 'planTitle' ), reports: t( 'tabReports' ), more: t( 'moreTitle' ) }[ v ];
 		const backBtn = '';
 		const left = backBtn + ( v === 'home' ? `<div class="ab-title home"><small>${ esc( greeting() ) }</small><b>Expen<i>ity</i></b></div>` : `<h1 class="ab-title">${ esc( title ) }</h1>` );
-		const right = v === 'activity' ? `<button type="button" class="ab-btn" data-act="toggle-search" aria-label="${ esc( t( st.searchOpen ? 'searchClose' : 'searchOpen' ) ) }">${ UI.icon( st.searchOpen ? 'x' : 'search', 24 ) }</button>` : '';
-		const reports = [ 'home', 'activity', 'bills', 'plan' ].includes( v ) ? `<button type="button" class="ab-btn" data-go="reports" aria-label="${ esc( t( 'tabReports' ) ) }">${ UI.icon( 'chart-pie', 24 ) }</button>` : '';
-		return `${ left }<span class="sp"></span>${ right }${ reports }${ v === 'more' ? '' : `<span class="ab-avatar">${ avatar() }</span>` }`;
+		// The bar follows the bottom menu: up to three large quick actions for this screen, the overflow menu, and the avatar.
+		const act = ( attrs, icon, label, badge ) => `<button type="button" class="ab-btn ab-act" ${ attrs } aria-label="${ esc( label ) }" title="${ esc( label ) }">${ UI.icon( icon, 28 ) }${ badge ? `<i class="ab-badge">${ badge }</i>` : '' }</button>`;
+		const lateN = active().filter( ( b ) => b.next < today() ).length, filtersN = EXA.filtersActive ? EXA.filtersActive() : 0;
+		const bar = {
+			home: [ act( 'data-go="reports"', 'chart-pie', t( 'tabReports' ) ), act( 'data-home-settings', 'layout-dashboard', t( 'homeCustomise' ) ) ],
+			activity: [ act( 'data-act="toggle-search"', st.searchOpen ? 'x' : 'search', t( st.searchOpen ? 'searchClose' : 'searchOpen' ) ), act( 'data-act="toggle-filters"', 'adjustments-horizontal', t( 'filtersTitle' ), filtersN ), act( 'data-act="jump-month"', 'calendar', t( 'jumpMonth' ) ) ],
+			bills: [ act( `data-billsmode="${ st.billsMode === 'calendar' ? 'list' : 'calendar' }"`, st.billsMode === 'calendar' ? 'list' : 'calendar', t( st.billsMode === 'calendar' ? 'modeList' : 'tabCalendar' ) ), act( 'data-act="jump-overdue"', 'alert-triangle', t( 'statOverdue' ), lateN || '' ) ],
+			plan: [ act( 'data-plan="add-budget"', 'target', t( 'newBudget' ) ), act( 'data-plan="add-goal"', 'flag', t( 'newGoal' ) ) ],
+		}[ v ] || [];
+		const menu = [ 'home', 'activity', 'bills', 'plan' ].includes( v ) ? act( 'data-act="bar-menu"', 'dots', t( 'barMore' ) ) : '';
+		return `${ left }<span class="sp"></span>${ bar.join( '' ) }${ menu }${ v === 'more' ? '' : `<span class="ab-avatar">${ avatar() }</span>` }`;
+	};
+	/** The overflow menu of the top bar: Help for this screen (when help is on), Tutorials and What's new. */
+	EXA.barMenu = () => {
+		const hid = EXA.help && EXA.help.pageHelp ? EXA.help.pageHelp() : '', row = ( act, icon, label ) => `<button type="button" class="mrow" data-bar-do="${ act }">${ UI.ci( icon, 'teal', 36 ) }<span class="mid"><b>${ esc( label ) }</b></span>${ UI.icon( 'chevron-right', 18 ) }</button>`;
+		UI.openSheet( `<div class="sheet-head"><h2>${ esc( t( 'barMore' ) ) }</h2><span class="sp"></span><button type="button" class="ab-btn" data-close aria-label="${ esc( t( 'close' ) ) }">${ UI.icon( 'x', 24 ) }</button></div><div class="sheet-pad"><div class="list mlist">${ hid ? row( 'help:' + hid, 'help-circle', t( 'helpIcon' ) ) : '' }${ row( 'tutorials', 'player-play', t( 'tutTitle' ) ) }${ row( 'whatsnew', 'sparkles', t( 'changelog' ) ) }</div></div>`, { cls: 'small' } );
+		document.querySelector( '.mlist' ).addEventListener( 'click', ( e ) => {
+			const b = e.target.closest( '[data-bar-do]' ); if ( ! b ) return; const a = b.dataset.barDo; UI.closeSheet( true );
+			if ( a.startsWith( 'help:' ) ) { EXA.help.fromId = a.slice( 5 ); EXA.help.open( a.slice( 5 ), true ); }
+			else if ( a === 'tutorials' ) { st.view = 'more'; st.more = 'tutorials'; EXA.render(); }
+			else if ( a === 'whatsnew' ) EXA.showReleases && EXA.showReleases();
+		} );
 	};
 	EXA.tabbar = () => {
 		const item = ( [ id, icon, label ] ) => `<button type="button" class="tab${ st.view === id ? ' on' : '' }" data-go="${ id }"${ st.view === id ? ' aria-current="page"' : '' }>${ UI.icon( icon, 26 ) }<span>${ esc( t( label ) ) }${ id === 'plan' ? EXA.goalsDiscovery() : '' }</span></button>`;
@@ -155,7 +174,10 @@
 	/* ------------------------------------------------------------------ Home: flip cards and the written week */
 	st.flips = st.flips || {};
 	/** A card with two faces. Front and back share one cell, so the card never changes size when it turns. */
-	const flipCard = ( id, front, back, cls = '' ) => `<div class="flipcard stack ${ cls }${ st.flips[ id ] ? ' flipped' : '' }" data-flip="${ id }" role="button" tabindex="0" aria-pressed="${ !! st.flips[ id ] }"><div class="fc-inner"><div class="fc-face fc-front">${ front }<i class="fc-hint" aria-hidden="true">${ UI.icon( 'refresh', 18 ) }</i></div><div class="fc-face fc-back" aria-hidden="${ ! st.flips[ id ] }">${ back }<i class="fc-hint" aria-hidden="true">${ UI.icon( 'refresh', 18 ) }</i></div></div></div>`;
+	const flipCard = ( id, front, back, cls = '' ) => `<div class="flipcard stack ${ cls }${ st.flips[ id ] ? ' flipped' : '' }" data-flip="${ id }" role="button" tabindex="0" aria-pressed="${ !! st.flips[ id ] }"><div class="fc-inner"><div class="fc-face fc-front">${ front }</div><div class="fc-face fc-back" aria-hidden="${ ! st.flips[ id ] }">${ back }</div></div></div>`;
+	/** The flip button lives in a header row, never on top of an amount or a number. */
+	const flipBtn = ( id ) => `<button type="button" class="fc-hint inline" data-flip-btn="${ id }" aria-label="${ esc( t( 'flipLabel' ) ) }" title="${ esc( t( 'flipLabel' ) ) }">${ UI.icon( 'refresh', 18 ) }</button>`;
+	EXA.flipBtn = flipBtn;
 	const unpaidOccurrences = ( from, to ) => active().flatMap( ( b ) => EX.occurrences( b, to ).filter( ( d ) => d >= from || from === '' ).map( ( d ) => ( { b, d } ) ) );
 	/** The next seven days in words, from the bills that are coming up: how many, how much, the biggest, and what is left. */
 	/** The next few bills as a small list (day, name, amount), for the back of the calendar. */
@@ -187,7 +209,7 @@
 		const upcoming = active().sort( byDue ).slice( 0, 3 );
 		// Due soon leads the page only when something is overdue or due within two days; otherwise it follows the wallets.
 		const urgent = active().some( ( b ) => diffDays( b.next, today() ) <= 2 );
-		const DUE = `<div class="sec-head"><h2>${ esc( t( 'dueSoon' ) ) }</h2><button type="button" class="link" data-go="bills">${ esc( t( 'seeAll' ) ) }</button></div>
+		const DUE = `<div class="sec-head"><h2>${ esc( t( 'dueSoon' ) ) }</h2><span class="sec-acts">${ upcoming.length ? flipBtn( 'due' ) : '' }<button type="button" class="link" data-go="bills">${ esc( t( 'seeAll' ) ) }</button></span></div>
 			${ upcoming.length ? flipCard( 'due', `<ul class="bm-list">${ upcoming.map( ( b ) => bmRow( { kind: 'bill', b, date: b.next, due: b.next, paid: false } ) ).join( '' ) }</ul>`, `<div class="wk-back"><span class="wk-ic">${ UI.icon( 'calendar-event', 28 ) }</span>${ EXA.weekSummary() }</div>`, 'fc-list' ) : `<p class="muted pad">${ esc( t( 'noDue' ) ) }</p>` }`;
 		const WAL = `<div class="sec-head"><h2>${ esc( t( 'wallets' ) ) }</h2><button type="button" class="link" data-more="wallets">${ esc( t( 'ovManage' ) ) }</button></div>
 			<div class="wallets">${ wallets.map( ( a ) => `<button type="button" class="wc" data-act="edit-wallet" data-id="${ esc( a.id ) }">${ UI.walletCi( a, 36 ) }<span>${ a.space ? UI.icon( 'users', 14 ) + ' ' : '' }${ esc( EX.accountName( a ) ) }</span><b>${ esc( money( EX.balance( a ) / 100, a.currency ) ) }</b></button>` ).join( '' ) }</div>`;
@@ -205,8 +227,8 @@
 		const paidV = S().txs.filter( ( x ) => x.billId && x.type !== 'income' && x.date >= mStart && x.date <= mEnd ).map( ( x ) => ( { amount: Number( x.amount ) || 0, currency: EX.txCurrency( x ) } ) );
 		const pC = EX.mainCents( paidV ), uC = EX.mainCents( unpaidV ), pct = pC + uC > 0 ? Math.round( ( pC / ( pC + uC ) ) * 100 ) : 0;
 		let safe = null; try { if ( EX.safeSpend ) { const r = EX.safeSpend.calculate(); if ( r.valid && Number.isFinite( r.daily ) ) safe = Math.max( 0, Math.floor( r.daily ) ); } } catch ( e ) { /* the estimate needs more data */ }
-		const tile = ( id, icon, label, val, sub, backTitle, backVal, backSub ) => flipCard( id, `<span class="fc-label">${ UI.icon( icon, 16 ) } ${ esc( label ) }</span><b class="fc-val">${ esc( val ) }</b><small>${ esc( sub ) }</small>`, `<span class="fc-label">${ esc( backTitle ) }</span><b class="fc-val">${ esc( backVal ) }</b><small>${ esc( backSub ) }</small>`, 'fc-tile' );
-		const strip = `<section data-home="balance"><div class="key-strip">${ tile( 'k-balance', 'wallet', t( 'ovBalance' ), total, `${ esc( t( 'ovIncome' ) ) } ${ inc }`, t( 'heroBackTitle' ), M( mC.inc - mC.exp ), `${ t( 'ovIncome' ) } ${ inc } · ${ t( 'ovExpenses' ) } ${ exp }` ) }${ tile( 'k-topay', 'calendar-event', t( 'keyToPay' ), EX.sumByCur( unpaidV ) || money( 0 ), t( 'billsN', { n: unpaidList.length } ), 'Paid', `${ pct }%`, `Paid ${ EX.sumByCur( paidV ) || money( 0 ) } · Unpaid ${ EX.sumByCur( unpaidV ) || money( 0 ) }` ) }${ safe === null ? '' : tile( 'k-safe', 'shield-check', t( 'keySafe' ), M( safe ), t( 'keySafeSub' ), t( 'keySafe' ), M( safe ), t( 'safeEstimate' ) ) }</div></section>`;
+		const tile = ( id, icon, label, val, sub, backTitle, backVal, backSub ) => flipCard( id, `<div class="fc-head"><span class="fc-label">${ esc( label ) }</span><i class="fc-hint sm" aria-hidden="true">${ UI.icon( 'refresh', 14 ) }</i></div><b class="fc-val">${ esc( val ) }</b><small>${ esc( sub ) }</small>`, `<div class="fc-head"><span class="fc-label">${ esc( backTitle ) }</span><i class="fc-hint sm" aria-hidden="true">${ UI.icon( 'refresh', 14 ) }</i></div><b class="fc-val">${ esc( backVal ) }</b><small>${ esc( backSub ) }</small>`, 'fc-tile' );
+		const strip = `<section data-home="balance"><div class="key-strip">${ tile( 'k-balance', 'wallet', t( 'keyBalance' ), total, `${ esc( t( 'ovIncome' ) ) } ${ inc }`, t( 'heroBackTitle' ), M( mC.inc - mC.exp ), `${ t( 'ovIncome' ) } ${ inc } · ${ t( 'ovExpenses' ) } ${ exp }` ) }${ tile( 'k-topay', 'calendar-event', t( 'keyToPay' ), EX.sumByCur( unpaidV ) || money( 0 ), t( 'billsN', { n: unpaidList.length } ), 'Paid', `${ pct }%`, `Paid ${ EX.sumByCur( paidV ) || money( 0 ) } · Unpaid ${ EX.sumByCur( unpaidV ) || money( 0 ) }` ) }${ safe === null ? '' : tile( 'k-safe', 'shield-check', t( 'keySafe' ), M( safe ), t( 'keySafeSub' ), t( 'keySafe' ), M( safe ), t( 'safeEstimate' ) ) }</div></section>`;
 		const legacy = `<section data-home="balance"><div class="hero-flip${ st.heroFlip ? ' flipped' : '' }${st.characterRetreated?' character-retreated':''}${st.characterCollapsed?' character-collapsed':''}" data-act="flip-hero" role="button" tabindex="0" aria-pressed="${ !! st.heroFlip }" aria-label="${ esc( t( 'balanceAria' ) + '. ' + t( 'heroFlipHint' ) ) }">
 			<section class="hero hero-front"><small>${ esc( t( 'ovBalance' ) ) }</small><b${ count( total, totalC ) }>${ esc( total ) }</b>
 				<div class="hero-tiles"><div><span class="k">${ UI.icon( 'arrow-down-left', 18 ) } ${ esc( t( 'ovIncome' ) ) }</span><b${ count( inc, mC.inc ) }>${ esc( inc ) }</b></div><div><span class="k">${ UI.icon( 'arrow-up-right', 18 ) } ${ esc( t( 'ovExpenses' ) ) }</span><b${ count( exp, mC.exp ) }>${ esc( exp ) }</b></div></div><i class="flip-ic" aria-hidden="true">${ UI.icon( 'refresh', 18 ) }</i></section>
@@ -218,7 +240,7 @@
 			${ lead ? `<section data-home="ideas">${EXA.ideasHome()}</section>` : `<section data-home="wallets">${WAL}</section>` }
 			${ lead ? `<section data-home="wallets">${WAL}</section>` : `<section data-home="due">${DUE}</section>` }
 			${ lead ? '' : `<section data-home="ideas">${EXA.ideasHome()}</section>` }
-			${ S().bills.length ? `<section data-home="calendar"><div class="sec-head"><h2>${ esc( t( 'tabCalendar' ) ) }</h2><button type="button" class="link" data-go="bills">${ esc( t( 'seeAll' ) ) }</button></div>${ ( ( cp ) => flipCard( 'cal', cp[ 0 ], `<div class="wk-back"><span class="wk-ic bob">${ UI.icon( 'calendar-event', 34 ) }</span><h3>${ esc( t( 'wkTitle' ) ) }</h3>${ EXA.weekSummary() }${ EXA.weekList() }</div>`, 'fc-cal' ) + cp[ 1 ] )( billsCalendar( true ) ) }</section>` : '' }
+			${ S().bills.length ? `<section data-home="calendar"><div class="sec-head"><h2>${ esc( t( 'tabCalendar' ) ) }</h2><span class="sec-acts">${ flipBtn( 'cal' ) }<button type="button" class="link" data-go="bills">${ esc( t( 'seeAll' ) ) }</button></span></div>${ ( ( cp ) => flipCard( 'cal', cp[ 0 ], `<div class="wk-back"><span class="wk-ic bob">${ UI.icon( 'calendar-event', 34 ) }</span><h3>${ esc( t( 'wkTitle' ) ) }</h3>${ EXA.weekSummary() }${ EXA.weekList() }</div>`, 'fc-cal' ) + cp[ 1 ] )( billsCalendar( true ) ) }</section>` : '' }
 			<section data-home="goals">${ EXA.planHome() }</section><section data-home="recent">
 			<div class="sec-head"><h2>${ esc( t( 'ovRecent' ) ) }</h2><button type="button" class="link" data-go="activity">${ esc( t( 'seeAll' ) ) }</button></div>
 			${ recent.length ? `<ul class="list">${ recent.map( txItem ).join( '' ) }</ul>` : `<p class="muted pad">${ esc( t( 'txNoneHint' ) ) }</p>` }</section>`;
@@ -255,7 +277,7 @@
 		const controls = `<div class="act-filters"><label class="chip select${ fl.type !== 'all' ? ' on' : '' }">${ UI.icon( 'arrows-sort', 18 ) }<select id="txTypeFilter" aria-label="${ esc( t( 'filtersTitle' ) ) }">${ typeOpt( 'all', t( 'typeAll' ) ) }${ typeOpt( 'expense', t( 'typeExpenses' ) ) }${ typeOpt( 'income', t( 'typeIncomes' ) ) }${ typeOpt( 'transfer', t( 'typeTransfer' ) ) }</select></label><label class="chip select${ fl.account ? ' on' : '' }">${ UI.icon( 'wallet', 18 ) }<select id="txWalletFilter" aria-label="${ esc( t( 'filterWallet' ) ) }"><option value="">${ esc( t( 'txAllWallets' ) ) }</option>${ S().accounts.map( ( a ) => `<option value="${ esc( a.id ) }"${ fl.account === a.id ? ' selected' : '' }>${ esc( EX.accountName( a ) ) }</option>` ).join( '' ) }</select></label>${ EXA.tagFilterHtml ? EXA.tagFilterHtml() : '' }</div>`;
 		return `${EXA.entryReceipt?EXA.entryReceipt():''}${ schedules ? '' : ( EXA.filtersActive && EXA.rangeTxs && EXA.rangeTxs() ? '' : monthHeader + summaryRow ) }
 			${ st.searchOpen ? `<div class="searchbar">${ UI.icon( 'search', 22 ) }<input id="txSearch" type="search" value="${ esc( fl.q ) }" placeholder="${ esc( t( 'txSearchPh' ) ) }" aria-label="${ esc( t( 'txSearchPh' ) ) }" autocomplete="off"></div>` : '' }
-			${ st.searchOpen && EXA.filterPanel ? EXA.filterPanel() : '' }
+			${ ( st.searchOpen || st.filtersPanel ) && EXA.filterPanel ? EXA.filterPanel() : '' }
 			${ schedules ? '' : controls }
 			${ toPayHtml }
 			${ incomeNav }

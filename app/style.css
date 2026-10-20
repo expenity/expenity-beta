@@ -1011,3 +1011,26 @@ button.bm-pill{cursor:pointer;min-height:34px;transition:transform .15s}button.b
 .flipcard:not(.fc-tile) .fc-back{display:none}
 .flipcard:not(.fc-tile).flipped .fc-front{display:none}
 .flipcard:not(.fc-tile).flipped .fc-back{display:block}
+.tx-scroll.entry-scroll.sentence-entry-mode>.entry-alert,.tx-scroll.entry-scroll.sentence-entry-mode>.entry-draft-status:not(:empty){display:block!important}
+
+/* Smart top bar: big quick actions that follow the bottom menu. */
+.ab-act{position:relative;width:44px;height:44px;min-height:44px;display:grid;place-items:center}
+.ab-badge{position:absolute;top:2px;right:0;min-width:18px;height:18px;padding:0 4px;border-radius:9px;background:var(--late);color:#fff;font:700 11px/18px system-ui;font-style:normal;text-align:center;box-sizing:border-box}
+.appbar .ab-title{transition:font-size .2s}.appbar.shrunk .ab-title,.appbar.shrunk .ab-title.home b{font-size:18px}
+.appbar{gap:0}.appbar .ab-act{width:40px}.appbar .ab-avatar{flex:none;margin-left:4px}.appbar .ab-title{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:0 1 auto}.appbar .sp{flex:1 1 4px;min-width:4px}
+.appbar .ab-title{font-size:clamp(19px,5.6vw,26px)}.appbar.shrunk .ab-title{font-size:clamp(17px,4.8vw,20px)}
+
+/* The flip button sits in a header row, never over an amount. */
+.fc-hint{position:static!important;flex:none;pointer-events:auto}
+.fc-hint.inline{width:36px;height:36px;border:0;cursor:pointer;padding:0}.fc-hint.sm{width:22px;height:22px;pointer-events:none}
+.fc-head{display:flex;justify-content:space-between;align-items:center;gap:6px}
+.sec-acts{display:flex;align-items:center;gap:12px}
+.fc-tile .fc-hint{top:auto;right:auto}
+.fc-label{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11.5px}.fc-head .fc-label{flex:1}
+
+/* Home calendar: about 20% smaller, and nothing but its own controls can be tapped inside it. */
+[data-home=calendar] .cal{gap:3px;margin:4px 0 8px}
+[data-home=calendar] .cell{aspect-ratio:auto;min-height:0;height:40px;padding:4px 2px 3px;border-radius:calc(11px * var(--rk,1))}
+[data-home=calendar] .cell .num{font-size:13px}[data-home=calendar] .dots{min-height:5px;gap:2px}[data-home=calendar] .dots i{width:5px;height:5px}
+[data-home=calendar] .monthbar{margin:0 0 4px}[data-home=calendar] .monthbar b{font-size:16px}[data-home=calendar] .dow{font-size:11px}
+[data-home=calendar] .grp{margin-top:8px}
