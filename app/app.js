@@ -12,7 +12,7 @@
 	const $ = ( s, r = document ) => r.querySelector( s );
 	const $$ = ( s, r = document ) => [ ...r.querySelectorAll( s ) ];
 	const toast = UI.toast;
-	window.EXPENITY_VERSION = '0.51.3';
+	window.EXPENITY_VERSION = '0.52.0';
 
  const seenCharacters=new Set();try{for(const skin of JSON.parse(sessionStorage.getItem('expenity.charactersSeen')||'[]'))seenCharacters.add(skin);}catch(_){}
  const characterSeen=skin=>seenCharacters.has(skin);
@@ -192,6 +192,7 @@
 			case 'add': EXA.openAdd(); break;
 			case 'tx-expense': case 'tx-income': case 'tx-transfer': EXA.openTx( null, { type: act.slice( 3 ) } ); break;
 			case 'add-bill': EXA.openBill(); break;
+			case 'ef-chat': EXA.efriendAskOpen(); break;
 			case 'open-tx': if ( ! UI.justSwiped ) EXA.openDetail( 'tx', id ); break;
 			case 'open-bill': if ( ! UI.justSwiped ) EXA.openDetail( 'bill', id ); break;
 			case 'edit-tx': if ( tx ) EXA.openTx( tx ); break;

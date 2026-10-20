@@ -115,7 +115,12 @@
 		const monthly = Math.round( ( spend / days ) * 30 + bills30 ), incomeMonthly = Math.round( inc30 + ( otherInc / win ) * 0.7 * 30 );
 		const left = projectedFree - remaining, cushion = Math.round( F.cushion() * monthly ), hasIncome = S().incomes.length > 0 || otherInc > 0;
 		// Safe: the chosen cushion is still there. Fits: it is not, but next month's income covers it. Otherwise at risk or no.
-		out.verdict = left >= cushion ? 'comfortable' : left >= 0 ? ( ( incomeMonthly > 0 && left + incomeMonthly >= monthly ) || left >= cushion / 2 ? 'ontrack' : 'tight' ) : ratio >= 0.6 ? 'atrisk' : 'unlikely';
+		// Stricter when you spend more than you earn: then it is about how long what is left lasts at your real monthly loss (the runway).
+		const deficit = hasIncome ? Math.max( 0, monthly - incomeMonthly ) : 0, runway = deficit > 0 ? left / deficit : Infinity;
+		if ( left < 0 ) out.verdict = ratio >= 0.6 ? 'atrisk' : 'unlikely';
+		else if ( deficit > 0 ) out.verdict = runway >= 6 && left >= cushion ? 'comfortable' : runway >= 3 ? 'ontrack' : runway >= 1 ? 'tight' : 'atrisk';
+		else out.verdict = left >= cushion ? 'comfortable' : ( ( incomeMonthly > 0 && left + incomeMonthly >= monthly ) || left >= cushion / 2 ? 'ontrack' : 'tight' );
+		out.deficit = deficit; out.runway = Number.isFinite( runway ) ? runway : null;
 		Object.assign( out, { reserved, balance, incomeSched, incomeOther, billsDue, overdue, spend, level, buffer, projectedFree, gap: Math.max( 0, remaining - projectedFree ), extra: Math.max( 0, projectedFree - remaining ), ratio, bills, cats, perWeek: Math.ceil( remaining / Math.max( 1, days / 7 ) ), win, left, cushion, monthly, incomeMonthly, hasIncome, limitPerDay: lpd, limitApplied, usualPerDay: habitPD + billsPD, leftMonths: monthly > 0 ? left / monthly : null, history: Math.max( 1, diff( now, first ) + 1 ) } );
 		out.confidence = win >= 60 && inWin.length >= 25 ? 'good' : win >= 28 && inWin.length >= 10 ? 'medium' : 'low';
 		// What would help: a quarter off the biggest Wants, and subscriptions that could pause.
@@ -172,6 +177,19 @@
 	};
 	/** eFriend's own suggestion: cheapest first, so the most plans can happen. */
 	F.suggestOrder = () => F.plans().slice().sort( ( a, b ) => ( EX.cents( a.target ) - EX.cents( b.target ) ) || ( a.deadline < b.deadline ? -1 : 1 ) ).map( ( g ) => g.id );
+	/** Which safety cushion would give the best outcome with this order: the biggest one that still keeps as many plans as possible workable. */
+	F.suggestCushion = ( order ) => {
+		const goals = F.plans(), keepP = goals.map( ( g ) => g.prio ), keepC = S().settings.efCushion, res = [];
+		order.forEach( ( id, i ) => { const g = goals.find( ( x ) => x.id === id ); if ( g ) g.prio = i + 1; } );
+		[ 0.5, 1, 1.5, 2, 3 ].forEach( ( m ) => { S().settings.efCushion = m; const all = F.all(); res.push( { m, fits: all.filter( ( f ) => F.status( f.verdict ) === 'safe' || F.status( f.verdict ) === 'fits' ).length, safe: all.filter( ( f ) => F.status( f.verdict ) === 'safe' ).length } ); } );
+		goals.forEach( ( g, i ) => { g.prio = keepP[ i ]; } ); S().settings.efCushion = keepC;
+		const top = Math.max( ...res.map( ( r ) => r.fits ) ), best = res.filter( ( r ) => r.fits === top ).pop();
+		return { m: best.m, fits: best.fits, n: goals.length, was: F.cushion() };
+	};
+	F.applySuggest = ( withCushion ) => {
+		const order = F.suggestOrder(), c = withCushion ? F.suggestCushion( order ) : null;
+		F.setOrder( order ); if ( c ) { S().settings.efCushion = c.m; S().settings.u = Date.now(); EX.save(); }
+	};
 	/** Safe, fits, at risk, or does not fit: the four groups the person hears about. */
 	F.status = ( v ) => ( v === 'comfortable' || v === 'done' ? 'safe' : v === 'ontrack' ? 'fits' : v === 'unlikely' ? 'no' : 'risk' );
 	/** If a lower-priority plan were dropped, would the first plan that does not fit now fit? */
@@ -284,7 +302,7 @@
 		const f = pickGoal(); if ( f ) F.snapshot();
 		if ( ! f ) {
 			const g = F.plans()[ 0 ];
-			return `<section data-home="efriend"><div class="ef-card ef-promo"><div class="ef-top">${ F.mascot( 'happy' ) }<div class="ef-bubble"><b>${ esc( t( 'efMeet' ) ) }</b>${ esc( g ? t( 'efPromoDate', { name: g.name } ) : t( 'efPromoWish' ) ) }</div></div>${ g ? '' : wishChips() }<div class="btn-row"><button type="button" class="btn btn-primary sm" data-ef-try="${ g ? esc( g.id ) : '' }">${ esc( g ? t( 'efAddDate' ) : t( 'efTry' ) ) }</button></div></div></section>`;
+			return `<section data-home="efriend"><div class="ef-card ef-promo"><div class="ef-top">${ F.mascot( 'happy' ) }<div class="ef-bubble"><b>${ esc( t( 'efMeet' ) ) }</b>${ esc( g ? t( 'efPromoDate', { name: g.name } ) : t( 'efPromoWish' ) ) }</div></div>${ g ? '' : wishChips() }<div class="btn-row"><button type="button" class="btn btn-primary sm" data-ef-try="${ g ? esc( g.id ) : '' }">${ esc( g ? t( 'efAddDate' ) : t( 'efTry' ) ) }</button><button type="button" class="btn btn-ghost sm" data-ef-ask>💬 ${ esc( t( 'efAskShort' ) ) }</button></div></div></section>`;
 		}
 		if ( ! EXA.flipCard ) return '';
 		const all = F.all();
@@ -295,7 +313,7 @@
 				<ul class="ef-mini-list">${ all.slice( 0, 4 ).map( ( x ) => `<li role="button" tabindex="0" data-ef-open="${ esc( x.goal.id ) }"><span class="ef-mi">${ all.indexOf( x ) === 0 ? '🏆' : UI.icon( x.goal.icon || 'plane', 18 ) }</span><b>${ esc( x.goal.name ) }</b>${ chip( x.verdict ) }</li>` ).join( '' ) }</ul>
 				${ all.length > 4 ? `<small>${ esc( t( 'efMorePlans', { n: all.length - 4 } ) ) }</small>` : '' }<small>${ esc( t( 'efTogether', { a: m( sm.cost ), b: m( sm.free ) } ) ) }</small></div>`;
 			const back = `<div class="wk-back ef-back"><span class="wk-ic bob">${ UI.icon( 'sparkles', 30 ) }</span><h3>${ esc( t( 'efAllPlans' ) ) }</h3>${ points( F.allSentences( sm ) ) }<button type="button" class="btn btn-primary" data-ef-all="">${ esc( t( 'efOpen' ) ) }</button></div>`;
-			return `<section data-home="efriend"><div class="sec-head"><h2>${ esc( t( 'efAllPlans' ) ) }</h2><span class="sec-acts">${ EXA.flipBtn( 'efriend' ) }</span></div>${ askBanner() }${ EXA.flipCard( 'efriend', front, back, 'fc-ef' ) }</section>`;
+			return `<section data-home="efriend"><div class="sec-head"><h2>${ esc( t( 'efAllPlans' ) ) }</h2><span class="sec-acts"><button type="button" class="link" data-ef-ask>💬 ${ esc( t( 'efAskShort' ) ) }</button>${ EXA.flipBtn( 'efriend' ) }</span></div>${ askBanner() }${ EXA.flipCard( 'efriend', front, back, 'fc-ef' ) }</section>`;
 		}
 		const g = f.goal, have = Math.max( 0, ( f.projectedFree || 0 ) + f.saved ), pct = f.done ? 100 : f.target ? Math.min( 100, Math.round( have / f.target * 100 ) ) : 0, label = { comfortable: 'Comfortable', ontrack: 'On track', tight: 'Tight', atrisk: 'At risk', unlikely: 'Unlikely', done: 'Done' }[ f.verdict ];
 		const front = `<div class="ef-card ef-${ f.verdict }"><div class="ef-top">${ F.mascot( f.verdict ) }<div class="ef-bubble ef-tkb" data-ef-bubble="${ f.verdict }"><div class="ef-ticker"><span class="ef-tk">${ esc( pickLine( f.verdict ) ) }</span></div></div></div>
@@ -303,7 +321,7 @@
 			<div class="ef-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${ pct }"><i style="width:${ pct }%"></i><span class="ef-suit" style="left:${ pct }%">${ UI.icon( g.icon || 'plane', 18 ) }</span></div>
 			<small>${ esc( f.left < 0 ? t( 'efShortLine', { a: money( -f.left / 100, main() ) } ) : t( 'efLeftLine', { a: money( f.left / 100, main() ), m: monthsText( f.leftMonths == null ? 0 : f.leftMonths ) } ) ) }</small></div>`;
 		const back = `<div class="wk-back ef-back"><span class="wk-ic bob">${ UI.icon( 'sparkles', 30 ) }</span><h3>${ esc( g.name ) }</h3>${ points( F.sentences( f ).concat( F.tips( f ).slice( 0, 1 ).map( ( x ) => x.text ) ) ) }<button type="button" class="btn btn-primary" data-ef-open="${ esc( g.id ) }">${ esc( t( 'efOpen' ) ) }</button><button type="button" class="btn btn-ghost sm" data-ef-edit="${ esc( g.id ) }">${ UI.icon( 'pencil', 18 ) } ${ esc( t( 'efEdit' ) ) }</button></div>`;
-		return `<section data-home="efriend"><div class="sec-head"><h2>${ esc( g.name ) }</h2><span class="sec-acts">${ EXA.flipBtn( 'efriend' ) }</span></div>${ EXA.flipCard( 'efriend', front, back, 'fc-ef' ) }</section>`;
+		return `<section data-home="efriend"><div class="sec-head"><h2>${ esc( g.name ) }</h2><span class="sec-acts"><button type="button" class="link" data-ef-ask>💬 ${ esc( t( 'efAskShort' ) ) }</button>${ EXA.flipBtn( 'efriend' ) }</span></div>${ EXA.flipCard( 'efriend', front, back, 'fc-ef' ) }</section>`;
 	};
 
 	/** Smart tips. A budget is eFriend's best friend: off target, it proposes budgets for the categories that cost the most and links straight to the form. */
@@ -349,7 +367,7 @@
 		const tiles = f.verdict === 'done' ? '' : `<div class="ef-tiles">${ tile( '💶', t( 'efTileCost' ), esc( m( f.target ) ) ) }${ tile( '🏦', t( 'efTileFree' ), esc( m( free ) ), free < 0 ? 'bad' : '' ) }${ f.left < 0 ? tile( '⚠️', t( 'efTileShort' ), esc( m( -f.left ) ), 'bad' ) : tile( '🛟', t( 'efTileLeft' ), esc( m( f.left ) ), f.left >= f.cushion ? 'good' : '', f.leftMonths == null ? '' : monthsText( f.leftMonths ) ) }${ tile( '📅', t( 'efTileDays' ), String( Math.max( 0, f.days ) ) ) }</div><p class="ef-conf">🎚️ ${ esc( t( 'efConfidence' ) ) } <b>${ esc( t( 'efConf_' + f.confidence ) ) }</b></p>`;
 		const er = ! f.done && ! f.late && RANK[ f.verdict ] < 4 ? F.earliest( g, f.reserved || 0 ) : undefined;
 		const callouts = [ f.verdict === 'done' ? t( 'efDone' ) : f.late ? t( 'efLate' ) : '', f.reserved > 0 ? t( 'efAfter', { a: m( f.reserved ) } ) : '', f.overdue > 0 ? t( 'efOverdue', { a: m( f.overdue ) } ) : '',
-			! f.done && ! f.late && f.left >= 0 && f.monthly > 0 ? t( 'efCover', { n: monthsText( f.leftMonths ), s: m( f.monthly ) } ) : '', ! f.done && ! f.late && f.left >= 0 && f.hasIncome ? ( f.incomeMonthly > 0 && f.left + f.incomeMonthly >= f.monthly ? t( 'efIncomeOk' ) : t( 'efIncomeNo' ) ) : '', ! f.done && ! f.late && ! f.hasIncome ? t( 'efNoIncomeAsk' ) : '',
+			! f.done && ! f.late && f.left >= 0 && f.monthly > 0 ? t( 'efCover', { n: monthsText( f.leftMonths ), s: m( f.monthly ) } ) : '', ! f.done && ! f.late && f.deficit > 0 ? t( 'efDeficit', { a: m( Math.round( f.deficit ) ), r: f.left >= 0 ? monthsShort( f.runway ) : '0' } ) : '', ! f.done && ! f.late && f.left >= 0 && f.hasIncome && ! ( f.deficit > 0 ) ? ( f.incomeMonthly > 0 && f.left + f.incomeMonthly >= f.monthly ? t( 'efIncomeOk' ) : t( 'efIncomeNo' ) ) : '', ! f.done && ! f.late && ! f.hasIncome ? t( 'efNoIncomeAsk' ) : '',
 			f.limitPerDay > 0 && f.usualPerDay > f.limitPerDay * 1.05 ? t( 'efLimitOver', { a: m( Math.round( f.usualPerDay ) ), b: m( Math.round( f.limitPerDay ) ) } ) : '', ...F.limitNotes(),
 			er ? t( 'efEarliest', { d: EX.dayName( er ) } ) : er === null ? t( 'efEarliestNone' ) : '',
 			t( 'efAccuracy', { d: f.history || 1 } ) ].filter( Boolean );
@@ -437,7 +455,7 @@
 			<path class="ef-m-e" d="${ M_E }" stroke="${ TEAL }" stroke-width="8"><animate attributeName="d" values="${ M_E };${ M_e }" dur=".9s" begin="1.1s" fill="freeze" ${ EASE }/></path>
 			<path class="ef-m-t" d="${ M_T }" stroke="#ffc94d" stroke-width="7"><animate attributeName="d" values="${ M_T };${ M_F }" dur=".9s" begin="1.1s" fill="freeze" ${ EASE }/><animate attributeName="stroke-width" values="7;8" dur=".9s" begin="1.1s" fill="freeze"/><animate attributeName="stroke" values="#ffc94d;${ GOLD }" dur=".9s" begin="1.1s" fill="freeze"/></path>
 			<path class="ef-m-hook" pathLength="1" d="${ M_HOOK }" stroke="${ GOLD }" stroke-width="8"/><path class="ef-m-bar" pathLength="1" d="${ M_BAR }" stroke="${ GOLD }" stroke-width="8"/></g>` : '';
-		return `<svg class="ef-logo ${ cls }" viewBox="-4 -92 330 130" role="img" aria-label="eFriend">${ strokes }
+		return `<svg class="ef-logo ${ cls }" viewBox="-44 -102 392 146" role="img" aria-label="eFriend">${ strokes }
 		${ WORD.map( ( [ , d ], i ) => `<path class="ef-lg-w ${ i < 2 ? 'sw' : 'ty' }" style="--d:${ i < 2 ? 2.6 : ( 3.1 + ( i - 2 ) * .22 ).toFixed( 2 ) }s" d="${ d }" fill="${ i === 0 ? TEAL : i === 1 ? GOLD : 'var(--ink)' }"/>` ).join( '' ) }</svg>`;
 	};
 	EXA.efriendIntro = () => {
@@ -604,7 +622,8 @@
 		const achievements = ( ach.length || plans.length ) ? `<section class="card ef-ach"><h2>🏆 ${ esc( t( 'efAchTitle' ) ) }</h2>${ ach.length ? points( [ t( 'efAchLine', { n: ach.length, a: m( totalDone ) } ) ] ) + `<ul class="ef-list">${ ach.map( ( g ) => `<li><div><b>${ esc( g.name ) }</b><small>${ esc( EX.dayName( g.doneOn || g.deadline ) ) } · ${ esc( m( EX.cents( g.doneAmount || g.target ) ) ) }</small></div><span class="ef-ach-ic">${ UI.icon( g.icon || 'trophy', 22 ) } ✅</span></li>` ).join( '' ) }</ul>` : points( [ t( 'efAchNone' ) ] ) }</section>` : '';
 		const pastHtml = pastList.length ? `<details class="card ef-sec ef-det"><summary><span class="ef-sec-em">🗄️</span><b>${ esc( t( 'efPast' ) ) }</b></summary><ul class="ef-list">${ pastList.map( ( g ) => `<li><div><b>${ esc( g.name ) }</b><small>${ esc( m( EX.cents( g.target ) ) ) }</small></div><button type="button" class="btn btn-ghost sm" data-ef-reopen="${ esc( g.id ) }">${ esc( t( 'efReopen' ) ) }</button></li>` ).join( '' ) }</ul></details>` : '';
 		const worst = all.length ? F.summary( all ) : null;
-		return `<section class="card ef-page"><div class="ef-top">${ F.mascot( 'happy', 84 ) }<div class="ef-bubble"><b>${ esc( t( 'efMeet' ) ) }</b></div></div>${ para( 'efMeetText' ) }</section>
+		const askCard = `<section class="card ef-askcard"><div class="ef-top">${ F.mascot( 'happy', 64 ) }<div class="ef-bubble"><b>${ esc( t( 'efAskCardTitle' ) ) }</b>${ esc( t( 'efAskCardText' ) ) }</div></div><div class="btn-row"><button type="button" class="btn btn-primary" data-ef-ask>💬 ${ esc( t( 'efAskGo' ) ) }</button></div></section>`;
+		return `${ askCard }<section class="card ef-page"><div class="ef-top">${ F.mascot( 'happy', 84 ) }<div class="ef-bubble"><b>${ esc( t( 'efMeet' ) ) }</b></div></div>${ para( 'efMeetText' ) }</section>
 			${ proposalsHtml() }${ overview }${ achievements }${ askBanner() ? `<section class="card">${ askBanner() }</section>` : '' }${ all.length > 1 ? `<section class="card"><h2>🏆 ${ esc( t( 'efPrioSection' ) ) }</h2>${ para( 'efPrioTextShort' ) }${ prioList( all ) }<div class="btn-row"><button type="button" class="btn btn-ghost" data-ef-suggest>✨ ${ esc( t( 'efSuggestOrder' ) ) }</button></div></section>` : '' }${ all.length ? `<section class="card">${ riskHtml() }</section>` : '' }${ buckets.length ? buckets.map( section ).join( '' ) : `<section class="card"><h2>${ esc( t( 'efYourGoals' ) ) }</h2><p class="muted">${ esc( t( 'efNoGoals' ) ) }</p></section>` }
 			${ allocCard() }${ pastHtml }<section class="card"><div class="btn-row"><button type="button" class="btn btn-primary" data-ef-new>${ UI.icon( 'plus', 20 ) } ${ esc( t( 'efNewGoal' ) ) }</button></div></section>
 			<section class="card"><label class="fx-row"><span class="mid"><b>${ esc( t( 'efSoundTitle' ) ) }</b><small>${ esc( t( 'efSoundHint' ) ) }</small></span><span class="switch"><input type="checkbox" data-ef-sound${ S().settings.efSound !== false ? ' checked' : '' } aria-label="${ esc( t( 'efSoundTitle' ) ) }"><i></i></span></label></section>
@@ -635,7 +654,7 @@
 		const m30 = addDays( now, 62 ), per = 62 / 30; let b30 = 0, i30 = 0;
 		S().bills.filter( ( b ) => ! b.done && b.next ).forEach( ( b ) => { EX.occurrences( b, m30 ).forEach( () => { b30 += centsOf( b.amount, b.currency ) / per; } ); } );
 		S().incomes.filter( ( i ) => ! i.done && i.next ).forEach( ( i ) => { EX.occurrences( i, m30 ).forEach( () => { i30 += centsOf( i.amount, i.currency ) / per; } ); } );
-		return { monthly: Math.round( ( spend / win ) * 30 + b30 ), incomeMonthly: Math.round( i30 + ( other / win ) * 0.7 * 30 ), hasIncome: S().incomes.length > 0 || other > 0, history: Math.max( 1, diff( now, first ) + 1 ) };
+		return { habitPD: spend / win, otherPD: ( other / win ) * 0.7, billsMonth: b30, monthly: Math.round( ( spend / win ) * 30 + b30 ), incomeMonthly: Math.round( i30 + ( other / win ) * 0.7 * 30 ), hasIncome: S().incomes.length > 0 || other > 0, history: Math.max( 1, diff( now, first ) + 1 ) };
 	};
 	/* ------------------------------------------------------------------ Priorities: drag to rank, how careful, and the question "which matters most?" */
 	const prioList = ( list ) => `<ol class="ef-prio" data-ef-prio-list>${ list.map( ( f, i ) => `<li class="ef-prio-i" data-id="${ esc( f.goal.id ) }"><button type="button" class="ef-grip" data-grip aria-label="${ esc( t( 'efDrag' ) ) }">\u2807</button><span class="ef-rank">${ i === 0 ? '🏆' : i + 1 }</span><div class="ef-prio-t"><b>${ esc( f.goal.name ) }</b><small>${ esc( money( f.target / 100, main() ) ) } · ${ esc( EX.dayName( f.goal.deadline ) ) }</small></div>${ chip( f.verdict ) }<span class="ef-ud"><button type="button" data-up aria-label="${ esc( t( 'efUp' ) ) }">▲</button><button type="button" data-down aria-label="${ esc( t( 'efDown' ) ) }">▼</button></span></li>` ).join( '' ) }</ol>`;
@@ -678,11 +697,19 @@
 	document.addEventListener( 'click', ( e ) => {
 		const up = e.target.closest && e.target.closest( '[data-up],[data-down]' ); if ( up ) { const li = up.closest( 'li' ), ol = li.parentNode; if ( up.hasAttribute( 'data-up' ) ) { if ( li.previousElementSibling ) ol.insertBefore( li, li.previousElementSibling ); } else if ( li.nextElementSibling ) ol.insertBefore( li.nextElementSibling, li ); renumber( ol ); commitOrder( ol ); return; }
 		if ( e.target.closest( '[data-ef-prio]' ) ) { e.preventDefault(); UI.closeSheet && UI.closeSheet(); setTimeout( () => EXA.openEfPriority(), 220 ); return; }
-		if ( e.target.closest( '[data-ef-suggest]' ) ) { F.setOrder( F.suggestOrder() ); return; }
+		if ( e.target.closest( '[data-ef-suggest]' ) ) { EXA.efSuggestOpen(); return; }
+		const sg = e.target.closest( '[data-ef-sug]' ); if ( sg ) { const back = F.view && F.view.k === 'prio'; F.applySuggest( sg.dataset.efSug === 'both' ); if ( back ) setTimeout( () => EXA.openEfPriority(), 60 ); else UI.closeSheet(); return; }
 		if ( e.target.closest( '[data-ef-prio-done]' ) ) { S().settings.efAsked = F.sig(); S().settings.u = Date.now(); EX.save(); UI.closeSheet(); }
 	} );
 	document.addEventListener( 'input', ( e ) => { const r = e.target.matches && e.target.matches( '[data-ef-margin]' ) ? e.target : null; if ( ! r ) return; const p = Number( r.value ), m = monthsAt( p ), box = r.closest( '.ef-risk' ); box.style.setProperty( '--c', colorAt( p ) ); box.style.setProperty( '--p', p + '%' ); box.querySelector( '.ef-risk-val' ).textContent = riskWord( p ) + ' · ' + monthsShort( m ); const hint = box.querySelector( '.ef-risk-hint' ), btn = hint.querySelector( 'button' ); hint.innerHTML = points( riskLines( p, m ) ); if ( btn ) hint.appendChild( btn ); } );
 	document.addEventListener( 'change', ( e ) => { if ( e.target.matches && e.target.matches( '[data-ef-margin]' ) ) { S().settings.efCushion = monthsAt( Number( e.target.value ) ); S().settings.u = Date.now(); EX.save(); } } );
+	/** "Let eFriend suggest": the person chooses whether it may touch only the order, or the order and the safety cushion. */
+	EXA.efSuggestOpen = () => {
+		const c = F.suggestCushion( F.suggestOrder() ), X = `<button type="button" class="ab-btn" data-close aria-label="${ esc( t( 'close' ) ) }">${ UI.icon( 'x', 24 ) }</button>`;
+		UI.openSheet( `<div class="sheet-head">${ X }<h2 id="sheetTitle">✨ ${ esc( t( 'efSuggestOrder' ) ) }</h2><span class="sp"></span></div><div class="sheet-pad ef-sug"><div class="ef-top">${ F.mascot( 'happy', 64 ) }<div class="ef-bubble"><b>${ esc( t( 'efSugAsk' ) ) }</b></div></div>
+			<button type="button" class="ef-sugopt" data-ef-sug="order"><b>📋 ${ esc( t( 'efSugOrder' ) ) }</b>${ points( [ t( 'efSugOrderText' ) ] ) }</button>
+			<button type="button" class="ef-sugopt ef-sugbest" data-ef-sug="both"><b>🛡️ ${ esc( t( 'efSugBoth' ) ) }</b>${ points( [ t( 'efSugBothText' ), t( 'efSugBothCushion', { a: monthsText( c.was ), b: monthsText( c.m ) } ), t( 'efSugBothFit', { n: c.fits, all: c.n } ) ] ) }</button></div>`, { cls: 'small' } );
+	};
 	EXA.openEfPriority = () => {
 		const list = F.all(); if ( ! list.length ) return; F.view = { k: 'prio' };
 		const X = `<button type="button" class="ab-btn" data-close aria-label="${ esc( t( 'close' ) ) }">${ UI.icon( 'x', 24 ) }</button>`, many = list.length > 1;
@@ -854,6 +881,92 @@
 	} );
 	document.addEventListener( 'input', ( e ) => { if ( e.target.matches && e.target.matches( '[data-ef-maxpend]' ) ) { const v = e.target.closest( '.ef-alloc-opts' ).querySelector( '[data-ef-maxv]' ); if ( v ) v.textContent = e.target.value; } } );
 
+	/* ------------------------------------------------------------------ Ask eFriend: "Can I buy shoes that cost 49?" */
+	const STOP = new Set( 'can could may i we you buy get purchase afford a an the that which cost costs costing for to is it be would should do does about my me on of at with euro euros eur dollar dollars usd and or please new'.split( ' ' ).concat( 'μπορώ να αγοράσω αγοράσουμε αγοράσει που κοστίζει κοστίζουν ένα μία μια ένας για το τα την τον με στο ευρώ ευρω και ή παρακαλώ νέο νέα νέος είναι θα πρέπει'.split( ' ' ) ) );
+	const ASK_ICONS = [ [ /shoe|sneaker|boot|sandal|παπούτσ|μπότ/i, 'heart', '👟' ], [ /phone|mobile|κινητ|τηλέφων/i, 'device-mobile', '📱' ], [ /laptop|computer|tablet|υπολογ/i, 'device-laptop', '💻' ], [ /trip|flight|holiday|vacation|hotel|ταξίδ|διακοπ|ξενοδοχ/i, 'plane', '✈️' ], [ /car|bike|scooter|αυτοκ|μηχαν|ποδήλατ/i, 'car', '🚗' ], [ /gift|present|δώρο|δωρο/i, 'gift', '🎁' ], [ /dinner|lunch|restaurant|coffee|φαγητ|δείπν|εστιατ|καφέ/i, 'trophy', '🍽️' ], [ /sofa|furniture|table|chair|καναπ|έπιπλ/i, 'home', '🛋️' ], [ /course|book|school|μάθημα|βιβλί|σχολ/i, 'school', '📚' ] ];
+	F.askIcon = ( item ) => { const x = ASK_ICONS.find( ( r ) => r[ 0 ].test( item || '' ) ); return x ? { icon: x[ 1 ], em: x[ 2 ] } : { icon: 'gift', em: '🛍️' }; };
+	/** "Can I buy shoes that cost $49?" -> { item: 'Shoes', cost: 4900 } (cents). Works in English and Greek. */
+	F.parseAsk = ( text ) => {
+		const raw = String( text || '' ), nums = raw.match( /\d+(?:[.,]\d+)*/g ) || [];
+		let cost = 0;
+		if ( nums.length ) { let n = nums[ 0 ]; if ( /^\d{1,3}([.,]\d{3})+$/.test( n ) ) n = n.replace( /[.,]/g, '' ); else n = n.replace( ',', '.' ); cost = Math.round( parseFloat( n ) * 100 ) || 0; }
+		const words = raw.toLowerCase().replace( /\d+(?:[.,]\d+)*/g, ' ' ).replace( /[€$£?!.,;:()"“”]/g, ' ' ).split( /\s+/ ).filter( ( w ) => w && ! STOP.has( w ) );
+		const item = words.join( ' ' ).trim(); return { item: item ? item.charAt( 0 ).toUpperCase() + item.slice( 1 ) : '', cost };
+	};
+	/** Your next ~11 weeks, day by day: wallets, income dates, bills, usual spending (capped by your limits) and your plans' dates. */
+	F.timeline = ( horizon = 80 ) => {
+		const now = today(), b = F.baseline(), end = addDays( now, horizon ), idx = ( d ) => Math.max( 0, diff( d, now ) ), all = F.all();
+		const bal0 = EX.mainCents( EX.activeAccounts().map( ( a ) => ( { amount: EX.balance( a ) / 100, currency: a.currency } ) ) );
+		const delta = new Array( horizon + 1 ).fill( 0 ), inc = Array.from( { length: horizon + 1 }, () => [] ), bil = Array.from( { length: horizon + 1 }, () => [] );
+		S().incomes.filter( ( i ) => ! i.done && i.next ).forEach( ( i ) => EX.occurrences( i, end ).forEach( ( d ) => { const k = idx( d ); if ( k <= horizon ) { delta[ k ] += centsOf( i.amount, i.currency ); inc[ k ].push( i.name ); } } ) );
+		S().bills.filter( ( x ) => ! x.done && x.next ).forEach( ( x ) => EX.occurrences( x, end ).forEach( ( d ) => { const k = idx( d ); if ( k <= horizon ) { delta[ k ] -= centsOf( x.amount, x.currency ); bil[ k ].push( x.name ); } } ) );
+		all.forEach( ( f ) => { if ( f.done || f.late ) return; const k = idx( f.goal.deadline ); if ( k <= horizon ) delta[ k ] -= f.remaining; } );
+		const lpd = F.limitPerDay(); let habit = b.habitPD; if ( lpd > 0 ) habit = Math.min( habit, Math.max( 0, lpd - b.billsMonth / 30 ) );
+		const out = []; let bal = bal0;
+		for ( let k = 0; k <= horizon; k++ ) { bal += delta[ k ] - habit + b.otherPD; out.push( { k, d: addDays( now, k ), bal, inc: inc[ k ], bills: bil[ k ] } ); }
+		return out;
+	};
+	/** For each of the next 42 days: if you bought it that day, how low would your money go afterwards (the next 30 days)? */
+	F.answer = ( cost ) => {
+		const tl = F.timeline( 80 ), b = F.baseline(), cushion = Math.round( F.cushion() * b.monthly ), days = [];
+		for ( let i = 0; i <= 41; i++ ) { let low = Infinity; for ( let k = i; k <= Math.min( i + 30, tl.length - 1 ); k++ ) low = Math.min( low, tl[ k ].bal - cost ); days.push( { i, d: tl[ i ].d, low, st: low >= cushion ? 'best' : low >= cushion / 2 ? 'good' : low >= 0 ? 'tight' : 'avoid', inc: tl[ i ].inc, bills: tl[ i ].bills, near: [ 0, 1, 2 ].map( ( o ) => ( tl[ Math.max( 0, i - o ) ].inc || [] ) ).flat() } ); }
+		let best = days.find( ( x ) => x.st === 'best' ) || days.find( ( x ) => x.st === 'good' ) || null; if ( ! best ) days.forEach( ( x ) => { if ( x.low >= 0 && ( ! best || x.low > best.low ) ) best = x; } );
+		return { cost, days, cushion, today: days[ 0 ], best: best && best.low >= 0 ? best : null, first: days.find( ( x ) => x.st === 'best' || x.st === 'good' ) || null, monthly: b.monthly, hasIncome: b.hasIncome };
+	};
+	const askState = { text: '', item: '', cost: '', ans: null, sel: 0 };
+	const askLine = ( a, item ) => {
+		const m = ( c ) => money( c / 100, main() ), it = item || t( 'efAskThing' ), t0 = a.today;
+		if ( t0.st === 'best' ) return t( 'efAskYes', { item: it, a: m( a.cost ) } );
+		if ( t0.st === 'good' ) return t( 'efAskThin', { item: it } );
+		if ( t0.st === 'tight' ) return a.best && a.best.i > 0 ? t( 'efAskTightWait', { d: EX.dayName( a.best.d ) } ) : t( 'efAskTight' );
+		return a.first ? t( 'efAskNotToday', { d: EX.dayName( a.first.d ) } ) : t( 'efAskNever' );
+	};
+	const calHtml = ( a ) => {
+		const first = parse( a.days[ 0 ].d ), lead = ( first.getDay() + 6 ) % 7, cells = []; for ( let i = 0; i < lead; i++ ) cells.push( '<i class="ef-cal-x"></i>' );
+		const wd = Array.from( { length: 7 }, ( _, i ) => new Intl.DateTimeFormat( EX.loc(), { weekday: 'short' } ).format( new Date( 2024, 0, 1 + i ) ).slice( 0, 2 ) );
+		a.days.forEach( ( x ) => { const dt = parse( x.d ), isBest = a.best && a.best.i === x.i; cells.push( `<button type="button" class="ef-cal-d st-${ x.st }${ x.i === askState.sel ? ' sel' : '' }${ x.i === 0 ? ' now' : '' }" data-ef-askday="${ x.i }" aria-label="${ esc( EX.dayName( x.d ) ) }"><b>${ dt.getDate() === 1 ? dt.toLocaleDateString( EX.loc(), { month: 'short' } ) + ' ' + dt.getDate() : dt.getDate() }</b><span class="mk">${ x.inc.length ? '💶' : '' }${ x.bills.length ? '🧾' : '' }</span>${ isBest ? '<em>⭐</em>' : '' }</button>` ); } );
+		return `<div class="ef-cal" role="group" aria-label="${ esc( t( 'efAskCalTitle' ) ) }"><div class="ef-cal-wd">${ wd.map( ( w ) => `<span>${ w }</span>` ).join( '' ) }</div><div class="ef-cal-g">${ cells.join( '' ) }</div></div><div class="ef-cal-legend"><span class="st-best">${ esc( t( 'efAskLBest' ) ) }</span><span class="st-good">${ esc( t( 'efAskLGood' ) ) }</span><span class="st-tight">${ esc( t( 'efAskLTight' ) ) }</span><span class="st-avoid">${ esc( t( 'efAskLAvoid' ) ) }</span><span>💶 ${ esc( t( 'efAskLPay' ) ) }</span><span>🧾 ${ esc( t( 'efAskLBill' ) ) }</span><span>⭐ ${ esc( t( 'efAskLStar' ) ) }</span></div>`;
+	};
+	const dayDetail = ( a ) => {
+		const x = a.days[ askState.sel ] || a.days[ 0 ], m = ( c ) => money( c / 100, main() ), mk = [];
+		if ( x.inc.length ) mk.push( t( 'efAskMkPay', { n: x.inc.join( ', ' ) } ) ); if ( x.bills.length ) mk.push( t( 'efAskMkBill', { n: x.bills.join( ', ' ) } ) );
+		return points( [ t( 'efAskDay_' + x.st, { d: EX.dayName( x.d ), a: m( Math.max( 0, x.low ) ) } ) ].concat( x.low < 0 ? [ t( 'efAskDayShort', { a: m( -x.low ) } ) ] : [] ).concat( mk ) );
+	};
+	const askBody = () => {
+		const a = askState.ans, m = ( c ) => money( c / 100, main() ), em = F.askIcon( askState.item ).em;
+		const mood = a.today.st === 'best' ? 'comfortable' : a.today.st === 'good' ? 'ontrack' : a.today.st === 'tight' ? 'tight' : 'atrisk';
+		const why = a.best && a.best.i > 0 ? ( a.best.near.length ? t( 'efAskWhyPay', { n: a.best.near[ 0 ] } ) : t( 'efAskWhyLow' ) ) : '';
+		const sel = a.days[ askState.sel ] || a.days[ 0 ], planDate = sel.i > 0 ? sel.d : ( a.best && a.best.i > 0 ? a.best.d : addDays( today(), 7 ) );
+		const small = a.monthly > 0 && a.cost < a.monthly * 0.04;
+		const lines = [ askLine( a, askState.item ), a.best && a.best.i > 0 ? t( 'efAskBest', { d: EX.dayName( a.best.d ), a: m( a.best.low ) } ) : '', why, small ? t( 'efAskSmall' ) : '', ! a.hasIncome ? t( 'efNoIncomeAsk' ) : '' ];
+		return `<div class="ef-askres"><div class="ef-top">${ F.mascot( mood, 80 ) }<div class="ef-bubble"><b>${ esc( em + ' ' + ( askState.item || t( 'efAskThing' ) ) + ' · ' + m( a.cost ) ) }</b></div></div>${ points( lines ) }
+			<ul class="ef-tiles ef-tiles3"><li class="ef-tile"><span class="ef-tile-em">🛍️</span><small>${ esc( t( 'efTileCost' ) ) }</small><b>${ esc( m( a.cost ) ) }</b></li><li class="ef-tile ${ a.today.low >= a.cushion ? 'good' : a.today.low < 0 ? 'bad' : '' }"><span class="ef-tile-em">📉</span><small>${ esc( t( 'efAskLow' ) ) }</small><b>${ esc( ( a.today.low < 0 ? '−' : '' ) + m( Math.abs( a.today.low ) ) ) }</b></li><li class="ef-tile ${ a.best ? 'good' : '' }"><span class="ef-tile-em">⭐</span><small>${ esc( t( 'efAskBestDay' ) ) }</small><b>${ esc( a.best ? EX.dayName( a.best.d ) : '–' ) }</b></li></ul>
+			<h3 class="ef-h">📅 ${ esc( t( 'efAskCalTitle' ) ) }</h3>${ calHtml( a ) }<div class="ef-callouts" id="efAskDetail">${ dayDetail( a ) }</div>
+			<div class="btn-row ef-ask-btns"><button type="button" class="btn btn-primary" data-ef-askplan="${ esc( planDate ) }">🎯 ${ esc( t( 'efAskMakePlan', { d: EX.dayName( planDate ) } ) ) }</button></div><p class="muted small">${ esc( t( 'efAskNote' ) ) }</p></div>`;
+	};
+	EXA.efriendAskOpen = ( prefill ) => {
+		if ( prefill ) Object.assign( askState, prefill );
+		const X = `<button type="button" class="ab-btn" data-close aria-label="${ esc( t( 'close' ) ) }">${ UI.icon( 'x', 24 ) }</button>`;
+		UI.openSheet( `<div class="sheet-head">${ X }<h2 id="sheetTitle">💬 ${ esc( t( 'efAskTitle' ) ) }</h2><span class="sp"></span></div><div class="sheet-pad ef-ask-sheet"><div class="ef-top">${ F.mascot( 'happy', 72 ) }<div class="ef-bubble"><b>${ esc( t( 'efAskHi' ) ) }</b></div></div>
+			<form id="efAskForm" novalidate><label class="f"><span>${ esc( t( 'efAskQ' ) ) }</span><input name="q" id="efAskQ" autocomplete="off" placeholder="${ esc( t( 'efAskPh' ) ) }" value="${ esc( askState.text ) }"></label>
+			<div class="grid2"><label class="f"><span>${ esc( t( 'efAskWhat' ) ) }</span><input name="what" autocomplete="off" value="${ esc( askState.item ) }"></label><label class="f"><span>${ esc( t( 'efAskHow' ) ) } (${ esc( main() ) })</span><input name="cost" inputmode="decimal" autocomplete="off" placeholder="0.00" value="${ esc( askState.cost ) }"></label></div>
+			<p class="err" id="efAskErr" role="alert" hidden></p><div class="btn-row"><button type="submit" class="btn btn-primary wide">💬 ${ esc( t( 'efAskGo' ) ) }</button></div></form>
+			<div id="efAskOut">${ askState.ans ? askBody() : '' }</div></div>`, { tall: true } );
+	};
+	document.addEventListener( 'submit', ( e ) => {
+		const f = e.target; if ( f.id !== 'efAskForm' ) return; e.preventDefault();
+		const el = f.elements, q = el.q.value.trim(), err = document.getElementById( 'efAskErr' ); let item = el.what.value.trim(), cost = num( el.cost.value );
+		if ( q && ( ! cost || ! item ) ) { const p = F.parseAsk( q ); if ( ! item ) item = p.item; if ( ! cost && p.cost ) cost = p.cost / 100; el.what.value = item; el.cost.value = cost ? String( cost ) : ''; }
+		if ( ! ( cost > 0 ) ) { err.textContent = t( 'efAskNeedCost' ); err.hidden = false; return; } err.hidden = true;
+		askState.text = q; askState.item = item; askState.cost = String( cost ); askState.ans = F.answer( Math.round( cost * 100 ) ); askState.sel = ( askState.ans.best && askState.ans.best.i ) || 0;
+		document.getElementById( 'efAskOut' ).innerHTML = askBody(); document.getElementById( 'efAskOut' ).scrollIntoView( { block: 'start', behavior: 'smooth' } );
+	} );
+	document.addEventListener( 'click', ( e ) => {
+		if ( e.target.closest && e.target.closest( '[data-ef-ask]' ) ) { e.preventDefault(); EXA.efriendAskOpen(); return; }
+		const d = e.target.closest && e.target.closest( '[data-ef-askday]' ); if ( d && askState.ans ) { askState.sel = Number( d.dataset.efAskday ); document.getElementById( 'efAskOut' ).innerHTML = askBody(); return; }
+		const pl = e.target.closest && e.target.closest( '[data-ef-askplan]' ); if ( pl ) { const ic = F.askIcon( askState.item ), dl = pl.dataset.efAskplan; UI.closeSheet && UI.closeSheet( true ); setTimeout( () => EXA.openEfPlan( null, { name: askState.item || t( 'efAskThing' ), target: askState.cost, deadline: dl > today() ? dl : addDays( today(), 1 ), icon: ic.icon } ), 220 ); }
+	} );
+
 	/* ------------------------------------------------------------------ Progress: what eFriend can honestly show */
 	// A snapshot per plan per day (how ready you are), so Reports can draw the journey. Small on purpose: at most 120 points per plan.
 	const pctOf = ( f ) => ( f.target ? Math.max( 0, Math.min( 300, Math.round( ( ( ( f.projectedFree || 0 ) + f.saved ) / f.target ) * 100 ) ) ) : 0 );
@@ -979,7 +1092,7 @@
 		efPlanNew: 'New eFriend plan', efPlanEdit: 'Edit plan', efPlanName: 'What are you planning?', efPlanNamePh: 'Trip to Italy', efPlanCost: 'How much will it cost?', efPlanDate: 'By when?',
 		efPlanWallets: 'Money I can use', efPlanLink: 'Money already set aside', efPlanLinkNone: 'None', efPlanLinkHint: 'Optional: count what you saved in one of your goals towards this plan.',
 		efNeedName: 'Give your plan a name.', efNeedCost: 'Enter how much it will cost.', efNeedFuture: 'Pick a date in the future.', efNeedWallet: 'Choose at least one wallet.',
-		tut_efriend_1: 'Open **More**, then **eFriend**.', tut_efriend_2: 'Tap **New plan with eFriend**, then enter what you are planning, how much it will cost and the date.', tut_efriend_3: 'Choose the wallets it can use. On Home, tap **Full analysis** to see whether you can afford it, what would help, and how your spending is sorted.',
+		tut_efriend_1: 'Open **More**, then **eFriend**.', tut_efriend_2: 'Tap **New plan with eFriend**, then enter what you are planning, how much it will cost and the date.', tut_efriend_3: 'Choose the wallets it can use. On Home, tap **Full analysis** to see whether you can afford it, what would help, and how your spending is sorted. Thinking of buying something? Tap **Ask** and eFriend finds the best day.',
 		tutD_efriend: 'A robot that checks if you can afford it', tutEx_efriend: 'Maria wants to take a 400 trip by December. eFriend checks her wallets, her rent and phone bill, and how much she spends on takeaway, and says: cut it by a quarter and you can afford it, with money to spare.',
 	} );
 	Object.assign( window.EXPENITY_I18N.langs.el, {
@@ -995,7 +1108,7 @@
 		efPlanNew: 'Νέο σχέδιο eFriend', efPlanEdit: 'Επεξεργασία σχεδίου', efPlanName: 'Τι σχεδιάζετε;', efPlanNamePh: 'Ταξίδι στην Ιταλία', efPlanCost: 'Πόσο θα κοστίσει;', efPlanDate: 'Μέχρι πότε;',
 		efPlanWallets: 'Χρήματα που μπορώ να χρησιμοποιήσω', efPlanLink: 'Χρήματα που έχετε ήδη στην άκρη', efPlanLinkNone: 'Κανένα', efPlanLinkHint: 'Προαιρετικό: υπολογίστε όσα έχετε αποταμιεύσει σε έναν στόχο σας για αυτό το σχέδιο.',
 		efNeedName: 'Δώστε ένα όνομα στο σχέδιό σας.', efNeedCost: 'Συμπληρώστε πόσο θα κοστίσει.', efNeedFuture: 'Διαλέξτε μια μελλοντική ημερομηνία.', efNeedWallet: 'Διαλέξτε τουλάχιστον ένα πορτοφόλι.',
-		tut_efriend_1: 'Ανοίξτε το **Περισσότερα** και μετά το **eFriend**.', tut_efriend_2: 'Πατήστε **Νέο σχέδιο με το eFriend** και συμπληρώστε τι σχεδιάζετε, πόσο θα κοστίσει και την ημερομηνία.', tut_efriend_3: 'Διαλέξτε τα πορτοφόλια που μπορεί να χρησιμοποιήσει. Στην Αρχική, πατήστε **Πλήρης ανάλυση** για να δείτε αν μπορείτε να το αντέξετε, τι θα βοηθούσε και πώς ταξινομούνται τα έξοδά σας.',
+		tut_efriend_1: 'Ανοίξτε το **Περισσότερα** και μετά το **eFriend**.', tut_efriend_2: 'Πατήστε **Νέο σχέδιο με το eFriend** και συμπληρώστε τι σχεδιάζετε, πόσο θα κοστίσει και την ημερομηνία.', tut_efriend_3: 'Διαλέξτε τα πορτοφόλια που μπορεί να χρησιμοποιήσει. Στην Αρχική, πατήστε **Πλήρης ανάλυση** για να δείτε αν μπορείτε να το αντέξετε, τι θα βοηθούσε και πώς ταξινομούνται τα έξοδά σας. Σκέφτεστε να αγοράσετε κάτι; Πατήστε **Ρωτήστε** και το eFriend βρίσκει την καλύτερη ημέρα.',
 		tutD_efriend: 'Ένα ρομπότ που ελέγχει αν μπορείτε να το αντέξετε', tutEx_efriend: 'Η Μαρία θέλει να κάνει ένα ταξίδι 400 μέχρι τον Δεκέμβριο. Το eFriend ελέγχει τα πορτοφόλια της, το ενοίκιο και τον λογαριασμό τηλεφώνου, και πόσα ξοδεύει σε delivery, και λέει: κόψτε το κατά ένα τέταρτο και μπορείτε να το αντέξετε, με χρήματα να περισσεύουν.',
 	} );
 	Object.assign( window.EXPENITY_I18N.langs.en, {
@@ -1211,4 +1324,42 @@
 	} );
 	Object.assign( window.EXPENITY_I18N.langs.en, { efMonthWord: 'month', efMonthsWord: 'months' } );
 	Object.assign( window.EXPENITY_I18N.langs.el, { efMonthWord: 'μήνας', efMonthsWord: 'μήνες' } );
+	Object.assign( window.EXPENITY_I18N.langs.en, {
+		efDeficit: '🔥 You spend about **{a}** a month more than you earn. What is left would last about **{r}**.',
+	} );
+	Object.assign( window.EXPENITY_I18N.langs.el, {
+		efDeficit: '🔥 Ξοδεύετε περίπου **{a}** τον μήνα περισσότερα από όσα κερδίζετε. Αυτό που απομένει θα κρατούσε περίπου **{r}**.',
+	} );
+	Object.assign( window.EXPENITY_I18N.langs.en, {
+		efAskTitle: 'Ask eFriend', efAskShort: 'Ask', efAskHi: 'Ask me before you buy something. I will find the best day.', efAskQ: 'Your question', efAskPh: 'Can I buy shoes that cost 49?', efAskWhat: 'What is it?', efAskHow: 'How much?', efAskGo: 'Ask eFriend', efAskThing: 'This purchase',
+		efAskNeedCost: 'Tell me how much it costs.', efAskCardTitle: 'Can I afford it?', efAskCardText: 'Ask about anything you want to buy and I will check your money and find the best day.',
+		efAskYes: '✅ Yes. You can buy {item} for **{a}** today and stay comfortably safe.', efAskThin: '👍 Yes, you can buy {item} today. Your cushion gets a little thinner.', efAskTight: '⚠️ You can, but it gets tight.', efAskTightWait: '⚠️ You can, but it gets tight. It is easier on **{d}**.',
+		efAskNotToday: '❌ Not today. A better day is **{d}**.', efAskNever: '❌ Not within 6 weeks at your current pace. Make it a plan and I will find the earliest safe date.',
+		efAskBest: '⭐ Best day: **{d}**. Your lowest point afterwards would be **{a}**.', efAskWhyPay: '💶 That is right after **{n}** arrives, before the next bills.', efAskWhyLow: '📊 Your lowest point afterwards is highest on that day.', efAskSmall: '🪙 It is small compared with your month, so a plan is optional.',
+		efAskCalTitle: 'Best days to buy', efAskLBest: 'Best', efAskLGood: 'Good', efAskLTight: 'Tight', efAskLAvoid: 'Avoid', efAskLPay: 'Income', efAskLBill: 'Bills', efAskLStar: 'Best day',
+		efAskLow: 'Lowest point after', efAskBestDay: 'Best day',
+		efAskDay_best: '🟢 **{d}**: a safe day. Your lowest point afterwards would be **{a}**.', efAskDay_good: '🟡 **{d}**: fine, with a thinner cushion. Lowest point afterwards **{a}**.', efAskDay_tight: '🟠 **{d}**: it gets tight. Lowest point afterwards **{a}**.', efAskDay_avoid: '🔴 **{d}**: better to avoid. You would run short.', efAskDayShort: '⚠️ About **{a}** short at the worst moment.',
+		efAskMkPay: '💶 Income that day: {n}', efAskMkBill: '🧾 Bills that day: {n}', efAskMakePlan: 'Make it a plan for {d}', efAskNote: 'I counted your income, bills, usual spending, spending limits and your other plans. Tap a day to see why.',
+	} );
+	Object.assign( window.EXPENITY_I18N.langs.el, {
+		efAskTitle: 'Ρωτήστε το eFriend', efAskShort: 'Ρωτήστε', efAskHi: 'Ρωτήστε με πριν αγοράσετε κάτι. Θα βρω την καλύτερη ημέρα.', efAskQ: 'Η ερώτησή σας', efAskPh: 'Μπορώ να αγοράσω παπούτσια 49 €;', efAskWhat: 'Τι είναι;', efAskHow: 'Πόσο κάνει;', efAskGo: 'Ρωτήστε το eFriend', efAskThing: 'Αυτή η αγορά',
+		efAskNeedCost: 'Πείτε μου πόσο κοστίζει.', efAskCardTitle: 'Μπορώ να το αντέξω;', efAskCardText: 'Ρωτήστε για οτιδήποτε θέλετε να αγοράσετε και θα ελέγξω τα χρήματά σας και θα βρω την καλύτερη ημέρα.',
+		efAskYes: '✅ Ναι. Μπορείτε να αγοράσετε: {item} για **{a}** σήμερα και να μείνετε άνετα ασφαλείς.', efAskThin: '👍 Ναι, μπορείτε να αγοράσετε: {item} σήμερα. Το περιθώριό σας λεπταίνει λίγο.', efAskTight: '⚠️ Μπορείτε, αλλά θα είναι στενά.', efAskTightWait: '⚠️ Μπορείτε, αλλά θα είναι στενά. Θα είναι πιο εύκολο στις **{d}**.',
+		efAskNotToday: '❌ Όχι σήμερα. Μια καλύτερη ημέρα είναι οι **{d}**.', efAskNever: '❌ Όχι μέσα σε 6 εβδομάδες με τον τρέχοντα ρυθμό σας. Κάντε το σχέδιο και θα βρω την πρώτη ασφαλή ημερομηνία.',
+		efAskBest: '⭐ Καλύτερη ημέρα: **{d}**. Το χαμηλότερο σημείο σας μετά θα ήταν **{a}**.', efAskWhyPay: '💶 Είναι αμέσως μετά την άφιξη του: **{n}**, πριν από τους επόμενους λογαριασμούς.', efAskWhyLow: '📊 Εκείνη την ημέρα το χαμηλότερο σημείο σας μετά είναι το υψηλότερο.', efAskSmall: '🪙 Είναι μικρό σε σχέση με τον μήνα σας, οπότε το σχέδιο είναι προαιρετικό.',
+		efAskCalTitle: 'Οι καλύτερες ημέρες για αγορά', efAskLBest: 'Άριστη', efAskLGood: 'Καλή', efAskLTight: 'Στενά', efAskLAvoid: 'Αποφύγετε', efAskLPay: 'Εισόδημα', efAskLBill: 'Λογαριασμοί', efAskLStar: 'Καλύτερη ημέρα',
+		efAskLow: 'Χαμηλότερο σημείο μετά', efAskBestDay: 'Καλύτερη ημέρα',
+		efAskDay_best: '🟢 **{d}**: ασφαλής ημέρα. Το χαμηλότερο σημείο σας μετά θα ήταν **{a}**.', efAskDay_good: '🟡 **{d}**: εντάξει, με λεπτότερο περιθώριο. Χαμηλότερο σημείο μετά **{a}**.', efAskDay_tight: '🟠 **{d}**: θα είναι στενά. Χαμηλότερο σημείο μετά **{a}**.', efAskDay_avoid: '🔴 **{d}**: καλύτερα να την αποφύγετε. Θα σας έλειπαν χρήματα.', efAskDayShort: '⚠️ Θα σας έλειπαν περίπου **{a}** τη χειρότερη στιγμή.',
+		efAskMkPay: '💶 Εισόδημα εκείνη την ημέρα: {n}', efAskMkBill: '🧾 Λογαριασμοί εκείνη την ημέρα: {n}', efAskMakePlan: 'Κάντε το σχέδιο για τις {d}', efAskNote: 'Έλαβα υπόψη το εισόδημα, τους λογαριασμούς, τα συνηθισμένα έξοδα, τα όριά σας και τα άλλα σας σχέδια. Πατήστε μια ημέρα για να δείτε το γιατί.',
+	} );
+	Object.assign( window.EXPENITY_I18N.langs.en, {
+		efSugAsk: 'What may I adjust for the best outcome?', efSugOrder: 'Only the order of your plans', efSugOrderText: '📋 Cheapest first, so the most plans can happen.\n🛡️ Your safety cushion stays as it is.',
+		efSugBoth: 'The order and the safety cushion', efSugBothText: '📋 Cheapest first, and I check which cushion fits best.', efSugBothCushion: '🛡️ Cushion: from **{a}** to **{b}**.', efSugBothFit: '✅ **{n}** of **{all}** plans would fit.',
+		efSugMenu: 'Ask eFriend', efSugMenuSub: 'Can I afford it? Best days to buy',
+	} );
+	Object.assign( window.EXPENITY_I18N.langs.el, {
+		efSugAsk: 'Τι να προσαρμόσω για το καλύτερο αποτέλεσμα;', efSugOrder: 'Μόνο τη σειρά των σχεδίων σας', efSugOrderText: '📋 Πρώτα το φθηνότερο, ώστε να γίνουν όσο το δυνατόν περισσότερα σχέδια.\n🛡️ Το μαξιλάρι ασφαλείας σας μένει ως έχει.',
+		efSugBoth: 'Τη σειρά και το μαξιλάρι ασφαλείας', efSugBothText: '📋 Πρώτα το φθηνότερο, και ελέγχω ποιο μαξιλάρι ταιριάζει καλύτερα.', efSugBothCushion: '🛡️ Μαξιλάρι: από **{a}** σε **{b}**.', efSugBothFit: '✅ Τα **{n}** από **{all}** σχέδια θα χωρούσαν.',
+		efSugMenu: 'Ρωτήστε το eFriend', efSugMenuSub: 'Μπορώ να το αγοράσω; Οι καλύτερες μέρες',
+	} );
 }() );

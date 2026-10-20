@@ -1,6 +1,20 @@
 {
-  "version": "0.51.3",
+  "version": "0.52.0",
   "releases": [
+    {
+      "version": "0.52.0",
+      "date": "2026-10-31",
+      "en": [
+        "Ask eFriend: type a question like “Can I buy shoes that cost 49?” (from the Ask link on the Home card, or More → eFriend). It answers for today and shows the next six weeks on a calendar, coloured by how safe each day is. It counts your income dates, bills, usual spending, spending limits and your other plans, marks paydays and bills, and stars the first safe day. Tap a day to see why, and turn it into a plan with one tap.",
+        "Stricter verdicts when you spend more than you earn: eFriend now looks at how long what is left would last at your real monthly loss, and says so plainly. A plan can no longer look comfortable on a salary that does not cover your spending.",
+        "Let eFriend suggest now asks what it may adjust: only the order of your plans, or the order and your safety cushion for the best outcome. Ask eFriend is also in the + menu, with its own icon."
+      ],
+      "el": [
+        "Ρωτήστε το eFriend: γράψτε μια ερώτηση όπως «Μπορώ να αγοράσω παπούτσια 49;» (από τον σύνδεσμο Ρωτήστε στην κάρτα της Αρχικής ή από το Περισσότερα → eFriend). Απαντά για σήμερα και δείχνει τις επόμενες έξι εβδομάδες σε ένα ημερολόγιο, χρωματισμένο ανάλογα με το πόσο ασφαλής είναι κάθε ημέρα. Λαμβάνει υπόψη τις ημερομηνίες του εισοδήματος, τους λογαριασμούς, τα συνηθισμένα έξοδα, τα όριά σας και τα άλλα σας σχέδια, σημειώνει τις πληρωμές και τους λογαριασμούς και βάζει αστέρι στην πρώτη ασφαλή ημέρα. Πατήστε μια ημέρα για να δείτε το γιατί και μετατρέψτε την σε σχέδιο με ένα πάτημα.",
+        "Πιο αυστηρές εκτιμήσεις όταν ξοδεύετε περισσότερα από όσα κερδίζετε: το eFriend κοιτάζει πλέον πόσο θα κρατούσε αυτό που απομένει με τη μηνιαία σας απώλεια και το λέει καθαρά. Ένα σχέδιο δεν μπορεί πια να φαίνεται άνετο με έναν μισθό που δεν καλύπτει τα έξοδά σας.",
+        "Το «Να προτείνει το eFriend» ρωτά πλέον τι μπορεί να προσαρμόσει: μόνο τη σειρά των σχεδίων σας, ή τη σειρά και το μαξιλάρι ασφαλείας σας για το καλύτερο αποτέλεσμα. Το «Ρωτήστε το eFriend» υπάρχει και στο μενού +, με δικό του εικονίδιο."
+      ]
+    },
     {
       "version": "0.51.3",
       "date": "2026-10-30",
