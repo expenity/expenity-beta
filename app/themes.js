@@ -86,7 +86,8 @@
 		const cur = EXA.skin(), th = THEMES.find( ( x ) => x.id === cur ) || THEMES[ 0 ];
 		const mode = root.dataset.theme || 'auto';
 		const mc = ( v, label, ic ) => `<button type="button" class="chip big${ mode === v ? ' on' : '' }" data-mode-set="${ v }">${ UI.icon( ic, 20 ) } ${ esc( label ) }</button>`;
-		return `<div class="theme-grid" role="radiogroup" aria-label="${ esc( t( 'themesTitle' ) ) }">${ THEMES.filter(x=>x.id!=='custom').map( ( x ) => `<div class="theme-cell">${ card( x, cur ) }${ opts.edit === false ? '' : `<button type="button" class="tc-edit" data-theme-edit="${ x.id }" aria-label="${ esc( t( 'themeEdit', { n: t( 'theme_' + x.id ) } ) ) }">${ UI.icon( 'pencil', 16 ) }</button>` }</div>` ).join( '' ) }</div>
+		return `<div class="theme-grid${ EXA.themesOpen ? ' open' : '' }" role="radiogroup" aria-label="${ esc( t( 'themesTitle' ) ) }">${ ( () => { const list = THEMES.filter( ( x ) => x.id !== 'custom' ), shown = list.slice( 0, 4 ).map( ( x ) => x.id ); if ( ! shown.includes( cur ) && list.some( ( x ) => x.id === cur ) ) shown[ 3 ] = cur; EXA.themeShown = shown; return list; } )().map( ( x ) => `<div class="theme-cell${ EXA.themeShown.includes( x.id ) ? '' : ' theme-extra' }">${ card( x, cur ) }${ opts.edit === false ? '' : `<button type="button" class="tc-edit" data-theme-edit="${ x.id }" aria-label="${ esc( t( 'themeEdit', { n: t( 'theme_' + x.id ) } ) ) }">${ UI.icon( 'pencil', 16 ) }</button>` }</div>` ).join( '' ) }</div>
+			${ ( () => { const n = THEMES.filter( ( x ) => x.id !== 'custom' ).length - EXA.themeShown.length; return n > 0 ? `<button type="button" class="btn btn-ghost theme-toggle" data-themes-toggle data-n="${ n + EXA.themeShown.length }" aria-expanded="${ !! EXA.themesOpen }">${ UI.icon( 'chevron-down', 18 ) } <span>${ esc( EXA.themesOpen ? t( 'themesShowFewer' ) : t( 'themesShowAll', { n: n + EXA.themeShown.length } ) ) }</span></button>` : ''; } )() }
 
 			${ cur === 'mobie' ? '' : `<label class="entry-paid fx-theme"><span><b>${ esc( t( 'compactTitle' ) ) }</b><small>${ esc( t( 'compactHint' ) ) }</small></span><span class="switch"><input type="checkbox" data-density-toggle${ root.dataset.density === 'compact' ? ' checked' : '' } aria-label="${ esc( t( 'compactTitle' ) ) }"><i></i></span></label>` }
 			${ EXA.hasThemeFx( cur ) ? `<label class="entry-paid fx-theme"><span><b>${ esc( t( 'themeFx' ) ) }</b><small>${ esc( t( 'themeFxHint' ) ) }</small></span><span class="switch"><input type="checkbox" data-fx-theme="${ cur }"${ EXA.themeFxOn( cur ) ? ' checked' : '' } aria-label="${ esc( t( 'themeFx' ) ) }"><i></i></span></label>` : '' }
@@ -205,7 +206,7 @@
 		if ( EXA.updateAmbient ) EXA.updateAmbient( on );
 		const enabled=['synthwave','amberwave','ion'].includes(EXA.skin())||(EXA.skin()==='custom'&&EXA.customPalette().trails);
 		if(!enabled){if(trails)trails.remove();trails=null;return;}
-		if(!trails){trails=document.createElement('div');trails.className='neon-trails';trails.setAttribute('aria-hidden','true');for(let i=0;i<22;i++){const dot=document.createElement('i');dot.style.left=(Math.random()*100)+'%';dot.style.setProperty('--duration',(7+Math.random()*12)+'s');dot.style.setProperty('--delay',(-Math.random()*20)+'s');dot.style.setProperty('--length',(15+Math.random()*45)+'px');trails.appendChild(dot);}document.body.prepend(trails);}
+		if(!trails){trails=document.createElement('div');trails.className='neon-trails';trails.setAttribute('aria-hidden','true');for(let i=0;i<8;i++){const dot=document.createElement('i');dot.style.left=(Math.random()*100)+'%';dot.style.setProperty('--duration',(7+Math.random()*12)+'s');dot.style.setProperty('--delay',(-Math.random()*20)+'s');dot.style.setProperty('--length',(15+Math.random()*45)+'px');trails.appendChild(dot);}document.body.prepend(trails);}
 		trails.hidden=!on;
 	};
 	document.addEventListener('click',e=>{if(e.target.closest('[data-custom-edit]'))editCustom();});
@@ -214,4 +215,11 @@
 	matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change',()=>EXA.updateTrails());
 	matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>setTimeout(()=>EXA.pillInk(),50));
 	EXA.applyCustomTheme(); EXA.updateTrails();
+	EX.I18N.langs.en.themesShowAll = 'Show all {n} themes'; EX.I18N.langs.en.themesShowFewer = 'Show fewer themes';
+	EX.I18N.langs.el.themesShowAll = 'Εμφάνιση και των {n} θεμάτων'; EX.I18N.langs.el.themesShowFewer = 'Εμφάνιση λιγότερων θεμάτων';
+	document.addEventListener( 'click', ( e ) => {
+		const b = e.target.closest && e.target.closest( '[data-themes-toggle]' ); if ( ! b ) return;
+		EXA.themesOpen = ! EXA.themesOpen; const g = b.parentNode.querySelector( '.theme-grid' ); if ( g ) g.classList.toggle( 'open', EXA.themesOpen );
+		b.setAttribute( 'aria-expanded', String( EXA.themesOpen ) ); b.querySelector( 'span' ).textContent = EXA.themesOpen ? EX.t( 'themesShowFewer' ) : EX.t( 'themesShowAll', { n: b.dataset.n || '' } );
+	} );
 }() );

@@ -294,3 +294,47 @@ document.addEventListener('toggle',event=>{
 	}, true );
 	window.addEventListener( 'resize', close ); document.addEventListener( 'scroll', ( e ) => { if ( pop && Date.now() - openedAt > 300 && ! e.target.closest?.( '.dp' ) ) close(); }, true );
 }() );
+
+/**
+ * Validation, everywhere: when a form shows its error, the page moves to the field behind it, the field is highlighted and pulses,
+ * and the message is repeated right under it (the main error often sits at the very bottom, out of sight).
+ * `UI.flagField( field, message )` does it for one field; a watcher does it for every `.err` message that appears, finding the field from
+ * the error text's key (name, amount, date, wallet...), from `aria-invalid`, or from the first field the browser calls invalid.
+ */
+( function () {
+	'use strict';
+	const UI = window.UI; if ( ! UI ) return; const ex = () => window.EX || {};
+	const FIELD = [ [ /cur/i, /currency/i ], [ /name/i, /name/i ], [ /amount|cost|price|target|limit|money|sum/i, /amount|cost|target|opening|limit|price|sum/i ], [ /date|next|future|deadline|due|until|when/i, /date|next|deadline|due|until|when/i ], [ /wallet|account/i, /account|wallet|gw/i ], [ /email/i, /email|mail/i ], [ /code|pass|key/i, /code|pass|key/i ], [ /cat/i, /categ/i ] ];
+	const wrapOf = ( el ) => el.closest( 'label.f, .f, label, fieldset, [data-entry-group], .field' ) || el.parentElement || el;
+	const clear = ( scope ) => scope.querySelectorAll( '.f-bad' ).forEach( ( w ) => { w.classList.remove( 'f-bad', 'f-pulse' ); const s = w.querySelector( ':scope > .f-err' ); if ( s ) s.remove(); w.querySelectorAll( '[aria-invalid]' ).forEach( ( x ) => x.removeAttribute( 'aria-invalid' ) ); } );
+	UI.flagField = ( el, msg ) => {
+		if ( ! el ) return false; const scope = el.closest( 'form, .sheet-body, dialog' ) || document.body; clear( scope );
+		el.closest( 'details' ) && ( el.closest( 'details' ).open = true );
+		const w = wrapOf( el ); w.classList.add( 'f-bad' ); el.setAttribute( 'aria-invalid', 'true' );
+		if ( msg && ! w.querySelector( ':scope > .f-err' ) ) { const s = document.createElement( 'small' ); s.className = 'f-err'; s.setAttribute( 'role', 'alert' ); s.textContent = msg; w.appendChild( s ); }
+		try { w.scrollIntoView( { block: 'center', behavior: matchMedia( '(prefers-reduced-motion: reduce)' ).matches ? 'auto' : 'smooth' } ); } catch ( e ) { /* ignore */ }
+		w.classList.remove( 'f-pulse' ); void w.offsetWidth; w.classList.add( 'f-pulse' ); setTimeout( () => w.classList.remove( 'f-pulse' ), 2400 );
+		const off = () => { w.classList.remove( 'f-bad', 'f-pulse' ); const s = w.querySelector( ':scope > .f-err' ); if ( s ) s.remove(); el.removeAttribute( 'aria-invalid' ); el.removeEventListener( 'input', off ); el.removeEventListener( 'change', off ); };
+		el.addEventListener( 'input', off ); el.addEventListener( 'change', off );
+		if ( ! matchMedia( '(pointer: coarse)' ).matches ) { try { el.focus( { preventScroll: true } ); } catch ( e ) { /* ignore */ } }
+		return true;
+	};
+	const fields = ( scope ) => [ ...scope.querySelectorAll( 'input:not([type=hidden]):not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file]), select, textarea' ) ].filter( ( el ) => ! el.disabled && el.offsetParent !== null );
+	const find = ( scope ) => {
+		const marked = scope.querySelector( '[aria-invalid="true"]' ); if ( marked && marked.offsetParent !== null ) return marked;
+		const all = fields( scope ), key = Date.now() - ( ex().lastErrAt || 0 ) < 1500 ? ex().lastErrKey || '' : '';
+		if ( key ) for ( const [ k, f ] of FIELD ) { if ( k.test( key ) ) { const hit = all.find( ( el ) => f.test( el.name || '' ) || f.test( el.id || '' ) || ( /date/.test( String( f ) ) && el.type === 'date' ) ); if ( hit ) return hit; } }
+		return all.find( ( el ) => ! el.checkValidity() ) || all.find( ( el ) => el.hasAttribute( 'required' ) && ! String( el.value ).trim() ) || null;
+	};
+	let queued = false;
+	const check = () => {
+		queued = false;
+		document.querySelectorAll( '.err' ).forEach( ( e ) => {
+			if ( e.hidden || ! e.textContent.trim() || e.offsetParent === null || e.dataset.flagged === e.textContent + '|' + ( ex().lastErrAt || 0 ) ) return;
+			e.dataset.flagged = e.textContent + '|' + ( ex().lastErrAt || 0 );
+			const scope = e.closest( 'form' ) || e.closest( '.sheet-pad, .sheet-body, dialog' ); if ( ! scope ) return;
+			const f = find( scope ); if ( f ) UI.flagField( f, e.textContent.trim() );
+		} );
+	};
+	new MutationObserver( () => { if ( ! queued ) { queued = true; requestAnimationFrame( check ); } } ).observe( document.documentElement, { subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: [ 'hidden' ] } );
+}() );

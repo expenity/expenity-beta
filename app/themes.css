@@ -1004,3 +1004,13 @@
 :is(:root[data-skin="mobie"], :root[data-density="compact"]) .bm-top { align-items: flex-start; } :is(:root[data-skin="mobie"], :root[data-density="compact"]) .bm-chip { padding: 2px 9px; font-size: 11.5px; }
 :is(:root[data-skin="mobie"], :root[data-density="compact"]) .bm-sum { padding: 8px 12px; } :is(:root[data-skin="mobie"], :root[data-density="compact"]) .bm-top > div > b { font-size: 20px; }
 :is(:root[data-skin="mobie"], :root[data-density="compact"]) .bm-bar { margin-top: 6px; height: 5px; } :is(:root[data-skin="mobie"], :root[data-density="compact"]) .bm-pct { margin-top: 6px; font-size: 12px; }
+
+/* themes: calmer. Fewer, slower, fainter motion everywhere; the extra themes are folded away until asked for. */
+.ambient { opacity: .55; }
+.amb-ember, .amb-bubble, .amb-sprinkle, .amb-leaf, .amb-digits { animation-duration: calc(var(--d) * 1.6) !important; }
+.amb-glow { animation-duration: 12s !important; opacity: .6; }
+@keyframes ambBreath { 0%, 100% { opacity: .4; transform: scale(1); } 50% { opacity: .65; transform: scale(1.03); } }
+.neon-trails { opacity: .55; } .neon-trails i { animation-duration: calc(var(--duration) * 1.5) !important; }
+.theme-grid:not(.open) .theme-extra { display: none; }
+.theme-toggle { width: 100%; margin: 6px 0 12px; justify-content: center; }
+.theme-toggle[aria-expanded="true"] svg { transform: rotate(180deg); }

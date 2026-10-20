@@ -26,6 +26,7 @@
 	EX.I18N = I18N;
 	EX.lang = () => lang;
 	EX.t = ( key, vars ) => {
+		if ( typeof key === 'string' && /^(err[A-Z]|efNeed|entry\w*Error|.*Err[A-Z]?\w*$)/.test( key ) ) { EX.lastErrKey = key; EX.lastErrAt = Date.now(); } // so a form that shows an error can point at the field behind it (see ui.js)
 		const v = I18N.langs[ lang ][ key ] !== undefined ? I18N.langs[ lang ][ key ] : I18N.langs.en[ key ];
 		if ( typeof v === 'function' ) return v( vars || {} );
 		if ( typeof v === 'string' && vars ) return v.replace( /\{(\w+)\}/g, ( m, k ) => ( vars[ k ] !== undefined ? vars[ k ] : m ) );

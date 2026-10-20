@@ -1,6 +1,20 @@
 {
-  "version": "0.54.14",
+  "version": "0.54.15",
   "releases": [
+    {
+      "version": "0.54.15",
+      "date": "2026-10-21",
+      "en": [
+        "Forms now show you what is missing: when you save and a required field is empty or wrong, the page scrolls to that field, highlights it, makes it pulse, and repeats the message right under it. This works on every form in the app.",
+        "Themes: only four are shown at first, with a button to show all of them. The theme you use is always visible.",
+        "Calmer themes: fewer, slower and fainter background animations everywhere, and far fewer leaves on the default theme."
+      ],
+      "el": [
+        "Οι φόρμες δείχνουν πλέον τι λείπει: όταν αποθηκεύετε και ένα υποχρεωτικό πεδίο είναι κενό ή λάθος, η σελίδα μεταφέρεται σε αυτό το πεδίο, το τονίζει, το κάνει να παλμοδοτεί και επαναλαμβάνει το μήνυμα ακριβώς από κάτω. Ισχύει σε κάθε φόρμα της εφαρμογής.",
+        "Θέματα: στην αρχή εμφανίζονται μόνο τέσσερα, με κουμπί για να δείτε όλα. Το θέμα που χρησιμοποιείτε είναι πάντα ορατό.",
+        "Πιο ήρεμα θέματα: λιγότερα, πιο αργά και πιο αχνά κινούμενα στοιχεία παρασκηνίου παντού, και πολύ λιγότερα φύλλα στο προεπιλεγμένο θέμα."
+      ]
+    },
     {
       "version": "0.54.14",
       "date": "2026-10-21",

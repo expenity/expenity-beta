@@ -447,7 +447,7 @@
 		if('account' in sm.prev)T.account=sm.prev.account;
 		T.smartOff=true;delete T.smart;drawTx(true,false);storeDraft();
 	}
-	function entryError(key,selector){EXA.playSound?.('error');const e=$('#txErr');e.textContent=t(key);e.hidden=false;const field=$(selector||'[data-tx=save]');const group=field?.closest('[data-entry-group]');if(group){group.open=true;T.entryGroup=group.dataset.entryGroup;}field?.setAttribute('aria-invalid','true');field?.setAttribute('aria-describedby','txErr');field?.scrollIntoView({block:'center'});field?.focus({preventScroll:true});}
+	function entryError(key,selector){EXA.playSound?.('error');const e=$('#txErr');e.textContent=t(key);e.hidden=false;const field=$(selector||'[data-tx=save]');const group=field?.closest('[data-entry-group]');if(group){group.open=true;T.entryGroup=group.dataset.entryGroup;}field?.setAttribute('aria-describedby','txErr');if(field&&field.matches('input,select,textarea'))UI.flagField(field,t(key));else{field?.setAttribute('aria-invalid','true');field?.scrollIntoView({block:'center'});}}
 	function saveTx(){
 		if(!T||T.saving||T.committed)return;if(EXA.photos.busy)return toast(t('photoWorking'));readTxFields();
 		if(T.editId&&T.unpaid&&T.type==='expense'){T.convertFrom=T.editId;T.editId=null;T.original=null;} // marking a saved expense as not paid turns it into a bill
