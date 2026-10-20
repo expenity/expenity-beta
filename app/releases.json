@@ -1,6 +1,22 @@
 {
-  "version": "0.50.0",
+  "version": "0.50.1",
   "releases": [
+    {
+      "version": "0.50.1",
+      "date": "2026-10-23",
+      "en": [
+        "eFriend now has its own page: More, then eFriend. See your goals, open the full analysis, review how your spending is sorted, and take the eFriend tour again any time.",
+        "A full-screen, step-by-step welcome to eFriend, with a preview of how it looks on Home.",
+        "The eFriend robot reacts when you tap it: it smiles and waves, giggles, and gets cross if you poke it too much.",
+        "Fixed: a goal coached by eFriend without a date no longer disappears. Home asks for the date, and the goal form asks for one."
+      ],
+      "el": [
+        "Το eFriend έχει πλέον τη δική του σελίδα: Περισσότερα, μετά eFriend. Δείτε τους στόχους σας, ανοίξτε την πλήρη ανάλυση, ελέγξτε πώς ταξινομούνται τα έξοδά σας και κάντε ξανά την περιήγηση του eFriend όποτε θέλετε.",
+        "Ένα καλωσόρισμα σε πλήρη οθόνη, βήμα προς βήμα, για το eFriend, με προεπισκόπηση του πώς φαίνεται στην Αρχική.",
+        "Το ρομπότ eFriend αντιδρά όταν το πατάτε: χαμογελά και χαιρετά, γελάει και θυμώνει αν το πειράξετε πολύ.",
+        "Διορθώθηκε: ένας στόχος που προπονεί το eFriend χωρίς ημερομηνία δεν εξαφανίζεται πια. Η Αρχική ζητά την ημερομηνία και η φόρμα του στόχου επίσης."
+      ]
+    },
     {
       "version": "0.50.0",
       "date": "2026-10-23",

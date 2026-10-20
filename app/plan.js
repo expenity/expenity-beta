@@ -266,6 +266,7 @@
 			const name = el.gname.value.trim(), target = amt( el.target.value );
 			if ( ! name ) return err( 'errNameReq' );
 			if ( ! ok( target ) ) return err( 'errAmount' );
+			if ( f.elements.coach?.checked && ! el.deadline.value ) return err( 'efNeedDate' );
 			const v = { tags: EXA.readTags(f), photo: el.photo.value, name, target, deadline: el.deadline.value || '', icon: el.icon.value, ...( EXA.efriendReadFields ? EXA.efriendReadFields( f ) : {} ) };
 			if ( editing ) Object.assign( editing, v ); else S().goals.push( Object.assign( { id: uid() }, v ) );
 			if ( EXA.efriendAfterSave && v.coach ) setTimeout( EXA.efriendAfterSave, 0 );

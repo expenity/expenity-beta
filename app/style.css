@@ -1136,3 +1136,60 @@ button.bm-pill{cursor:pointer;min-height:34px;transition:transform .15s}button.b
 @keyframes ef-fill{0%{width:20%}70%,100%{width:70%}}
 .ef-promo .ef-bubble .btn{margin-top:2px}
 .gcard [data-ef-open] svg{vertical-align:middle}
+.ef-page .ef-top{align-items:flex-start}
+.ef-grow{display:flex;flex-direction:column;gap:8px;padding:12px 0;border-bottom:1px solid var(--line)}
+.ef-gtop{display:flex;align-items:center;gap:10px}.ef-gtop>div{flex:1}.ef-gtop small{display:block;color:var(--muted)}
+.ef-gacts{display:flex;justify-content:flex-end}
+
+/* eFriend onboarding (full screen) */
+.ef-ob{position:fixed;inset:0;z-index:10000;background:var(--bg);display:flex;flex-direction:column;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+body.ef-ob-open{overflow:hidden}
+.ef-ob-head{display:flex;justify-content:space-between;align-items:center;padding:14px 16px}
+.ef-dots{display:flex;gap:6px}.ef-dots i{width:8px;height:8px;border-radius:99px;background:var(--line);transition:.3s}.ef-dots i.on{width:22px;background:#0f766e}.ef-dots i.done{background:color-mix(in srgb,#0f766e 50%,var(--line))}
+.ef-ob-main{flex:1;overflow:auto;padding:8px 20px 20px;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center;animation:ef-fade .4s both}
+.ef-ob-main p{max-width:340px;margin:0}
+.ef-ob-main .ef-logo{max-width:320px}
+.ef-ob-meet .ef-hop{animation:ef-pop .7s 3.2s both}.ef-ob-meet p{opacity:0;animation:ef-fade .6s 3.6s both}
+.ef-ob-sort{align-items:stretch;text-align:left}.ef-ob-sort .ef-list{width:100%}
+.ef-ob-foot{display:flex;justify-content:space-between;gap:12px;padding:12px 16px 16px;border-top:1px solid var(--line)}
+.ef-ob-foot .btn-primary{min-width:140px}
+.ef-phone{width:240px;border:3px solid var(--ink);border-radius:28px;padding:12px;background:var(--surface);display:flex;flex-direction:column;gap:8px;text-align:left}
+.ef-ph-bar{height:10px;width:40%;border-radius:6px;background:var(--line)}
+.ef-ph-block{height:34px;border-radius:12px;background:color-mix(in srgb,var(--line) 70%,var(--surface))}.ef-ph-block.short{height:22px;width:70%}
+.ef-ph-title{font-weight:700;padding:2px 4px}
+.ef-ph-widget{padding:8px;border-radius:14px;border:1px solid #0f766e;background:color-mix(in srgb,#0f766e 8%,var(--surface));animation:ef-widget 1s .5s both}
+.ef-ph-widget .ef-bubble{font-size:.78rem;padding:6px 8px}.ef-ph-widget .ef-meta{margin:6px 0;font-size:.75rem}
+.ef-demo-fill{animation:ef-dfill 3s .9s ease-out both}.ef-demo-suit{animation:ef-dsuit 3s .9s ease-out both}
+.ef-ph-row{height:34px;border-radius:12px;background:color-mix(in srgb,var(--line) 70%,var(--surface));display:flex;align-items:center;gap:8px;padding:0 10px;position:relative}
+.ef-ph-row.hot{background:color-mix(in srgb,#0f766e 14%,var(--surface));border:1.5px solid #0f766e;animation:ef-pulse 1.6s ease-in-out infinite}
+.ef-ph-ic{color:#0f766e;display:grid}
+.ef-tap{position:absolute;right:14px;top:14px;width:18px;height:18px;border-radius:50%;background:rgba(15,118,110,.35);animation:ef-tapa 1.6s ease-out infinite}
+@keyframes ef-widget{from{opacity:0;transform:translateY(14px) scale(.94)}to{opacity:1;transform:none}}
+@keyframes ef-dfill{from{width:8%}to{width:62%}}@keyframes ef-dsuit{from{left:8%}to{left:62%}}
+@keyframes ef-pulse{0%,100%{box-shadow:0 0 0 0 rgba(15,118,110,.35)}50%{box-shadow:0 0 0 6px rgba(15,118,110,0)}}
+@keyframes ef-tapa{0%{transform:scale(.4);opacity:1}100%{transform:scale(2.2);opacity:0}}
+@media (prefers-reduced-motion:reduce){.ef-ph-widget,.ef-demo-fill,.ef-demo-suit,.ef-ph-row.hot,.ef-tap,.ef-ob-meet .ef-hop,.ef-ob-meet p{animation:none;opacity:1}}
+
+/* eFriend: poke it */
+.ef-mascot{cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+.ef-face-smile,.ef-face-giggle,.ef-face-angry,.ef-fx .ef-heart,.ef-fx .ef-steam{display:none}
+.ef-poke-smile .ef-face-base,.ef-poke-giggle .ef-face-base,.ef-poke-angry .ef-face-base{display:none}
+.ef-poke-smile .ef-face-smile,.ef-poke-giggle .ef-face-giggle,.ef-poke-angry .ef-face-angry{display:inline}
+.ef-red{stroke:#ff8a80!important;filter:drop-shadow(0 0 3px #ff6b6b)}.ef-redglow{filter:drop-shadow(0 0 3px #ff6b6b)}
+.ef-poke-smile .ef-fx .ef-heart,.ef-poke-giggle .ef-fx .ef-heart{display:inline;transform-box:fill-box;transform-origin:center;animation:ef-heart 1.2s ease-out both}
+.ef-poke-angry .ef-fx .ef-steam{display:inline;animation:ef-steam .5s ease-in-out infinite}
+.ef-mascot.ef-poke-smile .ef-body{animation:ef-jump .5s ease-out}
+.ef-mascot.ef-poke-giggle .ef-body{animation:ef-wobble .25s ease-in-out 5}
+.ef-mascot.ef-poke-angry{animation:ef-shake .12s linear infinite}
+.ef-mascot.ef-poke-smile .ef-armR,.ef-mascot.ef-poke-giggle .ef-armR{animation:ef-flapR .3s ease-in-out 4}
+.ef-mascot.ef-poke-smile .ef-armL,.ef-mascot.ef-poke-giggle .ef-armL{animation:ef-flapL .3s ease-in-out 4}
+.ef-mascot.ef-poke-angry .ef-armR{animation:ef-flapR .14s linear infinite}
+.ef-mascot.ef-poke-angry .ef-armL{animation:ef-flapL .14s linear infinite}
+@keyframes ef-jump{0%{transform:translateY(0)}40%{transform:translateY(-12px)}100%{transform:translateY(0)}}
+@keyframes ef-wobble{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(6deg)}}
+@keyframes ef-shake{0%{transform:translate(0,0)}25%{transform:translate(-3px,1px)}50%{transform:translate(3px,-1px)}75%{transform:translate(-2px,-1px)}100%{transform:translate(0,0)}}
+@keyframes ef-flapR{0%,100%{transform:rotate(0)}50%{transform:rotate(-45deg)}}
+@keyframes ef-flapL{0%,100%{transform:rotate(0)}50%{transform:rotate(45deg)}}
+@keyframes ef-heart{0%{opacity:0;transform:translateY(10px) scale(.4)}30%{opacity:1}100%{opacity:0;transform:translateY(-22px) scale(1)}}
+@keyframes ef-steam{0%,100%{opacity:.3;transform:translateY(0)}50%{opacity:1;transform:translateY(-4px)}}
+@media (prefers-reduced-motion:reduce){.ef-mascot.ef-poke-angry,.ef-mascot[class*=ef-poke] .ef-body,.ef-mascot[class*=ef-poke] .ef-armR,.ef-mascot[class*=ef-poke] .ef-armL{animation:none}}

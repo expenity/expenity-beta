@@ -121,9 +121,24 @@
 			<rect x="14" y="18" width="92" height="70" rx="34" fill="url(#${ id }s)" stroke="#c3cbd9" stroke-width="1.2"/>
 			<rect x="24" y="27" width="72" height="52" rx="24" fill="#13171f"/>
 			<path d="M32 36q6-6 20-6" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".22"/>
-			<g class="ef-eyes">${ eyeL }${ eyeR }</g>${ brows }${ mouth }
-			<path d="m52 84 4 4 8-9" fill="none" stroke="#ffc94d" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" opacity=".95"/>${ extra }</g></svg>`;
+			<g class="ef-face-base"><g class="ef-eyes">${ eyeL }${ eyeR }</g>${ brows }${ mouth }</g>
+			<g class="ef-face-smile"><path d="M38 50q6-9 12 0M70 50q6-9 12 0" class="ef-glow ef-stk"/><path d="M50 58q10 14 20 0z" fill="${ G }" class="ef-glow"/><circle cx="33" cy="60" r="3.5" fill="#ff9db0" opacity=".7"/><circle cx="87" cy="60" r="3.5" fill="#ff9db0" opacity=".7"/></g>
+			<g class="ef-face-giggle"><path d="M38 42l9 6-9 6M82 42l-9 6 9 6" class="ef-glow ef-stk"/><path d="M48 58q12 18 24 0z" fill="${ G }" class="ef-glow"/></g>
+			<g class="ef-face-angry"><path d="M36 38l14 6M84 38l-14 6" class="ef-glow ef-stk ef-red"/><rect x="39" y="46" width="11" height="8" rx="2" fill="#ff8a80" class="ef-glow ef-redglow"/><rect x="70" y="46" width="11" height="8" rx="2" fill="#ff8a80" class="ef-glow ef-redglow"/><path d="M50 66q10-9 20 0" class="ef-glow ef-stk ef-red"/></g>
+			<path d="m52 84 4 4 8-9" fill="none" stroke="#ffc94d" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" opacity=".95"/>${ extra }</g><g class="ef-fx"><path class="ef-heart h1" d="M60 24c-5-8-16 0-8 8l8 7 8-7c8-8-3-16-8-8z" fill="#ff6b8a"/><path class="ef-steam s1" d="M30 20q-6-6 0-12M90 20q6-6 0-12" fill="none" stroke="#9aa4b5" stroke-width="3" stroke-linecap="round"/></g></svg>`;
 	};
+
+	/* Poke it: a click smiles and waves, a few giggle, many make it angry and shake. */
+	const pokes = new WeakMap();
+	document.addEventListener( 'click', ( e ) => {
+		const m = e.target.closest && e.target.closest( '.ef-mascot' ); if ( ! m ) return;
+		e.preventDefault(); e.stopPropagation();
+		const now = performance.now(), st = pokes.get( m ) || { t: [], timer: 0 }; pokes.set( m, st );
+		st.t = st.t.filter( ( x ) => now - x < 2500 ); st.t.push( now );
+		const n = st.t.length, cls = n >= 5 ? 'angry' : n >= 3 ? 'giggle' : 'smile';
+		m.classList.remove( 'ef-poke-smile', 'ef-poke-giggle', 'ef-poke-angry' ); void m.getBoundingClientRect(); m.classList.add( 'ef-poke-' + cls );
+		clearTimeout( st.timer ); st.timer = setTimeout( () => m.classList.remove( 'ef-poke-smile', 'ef-poke-giggle', 'ef-poke-angry' ), cls === 'angry' ? 2400 : 1300 );
+	}, true );
 
 	/* ------------------------------------------------------------------ Words (funny on purpose) */
 	const pickLine = ( verdict ) => { const lines = t( 'ef_' + verdict ).split( '|' ), d = parse( today() ); return lines[ ( d.getDate() + d.getMonth() ) % lines.length ]; };
@@ -142,9 +157,9 @@
 	EXA.efriendHome = () => {
 		if ( ! on() ) return '';
 		const f = pickGoal();
-		if ( ! f ) { const g = S().goals.find( ( x ) => ! x.coach ); return g ? `<section data-home="efriend"><div class="ef-card ef-promo"><div class="ef-top">${ F.mascot( 'happy' ) }<div class="ef-bubble"><b>${ esc( t( 'efMeet' ) ) }</b>${ esc( t( 'efPromo', { name: g.name } ) ) }<button type="button" class="btn btn-primary sm" data-ef-try="${ esc( g.id ) }">${ esc( t( 'efTry' ) ) }</button></div></div></div></section>` : ''; }
+		if ( ! f ) { const g = S().goals.find( ( x ) => ! x.coach || ! x.deadline ); return g ? `<section data-home="efriend"><div class="ef-card ef-promo"><div class="ef-top">${ F.mascot( 'happy' ) }<div class="ef-bubble"><b>${ esc( t( 'efMeet' ) ) }</b>${ esc( t( g.coach ? 'efPromoDate' : 'efPromo', { name: g.name } ) ) }<button type="button" class="btn btn-primary sm" data-ef-try="${ esc( g.id ) }">${ esc( t( g.coach ? 'efAddDate' : 'efTry' ) ) }</button></div></div></div></section>` : ''; }
 		if ( ! EXA.flipCard ) return '';
-		if ( ! ( S().device || {} ).efIntro && ! navigator.webdriver ) setTimeout( () => EXA.efriendIntro(), 600 );
+		if ( ! ( S().device || {} ).efIntro && ! navigator.webdriver ) setTimeout( () => EXA.efriendOnboard(), 600 );
 		const g = f.goal, pct = f.target ? Math.min( 100, Math.round( f.saved / f.target * 100 ) ) : 0, label = { comfortable: 'Comfortable', ontrack: 'On track', tight: 'Tight', atrisk: 'At risk', unlikely: 'Unlikely', done: 'Done' }[ f.verdict ];
 		const front = `<div class="ef-card ef-${ f.verdict }"><div class="ef-top">${ F.mascot( f.verdict ) }<div class="ef-bubble"><b>${ esc( pickLine( f.verdict ) ) }</b></div></div>
 			<div class="ef-meta"><span class="ef-chip">${ label }</span><span>${ esc( t( 'efDaysLeft', { n: Math.max( 0, f.days ) } ) ) }</span></div>
@@ -175,7 +190,7 @@
 			<button type="button" class="btn btn-ghost wide" data-ef-redo="${ esc( id ) }">${ esc( t( 'efRedo' ) ) }</button><p class="muted small">${ esc( t( 'efDisclaimer' ) ) }</p></div>`, { tall: true } );
 		document.querySelector( '.ef-sheet' ).addEventListener( 'change', ( e ) => { const s = e.target.closest( '[data-ef-level]' ); if ( ! s ) return; const o = S().settings.importance = S().settings.importance || {}; o[ 'cat:' + s.dataset.efLevel ] = s.value; S().settings.u = Date.now(); EX.save(); EXA.openEfriend( id ); EXA.render(); } );
 	};
-	document.addEventListener( 'click', ( e ) => { const tr = e.target.closest( '[data-ef-try]' ); if ( tr ) { e.preventDefault(); EXA.openGoal( S().goals.find( ( x ) => x.id === tr.dataset.efTry ) ); return; } const r = e.target.closest( '[data-ef-redo]' ); if ( r ) { UI.closeSheet(); setTimeout( () => EXA.efriendOnboard( r.dataset.efRedo ), 200 ); return; } const b = e.target.closest( '[data-ef-open]' ); if ( b ) { e.preventDefault(); e.stopImmediatePropagation(); EXA.openEfriend( b.dataset.efOpen ); } }, true );
+	document.addEventListener( 'click', ( e ) => { const tr = e.target.closest( '[data-ef-try]' ); if ( tr ) { e.preventDefault(); EXA.openGoal( S().goals.find( ( x ) => x.id === tr.dataset.efTry ) ); return; } const r = e.target.closest( '[data-ef-redo]' ); if ( r ) { UI.closeSheet(); setTimeout( () => EXA.efriendOnboard( r.dataset.efRedo, 'sort' ), 200 ); return; } const b = e.target.closest( '[data-ef-open]' ); if ( b ) { e.preventDefault(); e.stopImmediatePropagation(); EXA.openEfriend( b.dataset.efOpen ); } }, true );
 
 	/* ------------------------------------------------------------------ Goal form: the switch and the wallets */
 	EXA.efriendChip = ( g ) => ( g.coach && on() && g.deadline ? `<button type="button" class="btn btn-ghost sm" data-ef-open="${ esc( g.id ) }">${ F.mascot( F.forecast( g ).verdict, 22 ) } eFriend</button>` : '' );
@@ -183,7 +198,7 @@
 		if ( ! on() ) return '';
 		const ws = EX.writableAccounts(), chosen = g && g.wallets && g.wallets.length ? g.wallets : ws.map( ( w ) => w.id );
 		return `<div class="ef-intro"><span class="ef-mini">${ F.mascot( 'happy', 44 ) }</span><div><b>${ esc( t( 'efMeet' ) ) }</b><small>${ esc( t( 'efMeetText' ) ) }</small></div></div>
-			<label class="entry-paid ef-switch"><span><b>${ esc( t( 'efToggle' ) ) }</b><small>${ esc( t( 'efToggleHint' ) ) }</small></span><span class="switch"><input type="checkbox" name="coach"${ g && g.coach ? ' checked' : '' }><i></i></span></label>
+			<label class="entry-paid ef-switch"><span><b>${ esc( t( 'efToggle' ) ) }</b><small>${ esc( t( 'efToggleHint' ) ) }</small></span><span class="switch"><input type="checkbox" name="coach"${ ! g || g.coach ? ' checked' : '' }><i></i></span></label>
 			<div class="lbl">${ esc( t( 'efWallets' ) ) }</div><div class="chips wrap">${ ws.map( ( w ) => `<label class="chip ef-wallet"><input type="checkbox" name="gw" value="${ esc( w.id ) }"${ chosen.includes( w.id ) ? ' checked' : '' }> ${ esc( EX.accountName( w ) ) }</label>` ).join( '' ) }</div>`;
 	};
 	EXA.efriendAfterSave = () => { const g = F.goals().slice( -1 )[ 0 ]; if ( g && ! ( S().device || {} ).efOnboard ) setTimeout( () => EXA.efriendOnboard( g.id ), 450 ); };
@@ -219,28 +234,67 @@
 			return { cat, spent: tot[ cat ] > 1 ? tot[ cat ] : 0, auto: base, level: ov[ 'cat:' + cat ] || auto.level };
 		} );
 	};
-	EXA.efriendOnboard = ( goalId ) => {
-		const rows = F.sortRows();
+	/** Full-screen stepped onboarding: meet it, see the Home card, check the sorting, know where to find it. `only: 'sort'` shows just the sorting step. */
+	EXA.efriendOnboard = ( goalId, only ) => {
 		try { S().device.efOnboard = 1; } catch ( e ) { /* ignore */ }
-		if ( ! rows.length ) { if ( goalId ) EXA.openEfriend( goalId ); return; }
-		const row = ( r ) => `<li data-ef-row="${ esc( r.cat ) }"><div><b>${ esc( EX.catInfo( r.cat ).name ) }</b>${ r.spent ? `<small>${ esc( money( r.spent / 100, main() ) ) }</small>` : '' }</div>
-			<div class="ef-tri" role="group" aria-label="${ esc( EX.catInfo( r.cat ).name ) }">${ LVL.map( ( l ) => `<button type="button" data-ef-set="${ l }" aria-pressed="${ r.level === l }" class="${ r.level === l ? 'on ' : '' }ef-l-${ l }">${ esc( t( 'ef_lvl_' + l ) ) }</button>` ).join( '' ) }</div></li>`;
-		UI.openSheet( `<div class="sheet-head"><h2>${ esc( t( 'efOnbTitle' ) ) }</h2><span class="sp"></span></div>
-			<div class="sheet-pad ef-sheet ef-onb"><div class="ef-top">${ F.mascot( 'happy', 72 ) }<div class="ef-bubble"><b>${ esc( t( 'efOnbHi' ) ) }</b></div></div>
-			<p class="muted small">${ esc( t( 'efSortText' ) ) }</p>
-			<ul class="ef-list">${ rows.map( row ).join( '' ) }</ul>
-			<div class="btn-row"><button type="button" class="btn btn-primary wide" data-ef-save>${ esc( t( 'efOnbSave' ) ) }</button></div></div>`, { tall: true } );
-		const root = document.querySelector( '.ef-onb' );
-		root.addEventListener( 'click', ( e ) => {
-			const b = e.target.closest( '[data-ef-set]' );
-			if ( b ) { b.parentNode.querySelectorAll( 'button' ).forEach( ( x ) => { const on = x === b; x.classList.toggle( 'on', on ); x.setAttribute( 'aria-pressed', on ); } ); return; }
-			if ( ! e.target.closest( '[data-ef-save]' ) ) return;
-			const o = S().settings.importance = S().settings.importance || {};
-			root.querySelectorAll( '[data-ef-row]' ).forEach( ( li ) => { const cat = li.dataset.efRow, v = li.querySelector( '.on' )?.dataset.efSet, r = rows.find( ( x ) => x.cat === cat ); if ( ! v ) return; if ( v === r.auto ) delete o[ 'cat:' + cat ]; else o[ 'cat:' + cat ] = v; } );
-			S().settings.u = Date.now(); EX.save(); UI.closeSheet(); EXA.render();
+		const rows = F.sortRows(), pick = {}; rows.forEach( ( r ) => { pick[ r.cat ] = r.level; } );
+		const steps = only === 'sort' ? [ 'sort' ] : [ 'meet', 'see', 'sort', 'where' ];
+		let i = 0;
+		const ov = document.createElement( 'div' ); ov.className = 'ef-ob'; ov.setAttribute( 'role', 'dialog' ); ov.setAttribute( 'aria-modal', 'true' ); ov.setAttribute( 'aria-label', 'eFriend' );
+		const mock = ( kind ) => kind === 'see'
+			? `<div class="ef-phone"><div class="ef-ph-bar"></div><div class="ef-ph-block short"></div><div class="ef-ph-block"></div>
+				<div class="ef-ph-widget"><div class="ef-top">${ F.mascot( 'ontrack', 56 ) }<div class="ef-bubble ef-type"><b>${ esc( t( 'ef_ontrack' ).split( '|' )[ 0 ] ) }</b></div></div>
+				<div class="ef-meta"><span class="ef-chip">On track</span><span>${ esc( t( 'efDaysLeft', { n: 112 } ) ) }</span></div><div class="ef-bar"><i class="ef-demo-fill"></i><span class="ef-suit ef-demo-suit">${ UI.icon( 'plane', 16 ) }</span></div></div>
+				<div class="ef-ph-block"></div><div class="ef-ph-block short"></div></div>`
+			: `<div class="ef-phone"><div class="ef-ph-title">${ esc( t( 'barMore' ) ) }</div><div class="ef-ph-row"></div><div class="ef-ph-row"></div><div class="ef-ph-row hot"><span class="ef-ph-ic">${ UI.icon( 'sparkles', 18 ) }</span><b>eFriend</b><i class="ef-tap"></i></div><div class="ef-ph-row"></div><div class="ef-ph-row"></div></div>`;
+		const body = ( id ) => {
+			if ( id === 'meet' ) return `${ F.logoWord( 'play' ) }<div class="ef-hop">${ F.mascot( 'cheer', 110 ) }</div><p>${ esc( t( 'efMeetText' ) ) }</p>`;
+			if ( id === 'see' ) return `<h2>${ esc( t( 'efObSeeTitle' ) ) }</h2>${ mock( 'see' ) }<p>${ esc( t( 'efObSeeText' ) ) }</p>`;
+			if ( id === 'where' ) return `<h2>${ esc( t( 'efObWhereTitle' ) ) }</h2>${ mock( 'where' ) }<p>${ esc( t( 'efObWhereText' ) ) }</p>`;
+			const row = ( r ) => `<li data-ef-row="${ esc( r.cat ) }"><div><b>${ esc( EX.catInfo( r.cat ).name ) }</b>${ r.spent ? `<small>${ esc( money( r.spent / 100, main() ) ) }</small>` : '' }</div><div class="ef-tri" role="group" aria-label="${ esc( EX.catInfo( r.cat ).name ) }">${ LVL.map( ( l ) => `<button type="button" data-ef-set="${ l }" aria-pressed="${ pick[ r.cat ] === l }" class="${ pick[ r.cat ] === l ? 'on ' : '' }ef-l-${ l }">${ esc( t( 'ef_lvl_' + l ) ) }</button>` ).join( '' ) }</div></li>`;
+			return `<div class="ef-top">${ F.mascot( 'happy', 72 ) }<div class="ef-bubble"><b>${ esc( t( 'efOnbHi' ) ) }</b></div></div><p class="muted small">${ esc( t( 'efSortText' ) ) }</p>${ rows.length ? `<ul class="ef-list">${ rows.map( row ).join( '' ) }</ul>` : `<p class="muted">${ esc( t( 'efNoSpend' ) ) }</p>` }`;
+		};
+		const finish = ( save ) => {
+			if ( save && rows.length ) { const o = S().settings.importance = S().settings.importance || {}; rows.forEach( ( r ) => { if ( pick[ r.cat ] === r.auto ) delete o[ 'cat:' + r.cat ]; else o[ 'cat:' + r.cat ] = pick[ r.cat ]; } ); S().settings.u = Date.now(); EX.save(); }
+			ov.remove(); document.body.classList.remove( 'ef-ob-open' ); EXA.render();
 			if ( goalId ) setTimeout( () => EXA.openEfriend( goalId ), 250 );
+		};
+		const draw = () => {
+			const id = steps[ i ], last = i === steps.length - 1;
+			ov.innerHTML = `<div class="ef-ob-head"><span class="ef-dots">${ steps.map( ( x, n ) => `<i class="${ n === i ? 'on' : n < i ? 'done' : '' }"></i>` ).join( '' ) }</span><button type="button" class="btn btn-ghost sm" data-ef-ob="skip">${ esc( t( 'efSkip' ) ) }</button></div>
+				<div class="ef-ob-main ef-ob-${ id }" key="${ id }">${ body( id ) }</div>
+				<div class="ef-ob-foot">${ i ? `<button type="button" class="btn btn-ghost" data-ef-ob="back">${ esc( t( 'back' ) ) }</button>` : '<span></span>' }<button type="button" class="btn btn-primary" data-ef-ob="next">${ esc( last ? t( only ? 'efOnbSave' : 'efLetsGo' ) : t( 'efNext' ) ) }</button></div>`;
+			ov.querySelector( '.ef-ob-main' ).scrollTop = 0;
+		};
+		ov.addEventListener( 'click', ( e ) => {
+			const b = e.target.closest( '[data-ef-ob]' ), sb = e.target.closest( '[data-ef-set]' );
+			if ( sb ) { const li = sb.closest( '[data-ef-row]' ); pick[ li.dataset.efRow ] = sb.dataset.efSet; li.querySelectorAll( 'button' ).forEach( ( x ) => { const on = x === sb; x.classList.toggle( 'on', on ); x.setAttribute( 'aria-pressed', on ); } ); return; }
+			if ( ! b ) return;
+			if ( b.dataset.efOb === 'skip' ) finish( false );
+			else if ( b.dataset.efOb === 'back' ) { i = Math.max( 0, i - 1 ); draw(); }
+			else if ( i >= steps.length - 1 ) finish( true ); else { i++; draw(); }
 		} );
+		document.body.appendChild( ov ); document.body.classList.add( 'ef-ob-open' ); draw();
 	};
+
+	/* ------------------------------------------------------------------ Its own page: More, eFriend */
+	EXA.efriendPage = () => {
+		const goals = S().goals, lab = { comfortable: 'Comfortable', ontrack: 'On track', tight: 'Tight', atrisk: 'At risk', unlikely: 'Unlikely', done: 'Done' };
+		const row = ( g ) => {
+			const ready = g.coach && g.deadline, f = ready ? F.forecast( g ) : null;
+			return `<li class="ef-grow"><div class="ef-gtop">${ f ? F.mascot( f.verdict, 40 ) : UI.icon( g.icon || 'target', 28 ) }<div><b>${ esc( g.name ) }</b><small>${ esc( g.deadline ? t( 'efDaysLeft', { n: Math.max( 0, diff( g.deadline, today() ) ) } ) : t( 'efNoDate' ) ) }</small></div>${ f ? `<span class="ef-chip">${ lab[ f.verdict ] }</span>` : '' }</div>
+				<div class="ef-gacts">${ ready ? `<button type="button" class="btn btn-primary sm" data-ef-open="${ esc( g.id ) }">${ esc( t( 'efOpen' ) ) }</button>` : `<button type="button" class="btn btn-primary sm" data-ef-try="${ esc( g.id ) }">${ esc( g.coach ? t( 'efAddDate' ) : t( 'efTry' ) ) }</button>` }</div></li>`;
+		};
+		return `<section class="card ef-page"><div class="ef-top">${ F.mascot( 'happy', 84 ) }<div class="ef-bubble"><b>${ esc( t( 'efMeet' ) ) }</b>${ esc( t( 'efMeetText' ) ) }</div></div></section>
+			<section class="card"><h2>${ esc( t( 'efYourGoals' ) ) }</h2>${ goals.length ? `<ul class="ef-list">${ goals.map( row ).join( '' ) }</ul>` : `<p class="muted">${ esc( t( 'efNoGoals' ) ) }</p>` }
+			<div class="btn-row"><button type="button" class="btn btn-primary" data-ef-new>${ UI.icon( 'plus', 20 ) } ${ esc( t( 'efNewGoal' ) ) }</button></div></section>
+			<section class="card"><div class="list mlist"><button type="button" class="mrow" data-ef-sort>${ UI.ci( 'adjustments-horizontal', 'teal', 40 ) }<span class="mid"><b>${ esc( t( 'efSortTitle' ) ) }</b><small>${ esc( t( 'efSortSub' ) ) }</small></span>${ UI.icon( 'chevron-right', 18 ) }</button><button type="button" class="mrow" data-ef-intro>${ UI.ci( 'player-play', 'purple', 40 ) }<span class="mid"><b>${ esc( t( 'efReplay' ) ) }</b><small>${ esc( t( 'efReplaySub' ) ) }</small></span>${ UI.icon( 'chevron-right', 18 ) }</button></div></section>`;
+	};
+	document.addEventListener( 'click', ( e ) => {
+		if ( e.target.closest( '[data-ef-new]' ) ) { EXA.openGoal(); return; }
+		if ( e.target.closest( '[data-ef-sort]' ) ) { EXA.efriendOnboard( null, 'sort' ); return; }
+		if ( e.target.closest( '[data-ef-intro]' ) ) EXA.efriendOnboard();
+	} );
 
 	/* ------------------------------------------------------------------ Strings */
 	const en = {
@@ -259,7 +313,7 @@
 		efConf_low: 'A little (not much history yet)', efConf_medium: 'Fairly', efConf_good: 'Quite sure',
 		efHelps: 'What would help', efHelpsNote: 'Together these could add about {a} by the date.', efCutLabel: 'Spend a quarter less on {name}', efPauseLabel: 'Pause {name}',
 		efOtherWays: 'Other ways to get there', efAltSmaller: 'Aim a little lower: about {a} ({p}% less) fits comfortably.', efAltLater: 'Or move the date to about {d}.',
-		efMustTitle: 'Bills that cannot be skipped', efSortTitle: 'How I sorted your spending', efSortText: 'Must = fixed and necessary. Need = necessary but you can shop smarter. Want = nice to have. Change any of them.',
+		efMustTitle: 'Bills that cannot be skipped', efSortTitle: 'How I sorted your spending', efSortSub: 'Check what counts as Must, Need or Want', efSortText: 'Must = fixed and necessary. Need = necessary but you can shop smarter. Want = nice to have. Change any of them.',
 		ef_lvl_must: 'Must', ef_lvl_need: 'Need', ef_lvl_want: 'Want',
 		efWhy_housing: 'A roof comes first, and late rent costs fees.', efWhy_utility: 'Lights, water and heating are not optional.', efWhy_telecom: 'Phone and internet keep you reachable and online, so they stay.',
 		efWhy_insurance: 'Skipping insurance can cost far more later.', efWhy_loan: 'Missed payments add interest and hurt your record.', efWhy_tax: 'Taxes and contributions have penalties when late.',
@@ -268,6 +322,8 @@
 		fx_efriend: 'eFriend', fxD_efriend: 'A small robot that coaches a savings goal and tells you whether you will make it.', efPromo: 'Let it coach "{name}": it checks your bills, income and habits and tells you if you will make it.', efTry: 'Try it',
 		tut_efriend: 'Meet your eFriend', tutD_efriend: 'A robot that tells you if your goal will happen', tut_efriend_1: 'In **Plan**, add a goal with a target and a date, for example a trip.', tut_efriend_2: 'Turn on **Let eFriend coach this goal** and choose the wallets the money comes from.', tut_efriend_3: 'On Home, tap **Full analysis** to see what is likely, what would help, and how your spending is sorted. Change any of it.',
 		tutEx_efriend: 'Maria wants 400 for a trip by December. eFriend sees her rent and phone bill are musts, notices she spends a lot on takeaway, and says: cut it by a quarter and you will make it, with money to spare.',
+		efMoreSub: 'Your savings coach', efYourGoals: 'Goals with eFriend', efNoGoals: 'No goals yet. Add one and eFriend will watch it for you.', efNewGoal: 'New goal with eFriend', efNoDate: 'No date yet', efAddDate: 'Add a date', efPromoDate: 'I need a date for "{name}" to work out whether you will make it.', efNeedDate: 'Add a date so eFriend can coach this goal.', efReplay: 'Take the eFriend tour again', efReplaySub: 'Go through all the onboarding screens again',
+		efObSeeTitle: 'This is what you will see on Home', efObSeeText: 'A card with your goal, how it is going, and a few words from me. Tap the flip button for the numbers and Full analysis for the details.', efObWhereTitle: 'Find me any time', efObWhereText: 'Open More, then eFriend. Your goals, the full analysis and how your spending is sorted are all there.', efSkip: 'Skip', efNext: 'Next', efLetsGo: "Let's go", efNoSpend: 'Once you add some spending, I will sort it here.',
 		efDisclaimer: 'These are estimates from your own history, not financial advice. The more you add, the better my guesses get.',
 	};
 	const el = {
@@ -286,7 +342,7 @@
 		efConf_low: 'Λίγο (δεν υπάρχει ακόμα αρκετό ιστορικό)', efConf_medium: 'Αρκετά', efConf_good: 'Πολύ',
 		efHelps: 'Τι θα βοηθούσε', efHelpsNote: 'Μαζί αυτά θα μπορούσαν να προσθέσουν περίπου {a} μέχρι την ημερομηνία.', efCutLabel: 'Ξοδέψτε ένα τέταρτο λιγότερο σε «{name}»', efPauseLabel: 'Παγώστε το «{name}»',
 		efOtherWays: 'Άλλοι τρόποι να φτάσετε', efAltSmaller: 'Στοχεύστε λίγο χαμηλότερα: περίπου {a} ({p}% λιγότερο) χωράει άνετα.', efAltLater: 'Ή μετακινήστε την ημερομηνία γύρω στις {d}.',
-		efMustTitle: 'Λογαριασμοί που δεν παραλείπονται', efSortTitle: 'Πώς ταξινόμησα τα έξοδά σας', efSortText: 'Αναγκαίο = σταθερό και απαραίτητο. Ανάγκη = απαραίτητο αλλά μπορείτε να ψωνίσετε εξυπνότερα. Επιθυμία = καλό να υπάρχει. Αλλάξτε οποιοδήποτε.',
+		efMustTitle: 'Λογαριασμοί που δεν παραλείπονται', efSortTitle: 'Πώς ταξινόμησα τα έξοδά σας', efSortSub: 'Δείτε τι θεωρείται Αναγκαίο, Ανάγκη ή Επιθυμία', efSortText: 'Αναγκαίο = σταθερό και απαραίτητο. Ανάγκη = απαραίτητο αλλά μπορείτε να ψωνίσετε εξυπνότερα. Επιθυμία = καλό να υπάρχει. Αλλάξτε οποιοδήποτε.',
 		ef_lvl_must: 'Αναγκαίο', ef_lvl_need: 'Ανάγκη', ef_lvl_want: 'Επιθυμία',
 		efWhy_housing: 'Πρώτα η στέγη, και το ενοίκιο που καθυστερεί έχει επιβαρύνσεις.', efWhy_utility: 'Ρεύμα, νερό και θέρμανση δεν είναι προαιρετικά.', efWhy_telecom: 'Το τηλέφωνο και το internet σας κρατούν προσβάσιμους και συνδεδεμένους, γι’ αυτό μένουν.',
 		efWhy_insurance: 'Η παράλειψη ασφάλισης μπορεί να κοστίσει πολύ περισσότερο αργότερα.', efWhy_loan: 'Οι χαμένες δόσεις προσθέτουν τόκους και βλάπτουν το ιστορικό σας.', efWhy_tax: 'Οι φόροι και οι εισφορές έχουν πρόστιμα όταν καθυστερούν.',
@@ -295,6 +351,8 @@
 		fx_efriend: 'eFriend', fxD_efriend: 'Ένα μικρό ρομπότ που προπονεί έναν στόχο αποταμίευσης και σας λέει αν θα τα καταφέρετε.', efPromo: 'Αφήστε το να προπονήσει τον στόχο «{name}»: ελέγχει τους λογαριασμούς, τα έσοδα και τις συνήθειές σας και σας λέει αν θα τα καταφέρετε.', efTry: 'Δοκιμάστε το',
 		tut_efriend: 'Γνωρίστε το eFriend σας', tutD_efriend: 'Ένα ρομπότ που σας λέει αν θα γίνει ο στόχος σας', tut_efriend_1: 'Στο **Πλάνο**, προσθέστε έναν στόχο με ποσό και ημερομηνία, για παράδειγμα ένα ταξίδι.', tut_efriend_2: 'Ενεργοποιήστε το **Να προπονεί το eFriend αυτόν τον στόχο** και διαλέξτε τα πορτοφόλια από τα οποία προέρχονται τα χρήματα.', tut_efriend_3: 'Στην Αρχική, πατήστε **Πλήρης ανάλυση** για να δείτε τι είναι πιθανό, τι θα βοηθούσε και πώς ταξινομούνται τα έξοδά σας. Αλλάξτε οτιδήποτε.',
 		tutEx_efriend: 'Η Μαρία θέλει 400 για ένα ταξίδι μέχρι τον Δεκέμβριο. Το eFriend βλέπει ότι το ενοίκιο και ο λογαριασμός τηλεφώνου είναι αναγκαία, προσέχει ότι ξοδεύει πολλά σε delivery και λέει: κόψτε το κατά ένα τέταρτο και θα τα καταφέρετε, με χρήματα να περισσεύουν.',
+		efMoreSub: 'Ο προπονητής αποταμίευσής σας', efYourGoals: 'Στόχοι με το eFriend', efNoGoals: 'Δεν υπάρχουν στόχοι ακόμα. Προσθέστε έναν και το eFriend θα τον παρακολουθεί για εσάς.', efNewGoal: 'Νέος στόχος με το eFriend', efNoDate: 'Χωρίς ημερομηνία ακόμα', efAddDate: 'Προσθέστε ημερομηνία', efPromoDate: 'Χρειάζομαι μια ημερομηνία για τον στόχο «{name}» ώστε να υπολογίσω αν θα τα καταφέρετε.', efNeedDate: 'Προσθέστε ημερομηνία για να μπορεί το eFriend να προπονήσει αυτόν τον στόχο.', efReplay: 'Κάντε ξανά την περιήγηση του eFriend', efReplaySub: 'Περάστε ξανά από όλες τις οθόνες εισαγωγής',
+		efObSeeTitle: 'Αυτό θα δείτε στην Αρχική', efObSeeText: 'Μια κάρτα με τον στόχο σας, πώς πάει και λίγα λόγια από εμένα. Πατήστε το κουμπί αναστροφής για τους αριθμούς και την Πλήρη ανάλυση για λεπτομέρειες.', efObWhereTitle: 'Θα με βρίσκετε πάντα', efObWhereText: 'Ανοίξτε το Περισσότερα και μετά το eFriend. Εκεί βρίσκονται οι στόχοι σας, η πλήρης ανάλυση και ο τρόπος που ταξινομούνται τα έξοδά σας.', efSkip: 'Παράλειψη', efNext: 'Επόμενο', efLetsGo: 'Πάμε', efNoSpend: 'Μόλις προσθέσετε κάποια έξοδα, θα τα ταξινομήσω εδώ.',
 		efDisclaimer: 'Πρόκειται για εκτιμήσεις από το δικό σας ιστορικό και όχι για οικονομική συμβουλή. Όσο περισσότερα προσθέτετε, τόσο καλύτερα μαντεύω.',
 	};
 	Object.assign( window.EXPENITY_I18N.langs.en, en ); Object.assign( window.EXPENITY_I18N.langs.el, el );
