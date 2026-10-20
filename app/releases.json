@@ -1,6 +1,18 @@
 {
-  "version": "0.51.1",
+  "version": "0.51.2",
   "releases": [
+    {
+      "version": "0.51.2",
+      "date": "2026-10-29",
+      "en": [
+        "A nicer cushion slider: a calm neutral track, and only the round handle changes colour, blending smoothly from red through green to blue as you move it.",
+        "Fixed: the slider heading is now fully visible and shorter (Safety cushion), and the labels beneath it are neutral and line up under the right spots."
+      ],
+      "el": [
+        "Ένα πιο όμορφο ρυθμιστικό περιθωρίου: ήρεμη ουδέτερη γραμμή και μόνο η στρογγυλή λαβή αλλάζει χρώμα, περνώντας ομαλά από το κόκκινο στο πράσινο και στο μπλε καθώς τη μετακινείτε.",
+        "Διορθώθηκε: ο τίτλος του ρυθμιστικού φαίνεται πλέον ολόκληρος και είναι πιο σύντομος (Περιθώριο ασφαλείας), και οι ετικέτες από κάτω είναι ουδέτερες και ευθυγραμμισμένες στα σωστά σημεία."
+      ]
+    },
     {
       "version": "0.51.1",
       "date": "2026-10-29",

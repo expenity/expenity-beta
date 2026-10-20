@@ -652,7 +652,7 @@
 	const riskLines = ( p, m ) => { const b = F.baseline(), a = money( Math.round( m * b.monthly ) / 100, main() ); return [ m < 0.1 ? t( 'efCushionZero', { word: riskWord( p ) } ) : t( 'efCushionHint', { word: riskWord( p ), a, m: monthsText( m ), s: money( b.monthly / 100, main() ) } ), t( 'efAccuracy', { d: b.history } ) ].concat( b.hasIncome ? [] : [ t( 'efNoIncomeAsk' ) ] ); };
 	const riskHtml = () => {
 		const m = F.cushion(), p = Math.round( posOf( m ) );
-		return `<div class="ef-risk" style="--c:${ colorAt( p ) }"><div class="ef-risk-h"><b>🎚️ ${ esc( t( 'efRiskTitle' ) ) }</b><span class="ef-risk-val">${ esc( riskWord( p ) ) } · ${ esc( monthsShort( m ) ) }</span></div><input type="range" class="ef-grad" data-ef-margin min="0" max="100" step="1" value="${ p }" aria-label="${ esc( t( 'efRiskTitle' ) ) }"><div class="ef-risk-ends"><span>🔴 ${ esc( t( 'efRiskRisky' ) ) }</span><span>🟢 ${ esc( t( 'efRiskBalanced' ) ) }</span><span>🔵 ${ esc( t( 'efRiskVerySafe' ) ) }</span></div><div class="ef-risk-hint">${ points( riskLines( p, m ) ) }${ F.baseline().hasIncome ? '' : `<button type="button" class="btn btn-ghost sm" data-ef-income>💶 ${ esc( t( 'efAddIncome' ) ) }</button>` }</div></div>`;
+		return `<div class="ef-risk" style="--c:${ colorAt( p ) };--p:${ p }%"><div class="ef-risk-h"><b>🎚️ ${ esc( t( 'efRiskTitle' ) ) }</b><span class="ef-risk-val">${ esc( riskWord( p ) ) } · ${ esc( monthsShort( m ) ) }</span></div><input type="range" class="ef-grad" data-ef-margin min="0" max="100" step="1" value="${ p }" aria-label="${ esc( t( 'efRiskTitle' ) ) }"><div class="ef-risk-ends"><span class="e0">${ esc( t( 'efRiskRisky' ) ) }</span><span class="e40">${ esc( t( 'efRiskBalanced' ) ) }</span><span class="e100">${ esc( t( 'efRiskVerySafe' ) ) }</span></div><div class="ef-risk-hint">${ points( riskLines( p, m ) ) }${ F.baseline().hasIncome ? '' : `<button type="button" class="btn btn-ghost sm" data-ef-income>💶 ${ esc( t( 'efAddIncome' ) ) }</button>` }</div></div>`;
 	};
 	const renumber = ( ol ) => ol.querySelectorAll( ':scope > li .ef-rank' ).forEach( ( r, i ) => { r.textContent = i === 0 ? '🏆' : String( i + 1 ); } );
 	const commitOrder = ( ol ) => F.setOrder( [ ...ol.querySelectorAll( ':scope > li' ) ].map( ( li ) => li.dataset.id ) );
@@ -681,7 +681,7 @@
 		if ( e.target.closest( '[data-ef-suggest]' ) ) { F.setOrder( F.suggestOrder() ); return; }
 		if ( e.target.closest( '[data-ef-prio-done]' ) ) { S().settings.efAsked = F.sig(); S().settings.u = Date.now(); EX.save(); UI.closeSheet(); }
 	} );
-	document.addEventListener( 'input', ( e ) => { const r = e.target.matches && e.target.matches( '[data-ef-margin]' ) ? e.target : null; if ( ! r ) return; const p = Number( r.value ), m = monthsAt( p ), box = r.closest( '.ef-risk' ); box.style.setProperty( '--c', colorAt( p ) ); box.querySelector( '.ef-risk-val' ).textContent = riskWord( p ) + ' · ' + monthsShort( m ); const hint = box.querySelector( '.ef-risk-hint' ), btn = hint.querySelector( 'button' ); hint.innerHTML = points( riskLines( p, m ) ); if ( btn ) hint.appendChild( btn ); } );
+	document.addEventListener( 'input', ( e ) => { const r = e.target.matches && e.target.matches( '[data-ef-margin]' ) ? e.target : null; if ( ! r ) return; const p = Number( r.value ), m = monthsAt( p ), box = r.closest( '.ef-risk' ); box.style.setProperty( '--c', colorAt( p ) ); box.style.setProperty( '--p', p + '%' ); box.querySelector( '.ef-risk-val' ).textContent = riskWord( p ) + ' · ' + monthsShort( m ); const hint = box.querySelector( '.ef-risk-hint' ), btn = hint.querySelector( 'button' ); hint.innerHTML = points( riskLines( p, m ) ); if ( btn ) hint.appendChild( btn ); } );
 	document.addEventListener( 'change', ( e ) => { if ( e.target.matches && e.target.matches( '[data-ef-margin]' ) ) { S().settings.efCushion = monthsAt( Number( e.target.value ) ); S().settings.u = Date.now(); EX.save(); } } );
 	EXA.openEfPriority = () => {
 		const list = F.all(); if ( ! list.length ) return; F.view = { k: 'prio' };
@@ -1130,7 +1130,7 @@
 		efAskEf: 'Ρωτήστε το eFriend', efNudgeText: '🤖 Γνωρίστε το eFriend: ελέγχει αν μπορείτε να αντέξετε τα σχέδιά σας και σας βοηθά να διαλέξετε τι προηγείται.', efNudgeBtn: 'Γνωρίστε το eFriend', efPromoWish: 'Παρίσι; Ένα νέο κινητό; Πείτε μου για τι ονειρεύεστε.',
 	} );
 	Object.assign( window.EXPENITY_I18N.langs.en, {
-		efRiskTitle: 'How much cushion should I keep?', efRiskRisky: 'Risky', efRiskBold: 'Bold', efRiskBalanced: 'Balanced', efRiskCareful: 'Careful', efRiskSafe: 'Safe', efRiskVerySafe: 'Very safe',
+		efRiskTitle: 'Safety cushion', efRiskRisky: 'Risky', efRiskBold: 'Bold', efRiskBalanced: 'Balanced', efRiskCareful: 'Careful', efRiskSafe: 'Safe', efRiskVerySafe: 'Very safe',
 		efMonthsN: ( { n, one } ) => n + ( one ? ' month' : ' months' ) + ' of spending',
 		efCushionHint: '🛡️ With **{word}**, I keep about **{a}** untouched after each plan.\n🗓️ That is **{m}** (you spend about **{s}** a month).', efCushionZero: '⚠️ With **{word}**, I would let a plan use almost everything you have.',
 		efAccuracy: '📈 The more you use Expenity, the sharper I get. I have **{d} days** of history so far.', efNoIncomeAsk: '💶 I do not know your income yet. Add it and I can be more accurate.', efAddIncome: 'Add income',
@@ -1139,7 +1139,7 @@
 		efObIncTitle: 'Where does your money come from?', efObIncText: '💶 Tell me your salary or regular income\n🗓️ I use the day it arrives to see how next month looks\n🎯 The more I know, the better my answers', efObIncDone: '✅ Income added. I will use it in my forecasts.', efObIncSkip: 'You can skip this and add it later in Plan.',
 	} );
 	Object.assign( window.EXPENITY_I18N.langs.el, {
-		efRiskTitle: 'Πόσο περιθώριο να κρατώ;', efRiskRisky: 'Επικίνδυνο', efRiskBold: 'Τολμηρό', efRiskBalanced: 'Ισορροπημένο', efRiskCareful: 'Προσεκτικό', efRiskSafe: 'Ασφαλές', efRiskVerySafe: 'Πολύ ασφαλές',
+		efRiskTitle: 'Περιθώριο ασφαλείας', efRiskRisky: 'Επικίνδυνο', efRiskBold: 'Τολμηρό', efRiskBalanced: 'Ισορροπημένο', efRiskCareful: 'Προσεκτικό', efRiskSafe: 'Ασφαλές', efRiskVerySafe: 'Πολύ ασφαλές',
 		efMonthsN: ( { n, one } ) => n + ( one ? ' μήνας' : ' μήνες' ) + ' εξόδων',
 		efCushionHint: '🛡️ Με το **{word}**, κρατώ περίπου **{a}** ανέγγιχτα μετά από κάθε σχέδιο.\n🗓️ Αυτό είναι **{m}** (ξοδεύετε περίπου **{s}** τον μήνα).', efCushionZero: '⚠️ Με το **{word}**, θα άφηνα ένα σχέδιο να χρησιμοποιήσει σχεδόν όλα όσα έχετε.',
 		efAccuracy: '📈 Όσο περισσότερο χρησιμοποιείτε το Expenity, τόσο πιο ακριβής γίνομαι. Έχω **{d} ημέρες** ιστορικού μέχρι τώρα.', efNoIncomeAsk: '💶 Δεν γνωρίζω ακόμα το εισόδημά σας. Προσθέστε το και θα είμαι πιο ακριβές.', efAddIncome: 'Προσθήκη εισοδήματος',

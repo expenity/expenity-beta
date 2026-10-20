@@ -1413,3 +1413,17 @@ input[type=date]::-webkit-datetime-edit{padding:0}
 
 .ef-prio-i{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 .ef-prio-i.drag{transform:scale(1.02);z-index:2}
+
+/* the slider heading may wrap, but always has room for two lines, so every word shows and nothing moves */
+.ef-risk-h{align-items:center;min-height:3em}.ef-risk-h b{white-space:normal;overflow:visible;text-overflow:clip;line-height:1.25}
+.ef-risk-val{white-space:nowrap}
+
+/* the slider: a calm neutral track, and only the handle carries the colour */
+.ef-risk input.ef-grad{-webkit-appearance:none;appearance:none;width:100%;height:10px;margin:18px 0 6px;border-radius:99px;outline-offset:8px;background:linear-gradient(90deg,color-mix(in srgb,var(--ink) 38%,var(--surface)) 0 var(--p,40%),color-mix(in srgb,var(--line) 85%,var(--surface)) var(--p,40%) 100%)}
+.ef-risk input.ef-grad::-webkit-slider-thumb{-webkit-appearance:none;width:34px;height:34px;border-radius:50%;background:var(--c,#16a34a);border:4px solid var(--surface);box-shadow:0 0 0 7px color-mix(in srgb,var(--c,#16a34a) 22%,transparent),0 3px 10px rgba(0,0,0,.25);cursor:grab;transition:box-shadow .15s}
+.ef-risk input.ef-grad:active::-webkit-slider-thumb{box-shadow:0 0 0 11px color-mix(in srgb,var(--c,#16a34a) 28%,transparent),0 3px 12px rgba(0,0,0,.3);cursor:grabbing}
+.ef-risk input.ef-grad::-moz-range-thumb{width:26px;height:26px;border-radius:50%;background:var(--c,#16a34a);border:4px solid var(--surface);box-shadow:0 0 0 7px color-mix(in srgb,var(--c,#16a34a) 22%,transparent),0 3px 10px rgba(0,0,0,.25);cursor:grab}
+.ef-risk input.ef-grad::-moz-range-track{background:transparent}
+.ef-risk-val{color:var(--ink)}
+.ef-risk-ends{position:relative;height:1.4em;margin-top:6px;font-size:.8rem;color:var(--muted)}
+.ef-risk-ends span{position:absolute;top:0;white-space:nowrap}.ef-risk-ends .e0{left:0}.ef-risk-ends .e40{left:40%;transform:translateX(-50%)}.ef-risk-ends .e100{right:0}
