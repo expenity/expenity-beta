@@ -12,7 +12,7 @@
 	const $ = ( s, r = document ) => r.querySelector( s );
 	const $$ = ( s, r = document ) => [ ...r.querySelectorAll( s ) ];
 	const toast = UI.toast;
-	window.EXPENITY_VERSION = '0.47.1';
+	window.EXPENITY_VERSION = '0.48.0';
 
  const seenCharacters=new Set();try{for(const skin of JSON.parse(sessionStorage.getItem('expenity.charactersSeen')||'[]'))seenCharacters.add(skin);}catch(_){}
  const characterSeen=skin=>seenCharacters.has(skin);
@@ -217,6 +217,8 @@
 			case 'auth-create': case 'auth-signin': case 'auth-back': EXA.openAuth( 'start' ); break;
 			case 'auth-recover': EXA.openAuth( 'recover' ); break;
 			case 'sync-now': EX.sync.run().then( () => toast( t( 'syncDone' ) ) ); break;
+			case 'recover-email': { const f = $( '#recoverForm' ), email = f.elements.email.value.trim(); if ( ! email ) { f.elements.email.focus(); break; } const r = await EX.auth.recoverEmailStart( email ); const note = $( '#recoverNote' ), er = $( '#authErr' ); er.hidden = true; if ( r.ok ) { f.dataset.viaEmail = '1'; note.textContent = t( 'recoverEmailSent' ); note.hidden = false; f.elements.code.focus(); } else { note.hidden = true; er.textContent = t( r.error === 'email_unavailable' ? 'recoverEmailOff' : 'err_generic' ); er.hidden = false; } break; }
+			case 'reset-passkeys': { if ( ! await EXA.confirm( { title: t( 'pkResetTitle' ), text: t( 'pkResetConfirm' ), confirm: t( 'pkResetBtn' ) } ) ) break; const r = await EX.auth.resetPasskeys(); if ( r.ok ) { toast( t( 'pkResetDone' ) ); loadDevices(); if ( r.recoveryCodes ) EXA.showCodes( r.recoveryCodes, () => {} ); } else toast( EXA.errText( r.error ) ); break; }
 			case 'add-passkey': { const r = await EX.auth.addPasskey(); if ( r.ok ) { toast( t( 'tPasskeyAdded' ) ); loadDevices(); } else toast( EXA.errText( r.error ) ); break; }
 			case 'rm-passkey': { const r = await EX.auth.removePasskey( el.dataset.id ); if ( r.ok ) { toast( t( 'tPasskeyRemoved' ) ); loadDevices(); } else toast( EXA.errText( r.error ) ); break; }
 			case 'rm-session': { const r = await EX.auth.revokeSession( el.dataset.id ); if ( r.ok ) { toast( t( 'tDeviceOut' ) ); loadDevices(); } else toast( EXA.errText( r.error ) ); break; }
@@ -295,6 +297,10 @@
 			if ( ( el = e.target.closest( '[data-cal]' ) ) ) { const n = Number( el.dataset.cal ); st.calMonth = n === 0 ? st.nowMonth() : st.calMonth + n; st.calDay = null; render(); return; }
 			if ( ( el = e.target.closest( '[data-day]' ) ) ) { st.calDay = el.dataset.day; render(); return; }
 			if ( ( el = e.target.closest( '[data-period]' ) ) ) { st.repPeriod = el.dataset.period; render(); return; }
+			if ( ( el = e.target.closest( '[data-flip]' ) ) ) {
+				const inner = e.target.closest( 'button, a, input, select, .sw, [data-act], [data-calday], [data-go]' ) && ! e.target.closest( '.fc-hint' ) && ! e.target.closest( '.fc-back' );
+				if ( ! inner || el.classList.contains( 'fc-tile' ) ) { const id = el.dataset.flip; st.flips[ id ] = ! st.flips[ id ]; el.classList.toggle( 'flipped', st.flips[ id ] ); el.setAttribute( 'aria-pressed', String( !! st.flips[ id ] ) ); el.querySelector( '.fc-back' )?.setAttribute( 'aria-hidden', String( ! st.flips[ id ] ) ); return; }
+			}
 			if ( ( el = e.target.closest( '[data-status-set]' ) ) ) { EXA.setStatusTint( el.dataset.statusSet ); render(); return; }
 			if ( ( el = e.target.closest( '[data-motion-set]' ) ) ) { EXA.setMotion( el.dataset.motionSet ); render(); return; }
 			if ( ( el = e.target.closest( '[data-skin-set]' ) ) ) { EXA.setSkin( el.dataset.skinSet ); if ( EXA.flow.active() ) EXA.flow.show( true ); else render(); return; }
@@ -320,7 +326,7 @@
 			const { action, id, kind } = e.detail;
 			const rowEl = e.target.closest ? e.target.closest( '.sw' ) : null;
 			if ( rowEl && ( action === 'del' || action === 'paid' ) && motionOn() ) { rowEl.classList.add( action === 'del' ? 'leaving' : 'paid-out' ); await new Promise( ( r ) => setTimeout( r, 280 ) ); }
-			if ( kind === 'tx' ) { const x = S().txs.find( ( z ) => z.id === id ); if(action==='duplicate'&&x){EXA.duplicateRecord('tx',id);return;} if ( action === 'edit' && x ) EXA.openTx( x ); else if ( action === 'del' ) EXA.removeTx( id ); else if ( action === 'unpay' && x ) EXA.unpayTx( id ); }
+			if ( kind === 'tx' ) { const x = S().txs.find( ( z ) => z.id === id ); if(action==='duplicate'&&x){EXA.duplicateRecord('tx',id);return;} if ( action === 'edit' && x ) EXA.openTx( x ); else if ( action === 'del' ) EXA.removeTx( id ); else if ( action === 'unpay' && x ) EXA.openUnpay( id ); }
 			else { const b = S().bills.find( ( z ) => z.id === id ); if(action==='duplicate'&&b){EXA.duplicateRecord('bill',id);return;} if ( action === 'paid' && b ) quickPay( b ); else if ( action === 'edit' && b ) EXA.openBill( b ); else if ( action === 'del' ) EXA.removeBill( id ); }
 		} );
 
@@ -338,6 +344,7 @@
 		} );
 		document.addEventListener( 'compositionend', ( e ) => { if ( e.target.id === 'txSearch' ) { st.txFilter.q = e.target.value; if ( ! renderSearchResults() ) render(); } } );
 		document.addEventListener( 'change', ( e ) => {
+			if ( e.target.matches && e.target.matches( '[data-smart-home]' ) ) { S().settings.smartHome = e.target.checked; S().settings.u = Date.now(); EX.save(); render(); return; }
 			if ( e.target.matches && e.target.matches( '[data-density-toggle]' ) ) { EXA.setDensity( e.target.checked ); render(); return; }
 			if ( e.target.matches && e.target.matches( '[data-fx-theme]' ) ) { EXA.setThemeFx( e.target.dataset.fxTheme, e.target.checked ); render(); return; }
 			if ( EXA.repChange( e ) || EXA.shareChange( e ) || EXA.pushChange( e ) ) return;
@@ -360,6 +367,7 @@
 			}
 		} );
 		// Desktop keyboard: n adds, / searches, Escape closes the details pane.
+		document.addEventListener( 'keydown', ( e ) => { const fl = e.target.closest && e.target.closest( '[data-flip]' ); if ( fl && fl === e.target && ( e.key === 'Enter' || e.key === ' ' ) ) { e.preventDefault(); fl.click(); return; } } );
 		document.addEventListener( 'keydown', ( e ) => {
 			const tag = ( document.activeElement && document.activeElement.tagName ) || '';
 			if ( /INPUT|TEXTAREA|SELECT/.test( tag ) || UI.sheetOpen() || e.ctrlKey || e.metaKey || e.altKey ) return;

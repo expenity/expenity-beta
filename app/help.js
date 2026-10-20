@@ -58,7 +58,7 @@
 		if ( ! pop ) return;
 		const hd = ( title, back ) => `<div class="hp-head">${ back ? `<button type="button" class="ab-btn" data-hp-back aria-label="${ esc( t( 'helpBack' ) ) }">${ UI.icon( 'arrow-left', 22 ) }</button>` : '' }<h2>${ esc( title ) }</h2><button type="button" class="ab-btn" data-hp-close aria-label="${ esc( t( 'close' ) ) }">${ UI.icon( 'x', 22 ) }</button></div>`;
 		if ( listMode ) pop.innerHTML = hd( t( 'helpAll' ), !! H.current ) + `<div class="hp-body"><div class="list mlist">${ T.list().map( ( x ) => `<button type="button" class="mrow" data-hp-open="${ x.id }">${ UI.ci( x.icon, 'teal', 36 ) }<span class="mid"><b>${ esc( t( 'tut_' + x.id ) ) }${ x.fresh ? `<span class="tut-new">${ esc( t( 'tutNew' ) ) }</span>` : '' }</b><small>${ esc( t( 'tutD_' + x.id ) ) }</small></span>${ UI.icon( 'chevron-right', 18 ) }</button>` ).join( '' ) }</div></div>`;
-		else { H.current = id; pop.innerHTML = hd( t( 'tut_' + id ), false ) + `<div class="hp-body tt">${ T.body( id ) }${ nav( id ) }</div><div class="hp-foot"><button type="button" class="btn btn-ghost wide" data-hp-all>${ UI.icon( 'list-details', 20 ) } ${ esc( t( 'helpAll' ) ) }</button>${ H.fromIcon && H.current === H.fromId && ! H.hidden( H.fromId ) ? `<button type="button" class="link wide hp-never" data-hp-never>${ esc( t( 'helpNever' ) ) }</button>` : '' }</div>`; }
+		else { H.current = id; pop.innerHTML = hd( t( 'tut_' + id ), false ) + `<div class="hp-body tt">${ T.body( id ) }${ nav( id ) }</div><div class="hp-foot"><button type="button" class="btn btn-ghost wide" data-hp-all>${ UI.icon( 'list-details', 20 ) } ${ esc( t( 'helpAll' ) ) }</button>${ H.fromIcon && H.current === H.fromId && ! H.hidden( H.fromId ) ? `<button type="button" class="link wide hp-never" data-hp-never>${ esc( t( 'helpNever' ) ) }</button>` : '' }<button type="button" class="link wide hp-never" data-hp-settings>${ UI.icon( 'settings', 16 ) } ${ esc( t( 'helpManageAll' ) ) }</button></div>`; }
 	};
 	H.open = ( id, fromIcon ) => {
 		close(); H.fromIcon = !! fromIcon; pop = document.createElement( 'dialog' ); pop.className = 'help-pop'; pop.setAttribute( 'aria-label', t( 'helpTitle' ) );
@@ -70,6 +70,7 @@
 		if ( ! pop || ! pop.contains( e.target ) ) return;
 		const o = e.target.closest( '[data-hp-open]' ), n = e.target.closest( '[data-hp-nav]' );
 		if ( e.target.closest( '[data-hp-close]' ) ) { close(); return; }
+		if ( e.target.closest( '[data-hp-settings]' ) ) { close(); UI.closeSheet( true ); EXA.st.view = 'more'; EXA.st.more = 'helpicons'; EXA.render(); return; }
 		if ( e.target.closest( '[data-hp-never]' ) ) { const id = H.fromId; close(); hide( id, true ); place(); EXA.render(); UI.toast( t( 'helpHidden' ) ); return; }
 		if ( e.target.closest( '[data-hp-all]' ) ) { draw( H.current, true ); return; }
 		if ( e.target.closest( '[data-hp-back]' ) ) { draw( H.current ); return; }

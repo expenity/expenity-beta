@@ -1,6 +1,24 @@
 {
-  "version": "0.47.1",
+  "version": "0.48.0",
   "releases": [
+    {
+      "version": "0.48.0",
+      "date": "2026-10-22",
+      "en": [
+        "Home: a compact strip of flip cards (Total balance, To pay, Safe to spend). The Calendar and Due soon cards flip to a written summary of your next 7 days. Smart Home puts what needs attention first, and you can turn it off in Appearance.",
+        "Adding an entry: Wallet and Paid sit side by side as two tiles, and Paid turns green or amber without moving anything.",
+        "Swiping a paid expense to unpaid asks when it should be paid, with Cancel and Undo. Status labels stay in English, and the help popup links to the switch that turns all help off.",
+        "Account: Reset passkeys in Account and sync, and Email me a code on the Lost access screen (when emailed codes are switched on).",
+        "Compact view no longer shrinks the bottom menu or the + button."
+      ],
+      "el": [
+        "Αρχική: μια συμπαγής ταινία από κάρτες που γυρίζουν (Συνολικό υπόλοιπο, Προς πληρωμή, Ασφαλές ποσό). Το Ημερολόγιο και οι Προσεχείς πληρωμές γυρίζουν σε μια γραπτή σύνοψη των επόμενων 7 ημερών. Η Έξυπνη Αρχική βάζει πρώτα ό,τι χρειάζεται προσοχή και μπορείτε να την απενεργοποιήσετε στην Εμφάνιση.",
+        "Προσθήκη εγγραφής: το Πορτοφόλι και το Πληρωμένο βρίσκονται δίπλα-δίπλα ως δύο πλακίδια και το Πληρωμένο γίνεται πράσινο ή κεχριμπαρί χωρίς να μετακινείται τίποτα.",
+        "Όταν σύρετε ένα πληρωμένο έξοδο σε απλήρωτο, ρωτά πότε πρέπει να πληρωθεί, με Ακύρωση και Αναίρεση. Οι ενδείξεις κατάστασης μένουν στα αγγλικά και το παράθυρο βοήθειας οδηγεί στον διακόπτη που απενεργοποιεί όλη τη βοήθεια.",
+        "Λογαριασμός: Επαναφορά passkey στο Λογαριασμός και συγχρονισμός και Στείλτε μου κωδικό με email στην οθόνη Χάσατε την πρόσβαση (όταν οι κωδικοί με email είναι ενεργοποιημένοι).",
+        "Η συμπαγής προβολή δεν μικραίνει πλέον το κάτω μενού ούτε το κουμπί +."
+      ]
+    },
     {
       "version": "0.47.1",
       "date": "2026-10-21",

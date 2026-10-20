@@ -974,9 +974,6 @@
 :is(:root[data-skin="mobie"], :root[data-density="compact"]) .appbar { min-height: 46px; padding-block: 4px; }
 :is(:root[data-skin="mobie"], :root[data-density="compact"]) .ab-title, :is(:root[data-skin="mobie"], :root[data-density="compact"]) .ab-title.home b { font-size: 20px; }
 :is(:root[data-skin="mobie"], :root[data-density="compact"]) .ab-title.home small { font-size: 12px; }
-:is(:root[data-skin="mobie"], :root[data-density="compact"]) .tabbar { padding-block: 3px; }
-:is(:root[data-skin="mobie"], :root[data-density="compact"]) .tab svg { width: 22px; height: 22px; } :is(:root[data-skin="mobie"], :root[data-density="compact"]) .tab span { font-size: 11px; }
-:is(:root[data-skin="mobie"], :root[data-density="compact"]) .fab { width: 48px; height: 48px; margin-top: -20px; border-width: 4px; }
 :is(:root[data-skin="mobie"], :root[data-density="compact"]) .bm-list { gap: 5px; }
 :is(:root[data-skin="mobie"], :root[data-density="compact"]) .bm-row { box-shadow: none; }
 :is(:root[data-skin="mobie"], :root[data-density="compact"]) .bm-front { min-height: 52px; padding: 6px 10px; gap: 10px; }

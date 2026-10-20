@@ -71,14 +71,29 @@
 		toast( t( 'tTxDeleted' ), () => { S().txs.splice( i, 0, x ); EX.save(); } );
 	}
 	/** Mark a plain expense as not paid: it becomes a one-time bill due on its date, and Undo puts the expense back. */
-	function unpayTx( id ) {
+	function unpayTx( id, due ) {
 		const i = S().txs.findIndex( ( x ) => x.id === id ); if ( i < 0 ) return;
 		const x = S().txs[ i ]; if ( x.type !== 'expense' || x.billId || x.goalId || x.incomeId ) return;
 		const cur = ( S().accounts.find( ( a ) => a.id === x.account ) || {} ).currency || S().settings.currency;
-		const bill = { id: uid(), name: x.name || EX.catInfo( x.category ).name, amount: x.amount, account: x.account, currency: cur, category: x.category, tags: copy( x.tags || [] ), photo: x.photo || '', repeat: 'once', next: x.date };
+		const bill = { id: uid(), name: x.name || EX.catInfo( x.category ).name, amount: x.amount, account: x.account, currency: cur, category: x.category, tags: copy( x.tags || [] ), photo: x.photo || '', repeat: 'once', next: due || x.date };
 		S().txs.splice( i, 1 ); S().bills.push( bill ); EX.save();
 		toast( t( 'tUnpaid' ), () => { S().bills = S().bills.filter( ( b ) => b.id !== bill.id ); S().txs.splice( i, 0, x ); EX.save(); } );
 	}
+	/** Swiping a paid expense to unpaid: ask when it should be paid, with Cancel and a confirm button (and Undo afterwards). */
+	EXA.openUnpay = ( id ) => {
+		const x = S().txs.find( ( z ) => z.id === id ); if ( ! x ) return;
+		const cur = ( S().accounts.find( ( a ) => a.id === x.account ) || {} ).currency || S().settings.currency;
+		UI.openSheet( `${ head( t( 'actUnpaid' ) ) }<div class="sheet-pad unpay-sheet"><p><b>${ esc( x.name || EX.catInfo( x.category ).name ) }</b> \u00b7 ${ esc( EX.money( Number( x.amount ), cur ) ) }</p><p class="muted">${ esc( t( 'unpayWhen' ) ) }</p>
+			<div class="when-chips"><button type="button" class="chip" data-unpay-day="0">${ esc( t( 'relToday' ) ) }</button><button type="button" class="chip" data-unpay-day="1">${ esc( t( 'relTomorrow' ) ) }</button><button type="button" class="chip" data-unpay-day="7">${ esc( t( 'relIn', { n: 7 } ) ) }</button></div>
+			<label class="f"><span>${ esc( t( 'pickDate' ) ) }</span><input type="date" id="unpayDate" value="${ esc( today() ) }"></label><p class="err" id="unpayErr" role="alert" hidden></p>
+			<div class="btn-row"><button type="button" class="btn btn-ghost" data-unpay-cancel>${ esc( t( 'cancel' ) ) }</button><button type="button" class="btn btn-primary" data-unpay-ok>${ esc( t( 'actUnpaid' ) ) }</button></div></div>`, { cls: 'small' } );
+		const box = $( '.unpay-sheet' );
+		box.addEventListener( 'click', ( e ) => {
+			const d = e.target.closest( '[data-unpay-day]' ); if ( d ) { $( '#unpayDate' ).value = addDays( today(), Number( d.dataset.unpayDay ) ); return; }
+			if ( e.target.closest( '[data-unpay-cancel]' ) ) { UI.closeSheet( true ); return; }
+			if ( e.target.closest( '[data-unpay-ok]' ) ) { const v = $( '#unpayDate' ).value; if ( ! /^\d{4}-\d{2}-\d{2}$/.test( v ) ) { const er = $( '#unpayErr' ); er.textContent = t( 'errDate' ); er.hidden = false; return; } UI.closeSheet( true ); unpayTx( id, v ); }
+		} );
+	};
 	Object.assign( EXA, { unpayTx, markPaid, skipBill, snoozeBill, removeBill, removeTx } );
 
 	/* ------------------------------------------------------------------ Confirm */
@@ -182,11 +197,11 @@
 		const typeBar=fresh?`<div class="entry-top"><div class="entry-types" role="tablist" aria-label="${esc(t('entryChange'))}">${['expense','income','transfer'].map(type=>`<button type="button" class="${type===T.type?'on':''}" role="tab" aria-selected="${type===T.type}" data-tx-type="${type}">${esc(t('type'+type[0].toUpperCase()+type.slice(1)))}</button>`).join('')}</div>${T.type!=='transfer'?`<button type="button" class="entry-mode${T.quick?' on':''}" data-tx="toggle-mode" aria-pressed="${!!T.quick}" aria-label="${esc(t(T.quick?'entryModeCasual':'entryModeSmart'))}" title="${esc(t(T.quick?'entryModeCasual':'entryModeSmart'))}">${UI.icon(T.quick?'pencil':'sparkles',22)}</button>`:''}</div>`:'';
 		const sentenceBtn=`<button type="button" class="btn btn-ghost entry-sentence-switch" data-tx="quick">${UI.icon('notes',20)} ${esc(t('sentenceAlternative'))}</button>`;
 		const rec=T.editId?S().txs.find(x=>x.id===T.editId):null,canUnpay=!!rec&&rec.type==='expense'&&!rec.billId&&!rec.goalId&&!rec.incomeId&&!rec.reimbursementOf;
-		const paidRow=`<label class="entry-paid"><span><b>${esc(t(T.type==='income'?'receivedWord':'paid'))}</b>${T.unpaid?`<small>${esc(t(T.type==='income'?'entryUnreceivedHint':'entryUnpaidHint'))}</small>`:''}</span><span class="switch"><input type="checkbox" id="entryPaid"${T.unpaid?'':' checked'}><i></i></span></label>`;
+		const paidRow=`<label class="pair-tile pair-paid ${T.unpaid?'unpaid':'paid'}"><input type="checkbox" id="entryPaid" class="sr-only"${T.unpaid?'':' checked'}><span class="pt-ic">${UI.icon(T.unpaid?'clock':'check',24)}</span><b>${T.unpaid?'Unpaid':(T.type==='income'?'Received':'Paid')}</b></label>`;
 		const when=T.date===today()?'today':T.date===addDays(today(),-1)?'yesterday':'other';
 		const simpleTop=simple?`<div class="entry-category" id="entryCategory">${entryCategories()}</div>
-		<div class="entry-when"><span class="entry-label">${esc(t('entryDate'))}</span><div class="when-chips"><button type="button" class="chip${when==='today'?' on':''}" data-tx-date="today">${esc(t('relToday'))}</button><button type="button" class="chip${when==='yesterday'?' on':''}" data-tx-date="yesterday">${esc(t('relYesterday'))}</button><label class="chip date${when==='other'?' on':''}">${UI.icon('calendar',18)}<input type="date" id="txDate" value="${esc(T.date)}" aria-label="${esc(t('pickDate'))}"></label></div></div>
-		${paidRow}
+		<div class="entry-when"><span class="entry-label">${esc(t(T.unpaid?'dueDateLabel':'entryDate'))}</span><div class="when-chips"><button type="button" class="chip${when==='today'?' on':''}" data-tx-date="today">${esc(t('relToday'))}</button><button type="button" class="chip${when==='yesterday'?' on':''}" data-tx-date="yesterday">${esc(t('relYesterday'))}</button><label class="chip date${when==='other'?' on':''}">${UI.icon('calendar',18)}<input type="date" id="txDate" value="${esc(T.date)}" aria-label="${esc(t('pickDate'))}"></label></div></div>
+		<div class="entry-pair"><div class="pair-tile pair-wallet">${walletControl()}</div>${paidRow}</div>${T.walletOpen?`<div class="editor-wallet-row">${walletChoices()}</div>`:''}
 		<details class="entry-more" data-entry-more${T.moreOpen||(T.missing||[]).includes('wallet')?' open':''}><summary>${UI.ci('dots','gray',36)}<span class="entry-group-copy"><b>${esc(t('entryMoreDetails'))}</b><small>${esc(t('entryMoreHint'))}</small></span>${UI.icon('chevron-down',18)}</summary><div class="entry-more-body">${sentenceBtn}${T.type==='expense'?EXA.servicePicker():''}`:'';
 		return `<div class="sheet-head entry-head">${X}<h2 id="sheetTitle">${esc(t(titleKey()))}</h2><button type="button" class="btn btn-ghost entry-change"${T.scheduleKind||T.editId||fresh?' hidden':''} data-entry="type" aria-expanded="${!!T.typeOpen}">${esc(t('entryChange'))}</button></div>
 		<div class="tx-scroll entry-scroll${T.quick?' sentence-entry-mode':''}">
@@ -209,8 +224,8 @@
 		${T.type!=='transfer'?`${EX.savedNames(T.type).length?`<details class="saved-names"><summary>${UI.icon('bookmark',18)}${esc(t('savedNames'))} (${EX.savedNames(T.type).length}) ${UI.icon('chevron-down',16)}</summary><div class="saved-name-grid">${EX.savedNames(T.type).map((x,i)=>`<span><button type="button" class="chip" data-tx-saved="${i}">${esc(x.name)}</button>${EXA.pinControl?.(T.type,i)||''}</span>`).join('')}</div></details>`:''}`:''}</div>
         <div id="entryServices"${T.name.trim()||T.editScheduleId||T.editId||simple?' hidden':''}>${T.type==='expense'?EXA.servicePicker():''}</div>
         ${simpleTop}
-        ${canUnpay?paidRow:''}
-        ${T.type!=='transfer'?`<div class="editor-wallet-row"><span class="editor-row-label">${esc(t(T.type==='income'?'incTo':'fPayFrom'))}</span>${walletControl()}${T.walletOpen?walletChoices():''}</div>`:''}
+        ${canUnpay?`<div class="entry-pair single">${paidRow}</div>`:''}
+        ${T.type!=='transfer'&&!simple?`<div class="editor-wallet-row"><span class="editor-row-label">${esc(t(T.type==='income'?'incTo':'fPayFrom'))}</span>${walletControl()}${T.walletOpen?walletChoices():''}</div>`:''}
         ${simple?'':`<div class="editor-date-row"><button type="button" class="editor-row" data-entry="date">${UI.ci('calendar','teal',36)}<span><b>${esc(t('entryDate'))}</b><small>${esc(T.date===today()?t('relToday'):EX.parse(T.date).toLocaleDateString(EX.loc(),{day:'numeric',month:'short',year:'numeric'}))}</small></span>${UI.icon('chevron-down',20)}</button>${T.dateOpen?`<div class="entry-date-options"><button type="button" class="chip" data-tx-date="today">${esc(t('relToday'))}</button><button type="button" class="chip" data-tx-date="yesterday">${esc(t('relYesterday'))}</button><label class="f"><span>${esc(t('pickDate'))}</span><input type="date" id="txDate" value="${esc(T.date)}"></label></div>`:''}</div>`}
 
         ${T.type!=='transfer'&&!simple?entryGroup('category','fCategory','category-2',T.category?EX.catInfo(T.category).name:t('entryChooseCat'),`<div class="entry-category" id="entryCategory">${entryCategories()}</div>`):''}
@@ -347,7 +362,7 @@
 		const catChip = `<label class="qp-chip pick${ cat ? '' : ' warn' }">${ cat ? UI.icon( cat.iconName || 'tag', 16 ) + ' ' + esc( cat.name ) : esc( t( 'entryChooseCat' ) ) }<select data-qp-cat aria-label="${ esc( t( 'fCategory' ) ) }">${ cat ? '' : `<option value="" selected disabled>${ esc( t( 'entryChooseCat' ) ) }</option>` }${ catOpts }</select></label>`;
 		const walletChip = wallets.length > 1 ? `<label class="qp-chip pick${ acct ? '' : ' warn' }">${ UI.icon( 'wallet', 16 ) } ${ esc( acct ? EX.accountName( acct ) : t( 'entryChooseWallet' ) ) }<select data-qp-wallet aria-label="${ esc( t( T.type === 'income' ? 'incTo' : 'fPayFrom' ) ) }">${ acct ? '' : `<option value="" selected disabled>${ esc( t( 'entryChooseWallet' ) ) }</option>` }${ wallets.map( ( w ) => `<option value="${ esc( w.id ) }"${ T.account === w.id ? ' selected' : '' }>${ esc( EX.accountName( w ) ) }</option>` ).join( '' ) }</select></label>` : '';
 		return `<div class="qp-amt">${ esc( EX.money( T.amount || 0, cur ) ) }</div><div class="qp-name">${ esc( T.name || '\u2014' ) }</div>
-			<div class="qp-chips">${ catChip }${ walletChip }<span class="qp-chip">${ UI.icon( 'calendar', 16 ) } ${ esc( EX.dayName( T.date ) ) }</span><span class="qp-chip ${ later ? 'later' : 'paid' }">${ later ? esc( t( 'unpaidWord' ) ) : UI.icon( 'check', 14 ) + ' ' + esc( t( T.type === 'income' ? 'receivedWord' : 'paid' ) ) }</span>${ repeat }</div>`;
+			<div class="qp-chips">${ catChip }${ walletChip }<span class="qp-chip">${ UI.icon( 'calendar', 16 ) } ${ esc( EX.dayName( T.date ) ) }</span><span class="qp-chip ${ later ? 'later' : 'paid' }">${ later ? 'Unpaid' : UI.icon( 'check', 14 ) + ' ' + ( T.type === 'income' ? 'Received' : 'Paid' ) }</span>${ repeat }</div>`;
 	}
 	/** "Prepare my expense": understand the sentence, fill in anything it could not tell (Other, the usual wallet) and show the card. */
 	function prepareQuick() {
@@ -812,7 +827,7 @@
 		let h;
 		if ( ! EX.auth.supported() ) h = `${ head( t( 'authTitle' ) ) }<div class="sheet-pad"><p class="err">${ esc( t( 'err_unsupported' ) ) }</p></div>`;
 		else if ( mode === 'recover' ) {
-			h = `${ head( t( 'recoverTitle' ) ) }<div class="sheet-pad"><p class="muted">${ esc( t( 'recoverText' ) ) }</p><form id="recoverForm" novalidate><label class="f"><span>${ esc( t( 'authEmail' ) ) }</span><input name="email" type="email" autocomplete="email" required autofocus></label><label class="f"><span>${ esc( t( 'recoverCode' ) ) }</span><input name="code" autocomplete="off" spellcheck="false" placeholder="XXXX-XXXX-XXXX" required></label><p class="err" id="authErr" role="alert" hidden></p><div class="btn-row stack"><button type="submit" class="btn btn-primary">${ esc( t( 'recoverBtn' ) ) }</button><button type="button" class="btn btn-ghost" data-act="auth-back">${ esc( t( 'authBack' ) ) }</button></div></form></div>`;
+			h = `${ head( t( 'recoverTitle' ) ) }<div class="sheet-pad"><p class="muted">${ esc( t( 'recoverText' ) ) }</p><form id="recoverForm" novalidate><label class="f"><span>${ esc( t( 'authEmail' ) ) }</span><input name="email" type="email" autocomplete="email" required autofocus></label><label class="f"><span>${ esc( t( 'recoverCode' ) ) }</span><input name="code" autocomplete="off" spellcheck="false" placeholder="XXXX-XXXX-XXXX" required></label><p class="muted small" id="recoverNote" role="status" hidden></p><p class="err" id="authErr" role="alert" hidden></p><div class="btn-row stack"><button type="submit" class="btn btn-primary">${ esc( t( 'recoverBtn' ) ) }</button><button type="button" class="btn btn-ghost" data-act="recover-email">${ UI.icon( 'mail', 20 ) } ${ esc( t( 'recoverEmailBtn' ) ) }</button><button type="button" class="btn btn-ghost" data-act="auth-back">${ esc( t( 'authBack' ) ) }</button></div></form></div>`;
 		} else {
 			h = `${ head( t( 'authTitle' ) ) }<div class="sheet-pad"><div class="auth-hero">${ UI.ci( 'key', 'teal', 64 ) }</div><p class="muted center">${ esc( t( 'authPasskeyHelp' ) ) }</p><div class="btn-row stack"><button type="button" class="btn btn-primary" id="authLogin">${ UI.icon( 'key', 22 ) } ${ esc( t( 'authSignIn' ) ) }</button></div><p class="or"><span>${ esc( t( 'authOr' ) ) }</span></p>
 				<form id="registerForm" novalidate><label class="f"><span>${ esc( t( 'authEmail' ) ) }</span><input name="email" type="email" autocomplete="email" required></label><p class="muted small">${ esc( t( 'authEmailHelp' ) ) }</p><p class="err" id="authErr" role="alert" hidden></p><div class="btn-row stack"><button type="submit" class="btn btn-ghost">${ esc( t( 'authCreate' ) ) }</button></div></form>
@@ -842,7 +857,7 @@
 			EXA.showCodes( r.recoveryCodes, () => EXA.render() );
 		} );
 		else if ( f.id === 'recoverForm' ) withBusy( async () => {
-			const r = await EX.auth.recover( f.elements.email.value.trim(), f.elements.code.value.trim() );
+			const r = await EX.auth.recover( f.elements.email.value.trim(), f.elements.code.value.trim(), f.dataset.viaEmail === '1' );
 			if ( r.error ) return authError( r.error );
 			UI.closeSheet(); toast( t( 'tRecovered' ) ); EXA.render();
 		} );
