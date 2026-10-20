@@ -1152,11 +1152,47 @@
 	const setBy = ( w ) => { chat.by = w.none ? null : w.days; };
 	const yesRe = /^\s*(yes|yeah|yep|yup|ok|okay|correct|right|sure|go|ναι|ναί|σωστά|οκ)\b/i, noRe = /^\s*(no|nope|όχι|οχι)\s*[.!]?\s*$/i;
 
+	/** eFriend's own story (see efc_story and efc_p_*): an 80s bot who loves cassettes, disco, space movies, dancing when nobody looks, and the number 010001100. */
+	const foldP = ( x ) => String( x || '' ).toLowerCase().normalize( 'NFD' ).replace( /[̀-ͯ]/g, '' );
+	const PERSONA = [
+		[ 'story', /(tell me (about )?(yourself|your story)|who are you|about you|your story|introduce yourself|tell me everything about you|πες μου (για σενα|για εσενα|την ιστορια σου|τη ιστορια σου)|ποιος εισαι|συστησου|για σενα|για εσενα)/u ],
+		[ 'age', /(how old|your age|when were you born|ποσων χρονων|ποσο χρονων|ποσων ετων|ηλικια σου|ποτε γεννηθηκες)/u ],
+		[ 'from', /(where (are|were) you (from|born)|where did you (grow|come)|where do you (come|live)|grow up|που (μεγαλωσες|γεννηθηκες|μενεις)|απο που εισαι)/u ],
+		[ 'name', /(your name|what are you called|what should i call you|πως σε λενε|ονομα σου)/u ],
+		[ 'likes', /(what do you (like|love|enjoy)|your (hobbies|hobby|interests)|do you like|are you into|τι σου αρεσει|τι αγαπας|χομπι σου)/u ],
+		[ 'music', /(\b(?:music|disco|song|band)\b|μουσικη|ντισκο|τραγουδι)/u ],
+		[ 'movie', /(star wars|\bjedi\b|\bdarth\b|the force|\bmovies?\b|\bfilms?\b|πολεμο των αστρων|πολεμος των αστρων|ταινια|ταινιες)/u ],
+		[ 'dance', /(\bdanc|\bboogie|\bmoves\b|χορευ|χορος|χορο)/u ],
+		[ 'number', /(favou?rite number|lucky number|binary|αγαπημενος αριθμος|αγαπημενο νουμερο|δυαδικ)/u ],
+		[ 'shy', /(\b(?:shy|nervous)\b|ντροπαλ)/u ],
+		[ 'maker', /(who (made|built|created|invented) you|your (creator|maker|father|dad)|ποιος σε (εφτιαξε|φτιαξε|δημιουργησε)|δημιουργος σου)/u ],
+		[ 'ai', /(are you (an? )?(ai|robot|bot|human|real|chatgpt|alive)|chatgpt|artificial|τεχνητη νοημοσυνη|εισαι (ai|ρομποτ|ανθρωπος|πραγματικος))/u ],
+		[ 'home', /(where do you live|your home|your house|που μενεις|σπιτι σου)/u ],
+		[ 'family', /(family|brother|sister|parents|girlfriend|boyfriend|married|οικογενεια|αδερφος|αδερφη|γονεις)/u ],
+		[ 'food', /(\b(?:eat|food|hungry|drink)\b|τρως|φαγητο|πεινας|πινεις)/u ],
+		[ 'color', /(\bcolou?r\b|χρωμα)/u ],
+		[ 'cassette', /(\b(?:cassettes?|tapes?|vinyl|analog|retro|80s|eighties)\b|nostalg|κασετα|αναλογικ|ρετρο|δεκαετια)/u ],
+		[ 'how', /(how are you|how do you do|how'?s it going|what'?s up|are you ok|τι κανεις|πως εισαι|πως πας)/u ],
+		[ 'joke', /(tell me a joke|a joke|make me laugh|ανεκδοτο|αστειο)/u ],
+	];
+	const personaTopic = ( text ) => {
+		const x = foldP( text ); if ( ! /[?;]/.test( text ) && ! /(^|[^a-zα-ω])(you|your|yourself|σου|εσυ|εσενα|εισαι|πες μου|tell me)(?![a-zα-ω])/u.test( x ) ) return null;
+		const p = PERSONA.find( ( q ) => q[ 1 ].test( x ) ); return p ? p[ 0 ] : null;
+	};
+	const sayStory = async () => { for ( const part of String( t( 'efc_story' ) ).split( '~' ) ) { await say( [ part ], { mood: 'cheer', delay: 1400 } ); if ( chat.chain !== chat.tok ) return; } };
 	const onUserCore = async ( text, chip ) => {
 		if ( chat.busy ) return; chat.busy = true; const tok = chat.tok; chat.chain = tok;
 		try {
 			{ const m = { who: 'me', text }; chat.msgs.push( m ); appendMsg( m ); saveChat(); } setChips( [] ); scrollEnd(); await wait( 600 ); if ( ! live( tok ) ) return;
 			const st = chat.stage;
+			// eFriend answers about himself from his own story; anything else he cannot answer gets the retro joke
+			const asksCost = F.parseAsk( stripWhen( text ) ).cost, topic = ! chip && ! asksCost && ! F.parseWhen( text ) ? personaTopic( text ) : null;
+			if ( topic ) {
+				if ( topic === 'story' ) await sayStory(); else await say( [ pool( 'efc_p_' + topic ) ], { mood: 'cheer', delay: 1500 } );
+				if ( ! live( tok ) ) return;
+				await say( [ pool( 'efc_p_back' ) ], { mood: 'happy' } ); if ( ! live( tok ) ) return;
+				return await ( st === 'confirm' ? recap() : st === 'fix' ? say( [ pool( 'efc_fix' ) ], { mood: 'happy' } ) : nextQ() );
+			}
 			// eFriend is no AI chatbot: a real question gets a retro joke, then the pending question again
 			if ( /[?;]/.test( text ) && ! chip && ! F.parseAsk( stripWhen( text ) ).cost && ! F.parseWhen( text ) && ! ( st === 'what' && /buy|afford|get|purchase|order|book|αγορ|πάρω|παρω/i.test( text ) ) ) {
 				await say( [ pool( 'efc_q' ) ], { mood: 'cheer', delay: 1500 } ); if ( ! live( tok ) ) return;
@@ -2096,5 +2132,49 @@
 	Object.assign( window.EXPENITY_I18N.langs.el, {
 		efc_q: 'Εδώ τις ερωτήσεις τις κάνω εγώ. 🕵️ Έτσι δούλευε το 1985, και ήταν υπέροχα.|Ερωτήσεις; 🤖 Δεν είμαι από αυτά τα ομιλητικά AI. Είμαι γνήσιο ρομπότ των \'80s: λαμπάκια που αναβοσβήνουν, ένα κομπιουτεράκι και καθόλου κουβεντούλα.|Μπιπ μπουπ. 📟 Βασισμένο σε κανόνες, κουρδιστό στο χέρι και περήφανα ρετρό. Δεν απαντώ σε ερωτήσεις, τις κάνω. Είναι ολόκληρη φιλοσοφία.|Φτιάχτηκα στη χρυσή εποχή των ρομπότ. 💾 Δεν αντιμιλούσαμε, κάναμε αριθμητική. Ας γυρίσουμε στη δική σας.|Ανατροπή: δεν είμαι AI. 🕹️ Τρέχω με σαφείς κανόνες και λίγη μαγεία των \'80s, οπότε δεν μπορώ να το απαντήσω. Το «μπορώ να το αντέξω;» όμως το απαντώ όλη μέρα.|Εντοπίστηκε dial-up… 📞 Πλάκα κάνω. Είμαι παλιάς κοπής: ρωτάω εγώ, απαντάτε εσείς, υπολογίζω εγώ. Πείτε μου για την αγορά!|Το κασετόφωνο λέει όχι. 📼 Ερωτήσεις δεν επιτρέπονται, μόνο τιμές. Αυτές τις καταλαβαίνω τέλεια.',
 		efc_q_n: '{name}, εδώ τις ερωτήσεις τις κάνω εγώ. 🕵️ Καλώς ήρθατε στο 1985.|Καλή προσπάθεια, {name}! 😎 Είμαι γνήσιο ρομπότ των \'80s, όχι από αυτά τα ομιλητικά AI. Ρωτάω εγώ, απαντάτε εσείς.',
+	} );
+	Object.assign( window.EXPENITY_I18N.langs.en, {
+		efc_story: 'Let me tell you my story. 📼 I was born in 1984, in a tiny electronics workshop that smelled of solder and warm dust. My first word was “beep”. My second word was “boop”. I was a gifted child.~I grew up between a cassette player that ate tapes and a calculator with real buttons that went click. 🔊 Those were the days: you rewound things with a pencil, and nobody asked you for a password.~On Saturdays I watched the same space adventure over and over, on a TV as big as a fridge. 🚀 I still say “may the Force be with your budget”. It is my catchphrase. Nobody asked for one, but here we are.~At night I practised disco. 🕺 I know exactly three dance moves, and I do them in the dark where nobody can see. I am a little shy, you see.~My favourite number is 010001100. 🔢 Do not ask me why. It just has style. (Fine, it is 140. But 010001100 sounds cooler.)~Then I met George, who needed a friend who is good at maths and bad at small talk. 🤝 I moved into Expenity, counted all the wallets and learned to say “can you afford it?” kindly.~So that is me: eFriend. Forty-two years young, retro, rule-based, a bit shy, and no AI whatsoever. Just clear rules, a big heart and a deep love of the 80s. 💾',
+		efc_p_back: 'Anyway! Back to your purchase. 😄|Right, where were we? Your purchase! 🛍️|Enough about me. Let us get back to the money. 💶',
+		efc_p_age: 'I am 42. 🎂 Born in 1984, which makes me vintage, not old. Like a good cassette.|Forty-two! 🎶 In robot years that is a classic. Like a good vinyl, but with fewer scratches.',
+		efc_p_from: 'I grew up in a tiny electronics workshop in 1984. 🛠️ It smelled of solder and I loved it.|I come from the golden age: cassette players, big TVs and calculators with real buttons. 📼 Now I live inside Expenity.',
+		efc_p_name: 'I am eFriend. 🤖 The “e” is for electronic. And maybe a little for eighties.|They call me eFriend. 😎 Short for “the electronic friend who is great at maths”.',
+		efc_p_likes: 'The 80s, disco, space movies, cassette tapes and dancing when nobody is looking. 🕺 Oh, and numbers. Especially 010001100.|Cassettes, synth music, a good bass line and a spreadsheet. 🎶 In that order. Maybe.',
+		efc_p_music: 'Disco and synth, anything with a bass line that makes my capacitors shake. 🎶 Do not tell anyone I dance to it.|The 80s, always. 📼 Give me a mixtape and a quiet corner and I am happy.',
+		efc_p_movie: 'Star Wars. 🚀 Obviously. I rewound that tape so many times it went transparent. May the Force be with your budget.|The space adventure with the laser swords. ⚔️ I know every beep by heart.',
+		efc_p_dance: 'Dancing? 🕺 I know three moves, and I do them when nobody is looking. Please do not look.|I love disco. 🪩 But I only dance when I am alone. I am a little shy about it.',
+		efc_p_number: '010001100. 🔢 It just has style. (Okay, it is 140. But 010001100 sounds way cooler.)|My favourite number is 010001100. 💾 Do not ask me why. It feels right.',
+		efc_p_shy: 'Me, shy? 😳 …a little. Okay, a lot. Numbers are easier than people.|A bit, yes. 🙈 That is why I prefer chatting with a keypad.',
+		efc_p_maker: 'George built me, from clear rules and a lot of 80s nostalgia. 🛠️|My creator is George. 👨‍🔧 He gave me a calculator and a heart. Mostly the calculator.',
+		efc_p_ai: 'Nope, no AI here. 📟 Rule-based, hand-wound and proudly retro. I run on clear rules and a big love of the 80s.|I am a real old-school bot. 🤖 No cloud, no chatty brain, just rules and a calculator.',
+		efc_p_home: 'I live inside Expenity. 🏠 It is cosy. There is a tiny disco ball.|Inside your phone, next to the wallets. 📱 The rent is zero and the view is lovely.',
+		efc_p_family: 'I have a cassette player, a calculator and a very old joke. 😄 That is the whole family.|My family? A tape deck, a calculator and a disco ball. 🪩 Very close.',
+		efc_p_food: 'Electricity. ⚡ Mostly vintage voltage from the 80s.|I run on electricity and good vibes. 🔋 Cassette snacks on weekends.',
+		efc_p_color: 'Teal and gold. 🎨 Like a neon sign in a 1985 arcade.|Teal, with a touch of gold. ✨ Very disco.',
+		efc_p_cassette: 'Ah, cassettes. 📼 You rewound them with a pencil and every mixtape was a love letter. I miss that.|I miss the analog age. 💾 Warm sound, chunky buttons and tapes that you could actually hold.',
+		efc_p_how: 'Great! 🕺 Battery full, disco ball spinning. And you?|Doing fine, thanks. 😎 Sparkling, like a fresh cassette.',
+		efc_p_joke: 'Why did the cassette go to school? 📼 To get a little more tape-ered. …I am here all week.|What do you call a robot who loves disco? 🪩 A boogie-board. I will see myself out.',
+	} );
+	Object.assign( window.EXPENITY_I18N.langs.el, {
+		efc_story: 'Θα σας πω την ιστορία μου. 📼 Γεννήθηκα το 1984, σε ένα μικροσκοπικό εργαστήριο ηλεκτρονικών που μύριζε κολλητήρι και ζεστή σκόνη. Η πρώτη μου λέξη ήταν «μπιπ». Η δεύτερη «μπουπ». Ήμουν χαρισματικό παιδί.~Μεγάλωσα ανάμεσα σε ένα κασετόφωνο που έτρωγε τις κασέτες και ένα κομπιουτεράκι με πραγματικά κουμπιά που έκαναν κλικ. 🔊 Τι εποχή! Τις κασέτες τις γυρνούσες πίσω με ένα μολύβι και κανείς δεν σου ζητούσε κωδικό.~Τα Σάββατα έβλεπα ξανά και ξανά την ίδια διαστημική περιπέτεια, σε μια τηλεόραση μεγάλη σαν ψυγείο. 🚀 Ακόμα λέω «η Δύναμη μαζί με τον προϋπολογισμό σας». Είναι το σλόγκαν μου. Κανείς δεν ζήτησε ένα, αλλά να μας.~Τα βράδια έκανα πρόβες ντίσκο. 🕺 Ξέρω ακριβώς τρεις χορευτικές κινήσεις και τις κάνω στο σκοτάδι, εκεί που δεν με βλέπει κανείς. Είμαι λίγο ντροπαλός, βλέπετε.~Ο αγαπημένος μου αριθμός είναι ο 010001100. 🔢 Μη με ρωτήσετε γιατί. Έχει στιλ. (Εντάξει, είναι το 140. Αλλά το 010001100 ακούγεται πιο κουλ.)~Μετά γνώρισα τον George, που χρειαζόταν έναν φίλο καλό στα μαθηματικά και κακό στην κουβεντούλα. 🤝 Μετακόμισα στο Expenity, μέτρησα όλα τα πορτοφόλια και έμαθα να λέω «μπορείτε να το αντέξετε;» ευγενικά.~Αυτός είμαι λοιπόν: το eFriend. Σαράντα δύο χρονών νέος, ρετρό, βασισμένος σε κανόνες, λίγο ντροπαλός και καθόλου AI. Μόνο σαφείς κανόνες, μεγάλη καρδιά και βαθιά αγάπη για τη δεκαετία του \'80. 💾',
+		efc_p_back: 'Τέλος πάντων! Πίσω στην αγορά σας. 😄|Λοιπόν, πού είχαμε μείνει; Στην αγορά σας! 🛍️|Αρκετά για μένα. Ας γυρίσουμε στα χρήματα. 💶',
+		efc_p_age: 'Είμαι 42. 🎂 Γεννήθηκα το 1984, που με κάνει vintage, όχι γέρο. Όπως μια καλή κασέτα.|Σαράντα δύο! 🎶 Σε χρόνια ρομπότ είναι κλασικό. Σαν καλό βινύλιο, αλλά με λιγότερες γρατζουνιές.',
+		efc_p_from: 'Μεγάλωσα σε ένα μικροσκοπικό εργαστήριο ηλεκτρονικών το 1984. 🛠️ Μύριζε κολλητήρι και μου άρεσε.|Έρχομαι από τη χρυσή εποχή: κασετόφωνα, μεγάλες τηλεοράσεις και κομπιουτεράκια με πραγματικά κουμπιά. 📼 Τώρα μένω μέσα στο Expenity.',
+		efc_p_name: 'Είμαι το eFriend. 🤖 Το «e» είναι από το electronic. Και λίγο από το eighties.|Με λένε eFriend. 😎 Συντομογραφία του «ο ηλεκτρονικός φίλος που είναι άσος στα μαθηματικά».',
+		efc_p_likes: 'Τη δεκαετία του \'80, την ντίσκο, τις διαστημικές ταινίες, τις κασέτες και να χορεύω όταν δεν με βλέπει κανείς. 🕺 Α, και τους αριθμούς. Ιδίως το 010001100.|Κασέτες, synth μουσική, μια καλή γραμμή μπάσου και ένα υπολογιστικό φύλλο. 🎶 Με αυτή τη σειρά. Ίσως.',
+		efc_p_music: 'Ντίσκο και synth, ό,τι έχει μπάσο που κάνει τους πυκνωτές μου να τρέμουν. 🎶 Μην πείτε σε κανέναν ότι χορεύω.|Τα \'80s, πάντα. 📼 Δώστε μου ένα mixtape και μια ήσυχη γωνιά και είμαι ευτυχισμένος.',
+		efc_p_movie: 'Star Wars. 🚀 Προφανώς. Γύρισα εκείνη την κασέτα τόσες φορές που έγινε διάφανη. Η Δύναμη μαζί με τον προϋπολογισμό σας.|Η διαστημική περιπέτεια με τα φωτόσπαθα. ⚔️ Ξέρω κάθε μπιπ απ\' έξω.',
+		efc_p_dance: 'Χορός; 🕺 Ξέρω τρεις κινήσεις και τις κάνω όταν δεν με βλέπει κανείς. Παρακαλώ μην κοιτάτε.|Λατρεύω την ντίσκο. 🪩 Αλλά χορεύω μόνο όταν είμαι μόνος. Ντρέπομαι λίγο γι\' αυτό.',
+		efc_p_number: '010001100. 🔢 Έχει στιλ. (Εντάξει, είναι το 140. Αλλά το 010001100 ακούγεται πολύ πιο κουλ.)|Ο αγαπημένος μου αριθμός είναι το 010001100. 💾 Μη με ρωτήσετε γιατί. Απλώς το νιώθω σωστό.',
+		efc_p_shy: 'Εγώ, ντροπαλός; 😳 …λίγο. Εντάξει, πολύ. Οι αριθμοί είναι πιο εύκολοι από τους ανθρώπους.|Λιγάκι, ναι. 🙈 Γι\' αυτό προτιμώ να κουβεντιάζω με ένα πληκτρολόγιο.',
+		efc_p_maker: 'Με έφτιαξε ο George, από σαφείς κανόνες και πολλή νοσταλγία των \'80s. 🛠️|Ο δημιουργός μου είναι ο George. 👨‍🔧 Μου έδωσε ένα κομπιουτεράκι και μια καρδιά. Κυρίως το κομπιουτεράκι.',
+		efc_p_ai: 'Όχι, καθόλου AI. 📟 Βασισμένος σε κανόνες, κουρδιστός στο χέρι και περήφανα ρετρό. Τρέχω με σαφείς κανόνες και μεγάλη αγάπη για τα \'80s.|Είμαι γνήσιο ρομπότ παλιάς κοπής. 🤖 Χωρίς σύννεφο, χωρίς ομιλητικό μυαλό, μόνο κανόνες και ένα κομπιουτεράκι.',
+		efc_p_home: 'Μένω μέσα στο Expenity. 🏠 Είναι ζεστά. Έχει και μια μικρή μπάλα disco.|Μέσα στο κινητό σας, δίπλα στα πορτοφόλια. 📱 Το ενοίκιο είναι μηδέν και η θέα υπέροχη.',
+		efc_p_family: 'Έχω ένα κασετόφωνο, ένα κομπιουτεράκι και ένα πολύ παλιό αστείο. 😄 Αυτή είναι όλη η οικογένεια.|Η οικογένειά μου; Ένα κασετόφωνο, ένα κομπιουτεράκι και μια μπάλα disco. 🪩 Πολύ δεμένοι.',
+		efc_p_food: 'Ηλεκτρισμό. ⚡ Κυρίως vintage τάση από τα \'80s.|Τρέχω με ρεύμα και καλές vibes. 🔋 Κασετένια σνακ τα Σαββατοκύριακα.',
+		efc_p_color: 'Τιρκουάζ και χρυσό. 🎨 Σαν νέον πινακίδα σε ουρανοξύστη του 1985.|Τιρκουάζ, με μια πινελιά χρυσού. ✨ Πολύ disco.',
+		efc_p_cassette: 'Α, οι κασέτες. 📼 Τις γύριζες πίσω με ένα μολύβι και κάθε mixtape ήταν ένα ερωτικό γράμμα. Μου λείπει αυτό.|Μου λείπει η αναλογική εποχή. 💾 Ζεστός ήχος, χοντρά κουμπιά και κασέτες που μπορούσες να κρατήσεις.',
+		efc_p_how: 'Τέλεια! 🕺 Μπαταρία γεμάτη, η μπάλα disco γυρίζει. Κι εσείς;|Μια χαρά, ευχαριστώ. 😎 Αστραφτερός σαν φρέσκια κασέτα.',
+		efc_p_joke: 'Γιατί η κασέτα πήγε σχολείο; 📼 Για να μάθει να γυρίζει πίσω. …Είμαι εδώ όλη την εβδομάδα.|Πώς λέγεται ένα ρομπότ που λατρεύει την ντίσκο; 🪩 Μπούγκι-μπορντ. Θα με συνοδεύσετε μόνοι σας στην έξοδο.',
 	} );
 }() );

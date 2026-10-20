@@ -1,6 +1,18 @@
 {
-  "version": "0.54.0",
+  "version": "0.54.1",
   "releases": [
+    {
+      "version": "0.54.1",
+      "date": "2026-10-20",
+      "en": [
+        "eFriend has a personality and a story. He is an old-school 80s bot who grew up with cassette players and calculators with real buttons, loves disco, space movies and dancing when nobody is looking (he is a little shy), and has a favourite number: 010001100. Ask him about his age, where he grew up, what he likes, who made him, or tell him “tell me about yourself” and he tells the whole story.",
+        "Questions he cannot answer from his own story still get the old-school “I ask the questions around here” joke."
+      ],
+      "el": [
+        "Το eFriend έχει προσωπικότητα και ιστορία. Είναι ένα ρομπότ παλιάς κοπής των '80s που μεγάλωσε με κασετόφωνα και κομπιουτεράκια με πραγματικά κουμπιά, λατρεύει την ντίσκο, τις διαστημικές ταινίες και να χορεύει όταν δεν τον βλέπει κανείς (είναι λίγο ντροπαλός) και έχει αγαπημένο αριθμό: το 010001100. Ρωτήστε τον για την ηλικία του, πού μεγάλωσε, τι του αρέσει, ποιος τον έφτιαξε ή πείτε «πες μου για σένα» και θα πει όλη την ιστορία.",
+        "Ερωτήσεις που δεν μπορεί να απαντήσει από τη δική του ιστορία παίρνουν πάντα το αστείο «εδώ τις ερωτήσεις τις κάνω εγώ»."
+      ]
+    },
     {
       "version": "0.54.0",
       "date": "2026-10-20",
