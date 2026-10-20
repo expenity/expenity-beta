@@ -1562,3 +1562,8 @@ input[type=date]::-webkit-datetime-edit{padding:0}
 .ef-cp-skip { font-size: 1.25rem; }
 .ef-chips.open { max-height: 44vh; overflow-y: auto; } .ef-chiph { width: 100%; margin: 8px 0 2px; font-weight: 800; } .ef-chipq.more { border-style: dashed; }
 .ef-chat-in { position: relative; } .ef-inwrap { position: relative; flex: 1; min-width: 0; display: block; } .ef-inwrap input { width: 100%; padding-right: 48px; box-sizing: border-box; } .ef-menubtn { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); width: 34px; height: 34px; border-radius: 50%; border: 0; background: color-mix(in srgb, #0f766e 12%, transparent); font-size: 1.05rem; cursor: pointer; display: grid; place-items: center; padding: 0; } .ef-menubtn:disabled { opacity: .35; }
+/* the chat header stays put: only the messages scroll */
+.ef-cp { overflow: hidden; overscroll-behavior: none; }
+.ef-cp .ef-cp-h { flex: none; position: relative; z-index: 3; }
+.ef-cp .ef-chat { min-height: 0; flex: 1 1 0; }
+.ef-cp .ef-chips, .ef-cp .ef-chat-in { flex: none; }

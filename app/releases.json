@@ -1,6 +1,16 @@
 {
-  "version": "0.54.10",
+  "version": "0.54.11",
   "releases": [
+    {
+      "version": "0.54.11",
+      "date": "2026-10-20",
+      "en": [
+        "The chat header now stays fixed while eFriend types: only the messages scroll."
+      ],
+      "el": [
+        "Η κεφαλίδα της συζήτησης μένει πλέον σταθερή όσο πληκτρολογεί το eFriend: κυλούν μόνο τα μηνύματα."
+      ]
+    },
     {
       "version": "0.54.10",
       "date": "2026-10-20",
