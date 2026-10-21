@@ -99,7 +99,7 @@
 	EXA.appbar = () => {
 		const v = st.view;
 		if ( v === 'more' && st.more !== 'root' ) {
-			const titles = { efriend:'fx_efriend', helpicons:'helpIconsTitle', drafts:'draftTitle', trash:'trashTitle', tutorials:'tutTitle', features:'fxTitle', sounds:'soundsTitle', updates:'updatesTitle', account: 'rowAccount', wallets: 'walletsTitle', categories: 'catsTitle', tags: 'tags', reminders: 'rowReminders', data: 'rowData', appearance: 'rowAppearance', install: 'rowInstall', about: 'rowAbout' };
+			const titles = { efriend:'fx_efriend', efblog:'efbMenu', helpicons:'helpIconsTitle', drafts:'draftTitle', trash:'trashTitle', tutorials:'tutTitle', features:'fxTitle', sounds:'soundsTitle', updates:'updatesTitle', account: 'rowAccount', wallets: 'walletsTitle', categories: 'catsTitle', tags: 'tags', reminders: 'rowReminders', data: 'rowData', appearance: 'rowAppearance', install: 'rowInstall', about: 'rowAbout' };
 			return `<button type="button" class="ab-btn" data-act="more-back" aria-label="${ esc( t( 'back' ) ) }">${ UI.icon( 'arrow-left', 24 ) }</button><h1 class="ab-title">${ esc( t( titles[ st.more ] ) ) }</h1>`;
 		}
 		const title = { home: null, activity: t( 'tabActivity' ), bills: t( 'tabBills' ), plan: t( 'planTitle' ), reports: t( 'tabReports' ), more: t( 'moreTitle' ) }[ v ];
@@ -167,6 +167,7 @@
 		}
 		if ( EXA.autoTagsNotice ) h += EXA.autoTagsNotice();
 		if ( ! h && EXA.sharePrompt ) h += EXA.sharePrompt();
+		if ( EXA.efBlogCard ) h += EXA.efBlogCard();
 		return h;
 	}
 
@@ -511,6 +512,7 @@
         if ( sub === 'drafts' ) return EXA.drafts.view();
         if ( sub === 'trash' ) return EXA.trashView();
         if ( sub === 'efriend' && EXA.efriendPage ) return EXA.efriendPage();
+        if ( sub === 'efblog' && EXA.efBlogPage ) return EXA.efBlogPage();
         if ( sub === 'tutorials' ) return EXA.tutorials.view();
         if ( sub === 'features' ) return EXA.features.view();
         if ( sub === 'account' ) return accountView();

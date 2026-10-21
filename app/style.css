@@ -1871,3 +1871,77 @@ fieldset > legend { font-weight: 800; padding: 0 8px; color: var(--ink, #2a1a14)
 .ob-lightx { position: absolute; top: -12px; right: -6px; width: 34px; height: 34px; border-radius: 50%; border: 2px solid #5d6166; background: radial-gradient(circle at 35% 30%, #fff, #b7bcc1 60%, #6a6f74); color: #333; font-weight: 800; cursor: pointer; box-shadow: 0 3px 6px #0006; }
 @media (prefers-reduced-motion: reduce) { .ob-lightbtn, .ob-lightbtn svg { animation: none; } .ob-lightpanel { transition: opacity .2s; } }
 :root[data-motion=off] .ob-lightbtn, :root[data-motion=reduced] .ob-lightbtn, :root[data-motion=off] .ob-lightbtn svg, :root[data-motion=reduced] .ob-lightbtn svg { animation: none; }
+
+/* ------------------------------------------------------------------ eFriend Blog (efblog.js) */
+.efb,.efb *{min-width:0;box-sizing:border-box;overflow-wrap:anywhere}
+.efb{max-width:100%;margin:0 0 14px}
+.efb b{font-weight:700}
+.efb-bar{height:8px;border-radius:5px;background:rgba(127,127,127,.25);overflow:hidden;margin-top:6px}
+.efb-bar i{display:block;height:100%;background:var(--ef-tm,#ff941f);border-radius:5px}
+.efb-card{display:flex;align-items:center;gap:12px;width:100%;text-align:left;margin:0 0 12px}
+.efb-card .mid{flex:1;display:flex;flex-direction:column;gap:2px;min-width:0}
+.efb-card .mid small{font-size:.9rem;line-height:1.35}
+.efb-badge{background:var(--late,#d33);color:#fff;font:700 12px/20px system-ui;font-style:normal;min-width:20px;height:20px;border-radius:10px;padding:0 6px;text-align:center}
+.efb-gentle{display:flex;gap:12px;align-items:center;padding:12px 14px;margin:0 0 12px;border-radius:14px;background:var(--card,rgba(127,127,127,.12));cursor:pointer}
+.efb-gentle input{width:22px;height:22px;flex:none}
+.efb-gentle small{display:block;opacity:.8}
+.efb-tracks{display:grid;gap:8px;margin:12px 0}
+.efb-trk{display:flex;flex-direction:column;gap:2px;text-align:left;width:100%;padding:10px 12px;border-radius:10px;border:2px solid transparent;font:inherit}
+.efb-trk small{font-size:.85rem;opacity:.85}
+.efb-trk.off{opacity:.75}
+.efb-red{filter:blur(4px);user-select:none}
+.efb-note{margin:12px 0;font-size:1.05rem;line-height:1.55}
+.efb-sub{opacity:.85}
+.efb-h{margin:0 0 4px;font-size:1.3rem}
+.efb-stamp{margin:0 0 12px;font-size:.85rem;opacity:.75}
+.efb-l{margin:0 0 12px;font-size:1.1rem;line-height:1.6}
+.efb-hint{font-style:italic}
+.efb-status{margin:10px 0 0;font-size:.9rem}
+.efb-foot{margin:8px 2px 0;font-size:.95rem}
+/* Boogie: a tape deck and a paper strip */
+.efb-boogie .efb-deck{background:linear-gradient(#5a4128,#3b2a19);border:3px solid #b08d57;border-radius:18px;padding:14px;color:#f4e6c4;display:grid;gap:10px}
+.efb-boogie .efb-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.efb-boogie .efb-bt{font:700 1.3rem/1.2 Alegreya,Georgia,serif;text-align:center}
+.efb-reel{width:52px;height:52px;border-radius:50%;border:4px solid #d9b87a;flex:none;background:radial-gradient(circle,#2b2118 0 26%,transparent 27%),conic-gradient(#e8c98d 0 12%,#5a4128 12% 33%,#e8c98d 33% 45%,#5a4128 45% 66%,#e8c98d 66% 78%,#5a4128 78%);animation:efbSpin 6s linear infinite}
+.efb-nixie{font:700 30px/1 'JetBrains Mono',monospace;letter-spacing:3px;padding:6px 12px;border-radius:8px;background:#1c120a;border:2px solid #7a5a2e;color:var(--ef-tm,#ff941f);text-shadow:0 0 calc(12px * var(--ef-glow,.7)) var(--ef-tm,#ff941f)}
+.efb-rec{width:12px;height:12px;border-radius:50%;background:#5a1a14;flex:none}
+.efb-rec.on{background:#ff3b30;box-shadow:0 0 calc(14px * var(--ef-glow,.7)) #ff3b30;animation:efbPulse 1.6s ease-in-out infinite}
+.efb-vu{display:flex;gap:8px;justify-content:center}
+.efb-vu i{width:46%;max-width:150px;height:22px;border-radius:5px;background:#e9dcb8;position:relative;overflow:hidden}
+.efb-vu i::after{content:"";position:absolute;left:50%;bottom:-4px;width:2px;height:26px;background:#b3261e;transform-origin:bottom center;transform:rotate(-30deg);animation:efbNeedle 1.8s ease-in-out infinite alternate}
+.efb-vu i+i::after{animation-duration:2.3s}
+.efb-boogie .efb-trk{background:#f4ead2;color:#2b2118;border-color:#b08d57;font-family:Alegreya,Georgia,serif}
+.efb-boogie .efb-trk.on{border-color:#b3261e;box-shadow:0 0 0 2px rgba(179,38,30,.25)}
+.efb-boogie .efb-trk b{font-size:1.05rem}
+.efb-paper{background:#f4ead2;color:#2b2118;font-family:Alegreya,Georgia,serif;padding:16px;border-radius:6px;border:1px solid #d8c79c;box-shadow:inset 0 0 0 4px #f4ead2,inset 0 0 0 5px #d8c79c}
+.efb-boogie .efb-note,.efb-boogie .efb-status{color:inherit}
+.efb-boogie .efb-paper .efb-l{font-size:1.2rem}
+/* Chip: a retro computer window and a CD */
+.efb-win{border:2px solid #1d2b4f;border-radius:10px;background:#e8eefb;color:#101828;overflow:hidden;font-family:'JetBrains Mono',monospace}
+.efb-titlebar{display:flex;gap:10px;align-items:center;padding:6px 10px;background:linear-gradient(90deg,#1d4ed8,#6366f1);color:#fff;font-size:.85rem}
+.efb-dots{display:flex;gap:4px}.efb-dots i{width:10px;height:10px;border-radius:50%;background:#fff;opacity:.8}
+.efb-chip .efb-top{display:flex;gap:12px;align-items:center;padding:12px}
+.efb-chip .efb-top>div{flex:1}
+.efb-chip .efb-bt{font-size:1.1rem}
+.efb-cd{width:52px;height:52px;border-radius:50%;flex:none;background:radial-gradient(circle,#e8eefb 0 14%,transparent 15%),conic-gradient(#e0e7ff,#a5b4fc,#f0abfc,#99f6e4,#e0e7ff);border:2px solid #1d2b4f;animation:efbSpin 4s linear infinite}
+.efb-chip .efb-tracks,.efb-chip .efb-paper,.efb-chip .efb-note{margin-left:12px;margin-right:12px}
+.efb-chip .efb-trk{background:#fff;color:#101828;border-color:#9fb0d6}
+.efb-chip .efb-trk.on{border-color:#1d4ed8;box-shadow:0 0 0 2px rgba(29,78,216,.25)}
+.efb-chip .efb-paper{background:#fff;color:#101828;font-family:'JetBrains Mono',monospace;border:1px solid #9fb0d6;box-shadow:none}
+.efb-chip .efb-paper .efb-l{font-size:1.02rem;line-height:1.65}
+.efb-chip .efb-status{margin:12px 0 0;padding:6px 12px;background:#1d2b4f;color:#e8eefb;font-size:.85rem}
+.efb-cur{animation:efbBlink 1s steps(2) infinite;margin-left:4px}
+@keyframes efbSpin{to{transform:rotate(360deg)}}
+@keyframes efbPulse{50%{opacity:.45}}
+@keyframes efbNeedle{to{transform:rotate(30deg)}}
+@keyframes efbBlink{50%{opacity:0}}
+@media (prefers-reduced-motion:reduce){:root:not([data-motion=full]) .efb *{animation:none!important}}
+:root[data-motion=off] .efb *,:root[data-motion=reduced] .efb *{animation:none!important}
+.efb-rowwrap{margin:0 0 12px}
+.tt-blog{display:flex;flex-direction:column;align-items:center;gap:8px;padding:18px 14px 0}
+.tt-blog-reels{display:flex;gap:18px}
+.tt-blog-reels i{width:38px;height:38px;border-radius:50%;border:4px solid #d9b87a;background:radial-gradient(circle,#2b2118 0 26%,transparent 27%),conic-gradient(#e8c98d 0 25%,#5a4128 25% 50%,#e8c98d 50% 75%,#5a4128 75%);animation:efbSpin 5s linear infinite}
+.tt-blog-l{height:8px;border-radius:4px;background:#d8c79c;width:0;animation:ttBlogLine 3s ease-out infinite}
+.tt-blog-l.s{animation-delay:.5s}.tt-blog-l.r{animation-delay:1s}
+@keyframes ttBlogLine{0%{width:0}60%,100%{width:85%}}
+:root[data-motion=off] .tt-blog *,:root[data-motion=reduced] .tt-blog *{animation:none!important;width:85%}

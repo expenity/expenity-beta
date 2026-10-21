@@ -1,6 +1,16 @@
 {
-  "version": "0.54.34",
+  "version": "0.55.0",
   "releases": [
+    {
+      "version": "0.55.0",
+      "date": "2026-10-21",
+      "en": [
+        "New: the eFriend Blog. Boogie or Chip writes a short blog from your own entries, chapter by chapter, with jokes. It starts after 10 days, everything stays on your device, and Gentle mode removes the teasing. Find it in More and on Home."
+      ],
+      "el": [
+        "Νέο: το eFriend Blog. Ο Boogie ή ο Chip γράφει ένα σύντομο blog από τις δικές σας εγγραφές, κεφάλαιο προς κεφάλαιο, με χιούμορ. Ξεκινά μετά από 10 ημέρες, όλα μένουν στη συσκευή σας και η Ήπια λειτουργία αφαιρεί τα πειράγματα. Θα το βρείτε στα Περισσότερα και στην Αρχική."
+      ]
+    },
     {
       "version": "0.54.34",
       "date": "2026-10-21",
