@@ -1,6 +1,16 @@
 {
-  "version": "0.54.21",
+  "version": "0.54.22",
   "releases": [
+    {
+      "version": "0.54.22",
+      "date": "2026-10-21",
+      "en": [
+        "Chip now has his own personality: younger, hyped and playful, with his own greetings, reactions, jokes and story. Boogie keeps his vintage charm. Whichever eFriend you pick, the answer about your money is always the same."
+      ],
+      "el": [
+        "Ο Chip έχει πλέον τη δική του προσωπικότητα: νεότερος, ενθουσιώδης και παιχνιδιάρης, με δικούς του χαιρετισμούς, αντιδράσεις, ανέκδοτα και ιστορία. Ο Boogie κρατά τη vintage χάρη του. Όποιο eFriend κι αν διαλέξετε, η απάντηση για τα χρήματά σας είναι πάντα η ίδια."
+      ]
+    },
     {
       "version": "0.54.21",
       "date": "2026-10-21",
