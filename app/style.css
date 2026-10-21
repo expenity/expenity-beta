@@ -1735,3 +1735,8 @@ fieldset > legend { font-weight: 800; padding: 0 8px; color: var(--ink, #2a1a14)
 @media (prefers-reduced-motion: reduce) { .ob-drop { animation: none; } }
 
 .ob-art { transform-origin: 50% 55%; will-change: transform; }
+
+/* paid entries read like the ones coming soon: a tinted row with a coloured edge */
+:root[data-status=normal] .bm-row.paid>.bm-front{background:color-mix(in srgb,var(--ok) 9%,var(--surface));box-shadow:inset 4px 0 0 var(--ok)}
+:root[data-status=normal] .bm-row.paid>.bm-front .mid small{color:var(--ink-2)}
+:root[data-status=normal] .bm-row.paid{border-color:var(--line)}

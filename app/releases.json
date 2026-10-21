@@ -1,6 +1,16 @@
 {
-  "version": "0.54.23",
+  "version": "0.54.24",
   "releases": [
+    {
+      "version": "0.54.24",
+      "date": "2026-10-21",
+      "en": [
+        "Activity is simpler: paid entries now look like the ones coming soon (a tinted row with a coloured edge), and the summary and filter chips are gone. Filters are still under the sliders icon, and Reports has the details."
+      ],
+      "el": [
+        "Οι Κινήσεις είναι πιο απλές: οι πληρωμένες εγγραφές μοιάζουν πλέον με αυτές που έρχονται σύντομα (χρωματισμένη γραμμή με έγχρωμη άκρη) και η σύνοψη και τα φίλτρα έφυγαν. Τα φίλτρα παραμένουν στο εικονίδιο με τους ρυθμιστές και οι Αναφορές έχουν τις λεπτομέρειες."
+      ]
+    },
     {
       "version": "0.54.23",
       "date": "2026-10-21",
