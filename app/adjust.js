@@ -16,11 +16,12 @@
 
 	/* ------------------------------------------------------------------ The sheet */
 
-	let st = null;
+	let st = null, shownType = '';
 	A.open = ( accId, txId ) => {
 		const a = EX.account( accId ); if ( ! a || ! EX.canWrite( a.id ) ) return;
 		const tx = txId ? S().txs.find( ( x ) => x.id === txId ) : null, now = EX.balance( a );
 		st = { a, tx, base: now - ( tx ? signed( tx ) : 0 ) };
+		shownType = ''; // the category list is built fresh for every sheet (it stayed empty when editing an entry after adjusting before)
 		const fine = matchMedia( '(pointer: fine)' ).matches; // the keyboard never opens by itself on touch devices
 		UI.openSheet( `${ head( t( 'adjTitle' ) ) }<form id="adjForm" novalidate class="sheet-pad">
 			<p class="adj-now">${ esc( t( 'adjNow', { wallet: EX.accountName( a ), amount: money( now, a.currency ) } ) ) }</p>
@@ -31,7 +32,6 @@
 			<div class="btn-row sticky-actions">${ tx ? `<button type="button" class="btn btn-danger" id="adjDel">${ esc( t( 'del' ) ) }</button>` : '' }<span class="sp"></span><button type="submit" class="btn btn-primary">${ esc( t( 'adjSave' ) ) }</button></div></form>`, { cls: 'small' } );
 		diff();
 	};
-	let shownType = '';
 	function diff() {
 		const f = document.getElementById( 'adjForm' ); if ( ! f || ! st ) return;
 		const real = amountOf( f.elements.real.value ), d = real == null ? 0 : real - st.base, where = document.getElementById( 'adjWhere' ), out = document.getElementById( 'adjDiff' );

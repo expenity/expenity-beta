@@ -1,6 +1,16 @@
 {
-  "version": "0.56.1",
+  "version": "0.56.2",
   "releases": [
+    {
+      "version": "0.56.2",
+      "date": "2026-10-22",
+      "en": [
+        "Fix: editing a wallet adjustment from Activity now shows the category choices instead of an empty list."
+      ],
+      "el": [
+        "Διόρθωση: η επεξεργασία μιας προσαρμογής πορτοφολιού από τις Κινήσεις εμφανίζει πλέον τις κατηγορίες αντί για κενή λίστα."
+      ]
+    },
     {
       "version": "0.56.1",
       "date": "2026-10-22",
