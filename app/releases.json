@@ -1,6 +1,16 @@
 {
-  "version": "0.55.2",
+  "version": "0.55.3",
   "releases": [
+    {
+      "version": "0.55.3",
+      "date": "2026-10-21",
+      "en": [
+        "The eFriend Blog is now a seven-chapter story of how Boogie and Chip met: a drawer, a coffee ring, a pencil ghost, a blackout, a dream trip, a plot twist and a CD. Your own entries, bills and goals are woven into it, and Gentle mode still removes the teasing."
+      ],
+      "el": [
+        "Το eFriend Blog είναι πλέον μια ιστορία επτά κεφαλαίων για το πώς γνωρίστηκαν ο Boogie και ο Chip: ένα συρτάρι, ένας δακτύλιος από καφέ, ένα φάντασμα με μολύβι, μια διακοπή ρεύματος, ένα όνειρο για ταξίδι, μια ανατροπή και ένα CD. Οι δικές σας εγγραφές, λογαριασμοί και στόχοι υφαίνονται μέσα της, και η Ήπια λειτουργία συνεχίζει να αφαιρεί τα πειράγματα."
+      ]
+    },
     {
       "version": "0.55.2",
       "date": "2026-10-21",
