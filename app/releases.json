@@ -1,6 +1,16 @@
 {
-  "version": "0.54.28",
+  "version": "0.54.29",
   "releases": [
+    {
+      "version": "0.54.29",
+      "date": "2026-10-21",
+      "en": [
+        "The eFriend slider is back to the friends' happy faces, with the gradual Choose fade."
+      ],
+      "el": [
+        "Το slider του eFriend επανέρχεται στα χαρούμενα πρόσωπα των φίλων, με τη σταδιακή εμφάνιση του κουμπιού Επιλογή."
+      ]
+    },
     {
       "version": "0.54.28",
       "date": "2026-10-21",

@@ -99,21 +99,19 @@
 	/* ------------------------------------------------------------------ 2. The split-screen picker */
 	function picker() {
 		summaryOn = false;
-		const B = F().mascotOf( 'boogie', 'worried', 300 ), C = F().mascotOf( 'chip', 'worried', 250 );
+		const B = F().mascotOf( 'boogie', 'happy', 300 ), C = F().mascotOf( 'chip', 'happy', 250 );
 		host.innerHTML = `<div class="ob-pick" id="obPick">			<section class="ob-half ob-boogie" id="obB" aria-label="Boogie"><div class="ob-fall" aria-hidden="true"></div><h1 class="ob-pick-title">${ esc( L( 'pickTitle' ) ) }</h1><p class="ob-hint">${ esc( L( 'pickHint' ) ) }</p><div class="ob-half-in" id="obBin"><div class="ob-art">${ B }</div><div class="ob-txt"><h2>Boogie</h2><p>${ esc( L( 'pickBoogie' ) ) }</p></div></div></section>
 			<section class="ob-half ob-chip" id="obC" aria-label="Chip"><div class="ob-fall" aria-hidden="true"></div><h1 class="ob-pick-title">${ esc( L( 'pickTitle' ) ) }</h1><p class="ob-hint">${ esc( L( 'pickHint' ) ) }</p><div class="ob-half-in" id="obCin"><div class="ob-art">${ C }</div><div class="ob-txt"><h2>Chip</h2><p>${ esc( L( 'pickChip' ) ) }</p></div></div></section>
 			<div class="ob-handle" id="obH" role="slider" tabindex="0" aria-label="${ esc( L( 'pickTitle' ) ) }" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50"><span class="ob-grip"><i>◀</i><i>▶</i></span></div>
 			<button type="button" class="btn btn-primary big ob-choose" id="obChoose" tabindex="-1" aria-hidden="true">${ esc( L( 'pickChoose' ) ) }</button></div>`;
 		const root = host.querySelector( '#obPick' ), bP = root.querySelector( '#obB' ), cP = root.querySelector( '#obC' ), bA = root.querySelector( '#obB .ob-art' ), cA = root.querySelector( '#obC .ob-art' ), bTx = root.querySelector( '#obB .ob-txt' ), cTx = root.querySelector( '#obC .ob-txt' ), h = root.querySelector( '#obH' ), btn = root.querySelector( '#obChoose' ), hints = root.querySelectorAll( '.ob-hint' );
-		let X = 50, raf = 0, moodB = 'worried', moodC = 'worried';
+		let X = 50, raf = 0;
 		const apply = () => {
 			// both friends are drawn centred on the whole screen and the slider cuts them in half; the words fade in as their side is uncovered
 			root.style.setProperty( '--x', X + '%' );
 			bP.style.clipPath = `inset(0 ${ 100 - X }% 0 0)`; cP.style.clipPath = `inset(0 0 0 ${ X }%)`;
 			const pb = Math.max( 0, Math.min( 1, ( X - 52 ) / 40 ) ), pc = Math.max( 0, Math.min( 1, ( 48 - X ) / 40 ) );
 			bTx.style.opacity = pb; bTx.style.transform = `translateY(${ ( 1 - pb ) * 14 + pb * 46 }px)`; cTx.style.opacity = pc; cTx.style.transform = `translateY(${ ( 1 - pc ) * 14 + pc * 46 }px)`;
-			const mood = ( p ) => ( p < .12 ? 'worried' : p < .4 ? 'meh' : p < .75 ? 'happy' : 'cheer' ); // super sad in the middle, super happy at either end
-			const mb = mood( pb ), mc = mood( pc ); if ( mb !== moodB ) { moodB = mb; bA.innerHTML = F().mascotOf( 'boogie', mb, 300 ); } if ( mc !== moodC ) { moodC = mc; cA.innerHTML = F().mascotOf( 'chip', mc, 250 ); }
 			bA.style.transform = `scale(${ ( 1 + .3 * pb - .1 * pc ).toFixed( 3 ) })`; cA.style.transform = `scale(${ ( 1 + .3 * pc - .1 * pb ).toFixed( 3 ) })`; // the one you are choosing grows and comes to the centre
 			h.setAttribute( 'aria-valuenow', Math.round( X ) );
 			// the Choose button shows well before the screen edge, where a browser swipe could take over
