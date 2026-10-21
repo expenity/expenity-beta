@@ -1796,3 +1796,5 @@ fieldset > legend { font-weight: 800; padding: 0 8px; color: var(--ink, #2a1a14)
 .ob-choose[data-pick=chip] { background: linear-gradient(135deg, #38bdf8, #1d6fd8); border-color: transparent; color: #fff; box-shadow: 0 10px 24px -8px #1d6fd8cc; }
 .ob-choose[data-pick=boogie] { background: linear-gradient(135deg, #ff9a3c, #f47a14); color: #fff; box-shadow: 0 10px 24px -8px #f47a14cc; }
 @media (prefers-reduced-motion: reduce) { .ob-choose { transition: opacity .2s; } }
+
+.ob-choose { transition: opacity .18s linear, transform .18s linear; }

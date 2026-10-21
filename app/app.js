@@ -12,7 +12,7 @@
 	const $ = ( s, r = document ) => r.querySelector( s );
 	const $$ = ( s, r = document ) => [ ...r.querySelectorAll( s ) ];
 	const toast = UI.toast;
-	window.EXPENITY_VERSION = '0.54.27';
+	window.EXPENITY_VERSION = '0.54.28';
 
  const seenCharacters=new Set();try{for(const skin of JSON.parse(sessionStorage.getItem('expenity.charactersSeen')||'[]'))seenCharacters.add(skin);}catch(_){}
  const characterSeen=skin=>seenCharacters.has(skin);

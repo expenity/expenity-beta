@@ -1,6 +1,16 @@
 {
-  "version": "0.54.27",
+  "version": "0.54.28",
   "releases": [
+    {
+      "version": "0.54.28",
+      "date": "2026-10-21",
+      "en": [
+        "On the eFriend slider, both friends start out sad and grow happier as you slide towards them, ending super excited. The Choose button now fades in gradually as you drag."
+      ],
+      "el": [
+        "Στο slider του eFriend, και οι δύο φίλοι ξεκινούν λυπημένοι και χαίρονται όσο τους πλησιάζετε, καταλήγοντας ενθουσιασμένοι. Το κουμπί Επιλογή εμφανίζεται πλέον σταδιακά καθώς σύρετε."
+      ]
+    },
     {
       "version": "0.54.27",
       "date": "2026-10-21",
