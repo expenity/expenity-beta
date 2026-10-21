@@ -1,6 +1,16 @@
 {
-  "version": "0.55.0",
+  "version": "0.55.1",
   "releases": [
+    {
+      "version": "0.55.1",
+      "date": "2026-10-21",
+      "en": [
+        "The eFriend row in More now looks like the other rows, in amber for Boogie and teal for Chip. The eFriend Blog moved inside eFriend, and a red dot on the eFriend row tells you when a new chapter is waiting."
+      ],
+      "el": [
+        "Η γραμμή του eFriend στα Περισσότερα μοιάζει πλέον με τις υπόλοιπες, σε κεχριμπαρί για τον Boogie και τιρκουάζ για τον Chip. Το eFriend Blog μεταφέρθηκε μέσα στο eFriend και μια κόκκινη κουκκίδα στη γραμμή του eFriend σας ειδοποιεί όταν περιμένει νέο κεφάλαιο."
+      ]
+    },
     {
       "version": "0.55.0",
       "date": "2026-10-21",

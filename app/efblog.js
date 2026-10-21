@@ -204,11 +204,13 @@
 		const line = st.locked ? T( 'efbLocked', { n: Math.min( st.day + 1, LOCK_DAYS ), max: LOCK_DAYS } ) : st.unread.length ? T( 'efbNewChapter' ) : t( 'efbProgress', { p: st.pct } );
 		return `<button type="button" class="card efb-card" data-more="efblog"><span class="efb-card-art">${ EX.efriend.mascot( 'happy', 52 ) }</span><span class="mid"><b>${ esc( blogTitle() ) }</b><small>${ esc( line ) }</small>${ st.locked ? '' : bar( st.pct ) }</span>${ UI.icon( 'chevron-right', 20 ) }</button>`;
 	};
+	/** A dot on the eFriend row in More while a new chapter is waiting. */
+	EXA.efBlogDot = () => ( EX.feature( 'efblog' ) !== false && ( B.update(), B.status().unread.length ) ? `<i class="efb-dot" aria-label="${ esc( t( 'efbNewChapter' ) ) }"></i>` : '' );
 	/** More: the menu row, with a badge when a new chapter is waiting. */
 	EXA.efBlogRow = () => {
 		if ( EX.feature( 'efblog' ) === false ) return '';
 		B.update(); const n = B.status().unread.length;
-		return `<div class="list mlist efb-rowwrap"><button type="button" class="mrow" data-more="efblog">${ UI.ci( 'notes', 'purple', 40 ) }<span class="mid"><b>${ esc( t( 'efbMenu' ) ) }</b><small>${ esc( t( 'efbMoreSub' ) ) }</small></span>${ n ? `<i class="efb-badge" aria-label="${ esc( t( 'efbNewChapter' ) ) }">${ n }</i>` : '' }${ UI.icon( 'chevron-right', 18 ) }</button></div>`;
+		return `<button type="button" class="mrow" data-more="efblog">${ UI.ci( 'notes', 'purple', 40 ) }<span class="mid"><b>${ esc( t( 'efbMenu' ) ) }</b><small>${ esc( t( 'efbMoreSub' ) ) }</small></span>${ n ? `<i class="efb-badge" aria-label="${ esc( t( 'efbNewChapter' ) ) }">${ n }</i>` : '' }${ UI.icon( 'chevron-right', 18 ) }</button>`;
 	};
 	document.addEventListener( 'click', ( e ) => {
 		const b = e.target.closest && e.target.closest( '[data-efb-ch]' ); if ( ! b ) return;

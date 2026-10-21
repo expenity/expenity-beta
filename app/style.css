@@ -1223,9 +1223,6 @@ html:has(.ef-ob),body.ef-ob-open{overscroll-behavior:none}
 @keyframes ef-angryL{0%,100%{transform:rotate(100deg)}50%{transform:rotate(135deg)}}
 @media (prefers-reduced-motion:reduce){.ef-mascot .ef-armR,.ef-mascot .ef-armL{animation:none!important}}
 
-.ef-panel{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:12px 14px;margin:0 0 12px;border:1.5px solid color-mix(in srgb,#0f766e 45%,var(--line));background:color-mix(in srgb,#0f766e 8%,var(--surface));cursor:pointer}
-.ef-panel .mid{flex:1;display:flex;flex-direction:column;gap:2px}.ef-panel .mid b{font-size:1.05rem}.ef-panel small{color:var(--muted)}
-.ef-panel .ef-mascot{pointer-events:none;flex:none}
 .ef-bubble[data-ef-bubble]{cursor:pointer;transition:opacity .22s}.ef-bubble.swap{opacity:0}
 .ef-editrow{display:flex;justify-content:flex-end;margin-bottom:4px}.ef-gacts{gap:8px}.ef-back .btn.sm{margin-top:2px}
 
@@ -1945,3 +1942,6 @@ fieldset > legend { font-weight: 800; padding: 0 8px; color: var(--ink, #2a1a14)
 .tt-blog-l.s{animation-delay:.5s}.tt-blog-l.r{animation-delay:1s}
 @keyframes ttBlogLine{0%{width:0}60%,100%{width:85%}}
 :root[data-motion=off] .tt-blog *,:root[data-motion=reduced] .tt-blog *{animation:none!important;width:85%}
+
+.ef-more{cursor:pointer}.ef-more .ci svg{width:26px;height:auto}.ef-more .mid{flex:1;display:flex;flex-direction:column;gap:2px;min-width:0}.ef-more small{color:var(--muted)}
+.efb-dot{flex:none;width:10px;height:10px;border-radius:50%;background:var(--late,#d33);margin-right:2px}

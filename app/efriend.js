@@ -717,6 +717,7 @@
 			${ hrow( 'rules', 'adjustments-horizontal', 'amber', t( 'efHubRules' ), t( 'efHubRulesSub' ) ) }
 			${ hrow( 'moves', 'coin', 'green', t( 'efHubMoves' ), modeWord ) }
 			${ hrow( 'ideas', 'bulb', 'pink', t( 'efHubIdeas' ), t( 'efHubIdeasSub' ) ) }
+			${ EXA.efBlogRow ? EXA.efBlogRow() : '' }
 			${ hrow( 'look', 'mood-smile', 'purple', t( 'efHubLook' ), t( 'efHubLookSub', { name: CHARS[ ch ].name, mode: natural ? t( 'efNaturalOn' ) : t( 'efNaturalOff' ) } ) ) }
 		</div></section>`;
 	};
@@ -730,9 +731,8 @@
 	EXA.efriendNudge = () => ( on() && ! F.plans().length ? `<div class="ef-ask ef-nudge"><span class="ef-ask-em">🤖</span><span>${ rich( t( 'efNudgeText' ) ) }</span><button type="button" class="btn btn-primary sm" data-ef-nudge>${ esc( t( 'efNudgeBtn' ) ) }</button></div>` : '' );
 	/** The eFriend panel on the More page: the robot, what it is doing, and a way in. */
 	EXA.efriendPanel = () => {
-		const l = F.all(), v = l.length ? F.summary( l ).verdict : null;
-		const sub = l.length ? t( 'efPanelCoaching', { n: l.length } ) : t( 'efPanelNone' );
-		return `<button type="button" class="card ef-panel" data-more="efriend" aria-label="eFriend">${ F.mascot( v || 'happy', 56 ) }<span class="mid"><b>eFriend</b><small>${ esc( sub ) }</small></span>${ UI.icon( 'chevron-right', 20 ) }</button>`;
+		const c = F.char();
+		return `<button type="button" class="profile ef-more" data-more="efriend" aria-label="eFriend"><span class="ci ${ c === 'boogie' ? 'tint-amber' : 'tint-teal' }" style="--s:44px">${ F.icon( 26 ) }</span><span class="mid"><b>eFriend</b><small>${ esc( t( 'efMoreSub' ) ) }</small></span>${ EXA.efBlogDot ? EXA.efBlogDot() : '' }${ UI.icon( 'chevron-right', 20 ) }</button>`;
 	};
 	document.addEventListener( 'click', ( e ) => {
 		if ( e.target.closest( '[data-ef-new]' ) ) { EXA.openEfPlan(); return; }
