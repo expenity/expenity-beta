@@ -1,6 +1,16 @@
 {
-  "version": "0.56.0",
+  "version": "0.56.1",
   "releases": [
+    {
+      "version": "0.56.1",
+      "date": "2026-10-22",
+      "en": [
+        "You can now confirm a purchase at any time with the Mission Accomplished! 💸 button on your eFriend plans, even right after creating one. eFriend reacts to how early or late it was, and whether your money was ready."
+      ],
+      "el": [
+        "Μπορείτε πλέον να επιβεβαιώσετε μια αγορά οποιαδήποτε στιγμή με το κουμπί Αποστολή εξετελέσθη! 💸 στα σχέδια του eFriend, ακόμα και αμέσως μετά τη δημιουργία τους. Το eFriend αντιδρά ανάλογα με το πόσο νωρίς ή αργά έγινε και αν τα χρήματά σας ήταν έτοιμα."
+      ]
+    },
     {
       "version": "0.56.0",
       "date": "2026-10-21",

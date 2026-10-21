@@ -2105,3 +2105,6 @@ fieldset > legend { font-weight: 800; padding: 0 8px; color: var(--ink, #2a1a14)
 .tt-adj{display:flex;flex-direction:column;align-items:center;gap:8px;padding:22px 14px 0}.tt-adj-was{font-size:22px;text-decoration:line-through;opacity:.5}.tt-adj-now{font-size:34px;font-weight:700;animation:ttAdjPop 3s ease-in-out infinite}.tt-adj-tag{font-size:13px;padding:5px 12px;border-radius:14px;background:var(--surface);box-shadow:var(--shadow)}
 @keyframes ttAdjPop{0%,30%{transform:scale(.8);opacity:0}45%{transform:scale(1.12);opacity:1}60%,100%{transform:scale(1);opacity:1}}
 :root[data-motion=off] .tt-adj *,:root[data-motion=reduced] .tt-adj *{animation:none!important}
+
+.ef-bought-msg { margin: 10px 0 0; padding: 10px 14px; border-radius: 16px; background: var(--accent-soft, #ffe6d6); font-weight: 700; line-height: 1.4; }
+.ef-editrow { display: flex; gap: 8px; flex-wrap: wrap; } .ef-gacts { flex-wrap: wrap; }

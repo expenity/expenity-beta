@@ -461,7 +461,7 @@
 			<div class="ef-meta">${ chip( f.verdict ) }<span>${ esc( t( 'efDaysLeft', { n: Math.max( 0, f.days ) } ) ) }</span></div>
 			<div class="ef-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${ pct }"><i style="width:${ pct }%"></i><span class="ef-suit" style="left:${ pct }%">${ UI.icon( g.icon || 'plane', 18 ) }</span></div>
 			<small>${ esc( f.left < 0 ? t( 'efShortLine', { a: money( -f.left / 100, main() ) } ) : t( 'efLeftLine', { a: money( f.left / 100, main() ), m: monthsText( f.leftMonths == null ? 0 : f.leftMonths ) } ) ) }</small></div>`;
-		const back = `<div class="wk-back ef-back"><span class="wk-ic bob">${ UI.icon( 'sparkles', 30 ) }</span><h3>${ esc( g.name ) }</h3>${ points( F.sentences( f ).concat( F.tips( f ).slice( 0, 1 ).map( ( x ) => x.text ) ) ) }<button type="button" class="btn btn-primary" data-ef-open="${ esc( g.id ) }">${ esc( t( 'efOpen' ) ) }</button><button type="button" class="btn btn-ghost sm" data-ef-edit="${ esc( g.id ) }">${ UI.icon( 'pencil', 18 ) } ${ esc( t( 'efEdit' ) ) }</button></div>`;
+		const back = `<div class="wk-back ef-back"><span class="wk-ic bob">${ UI.icon( 'sparkles', 30 ) }</span><h3>${ esc( g.name ) }</h3>${ points( F.sentences( f ).concat( F.tips( f ).slice( 0, 1 ).map( ( x ) => x.text ) ) ) }<button type="button" class="btn btn-primary" data-ef-open="${ esc( g.id ) }">${ esc( t( 'efOpen' ) ) }</button><button type="button" class="btn btn-ghost sm" data-ef-bought="${ esc( g.id ) }">${ esc( t( 'efBoughtBtn' ) ) }</button><button type="button" class="btn btn-ghost sm" data-ef-edit="${ esc( g.id ) }">${ UI.icon( 'pencil', 18 ) } ${ esc( t( 'efEdit' ) ) }</button></div>`;
 		return `<section data-home="efriend"><div class="sec-head"><h2>${ esc( g.name ) }</h2><span class="sec-acts"><button type="button" class="link" data-ef-ask>💬 ${ esc( t( 'efAskShort' ) ) }</button>${ EXA.flipBtn( 'efriend' ) }</span></div>${ EXA.flipCard( 'efriend', front, back, 'fc-ef' ) }</section>`;
 	};
 
@@ -514,7 +514,7 @@
 			t( 'efAccuracy', { d: f.history || 1 } ) ].filter( Boolean );
 		const tp = F.tips( f ), helpBody = suggRows ? `<ul class="ef-list">${ suggRows }</ul>${ points( [ t( 'efHelpsNote', { a: m( f.gain ) } ) ] ) }` : '';
 		UI.openSheet( `<div class="sheet-head"><h2>${ esc( g.name ) }</h2><span class="sp"></span><button type="button" class="ab-btn" data-close aria-label="${ esc( t( 'close' ) ) }">${ UI.icon( 'x', 24 ) }</button></div>
-			<div class="sheet-pad ef-sheet"><div class="ef-editrow"><button type="button" class="btn btn-ghost sm" data-ef-edit="${ esc( id ) }">${ UI.icon( 'pencil', 18 ) } ${ esc( t( 'efEdit' ) ) }</button></div>
+			<div class="sheet-pad ef-sheet"><div class="ef-editrow"><button type="button" class="btn btn-primary sm" data-ef-bought="${ esc( id ) }">${ esc( t( 'efBoughtBtn' ) ) }</button><button type="button" class="btn btn-ghost sm" data-ef-edit="${ esc( id ) }">${ UI.icon( 'pencil', 18 ) } ${ esc( t( 'efEdit' ) ) }</button></div>
 			<div class="ef-top">${ F.mascot( f.verdict, 84 ) }<div class="ef-bubble"><b>${ esc( pickLine( f.verdict ) ) }</b>${ chip( f.verdict ) }</div></div>
 			${ tiles }${ callouts.length ? `<div class="ef-callouts">${ points( callouts ) }${ er ? `<button type="button" class="btn btn-primary sm" data-ef-usedate="${ esc( id ) }" data-d="${ er }">📅 ${ esc( t( 'efUseDate' ) ) }</button>` : '' }${ ! f.hasIncome && ! f.done ? `<button type="button" class="btn btn-ghost sm" data-ef-income>💶 ${ esc( t( 'efAddIncome' ) ) }</button>` : '' }</div>` : '' }
 			${ sec( '💡', t( 'efTipsTitle' ), tipsHtml( tp ) ) }${ sec( '✂️', t( 'efHelps' ), helpBody ) }${ sec( '🔀', t( 'efOtherWays' ), alt.length ? points( alt ) : '' ) }
@@ -750,7 +750,7 @@
 		const row = ( g ) => {
 			const f = byId[ g.id ], ready = !! f;
 			return `<li class="ef-grow"><div class="ef-gtop">${ f ? F.icon( 32 ) : UI.icon( g.icon || 'target', 28 ) }<div><b>${ esc( g.name ) }</b><small>${ esc( g.deadline ? t( 'efDaysLeft', { n: Math.max( 0, diff( g.deadline, today() ) ) } ) : t( 'efNoDate' ) ) }</small></div>${ f ? chip( f.verdict ) : '' }</div>
-				<div class="ef-gacts"><button type="button" class="btn btn-ghost sm" data-ef-edit="${ esc( g.id ) }">${ UI.icon( 'pencil', 18 ) } ${ esc( t( 'efEdit' ) ) }</button>${ ready ? `<button type="button" class="btn btn-primary sm" data-ef-open="${ esc( g.id ) }">${ esc( t( 'efOpen' ) ) }</button>` : `<button type="button" class="btn btn-primary sm" data-ef-try="${ esc( g.id ) }">${ esc( t( 'efAddDate' ) ) }</button>` }</div></li>`;
+				<div class="ef-gacts"><button type="button" class="btn btn-ghost sm" data-ef-bought="${ esc( g.id ) }">${ esc( t( 'efBoughtBtn' ) ) }</button><button type="button" class="btn btn-ghost sm" data-ef-edit="${ esc( g.id ) }">${ UI.icon( 'pencil', 18 ) } ${ esc( t( 'efEdit' ) ) }</button>${ ready ? `<button type="button" class="btn btn-primary sm" data-ef-open="${ esc( g.id ) }">${ esc( t( 'efOpen' ) ) }</button>` : `<button type="button" class="btn btn-primary sm" data-ef-try="${ esc( g.id ) }">${ esc( t( 'efAddDate' ) ) }</button>` }</div></li>`;
 		};
 		const buckets = F.groups().map( ( n ) => ( { name: n, plans: plans.filter( ( g ) => ( g.group || '' ).trim() === n ) } ) ), rest = plans.filter( ( g ) => ! ( g.group || '' ).trim() );
 		if ( rest.length ) buckets.push( { name: '', plans: rest } );
@@ -798,6 +798,8 @@
 		const cb = e.target.closest && e.target.closest( '[data-ef-char]' ); if ( cb ) { F.setChar( cb.dataset.efChar ); return; }
 	} );
 	document.addEventListener( 'change', ( e ) => { if ( e.target.matches && e.target.matches( '[data-ef-natural]' ) ) { S().settings.efInstant = ! e.target.checked; S().settings.u = Date.now(); EX.save(); } } );
+	/** "I bought it": works any time, even right after the plan was made. It opens the purchase form and eFriend reacts to when it happened. */
+	document.addEventListener( 'click', ( e ) => { const b = e.target.closest && e.target.closest( '[data-ef-bought]' ); if ( ! b ) return; e.preventDefault(); e.stopImmediatePropagation(); const id = b.dataset.efBought; if ( UI.closeSheet ) UI.closeSheet( true ); setTimeout( () => EXA.efriendDue( id, 'yes' ), 240 ); }, true );
 	EXA.efriendConvert = ( g ) => ( on() && ! isPlan( g ) ? `<button type="button" class="btn btn-ghost wide" data-ef-convert="${ esc( g.id ) }">🤖 ${ esc( t( 'efConvert' ) ) }</button><span class="ef-hint">${ para( 'efConvertHint' ) }</span>` : '' );
 	EXA.efriendAsk = ( g ) => ( on() && ! isPlan( g ) ? `<button type="button" class="btn btn-ghost sm" data-ef-fromgoal="${ esc( g.id ) }">🤖 ${ esc( t( 'efAskEf' ) ) }</button>` : '' );
 	EXA.efriendNudge = () => ( on() && ! F.plans().length ? `<div class="ef-ask ef-nudge"><span class="ef-ask-em">🤖</span><span>${ rich( t( 'efNudgeText' ) ) }</span><button type="button" class="btn btn-primary sm" data-ef-nudge>${ esc( t( 'efNudgeBtn' ) ) }</button></div>` : '' );
@@ -923,10 +925,10 @@
 	EXA.efriendBadge = () => '<svg class="ef-txbadge" viewBox="0 0 24 24" width="18" height="18" role="img" aria-label="eFriend"><title>eFriend</title><rect x="3" y="5" width="18" height="14" rx="6" fill="#fff" stroke="#8f9bb2"/><rect x="6" y="8" width="12" height="8" rx="4" fill="#13171f"/><circle cx="10" cy="12" r="1.4" fill="#9ff3e6"/><circle cx="14" cy="12" r="1.4" fill="#9ff3e6"/></svg>';
 	const CAT_FOR_ICON = { plane: 'leisure', beach: 'leisure', car: 'transport', home: 'housing', school: 'education', rocket: 'leisure', trophy: 'leisure' };
 	let dueOpen = false;
-	EXA.efriendDue = ( forceId ) => {
+	EXA.efriendDue = ( forceId, startView ) => {
 		if ( dueOpen || document.querySelector( '.ef-ob' ) ) return;
 		const queue = forceId ? [ forceId ] : F.due().map( ( g ) => g.id ); if ( ! queue.length ) return;
-		let idx = 0, view = 'ask', err = '', made = null; dueOpen = true;
+		const early = startView === 'yes'; let idx = 0, view = early ? 'yes' : 'ask', err = '', made = null, boughtMsg = ''; dueOpen = true; // early: bought before the planned date, so it opens straight on the purchase form
 		const ov = document.createElement( 'div' ); ov.className = 'ef-ob ef-due'; ov.setAttribute( 'role', 'dialog' ); ov.setAttribute( 'aria-modal', 'true' ); ov.setAttribute( 'aria-label', 'eFriend' );
 		const cur = () => S().goals.find( ( g ) => g.id === queue[ idx ] );
 		const close = () => { ov.remove(); document.body.classList.remove( 'ef-ob-open' ); dueOpen = false; EXA.render(); };
@@ -938,7 +940,7 @@
 			let main = '', foot = '';
 			if ( view === 'ask' ) main = `<div class="ef-hop on">${ F.mascot( 'cheer', 120 ) }</div><h2>${ esc( t( 'efDueTitle' ) ) }</h2><p class="ef-due-name">${ UI.icon( g.icon || 'plane', 22 ) } <b>${ esc( g.name ) }</b> · ${ esc( EX.dayName( g.deadline ) ) }</p>${ para( 'efDueText', { name: g.name } ) }${ ( () => { const c = F.forecast( Object.assign( {}, g, { deadline: addDays( today(), 1 ) } ) ), m = ( x ) => money( x / 100, main_() ); if ( ! c || c.done || c.left == null ) return ''; const a = m( Math.abs( c.left ) ), mo = c.leftMonths == null ? '' : monthsText( Math.abs( c.leftMonths ) ), good = c.left >= c.cushion, er = good ? undefined : F.earliest( g, 0 ); return `<div class="ef-callouts">${ points( [ good ? t( 'efDueGood', { a, m: mo } ) : c.left >= 0 ? t( 'efDueTight', { a, m: mo } ) : t( 'efDueShort', { a } ) ].concat( er ? [ t( 'efEarliest', { d: EX.dayName( er ) } ) ] : er === null ? [ t( 'efEarliestNone' ) ] : [] ) ) }</div>`; } )() }<div class="ef-due-btns"><button type="button" class="btn btn-primary wide" data-due="yes">${ esc( t( 'efDueYes' ) ) }</button><button type="button" class="btn btn-ghost wide" data-due="move">${ esc( t( 'efDueMove' ) ) }</button><button type="button" class="btn btn-ghost wide" data-due="drop">${ esc( t( 'efDueDrop' ) ) }</button></div>`;
 			else if ( view === 'yes' ) { const cats = EX.catList( 'expense' ), def = CAT_FOR_ICON[ g.icon ] || 'shopping'; main = `<div class="ef-hop on">${ F.mascot( 'cheer', 90 ) }</div><h2>${ esc( t( 'efYesTitle' ) ) }</h2>${ para( 'efYesText' ) }<div class="ef-due-form"><label class="f"><span>${ esc( t( 'efYesCost' ) ) } (${ esc( main_() ) })</span><input id="efDueCost" inputmode="decimal" autocomplete="off" value="${ esc( g.target ) }"></label><div class="grid2"><label class="f"><span>${ esc( t( 'efYesDate' ) ) }</span><input id="efDueDate" type="date" max="${ today() }" value="${ g.deadline <= today() ? g.deadline : today() }"></label><label class="f"><span>${ esc( t( 'efYesWallet' ) ) }</span><select id="efDueWallet">${ wallets().map( ( w ) => `<option value="${ esc( w.id ) }">${ esc( EX.accountName( w ) ) }</option>` ).join( '' ) }</select></label></div><label class="f"><span>${ esc( t( 'efYesCategory' ) ) }</span><select id="efDueCat">${ cats.map( ( c ) => `<option value="${ esc( c.key ) }"${ c.key === def ? ' selected' : '' }>${ esc( c.name ) }</option>` ).join( '' ) }</select></label>${ err ? `<p class="err">${ esc( err ) }</p>` : '' }</div>`; foot = `<button type="button" class="btn btn-ghost" data-due="back">${ esc( t( 'back' ) ) }</button><button type="button" class="btn btn-primary" data-due="add">${ esc( t( 'efYesAdd' ) ) }</button>`; }
-			else if ( view === 'done' ) main = `<div class="ef-confetti" aria-hidden="true">${ '🎉✨🎊🥳🎈'.match( /./gu ).concat( '🎉✨🎊🥳🎈'.match( /./gu ) ).map( ( c, n ) => `<i style="--n:${ n }">${ c }</i>` ).join( '' ) }</div><div class="ef-hop on">${ F.mascot( 'cheer', 130 ) }</div><h2>${ esc( t( 'efDoneTitle' ) ) }</h2><p class="ef-due-name">${ UI.icon( g.icon || 'plane', 22 ) } <b>${ esc( g.name ) }</b></p>${ para( 'efDoneText' ) }`;
+			else if ( view === 'done' ) main = `<div class="ef-confetti" aria-hidden="true">${ '🎉✨🎊🥳🎈'.match( /./gu ).concat( '🎉✨🎊🥳🎈'.match( /./gu ) ).map( ( c, n ) => `<i style="--n:${ n }">${ c }</i>` ).join( '' ) }</div><div class="ef-hop on">${ F.mascot( 'cheer', 130 ) }</div><h2>${ esc( t( 'efDoneTitle' ) ) }</h2><p class="ef-due-name">${ UI.icon( g.icon || 'plane', 22 ) } <b>${ esc( g.name ) }</b></p>${ para( 'efDoneText' ) }${ boughtMsg ? `<p class="ef-bought-msg">${ esc( boughtMsg ) }</p>` : '' }`;
 			else if ( view === 'move' ) { main = `<div class="ef-hop on">${ F.mascot( 'happy', 90 ) }</div><h2>${ esc( t( 'efMoveTitle' ) ) }</h2>${ para( 'efMoveText' ) }<div class="ef-due-form"><div class="grid2"><label class="f"><span>${ esc( t( 'efPlanDate' ) ) }</span><input id="efMoveDate" type="date" min="${ addDays( today(), 1 ) }" value="${ F.earliest( g, 0 ) || addDays( today(), 30 ) }"></label><label class="f"><span>${ esc( t( 'efPlanCost' ) ) } (${ esc( main_() ) })</span><input id="efMoveCost" inputmode="decimal" autocomplete="off" value="${ esc( g.target ) }"></label></div>${ err ? `<p class="err">${ esc( err ) }</p>` : '' }</div>`; foot = `<button type="button" class="btn btn-ghost" data-due="back">${ esc( t( 'back' ) ) }</button><button type="button" class="btn btn-primary" data-due="moveit">${ esc( t( 'efMoveBtn' ) ) }</button>`; }
 			else if ( view === 'drop' ) { main = `<div class="ef-hop on">${ F.mascot( 'meh', 90 ) }</div><h2>${ esc( t( 'efDropTitle' ) ) }</h2>${ para( 'efDropText' ) }`; foot = `<button type="button" class="btn btn-ghost" data-due="back">${ esc( t( 'back' ) ) }</button><button type="button" class="btn btn-primary" data-due="dropit">${ esc( t( 'efDropYes' ) ) }</button>`; }
 			if ( view === 'done' ) foot = `<span></span><button type="button" class="btn btn-primary" data-due="next">${ esc( t( 'efDoneBtn' ) ) }</button>`;
@@ -950,11 +952,13 @@
 			const b = e.target.closest( '[data-due]' ); if ( ! b ) return; const act = b.dataset.due, g = cur(); if ( ! g && act !== 'later' ) return;
 			if ( act === 'later' ) { const sn = S().settings.efSnooze = S().settings.efSnooze || {}; queue.forEach( ( id ) => { sn[ id ] = today(); } ); try { EX.persist(); } catch ( x ) { /* ignore */ } close(); }
 			else if ( [ 'yes', 'move', 'drop' ].includes( act ) ) { view = act; err = ''; draw(); }
-			else if ( act === 'back' ) { view = 'ask'; err = ''; draw(); }
+			else if ( act === 'back' ) { if ( early && view === 'yes' ) close(); else { view = 'ask'; err = ''; draw(); } }
 			else if ( act === 'next' ) nextPlan();
 			else if ( act === 'add' ) {
 				const cost = num( ov.querySelector( '#efDueCost' ).value ), date = ov.querySelector( '#efDueDate' ).value, acc = ov.querySelector( '#efDueWallet' ).value, cat = ov.querySelector( '#efDueCat' ).value;
 				if ( ! ( cost > 0 ) ) { err = t( 'efNeedCost' ); draw(); return; } if ( ! date || date > today() ) { err = t( 'efYesDateErr' ); draw(); return; } if ( ! acc ) { err = t( 'efNeedWallet' ); draw(); return; }
+				const st0 = ( F.answer( Math.round( cost * 100 ) ).today || {} ).st, gap = g.deadline ? Math.round( ( EX.parse( g.deadline ) - EX.parse( date ) ) / 864e5 ) : 0, risk = st0 === 'best' || st0 === 'good' ? 'safe' : st0 === 'tight' ? 'tight' : 'risky';
+				chat.used = chat.used || {}; boughtMsg = pool( gap > 0 ? 'efBought_early_' + risk : gap === 0 ? 'efBought_ontime' : 'efBought_late' ); // a fun word about when it happened, and whether the money was ready
 				const tx = { id: EX.uid(), type: 'expense', amount: String( cost ), category: cat, account: acc, date, name: g.name, efPlan: g.id };
 				S().txs.push( tx ); g.state = 'done'; g.doneOn = date; g.doneAmount = String( cost ); g.txId = tx.id; S().settings.u = Date.now(); EX.save(); view = 'done'; draw();
 			} else if ( act === 'moveit' ) {
@@ -2685,5 +2689,31 @@
 				efLight_custom: 'Δικό σας χρώμα',
 		efLightShort: 'Φως', efBoogieRoom: 'Το εργαστήριο του Boogie', efChipRoom: 'Το εργαστήριο του Chip', efLightSave: 'Αποθήκευση', efLightSpin: 'Γρανάζι', efSpin_still: 'Στάση', efSpin_slow: 'Αργά', efSpin_normal: 'Μέτρια', efSpin_fast: 'Γρήγορα',
 		efChipTitle: 'Η λάμψη του Chip', efChipHint: 'Κάντε τα μάτια, το στόμα και τα αυτιά του να λάμπουν όπως θέλετε.', efChipEyes: 'Μάτια', efChipMouth: 'Στόμα', efChipEars: 'Αυτιά', efChipGlow: 'Λάμψη', efChipAll: 'Ίδιο χρώμα για όλα', efChipColor: 'Χρώμα', efChipC_mint: 'Μέντα', efChipC_violet: 'Βιολετί', efChipC_blue: 'Μπλε', efChipC_pink: 'Ροζ', efChipC_lime: 'Λάιμ', efChipC_amber: 'Κεχριμπάρι',
+	} );
+	Object.assign( window.EXPENITY_I18N.langs.en, {
+		efBoughtBtn: 'Mission Accomplished! 💸',
+		efBought_early_safe: 'Ahead of schedule and the numbers agree. 📼 Well played, the plan still holds.|Early, and your cushion barely blinked. A tidy purchase.',
+		efBought_early_safe_c: 'You bought it EARLY and you are still safe?! 😎 Big brain move!|Ahead of schedule and the numbers say fine. Chef’s kiss. 🤌',
+		efBought_early_tight: 'Bold. 📼 Early, and it will pinch a little. Mind the next few weeks.|You got there before the plan did. The cushion is thinner now, so go gently.',
+		efBought_early_tight_c: 'Okay okay, early bird! 🐦 It is a bit tight now, so maybe skip the takeaway this week. 😅|Bought early and the cushion is thin. Careful out there! 😬',
+		efBought_early_risky: 'Hmm. 📼 That was ahead of the plan and the money was not quite ready. Let us keep a close eye on the bills.|A little too early, I fear. The next weeks will be tight, but we will manage.',
+		efBought_early_risky_c: 'Uh oh, you jumped the gun! 🙈 The money was not ready. Do not panic, I will help you through the next weeks. 💪|Whoa, that was early and risky! 😅 Let us be extra careful with the bills now.',
+		efBought_ontime: 'Right on schedule, as the tape foretold. 📼 Beautifully done.|Exactly when we planned. I am proud of you.',
+		efBought_ontime_c: 'RIGHT ON TIME! 🎯 Plan, save, buy. You nailed it! 🎉|Perfect timing! ⏰ That is how it is done.',
+		efBought_late: 'It took a little longer than planned, and that is perfectly fine. Good things come to those who wait. 📼',
+		efBought_late_c: 'A bit later than planned, but you got it! 🎉 Patience level: expert. 😎',
+	} );
+	Object.assign( window.EXPENITY_I18N.langs.el, {
+		efBoughtBtn: 'Αποστολή εξετελέσθη! 💸',
+		efBought_early_safe: 'Νωρίτερα από το πρόγραμμα και οι αριθμοί συμφωνούν. 📼 Μπράβο, το σχέδιο εξακολουθεί να ισχύει.|Νωρίς, και το μαξιλάρι σας σχεδόν δεν κουνήθηκε. Μια τακτοποιημένη αγορά.',
+		efBought_early_safe_c: 'Το αγοράσατε ΝΩΡΙΣ και είστε ακόμα ασφαλείς;! 😎 Έξυπνη κίνηση!|Νωρίτερα από το πρόγραμμα και οι αριθμοί λένε ότι όλα καλά. Τέλεια! 🤌',
+		efBought_early_tight: 'Τολμηρό. 📼 Νωρίς, και θα το νιώσετε λίγο. Προσέξτε τις επόμενες εβδομάδες.|Φτάσατε πριν από το σχέδιο. Το μαξιλάρι είναι πιο λεπτό τώρα, οπότε με ηρεμία.',
+		efBought_early_tight_c: 'Εντάξει, πρωινό πουλί! 🐦 Είναι λίγο στενά τώρα, οπότε ίσως παραλείψετε το delivery αυτή την εβδομάδα. 😅|Αγορά νωρίς και το μαξιλάρι είναι λεπτό. Προσοχή! 😬',
+		efBought_early_risky: 'Χμ. 📼 Ήταν νωρίτερα από το σχέδιο και τα χρήματα δεν ήταν ακριβώς έτοιμα. Ας έχουμε το νου μας στους λογαριασμούς.|Λίγο νωρίς, φοβάμαι. Οι επόμενες εβδομάδες θα είναι στενές, αλλά θα τα καταφέρουμε.',
+		efBought_early_risky_c: 'Ωχ, βιαστήκατε! 🙈 Τα χρήματα δεν ήταν έτοιμα. Μην πανικοβάλλεστε, θα σας βοηθήσω στις επόμενες εβδομάδες. 💪|Ουπς, ήταν νωρίς και ριψοκίνδυνο! 😅 Ας προσέξουμε ιδιαίτερα τους λογαριασμούς τώρα.',
+		efBought_ontime: 'Ακριβώς στην ώρα του, όπως προέβλεπε η κασέτα. 📼 Υπέροχα.|Ακριβώς όταν το σχεδιάσαμε. Είμαι περήφανος για εσάς.',
+		efBought_ontime_c: 'ΑΚΡΙΒΩΣ ΣΤΗΝ ΩΡΑ! 🎯 Σχέδιο, αποταμίευση, αγορά. Τα καταφέρατε! 🎉|Τέλειο timing! ⏰ Έτσι γίνεται.',
+		efBought_late: 'Πήρε λίγο περισσότερο από το σχέδιο, και είναι μια χαρά. Τα καλά έρχονται σε όσους περιμένουν. 📼',
+		efBought_late_c: 'Λίγο αργότερα από το σχέδιο, αλλά τα καταφέρατε! 🎉 Επίπεδο υπομονής: ειδικός. 😎',
 	} );
 }() );
