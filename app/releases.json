@@ -1,6 +1,16 @@
 {
-  "version": "0.54.29",
+  "version": "0.54.30",
   "releases": [
+    {
+      "version": "0.54.30",
+      "date": "2026-10-21",
+      "en": [
+        "The eFriend slider goes the rest of the way by itself once you pass about 70%, and tapping its handle brings it back to the middle."
+      ],
+      "el": [
+        "Το slider του eFriend ολοκληρώνει μόνο του τη διαδρομή μόλις περάσετε περίπου το 70% και με ένα πάτημα στη λαβή επιστρέφει στη μέση."
+      ]
+    },
     {
       "version": "0.54.29",
       "date": "2026-10-21",
