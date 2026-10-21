@@ -12,7 +12,7 @@
 	const $ = ( s, r = document ) => r.querySelector( s );
 	const $$ = ( s, r = document ) => [ ...r.querySelectorAll( s ) ];
 	const toast = UI.toast;
-	window.EXPENITY_VERSION = '0.56.3';
+	window.EXPENITY_VERSION = '0.56.4';
 
  const seenCharacters=new Set();try{for(const skin of JSON.parse(sessionStorage.getItem('expenity.charactersSeen')||'[]'))seenCharacters.add(skin);}catch(_){}
  const characterSeen=skin=>seenCharacters.has(skin);
@@ -201,6 +201,7 @@
 			case 'del-bill': UI.closeSheet(); EXA.removeBill( id ); break;
 			case 'pay-bill': if ( bill ) EXA.openPay( bill ); break;
 			case 'snooze1': UI.closeSheet(); EXA.snoozeBill( id, 1 ); break;
+			case 'snooze-n': UI.closeSheet(); EXA.snoozeBill( id, Number( el.dataset.days ) || 1 ); break;
 			case 'skip': UI.closeSheet(); EXA.skipBill( id ); break;
 			case 'copyref': if ( bill ) { if ( navigator.clipboard ) navigator.clipboard.writeText( bill.reference ).then( () => toast( t( 'tRefCopied' ) ), () => toast( bill.reference ) ); else toast( bill.reference ); } break;
 			case 'add-wallet': EXA.openWallet( null ); break;

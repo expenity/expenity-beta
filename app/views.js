@@ -558,7 +558,7 @@
 ( function () {
 	'use strict';
 	const EX = window.EX; if ( ! EX ) return;
-	Object.assign( EX.I18N.langs.en, { actSnooze: 'Snooze 1 day' } ); Object.assign( EX.I18N.langs.el, { actSnooze: 'Αναβολή 1 ημέρας' } );
+	Object.assign( EX.I18N.langs.en, { actSnooze: 'Snooze 1 day', snoozeFor: 'Snooze for', snoozeD1: '1 day', snoozeD3: '3 days', snoozeD7: '1 week' } ); Object.assign( EX.I18N.langs.el, { actSnooze: 'Αναβολή 1 ημέρας', snoozeFor: 'Αναβολή για', snoozeD1: '1 ημέρα', snoozeD3: '3 ημέρες', snoozeD7: '1 εβδομάδα' } );
 }() );
 
 document.addEventListener( 'toggle', ( e ) => { const d = e.target; if ( d && d.matches && d.matches( 'details[data-fold=paid]' ) && EXA.st ) EXA.st.paidOpen = d.open; }, true );

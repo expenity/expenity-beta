@@ -50,7 +50,8 @@
 	function snoozeBill( id, days ) {
 		const b = S().bills.find( ( x ) => x.id === id );
 		if ( ! b ) return;
-		b.snooze = addDays( today(), days );
+		const base = b.snooze && b.snooze > today() ? b.snooze : today(), cap = addDays( today(), 7 ), to = addDays( base, days ); // each snooze adds on top of the last one, up to a week from today
+		b.snooze = to > cap ? cap : to;
 		EX.save();
 		toast( t( 'tSnoozed', { name: b.name, date: dayName( b.snooze ) } ) );
 	}
@@ -891,7 +892,8 @@
 		return `<div class="detail"><div class="detail-top">${ UI.catCi( EX.catInfo( b.category ), 64 ) }<h3>${ esc( b.name ) }</h3><div class="big">${ esc( EXA.amountText( b ) ) }</div></div>
 			${ EXA.tagsDisplay(b.tags) }${ EXA.photos.button( b.photo ) }<dl class="facts">${ rows.map( ( [ k, v ] ) => `<div><dt>${ esc( k ) }</dt><dd>${ esc( v ) }</dd></div>` ).join( '' ) }</dl>
 			<div class="btn-row stack"><button type="button" class="btn btn-primary" data-act="pay-bill" data-id="${ esc( b.id ) }">${ UI.icon( 'check', 20 ) } ${ esc( b.autopay ? t( 'checked' ) : t( 'actPaid' ) ) }</button>
-			<div class="btn-row two"><button type="button" class="btn btn-ghost" data-act="snooze1" data-id="${ esc( b.id ) }">${ UI.icon( 'clock-pause', 20 ) } ${ esc( t( 'snooze1' ) ) }</button>${ b.repeat !== 'once' ? `<button type="button" class="btn btn-ghost" data-act="skip" data-id="${ esc( b.id ) }">${ UI.icon( 'player-skip-forward', 20 ) } ${ esc( t( 'skipThis' ) ) }</button>` : '' }</div>
+			<div class="snooze-row" role="group" aria-label="${ esc( t( 'snoozeFor' ) ) }"><span class="muted small">${ UI.icon( 'clock-pause', 18 ) } ${ esc( t( 'snoozeFor' ) ) }</span>${ [ [ 1, 'snoozeD1' ], [ 3, 'snoozeD3' ], [ 7, 'snoozeD7' ] ].map( ( [ n, k ] ) => `<button type="button" class="chip" data-act="snooze-n" data-days="${ n }" data-id="${ esc( b.id ) }">${ esc( t( k ) ) }</button>` ).join( '' ) }</div>
+			<div class="btn-row two">${ b.repeat !== 'once' ? `<button type="button" class="btn btn-ghost" data-act="skip" data-id="${ esc( b.id ) }">${ UI.icon( 'player-skip-forward', 20 ) } ${ esc( t( 'skipThis' ) ) }</button>` : '' }</div>
 			<div class="btn-row two">${ /^https?:\/\//i.test( b.payUrl || '' ) ? `<a class="btn btn-ghost" href="${ esc( b.payUrl ) }" target="_blank" rel="noopener noreferrer">${ UI.icon( 'link', 20 ) } ${ esc( t( 'openLink' ) ) }</a>` : '' }${ b.reference ? `<button type="button" class="btn btn-ghost" data-act="copyref" data-id="${ esc( b.id ) }">${ UI.icon( 'copy', 20 ) } ${ esc( t( 'copyRef' ) ) }</button>` : '' }</div>
 			<button type="button" class="btn btn-ghost" data-duplicate="bill" data-id="${esc(b.id)}">${UI.icon('copy',20)} ${esc(t('duplicateRecord'))}</button><div class="btn-row two"><button type="button" class="btn btn-ghost" data-act="edit-bill" data-id="${ esc( b.id ) }">${ UI.icon( 'pencil', 20 ) } ${ esc( t( 'actEdit' ) ) }</button><button type="button" class="btn btn-danger-ghost" data-act="del-bill" data-id="${ esc( b.id ) }">${ UI.icon( 'trash', 20 ) } ${ esc( t( 'actDelete' ) ) }</button></div></div></div>`;
 	}

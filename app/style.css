@@ -2111,3 +2111,5 @@ fieldset > legend { font-weight: 800; padding: 0 8px; color: var(--ink, #2a1a14)
 
 .bm-pill.snoozed { background: var(--accent-soft, #eef); color: var(--ink-2, #555); border-color: var(--line, #ddd); }
 .bm-row.snoozed { opacity: .88; }
+
+.snooze-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 10px 0; } .snooze-row > span { display: inline-flex; align-items: center; gap: 4px; }

@@ -1,6 +1,16 @@
 {
-  "version": "0.56.3",
+  "version": "0.56.4",
   "releases": [
+    {
+      "version": "0.56.4",
+      "date": "2026-10-22",
+      "en": [
+        "Snooze up to a week: the bill sheet now offers Snooze for 1 day, 3 days or 1 week, and the swipe snooze adds another day each time, up to 7 days from today."
+      ],
+      "el": [
+        "Αναβολή έως και μία εβδομάδα: το φύλλο λογαριασμού προσφέρει πλέον Αναβολή για 1 ημέρα, 3 ημέρες ή 1 εβδομάδα και η αναβολή με σύρσιμο προσθέτει μία ακόμα ημέρα κάθε φορά, έως 7 ημέρες από σήμερα."
+      ]
+    },
     {
       "version": "0.56.3",
       "date": "2026-10-22",
