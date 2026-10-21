@@ -175,7 +175,9 @@
 	};
 	const me = ( text ) => push( 'me', esc( text ) );
 	const setBar = ( o ) => {
-		const chips = host.querySelector( '#obChips' ), form = host.querySelector( '#obForm' ), inp = form.querySelector( 'input' );
+		const chips = host.querySelector( '#obChips' ), form = host.querySelector( '#obForm' );
+		// a fresh input every time: the amount formatting (amountfield.js) sticks to an input once it has been a number field, and would turn an email into 0
+		const wrap = form.querySelector( '.ef-inwrap' ), old = form.querySelector( 'input' ), inp = document.createElement( 'input' ); inp.name = 'q'; inp.autocomplete = 'off'; inp.setAttribute( 'enterkeyhint', 'send' ); inp.setAttribute( 'aria-label', old.getAttribute( 'aria-label' ) || '' ); wrap.replaceChild( inp, old );
 		chips.innerHTML = ( o.chips || [] ).map( ( c, i ) => `<button type="button" class="ef-chipq${ c.go ? ' go' : '' }${ c.on ? ' on' : '' }" style="--i:${ i }" data-ob-chip="${ i }" aria-pressed="${ c.on ? 'true' : 'false' }">${ esc( c.label ) }</button>` ).join( '' );
 		form.hidden = ! o.input; inp.value = ''; inp.setAttribute( 'inputmode', o.input === 'decimal' ? 'decimal' : 'text' ); inp.placeholder = o.ph || L( 'ph' ); inp.maxLength = o.input === 'decimal' ? 14 : 40;
 		pending = o; if ( o.input && fine() ) inp.focus( { preventScroll: true } ); // desktop only: a phone keyboard never opens by itself
@@ -370,7 +372,9 @@
 		if ( chip && pending ) {
 			const i = Number( chip.dataset.obChip ), p = pending;
 			if ( p.sumBtn ) { exit(); return; }
-			if ( p.multi ) { const c = p.chips[ i ]; if ( c.doneBtn ) { const r = p.res; clearBar(); r( { done: true } ); return; } if ( p.sel.has( c.toggle ) ) p.sel.delete( c.toggle ); else p.sel.add( c.toggle ); p.chips = p.chips.map( ( x, k ) => ( x.doneBtn ? Object.assign( x, { label: p.sel.size ? '✅ ' + L( 'done' ) : L( 'noBills' ) } ) : Object.assign( x, { on: p.sel.has( x.toggle ) } ) ) ); setBar( p ); return; }
+			if ( p.multi ) { const c = p.chips[ i ]; if ( c.doneBtn ) { const r = p.res; clearBar(); r( { done: true } ); return; } if ( p.sel.has( c.toggle ) ) p.sel.delete( c.toggle ); else p.sel.add( c.toggle ); p.chips = p.chips.map( ( x, k ) => ( x.doneBtn ? Object.assign( x, { label: p.sel.size ? '✅ ' + L( 'done' ) : L( 'noBills' ) } ) : Object.assign( x, { on: p.sel.has( x.toggle ) } ) ) );
+				// update the buttons in place: redrawing them would make every one flash
+				host.querySelectorAll( '#obChips [data-ob-chip]' ).forEach( ( el, k ) => { const x = p.chips[ k ]; if ( ! x ) return; el.classList.toggle( 'on', !! x.on ); el.setAttribute( 'aria-pressed', x.on ? 'true' : 'false' ); if ( x.doneBtn && el.textContent !== x.label ) el.textContent = x.label; } ); return; }
 			const r = p.res; clearBar(); r( { chip: i } ); return;
 		}
 		const lg = e.target.closest( '[data-ob-lang]' ); if ( lg ) { const k = lg.dataset.obLang; if ( EX.lang() !== k ) EX.setLang( k ); A.lang = k; const y = host.querySelector( '.ob-intro' ).scrollTop; intro(); host.querySelector( '.ob-intro' ).scrollTop = y; return; }

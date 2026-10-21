@@ -1,6 +1,16 @@
 {
-  "version": "0.54.30",
+  "version": "0.54.31",
   "releases": [
+    {
+      "version": "0.54.31",
+      "date": "2026-10-21",
+      "en": [
+        "Setup chat fixes: choosing your regular bills no longer makes the buttons flash, and an email address typed in the chat is kept as typed."
+      ],
+      "el": [
+        "Διορθώσεις στη συνομιλία ρύθμισης: η επιλογή τακτικών λογαριασμών δεν κάνει πλέον τα κουμπιά να αναβοσβήνουν και η διεύθυνση email που γράφετε στη συνομιλία διατηρείται όπως τη γράψατε."
+      ]
+    },
     {
       "version": "0.54.30",
       "date": "2026-10-21",
