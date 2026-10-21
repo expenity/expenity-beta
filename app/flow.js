@@ -35,7 +35,7 @@
 		if ( UI.isStandalone() && d.stage === 'install' ) { d.installDismissed = true; d.stage = S().settings.setupDone ? 'done' : 'setup'; }
 		if ( d.onboarded && ! d.stage ) d.stage = 'done'; // devices from before this flow
 		if ( EX.auth.isSignedIn() && ! d.stage ) d.stage = 'done';
-		if ( ! d.stage ) d.stage = ( S().bills.length || S().txs.length || S().accounts.some( ( a ) => ! a.auto ) ) ? 'done' : 'welcome'; // people who already had data on this device keep it
+		if ( ! d.stage ) d.stage = ( S().bills.length || S().txs.length || S().accounts.some( ( a ) => ! a.auto ) ) ? 'done' : ( EXA.onboard && EXA.onboard.enabled() ? 'setup' : 'welcome' ); // people who already had data on this device keep it; with the setup chat there is no separate welcome or install page
 		EX.persist();
 		if ( d.stage === 'done' ) EX.ensureWallet();
 		flow.show();
@@ -58,7 +58,7 @@
 		host.scrollTop = keep ? prev : 0;
 	};
 	const afterAuth = () => {
-		if ( needsInstall() ) return setStage( 'install' );
+		if ( needsInstall() && ! ( EXA.onboard && EXA.onboard.enabled() ) ) return setStage( 'install' );
 		if ( S().settings.setupDone ) return finish();
 		return startSetup();
 	};

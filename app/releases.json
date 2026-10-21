@@ -1,6 +1,18 @@
 {
-  "version": "0.54.24",
+  "version": "0.54.25",
   "releases": [
+    {
+      "version": "0.54.25",
+      "date": "2026-10-21",
+      "en": [
+        "A friendlier first run: a welcome page with a big language switch and both eFriends, then a slider to choose Boogie or Chip, then a short chat with seven questions. At the end you can create a free account, and eFriend explains why adding Expenity to your home screen is worth 20 seconds.",
+        "The slider is bigger and easier to grab, and the background jokes now drift by softly."
+      ],
+      "el": [
+        "Πιο φιλική πρώτη χρήση: μια σελίδα υποδοχής με μεγάλο διακόπτη γλώσσας και τα δύο eFriend, μετά ένα slider για να διαλέξετε Boogie ή Chip και μετά μια σύντομη συνομιλία με επτά ερωτήσεις. Στο τέλος μπορείτε να δημιουργήσετε δωρεάν λογαριασμό και το eFriend εξηγεί γιατί αξίζει να προσθέσετε το Expenity στην αρχική οθόνη σας σε 20 δευτερόλεπτα.",
+        "Το slider είναι μεγαλύτερο και πιο εύκολο να το πιάσετε, και τα ανέκδοτα στο φόντο περνούν πλέον απαλά."
+      ]
+    },
     {
       "version": "0.54.24",
       "date": "2026-10-21",

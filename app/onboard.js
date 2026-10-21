@@ -1,9 +1,10 @@
 /**
  * First-run setup as a chat with eFriend. It replaces the classic setup wizard (flow.js) while USE_CHAT is true; set it to
  * false and the old wizard comes back untouched.
- *   1. Pick your eFriend on a split screen (Boogie on the left, Chip on the right, a slider in between).
- *   2. Eight questions: language, name, currency, income, bills, a goal, cushion, how to add expenses.
- *   3. A summary of what was set up, with a pencil to change an answer and a cross to remove the estimated budgets.
+ *   1. A welcome page: the logo, a few words about Expenity, both eFriends as little bots, and a big language switch (its answer is the language of everything after it).
+ *   2. Pick your eFriend on a split screen (Boogie on the left, Chip on the right, a slider in between).
+ *   3. Seven questions: name, currency, income, bills, a goal, cushion, how to add expenses.
+ *   4. A summary of what was set up, with a pencil to change an answer and a cross to remove the estimated budgets.
  * Nothing is saved without being said back, every question can be skipped, and the keyboard never opens by itself on a phone.
  */
 ( function () {
@@ -22,11 +23,17 @@
 		pickChoose: [ 'Choose', 'Επιλογή' ],
 		pickBoogie: [ 'A vintage cassette with a glowing Nixie tube. Warm, a little dry, fond of a good plan and a better pencil.', 'Μια vintage κασέτα με λαμπερή λυχνία Nixie. Ζεστός, λίγο ξερός, αγαπά ένα καλό σχέδιο και ένα ακόμα καλύτερο μολύβι.' ],
 		pickChip: [ 'Young, fast and wireless. Hyped, playful, full of emoji and bad battery jokes.', 'Νέος, γρήγορος και ασύρματος. Ενθουσιώδης, παιχνιδιάρης, γεμάτος emoji και κακά ανέκδοτα με μπαταρίες.' ],
+		introTitle: [ 'Welcome to Expenity', 'Καλώς ήρθατε στο Expenity' ], introSub: [ 'Your money, calm and clear.', 'Τα χρήματά σας, ήρεμα και καθαρά.' ],
+		introL1: [ '🧾 Bills, income and spending in one place', '🧾 Λογαριασμοί, εισοδήματα και έξοδα σε ένα μέρος' ], introL2: [ '🔔 Never miss a payment', '🔔 Ποτέ πια χαμένη πληρωμή' ], introL3: [ '🤖 eFriend checks if you can afford it, and finds the best day', '🤖 Το eFriend ελέγχει αν το αντέχετε και βρίσκει την καλύτερη μέρα' ],
+		introQ: [ 'Can I afford a €49 gift?', 'Μπορώ να αγοράσω ένα δώρο €49;' ], introA: [ 'Yes! Best day: Friday ✅', 'Ναι! Καλύτερη μέρα: Παρασκευή ✅' ], introLang: [ 'Choose your language', 'Επιλέξτε γλώσσα' ], introGo: [ 'Let’s go', 'Πάμε' ], introPoke: [ 'Tap them!', 'Πατήστε τους!' ],
+		instPitch: [ 'Final boss level, my friend. 📼\nIf you add me to your home screen I live in your pocket, one tap away, full screen, and I can nudge you before a bill bites. Skip it and I am just one of 47 open tabs, right next to a banana bread recipe. 🍌\nThe next page takes 20 seconds. Your future self sends thanks.', 'Το τελικό επίπεδο, φίλε μου. 📼\nΑν με προσθέσετε στην αρχική οθόνη, ζω στην τσέπη σας, με ένα πάτημα, σε πλήρη οθόνη, και μπορώ να σας ειδοποιώ πριν δαγκώσει ένας λογαριασμός. Αν το παραλείψετε, είμαι απλώς μία από τις 47 ανοιχτές καρτέλες, δίπλα σε μια συνταγή για μπανανόψωμο. 🍌\nΗ επόμενη σελίδα θέλει 20 δευτερόλεπτα. Το μελλοντικό σας εαυτό θα σας ευχαριστήσει.',
+			'OKAY this is the SUPER DUPER important part!! 🚨\nAdd me to your home screen and I become a real app: one tap, full screen, instant, and I can remind you before bills hit. Skip it and I am stuck in a browser tab between 37 other tabs and a cat video. 🐱\nThe next page takes 20 seconds. Do it for me?? 🥺', 'ΟΚ αυτό είναι το ΣΟΥΠΕΡ ΔΟΥΠΕΡ σημαντικό μέρος!! 🚨\nΠροσθέστε με στην αρχική οθόνη και γίνομαι κανονική εφαρμογή: ένα πάτημα, πλήρης οθόνη, άμεσα, και μπορώ να σας θυμίζω πριν έρθουν οι λογαριασμοί. Αν το παραλείψετε, θα είμαι κολλημένος σε μια καρτέλα ανάμεσα σε 37 άλλες και ένα βίντεο με γάτες. 🐱\nΗ επόμενη σελίδα θέλει 20 δευτερόλεπτα. Θα το κάνετε για μένα?? 🥺' ],
+		accAsk: [ 'One more thing: want to keep your data safe and use it on all your devices? A free account takes a few seconds. 🔐', 'Ένα τελευταίο: θέλετε να κρατήσετε τα δεδομένα σας ασφαλή και να τα χρησιμοποιείτε σε όλες τις συσκευές σας; Ένας δωρεάν λογαριασμός θέλει λίγα δευτερόλεπτα. 🔐',
+			'One more thing!! 🔐 Want your data safe and on all your devices? A free account takes seconds!', 'Ένα τελευταίο!! 🔐 Θέλετε τα δεδομένα σας ασφαλή και σε όλες τις συσκευές σας; Ένας δωρεάν λογαριασμός θέλει δευτερόλεπτα!' ],
+		accCreate: [ '🔐 Create a free account', '🔐 Δημιουργία δωρεάν λογαριασμού' ], accLater: [ 'Maybe later', 'Ίσως αργότερα' ], accEmail: [ 'What is your email address? It is only used to recover your account.', 'Ποια είναι η διεύθυνση email σας; Χρησιμοποιείται μόνο για την ανάκτηση του λογαριασμού σας.' ], accBad: [ 'That does not look like an email. Try again?', 'Αυτό δεν μοιάζει με email. Δοκιμάστε ξανά;' ],
 		skip: [ 'Skip setup', 'Παράλειψη' ], skipQ: [ 'Skip', 'Παράλειψη' ], send: [ 'Send', 'Αποστολή' ], ph: [ 'Type here', 'Γράψτε εδώ' ],
-		hello: [ 'Well hello! 📼 I am Boogie, and I will help you set things up. Eight quick questions, and you can skip any of them.', 'Λοιπόν, γεια σας! 📼 Είμαι ο Boogie και θα σας βοηθήσω με τη ρύθμιση. Οκτώ γρήγορες ερωτήσεις, και μπορείτε να παραλείψετε όποια θέλετε.',
-			'Heyyy! 🎉 I am Chip! Eight super quick questions and we are set. Skip any you want!', 'Γεια σας! 🎉 Είμαι ο Chip! Οκτώ σούπερ γρήγορες ερωτήσεις και είμαστε έτοιμοι. Παραλείψτε όποια θέλετε!' ],
-		lang: [ 'First things first: which language do we speak? 🎙️ I know both, plus a little tape hiss.\nΠρώτα απ’ όλα: ποια γλώσσα μιλάμε; Ξέρω και τις δύο, και λίγο σφύριγμα κασέτας.', null,
-			'Greek or English?? 🌍 I speak both. And Emoji. 😎\nΕλληνικά ή Αγγλικά;; Μιλάω και τα δύο. Και Emoji. 😎', null ],
+		hello: [ 'Well hello! 📼 I am Boogie, and I will help you set things up. Seven quick questions, and you can skip any of them.', 'Λοιπόν, γεια σας! 📼 Είμαι ο Boogie και θα σας βοηθήσω με τη ρύθμιση. Επτά γρήγορες ερωτήσεις, και μπορείτε να παραλείψετε όποια θέλετε.',
+			'Heyyy! 🎉 I am Chip! Seven super quick questions and we are set. Skip any you want!', 'Γεια σας! 🎉 Είμαι ο Chip! Επτά σούπερ γρήγορες ερωτήσεις και είμαστε έτοιμοι. Παραλείψτε όποια θέλετε!' ],
 		name: [ 'Lovely. What should I call you? 😊', 'Υπέροχα. Πώς να σας φωνάζω; 😊', 'Cool! What should I call you? 😄', 'Τέλεια! Πώς να σας φωνάζω; 😄' ],
 		nameHi: [ '{name}… a good name. 📼', '{name}… ωραίο όνομα. 📼', '{name}!! Love it! 🙌', '{name}!! Το λατρεύω! 🙌' ],
 		nameNone: [ 'No name, no problem. A mystery. 🕵️', 'Χωρίς όνομα, κανένα πρόβλημα. Μυστήριο. 🕵️', 'Mystery person! 🕵️ Love it.', 'Άγνωστο πρόσωπο! 🕵️ Μου αρέσει.' ],
@@ -63,7 +70,7 @@
 		chip: { icons: [ '🤖', '📱', '🔋', '📶', '😂', '💬', '⚡', '🎮' ], en: [ 'Battery 100% 🔋', '404: joke not found', 'No cap, I am fast', 'Wi-Fi: 5 bars', 'Emoji fluent 😎' ], el: [ 'Μπαταρία 100% 🔋', '404: το ανέκδοτο χάθηκε', 'Χωρίς ψέματα, είμαι γρήγορος', 'Wi-Fi: 5 γραμμές', 'Μιλάω Emoji 😎' ] },
 	};
 	const pickFrom = ( s ) => { const l = String( s ).split( '|' ); return l[ Math.floor( Math.random() * l.length ) ]; };
-	const L = ( k, vars ) => { const r = TX[ k ] || [ k ], el = EX.lang() === 'el', chip = F().char() === 'chip'; let s = r[ el ? 1 : 0 ]; if ( chip && r[ el ? 3 : 2 ] ) s = r[ el ? 3 : 2 ]; if ( s == null ) s = r[ 0 ]; s = pickFrom( s ); if ( vars ) s = s.replace( /\{(\w+)\}/g, ( m, x ) => ( vars[ x ] !== undefined ? vars[ x ] : m ) ); return s; };
+	const L = ( k, vars, lang ) => { const r = TX[ k ] || [ k ], el = ( lang || EX.lang() ) === 'el', chip = F().char() === 'chip'; let s = r[ el ? 1 : 0 ]; if ( chip && r[ el ? 3 : 2 ] ) s = r[ el ? 3 : 2 ]; if ( s == null ) s = r[ 0 ]; s = pickFrom( s ); if ( vars ) s = s.replace( /\{(\w+)\}/g, ( m, x ) => ( vars[ x ] !== undefined ? vars[ x ] : m ) ); return s; };
 	ob.words = TX;
 
 	/* ------------------------------------------------------------------ State */
@@ -74,7 +81,21 @@
 	const fine = () => { try { return matchMedia( '(pointer: fine)' ).matches; } catch ( e ) { return false; } };
 	const natural = () => S().settings.efInstant !== true;
 
-	/* ------------------------------------------------------------------ 1. The split-screen picker */
+	/* ------------------------------------------------------------------ 1. The welcome page: logo, a few words, both eFriends, and the language switch */
+	function intro() {
+		summaryOn = false; const el = EX.lang() === 'el';
+		host.innerHTML = `<div class="ob-intro"><div class="ob-intro-in">
+			<div id="flowLogo" class="ob-logo" aria-hidden="true"></div><h1>${ esc( L( 'introTitle' ) ) }</h1><p class="ob-sub">${ esc( L( 'introSub' ) ) }</p>
+			<div class="ob-lang" role="radiogroup" aria-label="${ esc( L( 'introLang' ) ) }" data-lang-now="${ el ? 'el' : 'en' }"><span class="ob-lang-thumb"></span><button type="button" role="radio" aria-checked="${ el }" data-ob-lang="el" lang="el">Ελληνικά</button><button type="button" role="radio" aria-checked="${ ! el }" data-ob-lang="en" lang="en">English</button></div>
+			<ul class="ob-points"><li>${ esc( L( 'introL1' ) ) }</li><li>${ esc( L( 'introL2' ) ) }</li><li>${ esc( L( 'introL3' ) ) }</li></ul>
+			<div class="ob-demo" aria-hidden="true"><div class="ob-q">${ esc( L( 'introQ' ) ) }</div><div class="ob-ty"><i></i><i></i><i></i></div><div class="ob-a">${ esc( L( 'introA' ) ) }</div></div>
+			<div class="ob-bots"><span class="ob-bot">${ F().mascotOf( 'boogie', 'happy', 104 ) }</span><span class="ob-bot">${ F().mascotOf( 'chip', 'happy', 104 ) }</span></div><p class="ob-poke">${ esc( L( 'introPoke' ) ) }</p>
+			<button type="button" class="btn btn-primary big ob-go" data-ob-go>${ esc( L( 'introGo' ) ) }</button>
+			<div class="ob-have"><span>${ esc( t( 'flowHaveAccount' ) ) }</span><button type="button" class="link" data-flow="signin">${ esc( t( 'authSignIn' ) ) }</button><button type="button" class="link" data-flow="restore">${ esc( t( 'restore' ) ) }</button><button type="button" class="link" data-flow="recover">${ esc( t( 'flowLost' ) ) }</button><input type="file" id="impJson" accept="application/json,.json" hidden></div></div></div>`;
+		const lg = host.querySelector( '#flowLogo' ); if ( lg && EXA.logoSvg ) lg.innerHTML = EXA.logoSvg.replace( 'width="34" height="34"', 'width="64" height="64"' );
+	}
+
+	/* ------------------------------------------------------------------ 2. The split-screen picker */
 	function picker() {
 		summaryOn = false;
 		const B = F().mascotOf( 'boogie', 'happy', 300 ), C = F().mascotOf( 'chip', 'happy', 250 );
@@ -92,7 +113,8 @@
 			bTx.style.opacity = pb; bTx.style.transform = `translateY(${ ( 1 - pb ) * 14 + pb * 46 }px)`; cTx.style.opacity = pc; cTx.style.transform = `translateY(${ ( 1 - pc ) * 14 + pc * 46 }px)`;
 			bA.style.transform = `scale(${ ( 1 + .3 * pb - .1 * pc ).toFixed( 3 ) })`; cA.style.transform = `scale(${ ( 1 + .3 * pc - .1 * pb ).toFixed( 3 ) })`; // the one you are choosing grows and comes to the centre
 			h.setAttribute( 'aria-valuenow', Math.round( X ) );
-			const edge = X >= 97 ? 'boogie' : X <= 3 ? 'chip' : ''; btn.hidden = ! edge; btn.dataset.pick = edge; btn.setAttribute( 'aria-hidden', edge ? 'false' : 'true' );
+			// the Choose button shows well before the screen edge, where a browser swipe could take over
+			const edge = X >= 84 ? 'boogie' : X <= 16 ? 'chip' : ''; btn.hidden = ! edge; btn.dataset.pick = edge; btn.setAttribute( 'aria-hidden', edge ? 'false' : 'true' );
 			if ( edge ) { btn.textContent = L( 'pickChoose' ); bP.classList.toggle( 'on', edge === 'boogie' ); cP.classList.toggle( 'on', edge === 'chip' ); } else { bP.classList.remove( 'on' ); cP.classList.remove( 'on' ); }
 			hints.forEach( ( x ) => { x.style.opacity = Math.abs( X - 50 ) < 6 ? 1 : 0; } );
 		};
@@ -101,7 +123,7 @@
 		let drag = false;
 		root.addEventListener( 'pointerdown', ( e ) => { if ( e.target.closest( 'button' ) ) return; drag = true; cancelAnimationFrame( raf ); try { root.setPointerCapture( e.pointerId ); } catch ( x ) { /* ignore */ } fromEvent( e ); } );
 		root.addEventListener( 'pointermove', ( e ) => { if ( drag ) fromEvent( e ); } );
-		const up = () => { if ( ! drag ) return; drag = false; if ( X > 88 ) tween( 100 ); else if ( X < 12 ) tween( 0 ); };
+		const up = () => { if ( ! drag ) return; drag = false; if ( X > 84 ) tween( 100 ); else if ( X < 16 ) tween( 0 ); };
 		root.addEventListener( 'pointerup', up ); root.addEventListener( 'pointercancel', up );
 		h.addEventListener( 'keydown', ( e ) => { const k = e.key; if ( k === 'ArrowLeft' ) X = Math.max( 0, X - 8 ); else if ( k === 'ArrowRight' ) X = Math.min( 100, X + 8 ); else if ( k === 'Home' ) X = 0; else if ( k === 'End' ) X = 100; else return; e.preventDefault(); apply(); } );
 		btn.addEventListener( 'click', () => { const c = btn.dataset.pick; if ( c ) choose( c ); } );
@@ -109,23 +131,24 @@
 		falling( bP.querySelector( '.ob-fall' ), 'boogie', root ); falling( cP.querySelector( '.ob-fall' ), 'chip', root );
 		if ( ! reduce() ) setTimeout( () => { if ( X === 50 && ! drag ) { tween( 40, 360 ); setTimeout( () => { if ( ! drag && Math.abs( X - 40 ) < 1 ) tween( 60, 560 ); setTimeout( () => { if ( ! drag && Math.abs( X - 60 ) < 1 ) tween( 50, 360 ); }, 640 ); }, 420 ); } }, 900 );
 	}
-	/** Jokes and icons drop from the top of one half and pile up at the bottom; when the pile is high it fades and starts again. */
+	/** Jokes and icons drift slowly down behind one half, faded, so they set the mood without getting in the way. */
 	function falling( layer, who, root ) {
-		const cfg = FALL[ who ], el = EX.lang() === 'el', texts = el ? cfg.el : cfg.en, W = () => layer.clientWidth || 360, H = () => layer.clientHeight || 700, cols = 3, heights = new Array( cols ).fill( 0 ), items = [];
+		const cfg = FALL[ who ], el = EX.lang() === 'el', texts = el ? cfg.el : cfg.en,
+		 W = () => layer.clientWidth || 360, H = () => layer.clientHeight || 700;
 		let n = 0, timer = 0;
-		const drop = () => {
+		const drift = ( still ) => {
 			if ( ! root.isConnected ) { clearTimeout( timer ); return; }
 			const text = n % 2 === 0, label = text ? texts[ Math.floor( Math.random() * texts.length ) ] : cfg.icons[ Math.floor( Math.random() * cfg.icons.length ) ]; n++;
 			const d = document.createElement( 'span' ); d.className = 'ob-drop' + ( text ? ' ob-drop-t' : '' ); d.textContent = label; layer.appendChild( d );
-			const w = d.offsetWidth, h = d.offsetHeight, colW = W() / cols, order = heights.map( ( v, i ) => i ).sort( ( a, b ) => heights[ a ] - heights[ b ] ), c = order[ Math.floor( Math.random() * 2 ) ];
-			const x = Math.max( 4, Math.min( W() - w - 4, c * colW + Math.random() * Math.max( 0, colW - w ) ) ), y = H() - 96 - heights[ c ] - h; heights[ c ] += h + 3;
-			d.style.left = x + 'px'; d.style.top = y + 'px'; d.style.transform = `rotate(${ ( Math.random() - .5 ) * 14 }deg)`; items.push( d );
-			if ( ! reduce() ) d.animate( [ { transform: `translateY(${ -y - h - 20 }px) rotate(${ ( Math.random() - .5 ) * 60 }deg)`, opacity: 0 }, { opacity: 1, offset: .12 }, { transform: `translateY(0) rotate(0deg)`, opacity: 1 } ], { duration: 1300 + y * 1.1, easing: 'cubic-bezier(.3,.1,.5,1.2)' } );
-			if ( Math.max( ...heights ) > H() * .36 ) { const old = items.splice( 0 ); heights.fill( 0 ); old.forEach( ( o ) => { o.style.transition = 'opacity 1s'; o.style.opacity = 0; setTimeout( () => o.remove(), 1100 ); } ); }
-			if ( ! reduce() ) timer = setTimeout( drop, 850 + Math.random() * 400 );
+			const x = Math.random() * Math.max( 0, W() - d.offsetWidth - 8 ) + 4, op = text ? .2 : .26, rot = ( Math.random() - .5 ) * 16;
+			d.style.left = x + 'px'; d.style.top = '0px'; d.style.opacity = op;
+			if ( still ) { d.style.top = Math.round( 40 + Math.random() * ( H() - 160 ) ) + 'px'; d.style.transform = `rotate(${ rot }deg)`; return; }
+			const dur = 16000 + Math.random() * 8000, sway = ( Math.random() - .5 ) * 50, a = d.animate( [ { transform: `translate(0, -50px) rotate(${ rot }deg)`, opacity: 0 }, { opacity: op, offset: .1 }, { opacity: op, offset: .9 }, { transform: `translate(${ sway }px, ${ H() + 30 }px) rotate(${ -rot }deg)`, opacity: 0 } ], { duration: dur, easing: 'linear' } );
+			a.onfinish = () => d.remove();
+			timer = setTimeout( () => drift( false ), 1500 + Math.random() * 900 );
 		};
-		if ( reduce() ) { for ( let i = 0; i < 6; i++ ) drop(); clearTimeout( timer ); return; }
-		timer = setTimeout( drop, 300 );
+		if ( reduce() ) { for ( let i = 0; i < 6; i++ ) drift( true ); return; }
+		drift( false );
 	}
 	function choose( c ) { chosen = true; S().settings.efChar = c; S().settings.u = Date.now(); EX.persist(); chat(); }
 
@@ -168,10 +191,6 @@
 	const BILL_TPL = [ [ 'tplRent', 'housing', 'monthly', '🏠' ], [ 'tplElectricity', 'utilities', 'monthly', '💡' ], [ 'tplInternet', 'utilities', 'monthly', '🌐' ], [ 'tplPhone', 'utilities', 'monthly', '📱' ], [ 'tplWater', 'utilities', 'quarterly', '💧' ], [ 'tplNetflix', 'subscriptions', 'monthly', '📺' ], [ 'tplCarIns', 'insurance', 'yearly', '🛡️' ], [ 'tplCard', 'loans', 'monthly', '💳' ] ];
 	const GOALS = [ [ 'trip', 'plane', '✈️' ], [ 'car', 'car', '🚗' ], [ 'gift', 'gift', '🎁' ], [ 'home', 'home', '🏠' ], [ 'emergency', 'heart', '❤️' ] ];
 
-	async function qLang() {
-		await say( L( 'lang' ) ); const r = await prompt( { chips: [ { label: 'Ελληνικά' }, { label: 'English' } ] } ); if ( ! r ) return;
-		const k = r.chip === 0 ? 'el' : 'en'; A.lang = k; me( r.chip === 0 ? 'Ελληνικά' : 'English' ); if ( EX.lang() !== k ) EX.setLang( k );
-	}
 	async function qName() {
 		await say( L( 'name' ) ); const r = await prompt( { input: 'text', ph: L( 'ph' ), chips: [ { label: L( 'skipQ' ) } ] } ); if ( ! r ) return;
 		if ( r.chip !== undefined ) { me( L( 'skipQ' ) ); A.name = ''; await say( L( 'nameNone' ) ); } else { A.name = r.text.trim().slice( 0, 40 ); me( A.name ); await say( L( 'nameHi', { name: A.name } ) ); }
@@ -238,8 +257,8 @@
 		await say( L( 'entry' ) ); const r = await prompt( { chips: [ { label: L( 'eSmart' ) }, { label: L( 'eCasual' ) } ] } ); if ( ! r ) return;
 		A.entry = r.chip === 0 ? 'smart' : 'casual'; me( r.chip === 0 ? L( 'eSmart' ) : L( 'eCasual' ) );
 	}
-	const QS = { lang: qLang, name: qName, cur: qCur, income: qIncome, bills: qBills, goal: qGoal, cushion: qCushion, entry: qEntry };
-	const ORDER = [ 'lang', 'name', 'cur', 'income', 'bills', 'goal', 'cushion', 'entry' ];
+	const QS = { name: qName, cur: qCur, income: qIncome, bills: qBills, goal: qGoal, cushion: qCushion, entry: qEntry };
+	const ORDER = [ 'name', 'cur', 'income', 'bills', 'goal', 'cushion', 'entry' ];
 
 	function chat() {
 		const my = ++tok; summaryOn = false; created = null;
@@ -293,17 +312,41 @@
 		const inc = A.income ? esc( fmt( A.income.amount ) + ' · ' + L( { monthly: 'fMonthly', biweekly: 'fBiweekly', weekly: 'fWeekly' }[ A.income.repeat ] ) ) : none;
 		const bills = A.bills.length ? esc( A.bills.map( ( b ) => t( BILL_TPL[ b.tpl ][ 0 ] ) ).join( ', ' ) + ' · ' + fmt( A.bills.reduce( ( x, b ) => x + perMonth( b.amount, BILL_TPL[ b.tpl ][ 2 ] ), 0 ) ) + ' ' + L( 'perMonth' ) ) : none;
 		const bud = created && created.budgets.length ? esc( S().budgets.filter( ( b ) => created.budgets.includes( b.id ) ).map( ( b ) => t( 'cat_' + b.category ) + ' ' + fmt( Number( b.amount ) ) ).join(', ') ) : none;
-		return R( 'lang', '🌍', 'sLang', A.lang === 'el' ? 'Ελληνικά' : 'English', 'lang' ) + R( 'name', '👤', 'sName', esc( A.name ) || none, 'name' ) + R( 'cur', '💶', 'sCur', esc( A.cur || S().settings.currency ), 'cur' ) + R( 'income', '💼', 'sInc', inc, 'income' )
+		return R( 'lang', '🌍', 'sLang', EX.lang() === 'el' ? 'Ελληνικά' : 'English', '' ) + R( 'name', '👤', 'sName', esc( A.name ) || none, 'name' ) + R( 'cur', '💶', 'sCur', esc( A.cur || S().settings.currency ), 'cur' ) + R( 'income', '💼', 'sInc', inc, 'income' )
 			+ R( 'bills', '🧾', 'sBills', bills, 'bills' ) + R( 'goal', '🎯', 'sGoal', A.goal ? esc( A.goal.name + ' · ' + fmt( A.goal.target ) ) : none, 'goal' ) + R( 'cushion', '🛡️', 'sCush', esc( L( cush ) ), 'cushion' )
 			+ R( 'entry', '✨', 'sEntry', esc( L( A.entry === 'smart' ? 'eSmart' : 'eCasual' ) ), 'entry' ) + R( 'bud', '📊', 'sBud', bud, '', created && created.budgets.length ? 'bud' : '' );
 	}
 	function summary() {
 		summaryOn = true; const b = box(); if ( ! b ) return;
-		( async () => { await say( L( 'sumIntro' ) ); const bx = box(); if ( ! bx || ! summaryOn ) return; push( 'ef', `<ul class="ob-sum" id="obSum">${ rowsHtml() }</ul><p class="ob-note">${ esc( L( 'sumNote' ) ) }</p>` ); setBar( { chips: [ { label: L( 'open' ), go: true } ] , sumBtn: true } ); } )();
+		( async () => { await say( L( 'sumIntro' ) ); const bx = box(); if ( ! bx || ! summaryOn ) return; push( 'ef', `<ul class="ob-sum" id="obSum">${ rowsHtml() }</ul><p class="ob-note">${ esc( L( 'sumNote' ) ) }</p>` ); await offerAccount(); } )();
+	}
+	/** The last step: if the app is not installed yet, eFriend explains (with some drama) why the next page matters, then the install guide shows before the app opens. */
+	async function finalStep() {
+		const my = tok, needs = ! UI.isStandalone() && ! D().installDismissed;
+		if ( ! needs ) { exit(); return; }
+		await say( L( 'instPitch' ) ); if ( my !== tok ) return;
+		const r = await prompt( { chips: [ { label: L( 'open' ), go: true } ] } ); if ( ! r || my !== tok ) return;
+		me( L( 'open' ) ); clearBar(); tok++; S().settings.setupDone = true; D().onboarded = true; D().stage = 'install'; EX.save(); EXA.flow.show();
+	}
+	/** After the summary: keep it all safe with a free account, or open the app. */
+	async function offerAccount() {
+		if ( EX.auth.isSignedIn() ) { await finalStep(); return; }
+		const my = tok; await say( L( 'accAsk' ) ); if ( my !== tok ) return;
+		const r = await prompt( { chips: [ { label: L( 'accCreate' ), go: true }, { label: L( 'open' ) } ] } ); if ( ! r || my !== tok ) return;
+		if ( r.chip === 1 ) { me( L( 'open' ) ); await finalStep(); return; }
+		me( L( 'accCreate' ) ); await say( L( 'accEmail' ) );
+		for ( ;; ) {
+			const e = await prompt( { input: 'text', ph: 'name@example.com', chips: [ { label: L( 'accLater' ) } ] } ); if ( ! e || my !== tok ) return;
+			if ( e.chip !== undefined ) { me( L( 'accLater' ) ); await finalStep(); return; }
+			const mail = e.text.trim(); me( mail ); if ( ! /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test( mail ) ) { await say( L( 'accBad' ) ); continue; }
+			const res = await EX.auth.register( mail );
+			if ( res.error ) { await say( EXA.errText( res.error ) ); continue; }
+			EXA.showCodes( res.recoveryCodes, () => { finalStep(); } ); return;
+		}
 	}
 	function refreshSummary() { const u = host.querySelector( '#obSum' ); if ( u ) u.innerHTML = rowsHtml(); }
 	async function edit( id ) {
-		const my = ++tok; summaryOn = false; clearBar(); await QS[ id ](); if ( my !== tok ) return; clearBar(); build(); const u = host.querySelector( '#obSum' ); if ( u ) { await say( L( 'sumIntro' ) ); if ( my === tok ) { push( 'ef', `<ul class="ob-sum" id="obSum">${ rowsHtml() }</ul>` ); summaryOn = true; setBar( { chips: [ { label: L( 'open' ), go: true } ], sumBtn: true } ); } } else summary();
+		const my = ++tok; summaryOn = false; clearBar(); await QS[ id ](); if ( my !== tok ) return; clearBar(); build(); const u = host.querySelector( '#obSum' ); if ( u ) { await say( L( 'sumIntro' ) ); if ( my === tok ) { push( 'ef', `<ul class="ob-sum" id="obSum">${ rowsHtml() }</ul>` ); summaryOn = true; await offerAccount(); } } else summary();
 	}
 	function exit() {
 		clearBar(); tok++; const fl = EXA.flow; EX.persist();
@@ -321,6 +364,8 @@
 			if ( p.multi ) { const c = p.chips[ i ]; if ( c.doneBtn ) { const r = p.res; clearBar(); r( { done: true } ); return; } if ( p.sel.has( c.toggle ) ) p.sel.delete( c.toggle ); else p.sel.add( c.toggle ); p.chips = p.chips.map( ( x, k ) => ( x.doneBtn ? Object.assign( x, { label: p.sel.size ? '✅ ' + L( 'done' ) : L( 'noBills' ) } ) : Object.assign( x, { on: p.sel.has( x.toggle ) } ) ) ); setBar( p ); return; }
 			const r = p.res; clearBar(); r( { chip: i } ); return;
 		}
+		const lg = e.target.closest( '[data-ob-lang]' ); if ( lg ) { const k = lg.dataset.obLang; if ( EX.lang() !== k ) EX.setLang( k ); A.lang = k; const y = host.querySelector( '.ob-intro' ).scrollTop; intro(); host.querySelector( '.ob-intro' ).scrollTop = y; return; }
+		if ( e.target.closest( '[data-ob-go]' ) ) { picker(); return; }
 		if ( e.target.closest( '[data-ob-skip]' ) ) { skipAll(); return; }
 		const ed = e.target.closest( '[data-ob-edit]' ); if ( ed ) { edit( ed.dataset.obEdit ); return; }
 		if ( e.target.closest( '[data-ob-rm]' ) ) { if ( created ) { S().budgets = S().budgets.filter( ( b ) => ! created.budgets.includes( b.id ) ); created.budgets = []; EX.save(); refreshSummary(); } }
@@ -332,7 +377,7 @@
 	/* ------------------------------------------------------------------ Entry point (called by flow.js instead of the classic wizard) */
 	ob.show = () => {
 		host = document.getElementById( 'flow' ); if ( ! host ) return;
-		if ( host.querySelector( '.ob-pick, .ob-chat' ) ) return; // already running: a language change must not restart it
-		A.lang = EX.lang(); A.cur = ''; tok++; chosen = false; picker();
+		if ( host.querySelector( '.ob-intro, .ob-pick, .ob-chat' ) ) return; // already running: a language change must not restart it
+		A.lang = EX.lang(); A.cur = ''; tok++; chosen = false; intro();
 	};
 }() );
