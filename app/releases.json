@@ -1,6 +1,20 @@
 {
-  "version": "0.55.3",
+  "version": "0.55.4",
   "releases": [
+    {
+      "version": "0.55.4",
+      "date": "2026-10-21",
+      "en": [
+        "eFriend Blog: chapters now unlock one at a time, in story order, when your data is ready or two days after the previous chapter. A chapter opens right under its own title.",
+        "Boogie's light now has its own full page: tap the gear on his card to see him and the controls together, then Save or close to undo.",
+        "Boogie's body now darkens the further it is from the bulb, and more as the light fades."
+      ],
+      "el": [
+        "eFriend Blog: τα κεφάλαια ξεκλειδώνουν πλέον ένα-ένα, με τη σειρά της ιστορίας, όταν τα δεδομένα σας είναι έτοιμα ή δύο ημέρες μετά το προηγούμενο κεφάλαιο. Κάθε κεφάλαιο ανοίγει ακριβώς κάτω από τον τίτλο του.",
+        "Το φως του Boogie έχει πλέον δική του σελίδα: πατήστε το γρανάζι στην κάρτα του για να τον δείτε μαζί με τα χειριστήρια και μετά Αποθήκευση ή κλείσιμο για να αναιρέσετε.",
+        "Το σώμα του Boogie σκουραίνει όσο απομακρύνεται από τη λάμπα, και περισσότερο όταν το φως εξασθενεί."
+      ]
+    },
     {
       "version": "0.55.3",
       "date": "2026-10-21",

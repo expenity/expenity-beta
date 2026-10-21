@@ -1945,3 +1945,20 @@ fieldset > legend { font-weight: 800; padding: 0 8px; color: var(--ink, #2a1a14)
 
 .ef-more{cursor:pointer}.ef-more .ci svg{width:26px;height:auto}.ef-more .mid{flex:1;display:flex;flex-direction:column;gap:2px;min-width:0}.ef-more small{color:var(--muted)}
 .efb-dot{flex:none;width:10px;height:10px;border-radius:50%;background:var(--late,#d33);margin-right:2px}
+
+/* Boogie's light sheet (gear on the eFriend picker) */
+.ef-chars{position:relative}
+.ef-gear{position:absolute;top:-16px;right:-10px;z-index:2;box-shadow:0 2px 8px rgba(0,0,0,.18);width:44px;height:44px;display:grid;place-items:center;border-radius:50%;border:2px solid var(--line,#e6d5c5);background:var(--surface,#fff);color:inherit;cursor:pointer;padding:0}
+.ef-lightsheet{display:grid;gap:10px;justify-items:center}
+.ef-lightsheet>*{max-width:100%}
+.ef-lightart{display:grid;place-items:center;min-height:150px}
+
+.ef-lightfull .sheet-pad{min-height:100%;display:grid;align-content:center;justify-items:center;gap:14px;padding-bottom:28px}
+.ef-lightfull .ef-lightart{min-height:min(34dvh,260px)}
+.ef-lightfull .btn-row{width:100%;max-width:420px}
+
+/* The shade: dark where the bulb's light does not reach. At full brightness there is none; as the light fades (or pulses down) the far parts of his body go dark. */
+.ef-cassette .tube-shade { pointer-events: none; opacity: min(1, calc((1 - var(--ef-glow)) * 2.6)); animation: efc-shade 2.2s ease-in-out infinite; }
+@keyframes efc-shade { 0%, 100% { opacity: min(1, calc((1 - var(--ef-glow)) * 3)); } 50% { opacity: min(1, calc((1 - var(--ef-glow)) * 2)); } }
+:root[data-motion=off] .ef-cassette .tube-shade, :root[data-motion=reduced] .ef-cassette .tube-shade { animation: none; }
+@media (prefers-reduced-motion: reduce) { :root:not([data-motion=full]) .ef-cassette .tube-shade { animation: none; } }

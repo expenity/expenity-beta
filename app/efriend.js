@@ -213,7 +213,7 @@
 	F.LEVELS = [ [ 'low', 40 ], [ 'normal', 70 ], [ 'high', 100 ] ]; // High is the brightest it can be
 	F.light = () => { const l = S().settings.efLight || {}, i = Number( l.i ), v = Number.isFinite( i ) ? i : 70, lv = F.LEVELS.reduce( ( best, x ) => ( Math.abs( x[ 1 ] - v ) < Math.abs( best[ 1 ] - v ) ? x : best ), F.LEVELS[ 1 ] ), c = ( l.c || '' ).toLowerCase(); return { i: lv[ 1 ], lvl: lv[ 0 ], c: F.LIGHTS.some( ( x ) => x[ 1 ] === c ) ? c : F.LIGHTS[ 0 ][ 1 ] }; };
 	F.applyLight = () => { const { i, c } = F.light(), st = document.documentElement.style; st.setProperty( '--ef-glow', ( i / 100 ).toFixed( 2 ) ); st.setProperty( '--ef-tm', c ); st.setProperty( '--ef-te', mixc( c, '#000000', .25 ) ); st.setProperty( '--ef-tc', mixc( c, '#ffffff', .78 ) ); st.setProperty( '--ef-tl', mixc( c, '#ffffff', .18 ) ); };
-	F.setLight = ( patch, final ) => { const cur = F.light(); S().settings.efLight = { i: cur.i, c: cur.c, ...patch }; S().settings.u = Date.now(); F.applyLight(); if ( final ) EX.save(); else EX.persist(); };
+	F.setLight = ( patch, final ) => { const cur = F.light(); S().settings.efLight = { i: cur.i, c: cur.c, ...patch }; F.applyLight(); if ( F.lightDraft ) return; S().settings.u = Date.now(); if ( final ) EX.save(); else EX.persist(); }; // while the light sheet is open nothing is stored until Save
 	EX.on( 'change', () => F.applyLight() ); F.applyLight();
 	/** The vintage control plate: a bat-handle toggle for the brightness and three lamp buttons for the bulb colour. Used in the eFriend menu and on the picker. */
 	F.lightControls = () => {
@@ -228,7 +228,7 @@
 					<div class="ef-pos">${ F.LEVELS.map( ( [ k, v ], n ) => `<button type="button" class="ef-lvl${ pos === n ? ' on' : '' }" data-ef-lightlvl="${ v }" role="radio" aria-checked="${ pos === n }" tabindex="${ pos === n ? 0 : -1 }">${ esc( t( 'efLvl_' + k ) ) }</button>` ).join( '' ) }</div></div></div>
 			<div class="ef-psec"><div class="ef-eng">${ esc( t( 'efLightColor' ) ) }</div><div class="ef-lamps" role="radiogroup" aria-label="${ esc( t( 'efLightColor' ) ) }">${ F.LIGHTS.map( ( [ k, c ] ) => `<button type="button" class="ef-lamp${ l.c === c ? ' on' : '' }" style="--c:${ c }" data-ef-lightc="${ c }" role="radio" aria-checked="${ l.c === c }" aria-label="${ esc( t( 'efLight_' + k ) ) }" title="${ esc( t( 'efLight_' + k ) ) }"><i></i></button>` ).join( '' ) }</div></div></div>`;
 	};
-	let lightTimer = 0; const saveLight = () => { clearTimeout( lightTimer ); lightTimer = setTimeout( () => { S().settings.u = Date.now(); EX.save(); }, 500 ); };
+	let lightTimer = 0; const saveLight = () => { if ( F.lightDraft ) return; clearTimeout( lightTimer ); lightTimer = setTimeout( () => { S().settings.u = Date.now(); EX.save(); }, 500 ); };
 	/** Moves the lever and the labels in place (no redraw), so the flick animation plays. */
 	const showLevel = ( panel, v ) => { const pos = F.LEVELS.findIndex( ( x ) => x[ 1 ] === v ), tg = panel.querySelector( '.ef-toggle' ); if ( ! tg ) return; tg.dataset.pos = pos; tg.querySelectorAll( '[data-ef-lightlvl]' ).forEach( ( b, n ) => { b.classList.toggle( 'on', n === pos ); b.setAttribute( 'aria-checked', n === pos ? 'true' : 'false' ); b.tabIndex = n === pos ? 0 : -1; } ); };
 	const setLevel = ( el, v ) => { const panel = el.closest( '.ef-panel' ); if ( ! panel || F.light().i === v ) return; F.setLight( { i: v }, false ); showLevel( panel, v ); F.sound( 'click' ); saveLight(); };
@@ -237,6 +237,17 @@
 		const cy = e.target.closest && e.target.closest( '[data-ef-lightcycle]' ); if ( cy ) { const i = F.LEVELS.findIndex( ( x ) => x[ 1 ] === F.light().i ); setLevel( cy, F.LEVELS[ ( i + 1 ) % 3 ][ 1 ] ); return; }
 		const b = e.target.closest && e.target.closest( '[data-ef-lightc]' ); if ( ! b ) return;
 		F.setLight( { c: b.dataset.efLightc }, false ); b.closest( '.ef-panel' ).querySelectorAll( '[data-ef-lightc]' ).forEach( ( x ) => { const on = x === b; x.classList.toggle( 'on', on ); x.setAttribute( 'aria-checked', on ? 'true' : 'false' ); } ); F.sound( 'click' ); saveLight();
+	} );
+	/** The light sheet: Boogie on top, the control plate below. Changes are a draft until Save; closing any other way puts the light back as it was. */
+	let lightDraft = null;
+	F.openLightSheet = () => {
+		lightDraft = { keep: S().settings.efLight ? { ...S().settings.efLight } : null }; F.lightDraft = true;
+		const revert = () => { if ( ! lightDraft ) return; F.lightDraft = false; if ( lightDraft.keep ) S().settings.efLight = lightDraft.keep; else delete S().settings.efLight; lightDraft = null; F.applyLight(); };
+		UI.openSheet( `<div class="sheet-head"><h2>💡 ${ esc( t( 'efLightTitle' ) ) }</h2><span class="sp"></span><button type="button" class="ab-btn" data-close aria-label="${ esc( t( 'close' ) ) }">${ UI.icon( 'x', 24 ) }</button></div><div class="sheet-pad ef-lightsheet"><div class="ef-lightart">${ F.mascotOf( 'boogie', 'happy', 230 ) }</div><p class="muted small">${ esc( t( 'efLightHint' ) ) }</p>${ F.lightControls() }<div class="btn-row"><button type="button" class="btn btn-primary wide" data-ef-lightsave>${ esc( t( 'efLightSave' ) ) }</button></div></div>`, { full: true, cls: 'ef-lightfull', onClose: revert } );
+	};
+	document.addEventListener( 'click', ( e ) => {
+		if ( e.target.closest && e.target.closest( '[data-ef-gear]' ) ) { F.openLightSheet(); return; }
+		if ( e.target.closest && e.target.closest( '[data-ef-lightsave]' ) ) { lightDraft = null; F.lightDraft = false; S().settings.u = Date.now(); EX.save(); UI.closeSheet( true ); }
 	} );
 	document.addEventListener( 'keydown', ( e ) => { const lv = e.target.closest && e.target.closest( '[data-ef-lightlvl]' ); if ( ! lv || ! [ 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown' ].includes( e.key ) ) return; e.preventDefault(); const i = F.LEVELS.findIndex( ( x ) => x[ 1 ] === F.light().i ), n = Math.max( 0, Math.min( 2, i + ( e.key === 'ArrowLeft' || e.key === 'ArrowUp' ? -1 : 1 ) ) ); setLevel( lv, F.LEVELS[ n ][ 1 ] ); lv.closest( '.ef-panel' ).querySelector( '[data-ef-lightlvl].on' ).focus(); } );
 
@@ -255,6 +266,10 @@
 		// the light falls on his body too: the upper left of the shell glows from the tube and pulses with it
 		const cid = prefix + 'cast', kid = prefix + 'castclip';
 		svg = svg.replace( '</g><g class="ef-fx">', `<defs><radialGradient id="${ cid }" cx="45" cy="22" r="64" gradientUnits="userSpaceOnUse"><stop offset="0" style="stop-color:var(--ef-tc)" stop-opacity=".95"/><stop offset=".3" style="stop-color:var(--ef-tm)" stop-opacity=".7"/><stop offset=".65" style="stop-color:var(--ef-te)" stop-opacity=".3"/><stop offset="1" style="stop-color:var(--ef-te)" stop-opacity="0"/></radialGradient><clipPath id="${ kid }"><rect x="20" y="20" width="104" height="80" rx="12"/></clipPath></defs><rect class="tube-cast" x="20" y="20" width="104" height="80" rx="12" fill="url(#${ cid })" clip-path="url(#${ kid })"/></g><g class="ef-fx">` );
+		// the rest of his body darkens the further it is from the bulb, and more as the light fades (shade layer, see style.css)
+		const sid = prefix + 'shade', shade = `<defs><radialGradient id="${ sid }" cx="45" cy="22" r="112" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#0b0604" stop-opacity="0"/><stop offset=".22" stop-color="#0b0604" stop-opacity=".12"/><stop offset=".55" stop-color="#0b0604" stop-opacity=".55"/><stop offset="1" stop-color="#0b0604" stop-opacity=".92"/></radialGradient></defs>`;
+		svg = svg.replace( '<g class="ef-fx">', `${ shade }<rect class="tube-shade" x="20" y="20" width="104" height="80" rx="12" fill="url(#${ sid })" clip-path="url(#${ kid })"/><g class="ef-fx">` );
+		[ 'ef-armL', 'ef-armR' ].forEach( ( g ) => { svg = svg.replace( new RegExp( '(<g class="' + g + '">\\s*)(<path d="[^"]+")([^>]*>)' ), ( m, a1, p, rest ) => m + p + ' class="tube-shade" fill="url(#' + sid + ')" stroke="none"/>' ); } );
 		return svg;
 	};
 	F.boogieIcon = ( size = 28 ) => ( window.EXBOOGIE ? window.EXBOOGIE.icon.replace( 'width="40" height="36"', 'class="ef-ico" width="' + size + '" height="' + ( size * 0.9 ) + '"' ) : F.chipIcon( size ) );
@@ -702,13 +717,13 @@
 		const tourRow = `<section class="card"><div class="list mlist"><button type="button" class="mrow" data-ef-intro>${ UI.ci( 'player-play', 'purple', 40 ) }<span class="mid"><b>${ esc( t( 'efReplay' ) ) }</b><small>${ esc( t( 'efReplaySub' ) ) }</small></span>${ UI.icon( 'chevron-right', 18 ) }</button></div></section>`;
 		const soundCard = `<section class="card"><label class="fx-row"><span class="mid"><b>${ esc( t( 'efSoundTitle' ) ) }</b><small>${ esc( t( 'efSoundHint' ) ) }</small></span><span class="switch"><input type="checkbox" data-ef-sound${ S().settings.efSound !== false ? ' checked' : '' } aria-label="${ esc( t( 'efSoundTitle' ) ) }"><i></i></span></label></section>`;
 		const naturalCard = `<section class="card"><label class="fx-row"><span class="mid"><b>${ esc( t( 'efNaturalTitle' ) ) }</b><small>${ esc( t( 'efNaturalHint' ) ) }</small></span><span class="switch"><input type="checkbox" data-ef-natural${ natural ? ' checked' : '' } aria-label="${ esc( t( 'efNaturalTitle' ) ) }"><i></i></span></label></section>`;
-		const charCard = `<section class="card ef-charcard"><h2>${ esc( t( 'efChooseTitle' ) ) }</h2><div class="ef-chars" role="radiogroup" aria-label="${ esc( t( 'efChooseTitle' ) ) }">${ [ 'chip', 'boogie' ].map( ( c ) => `<button type="button" class="ef-char${ ch === c ? ' on' : '' }" data-ef-char="${ c }" role="radio" aria-checked="${ ch === c }"><span class="ef-char-art">${ F.mascotOf( c, 'happy', 96 ) }</span><b>${ esc( CHARS[ c ].name ) }</b><small>${ esc( t( 'efChar_' + c ) ) }</small>${ ch === c ? `<em>✓ ${ esc( t( 'efChosen' ) ) }</em>` : '' }</button>` ).join( '' ) }</div>${ points( [ t( 'efMeetStory1' ), t( 'efMeetStory2' ), t( 'efMeetStory3' ) ] ) }</section>`;
+		const charCard = `<section class="card ef-charcard"><h2>${ esc( t( 'efChooseTitle' ) ) }</h2><div class="ef-chars" role="radiogroup" aria-label="${ esc( t( 'efChooseTitle' ) ) }">${ [ 'chip', 'boogie' ].map( ( c ) => `<button type="button" class="ef-char${ ch === c ? ' on' : '' }" data-ef-char="${ c }" role="radio" aria-checked="${ ch === c }"><span class="ef-char-art">${ F.mascotOf( c, 'happy', 96 ) }</span><b>${ esc( CHARS[ c ].name ) }</b><small>${ esc( t( 'efChar_' + c ) ) }</small>${ ch === c ? `<em>✓ ${ esc( t( 'efChosen' ) ) }</em>` : '' }</button>` ).join( '' ) }<button type="button" class="ef-gear" data-ef-gear aria-label="${ esc( t( 'efLightTitle' ) ) }" title="${ esc( t( 'efLightTitle' ) ) }">${ UI.icon( 'settings', 24 ) }</button></div>${ points( [ t( 'efMeetStory1' ), t( 'efMeetStory2' ), t( 'efMeetStory3' ) ] ) }</section>`;
 		const back = ( title ) => `<div class="ef-subhead"><button type="button" class="btn btn-ghost sm" data-ef-sub="">← ${ esc( t( 'efHubBack' ) ) }</button><h2>${ esc( title ) }</h2></div>`;
 		if ( sub === 'plans' ) return `${ back( t( 'efHubPlans' ) ) }${ overview }${ achievements }${ buckets.length ? buckets.map( section ).join( '' ) : noGoals }${ pastHtml }${ newBtn }`;
 		if ( sub === 'rules' ) return `${ back( t( 'efHubRules' ) ) }${ askBanner() ? `<section class="card">${ askBanner() }</section>` : '' }${ prioCard }${ riskCard }${ prioCard || riskCard ? '' : `<section class="card"><p class="muted">${ esc( t( 'efHubRulesNone' ) ) }</p></section>` }`;
 		if ( sub === 'moves' ) return `${ back( t( 'efHubMoves' ) ) }${ proposalsHtml() }${ allocCard() }`;
 		if ( sub === 'ideas' ) return `${ back( t( 'efHubIdeas' ) ) }${ budIdeasHtml() || `<section class="card"><p class="muted">${ esc( t( 'efHubIdeasNone' ) ) }</p></section>` }${ sortRows }`;
-		if ( sub === 'look' ) return `${ back( t( 'efHubLook' ) ) }${ charCard }${ ch === 'boogie' ? `<section class="card"><h2>💡 ${ esc( t( 'efLightTitle' ) ) }</h2><p class="muted small">${ esc( t( 'efLightHint' ) ) }</p>${ F.lightControls() }</section>` : '' }${ naturalCard }${ soundCard }<section class="card ef-page"><div class="ef-top">${ F.mascot( 'happy', 84 ) }<div class="ef-bubble"><b>${ esc( t( 'efMeet' ) ) }</b></div></div>${ para( 'efMeetText' ) }</section>${ tourRow }`;
+		if ( sub === 'look' ) return `${ back( t( 'efHubLook' ) ) }${ charCard }${ naturalCard }${ soundCard }<section class="card ef-page"><div class="ef-top">${ F.mascot( 'happy', 84 ) }<div class="ef-bubble"><b>${ esc( t( 'efMeet' ) ) }</b></div></div>${ para( 'efMeetText' ) }</section>${ tourRow }`;
 		// the hub: the way into the chat, then everything else in a few groups
 		const hrow = ( id, ic, color, title, subtitle ) => `<button type="button" class="mrow" data-ef-sub="${ id }">${ UI.ci( ic, color, 40 ) }<span class="mid"><b>${ esc( title ) }</b><small>${ esc( subtitle ) }</small></span>${ UI.icon( 'chevron-right', 18 ) }</button>`;
 		const al = F.alloc(), modeWord = t( { off: 'efModeOff', suggest: 'efModeSuggest', ask: 'efModeAsk', auto: 'efModeAuto' }[ al.mode || 'off' ] || 'efModeOff' ), pend = props().filter( ( p ) => p.status === 'pending' ).length;
@@ -2598,7 +2613,7 @@
 						efLight_green: 'Fluorescent green',
 		efLight_blue: 'Blue',
 				efLight_custom: 'Your own colour',
-		efLightShort: 'Light',
+		efLightShort: 'Light', efLightSave: 'Save',
 	} );
 	Object.assign( window.EXPENITY_I18N.langs.el, {
 		efLightTitle: 'Το φως του Boogie',
@@ -2610,6 +2625,6 @@
 						efLight_green: 'Φθορίζον πράσινο',
 		efLight_blue: 'Μπλε',
 				efLight_custom: 'Δικό σας χρώμα',
-		efLightShort: 'Φως',
+		efLightShort: 'Φως', efLightSave: 'Αποθήκευση',
 	} );
 }() );
