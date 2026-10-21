@@ -1,6 +1,68 @@
 {
-  "version": "0.54.15",
+  "version": "0.54.19",
   "releases": [
+    {
+      "version": "0.54.19",
+      "date": "2026-10-21",
+      "en": [
+        "Choose your eFriend: Boogie, a vintage cassette (now the default), or Chip, the robot. Each has their own way of talking and their own story, and they have met.",
+        "Replies can be natural (eFriend pauses and types like a person) or instant. Pick it in the eFriend menu.",
+        "The eFriend menu is tidier: a short list of groups (My plans, Priorities and safety, Helping with goals, Ideas and insights, Your eFriend), each opening its own page."
+      ],
+      "el": [
+        "Διαλέξτε το eFriend σας: τον Boogie, μια vintage κασέτα (πλέον προεπιλογή), ή τον Chip, το ρομπότ. Ο καθένας έχει τον δικό του τρόπο ομιλίας και τη δική του ιστορία, και έχουν γνωριστεί.",
+        "Οι απαντήσεις μπορούν να είναι φυσικές (το eFriend κάνει παύσεις και πληκτρολογεί σαν άνθρωπος) ή άμεσες. Επιλέξτε στο μενού του eFriend.",
+        "Το μενού του eFriend είναι πιο τακτοποιημένο: μια σύντομη λίστα ομάδων (Τα σχέδιά μου, Προτεραιότητες και ασφάλεια, Βοήθεια με τους στόχους, Ιδέες και πληροφορίες, Το eFriend σας), καθεμία με τη δική της σελίδα."
+      ]
+    },
+    {
+      "version": "0.54.18",
+      "date": "2026-10-21",
+      "en": [
+        "Auto tags (Pro and up, on by default): new entries, bills, income, budgets, goals and eFriend plans get up to three tags by themselves, from a built-in list of 200 everyday things in English and Greek and from your own tags. “I want a watch that costs 49” becomes Watch and Shopping. The app reuses the tags you already have instead of creating new ones, and tags you type are never changed. Turn it off in Settings.",
+        "Improve my tags: in Settings, one button scans your tags, merges look-alikes (coffee, Coffees, coffe) and gives older entries better tags. It shows a preview first and can be undone. After every 10 new entries, Home suggests running it."
+      ],
+      "el": [
+        "Αυτόματες ετικέτες (Pro και πάνω, ενεργές από προεπιλογή): οι νέες εγγραφές, οι λογαριασμοί, τα έσοδα, οι προϋπολογισμοί, οι στόχοι και τα σχέδια του eFriend παίρνουν μόνα τους έως τρεις ετικέτες, από μια ενσωματωμένη λίστα 200 καθημερινών πραγμάτων στα αγγλικά και στα ελληνικά και από τις δικές σας ετικέτες. Το «Θέλω ένα ρολόι που κοστίζει 49» γίνεται Ρολόι και Αγορές. Η εφαρμογή χρησιμοποιεί τις ετικέτες που έχετε ήδη αντί να φτιάχνει νέες και οι ετικέτες που γράφετε εσείς δεν αλλάζουν ποτέ. Απενεργοποιήστε το από τις Ρυθμίσεις.",
+        "Βελτίωση των ετικετών μου: στις Ρυθμίσεις, ένα κουμπί σαρώνει τις ετικέτες σας, ενώνει τις παρόμοιες (καφές, Καφέδες, καφέ) και δίνει καλύτερες ετικέτες στις παλαιότερες εγγραφές. Δείχνει πρώτα προεπισκόπηση και μπορεί να αναιρεθεί. Μετά από κάθε 10 νέες εγγραφές, η Αρχική προτείνει να το τρέξετε."
+      ]
+    },
+    {
+      "version": "0.54.17",
+      "date": "2026-10-21",
+      "en": [
+        "Fix: the Save changes button in the add and edit form could be squeezed into a thin vertical strip next to an error message. The error now has its own line and the button keeps its size.",
+        "Grouped sections (for example Wallets included and Shortcut options) now stand out with a tinted panel and a clear outline.",
+        "Save for next time now explains itself: it remembers the name, category and tags so you can add it again with one tap from Saved names.",
+        "A blinking cursor shows in the amount while you type on the keypad.",
+        "Swipe a bill that is due today or late from the left and you can Snooze it for one day, next to Paid. A snoozed bill rests until its date.",
+        "The wallet screen no longer says Share the love: the button is back to Share this wallet.",
+        "The website and blog demo of eFriend ends when the plan would be made, so nothing else of the app can be opened from there."
+      ],
+      "el": [
+        "Διόρθωση: το κουμπί Αποθήκευση αλλαγών στη φόρμα προσθήκης και επεξεργασίας μπορούσε να στενέψει σε λεπτή κάθετη λωρίδα δίπλα σε ένα μήνυμα σφάλματος. Το σφάλμα έχει πλέον τη δική του γραμμή και το κουμπί κρατά το μέγεθός του.",
+        "Οι ομαδοποιημένες ενότητες (για παράδειγμα Πορτοφόλια που περιλαμβάνονται και Επιλογές συντόμευσης) ξεχωρίζουν πλέον με χρωματισμένο πλαίσιο και καθαρό περίγραμμα.",
+        "Το Αποθήκευση για την επόμενη φορά εξηγεί πλέον τι κάνει: θυμάται το όνομα, την κατηγορία και τις ετικέτες ώστε να το προσθέσετε ξανά με ένα πάτημα από τα Αποθηκευμένα ονόματα.",
+        "Ένας αναβοσβήνων δείκτης εμφανίζεται στο ποσό όσο πληκτρολογείτε στο πληκτρολόγιο.",
+        "Σύρετε από τα αριστερά έναν λογαριασμό που λήγει σήμερα ή έχει καθυστερήσει και μπορείτε να τον αναβάλετε για μία ημέρα, δίπλα στο Πληρώθηκε. Ένας λογαριασμός σε αναβολή ξεκουράζεται μέχρι την ημερομηνία του.",
+        "Η οθόνη του πορτοφολιού δεν γράφει πια Μοιραστείτε την αγάπη: το κουμπί ξαναέγινε Κοινή χρήση πορτοφολιού.",
+        "Το demo του eFriend στον ιστότοπο και στο blog τελειώνει εκεί που θα δημιουργούνταν το σχέδιο, ώστε να μη μπορεί να ανοίξει τίποτα άλλο από την εφαρμογή."
+      ]
+    },
+    {
+      "version": "0.54.16",
+      "date": "2026-10-21",
+      "en": [
+        "A field with a problem is now highlighted and pulses without adding a message under it, so the layout never shifts.",
+        "Currencies: the setup step shows four currencies and a button to show all of them (searching still finds every one), and Settings has a Main currency card like language and themes, with four chips, the rest folded away, and any other code by hand.",
+        "Smart is now the default way to add expenses."
+      ],
+      "el": [
+        "Ένα πεδίο με πρόβλημα τονίζεται και παλμοδοτεί χωρίς να προστίθεται μήνυμα από κάτω, ώστε η διάταξη να μη μετακινείται ποτέ.",
+        "Νομίσματα: το βήμα ρύθμισης δείχνει τέσσερα νομίσματα και ένα κουμπί για να δείτε όλα (η αναζήτηση βρίσκει πάντα όλα), και οι Ρυθμίσεις έχουν κάρτα Κύριο νόμισμα όπως η γλώσσα και τα θέματα, με τέσσερα κουμπιά, τα υπόλοιπα διπλωμένα και οποιονδήποτε άλλο κωδικό με το χέρι.",
+        "Το Έξυπνο είναι πλέον ο προεπιλεγμένος τρόπος προσθήκης εξόδων."
+      ]
+    },
     {
       "version": "0.54.15",
       "date": "2026-10-21",

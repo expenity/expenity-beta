@@ -311,7 +311,6 @@ document.addEventListener('toggle',event=>{
 		if ( ! el ) return false; const scope = el.closest( 'form, .sheet-body, dialog' ) || document.body; clear( scope );
 		el.closest( 'details' ) && ( el.closest( 'details' ).open = true );
 		const w = wrapOf( el ); w.classList.add( 'f-bad' ); el.setAttribute( 'aria-invalid', 'true' );
-		if ( msg && ! w.querySelector( ':scope > .f-err' ) ) { const s = document.createElement( 'small' ); s.className = 'f-err'; s.setAttribute( 'role', 'alert' ); s.textContent = msg; w.appendChild( s ); }
 		try { w.scrollIntoView( { block: 'center', behavior: matchMedia( '(prefers-reduced-motion: reduce)' ).matches ? 'auto' : 'smooth' } ); } catch ( e ) { /* ignore */ }
 		w.classList.remove( 'f-pulse' ); void w.offsetWidth; w.classList.add( 'f-pulse' ); setTimeout( () => w.classList.remove( 'f-pulse' ), 2400 );
 		const off = () => { w.classList.remove( 'f-bad', 'f-pulse' ); const s = w.querySelector( ':scope > .f-err' ); if ( s ) s.remove(); el.removeAttribute( 'aria-invalid' ); el.removeEventListener( 'input', off ); el.removeEventListener( 'change', off ); };

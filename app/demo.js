@@ -4,6 +4,15 @@
 	if ( ! window.EXPENITY_DEMO ) return;
 	// The playable chat on the website: a cover hides the app while it loads in the background, then fades away on the chat.
 	let cover = null;
+	// In the embedded demo the visit ends where the plan would be made: nothing else of the app (account, settings, reset) is reachable.
+	window.EXAEmbedEnd = () => {
+		if ( document.querySelector( '.ef-embed-end' ) ) return;
+		const el = ( window.EX && EX.lang && EX.lang() ) === 'el', lang = el ? 'el' : 'en';
+		const box = document.createElement( 'div' ); box.className = 'ef-embed-end'; box.setAttribute( 'role', 'dialog' ); box.setAttribute( 'aria-modal', 'true' );
+		const app = location.pathname.replace( /[^/]*$/, '' ) + '?lang=' + lang;
+		box.innerHTML = `<div class="ef-end-card"><div class="ef-end-em">🎬</div><h2>${ el ? 'Αυτό ήταν το demo!' : 'That is the demo!' }</h2><p>${ el ? 'Αυτό ήταν το eFriend, ζωντανά. Για να φτιάξετε δικό σας σχέδιο, ανοίξτε το Expenity.' : 'That was eFriend, live. To make a plan of your own, open Expenity.' }</p><div class="ef-end-btns"><a class="btn btn-primary" href="${ app }" target="_top" rel="noopener">${ el ? 'Άνοιγμα του Expenity' : 'Open Expenity' }</a><a class="btn btn-ghost" href="${ location.pathname }?demo=1&ask=1&lang=${ lang }">${ el ? '↻ Ξανά από την αρχή' : '↻ Try again' }</a></div></div>`;
+		document.body.appendChild( box );
+	};
 	const waitMode = /[?&]ask=wait/.test( location.search ); let ready = false, wanted = false, doOpen = null;
 	window.addEventListener( 'message', ( e ) => { if ( e.data === 'ef-open' ) { if ( ready && doOpen ) doOpen(); else wanted = true; } } );
 	if ( /[?&]ask=(1|wait)/.test( location.search ) ) {

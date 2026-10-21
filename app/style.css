@@ -1586,7 +1586,8 @@ html, body { max-width: 100%; overflow-x: clip; }
 *, *::before, *::after { box-sizing: border-box; }
 img, svg, video, canvas, iframe, embed, object { max-width: 100%; }
 input, select, textarea, button { max-width: 100%; }
-:where(p, li, h1, h2, h3, h4, h5, h6, label, small, span, a, b, strong, em, td, th, summary, dd, dt, button) { overflow-wrap: break-word; }
+:where(p, li, h1, h2, h3, h4, h5, h6, small, a, b, strong, em, td, th, dd, dt) { overflow-wrap: break-word; }
+button, .btn { overflow-wrap: normal; word-break: normal; }
 :where(div, section, article, aside, nav, header, footer, main, form, label, ul, ol, li, figure, fieldset, details) { min-width: 0; }
 pre, code { white-space: pre-wrap; overflow-wrap: anywhere; }
 .ef-edit { margin-left: 10px; border: 0; background: rgba(255,255,255,.22); color: inherit; border-radius: 50%; width: 28px; height: 28px; font-size: .9rem; cursor: pointer; vertical-align: middle; padding: 0; } .ef-editf { display: flex; gap: 6px; align-items: center; } .ef-editf input { flex: 1; min-width: 0; width: 100%; max-width: 160px; }
@@ -1602,3 +1603,81 @@ input[type="date"] { accent-color: var(--accent, #e8602c); }
 .f-pulse { animation: f-pulse 1s ease-in-out 3; border-radius: 14px; }
 @keyframes f-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(192, 57, 43, 0); transform: none; } 30% { box-shadow: 0 0 0 8px rgba(192, 57, 43, .28); transform: translateX(-3px); } 60% { transform: translateX(3px); } }
 @media (prefers-reduced-motion: reduce) { .f-pulse { animation: none; } }
+.cur-grid .cur-extra { display: none; } .cur-toggle { width: 100%; margin: 10px 0 4px; justify-content: center; } .cur-toggle[aria-expanded="true"] svg { transform: rotate(180deg); } .cur-more { margin-top: 10px; } .cur-more summary { cursor: pointer; font-weight: 700; padding: 8px 0; } .cur-more .chips { margin: 8px 0 10px; }
+
+/* a blinking cursor in the amount while the keypad is open, so you know where you are */
+.amt-display .amt-caret { display: none; width: 3px; height: .95em; margin-left: 3px; align-self: center; border-radius: 2px; background: var(--accent, #e8602c); }
+.amt-display.on .amt-caret { display: inline-block; animation: amt-blink 1s steps(1) infinite; }
+@keyframes amt-blink { 0%, 55% { opacity: 1; } 56%, 100% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .amt-display.on .amt-caret { animation: none; } }
+.entry-next-hint { display: block; margin: 2px 0 8px 4px; line-height: 1.35; }
+/* sections stand out: a tinted panel with a clear outline, so what belongs together is obvious (and its toggles line up inside it) */
+fieldset, .entry-shortcut-options, .editor-group, .fx-group { border: 2px solid color-mix(in srgb, var(--accent, #e8602c) 45%, var(--line, #e6d5c5)) !important; background: color-mix(in srgb, var(--accent, #e8602c) 7%, var(--surface, #fff)) !important; border-radius: 18px; padding: 14px 16px; margin: 12px 0; }
+fieldset > legend { font-weight: 800; padding: 0 8px; color: var(--ink, #2a1a14); }
+
+/* the add/edit footer: the error takes its own line above the buttons, so Save never gets squeezed */
+.entry-footer { flex-wrap: wrap; } .entry-footer .err { flex: 1 1 100%; order: -1; margin: 0 0 8px; } .entry-footer .entry-save, .entry-footer .btn-primary { flex: 1 1 auto; min-width: 140px; white-space: nowrap; }
+.sw-act.snooze { background: #6b7bd1; }
+
+.ef-embed-end { position: fixed; inset: 0; z-index: 2147483001; background: #fffaf6; display: grid; place-items: center; padding: 24px; text-align: center; animation: ef-fade .6s both; }
+.ef-end-card { max-width: 340px; } .ef-end-em { font-size: 3rem; } .ef-end-card h2 { margin: 6px 0 8px; } .ef-end-card p { margin: 0 0 18px; line-height: 1.5; }
+.ef-end-btns { display: grid; gap: 10px; } .ef-end-btns .btn { text-decoration: none; justify-content: center; }
+
+/* Boogie, the vintage eFriend (from assets/vintage-efriend/efriend-cassette.css) */
+/* Scoped to the cassette: these rules supersede the old robot's arm pivots. */
+.ef-mascot.ef-cassette{overflow:visible;flex:none;cursor:pointer;touch-action:manipulation;user-select:none;animation:none}
+.ef-cassette.ef-mascot .ef-body{transform-origin:72px 60px;animation:efc-hover 3s ease-in-out infinite}
+.ef-cassette.ef-mascot .ef-shadow{transform-box:fill-box;transform-origin:center;animation:efc-shadow 3s ease-in-out infinite}
+.ef-cassette.ef-mascot .ef-armL{transform-box:view-box;transform-origin:24px 58px;animation:efc-left 5s ease-in-out infinite}
+.ef-cassette.ef-mascot .ef-armR{transform-box:view-box;transform-origin:119px 58px;animation:efc-wave 5s ease-in-out infinite}
+.ef-cassette .reel{transform-box:view-box;animation:efc-reel 8s ease-in-out infinite}
+.ef-cassette .ef-reel-right{animation-direction:reverse;animation-delay:-.2s}
+.ef-cassette .tube-light{animation:efc-glow 4s ease-in-out infinite}
+.ef-cassette .spark{animation:efc-spark 5s linear infinite;opacity:.12}
+.ef-cassette .ef-face-smile,.ef-cassette .ef-face-giggle,.ef-cassette .ef-face-angry,.ef-cassette .ef-heart,.ef-cassette .ef-steam,.ef-cassette .ef-mouth-cheer,.ef-cassette .ef-mouth-meh,.ef-cassette .ef-mouth-worried{display:none}
+.ef-cassette.ef-cheer .ef-mouth-happy,.ef-cassette.ef-meh .ef-mouth-happy,.ef-cassette.ef-worried .ef-mouth-happy{display:none}
+.ef-cassette.ef-cheer .ef-mouth-cheer,.ef-cassette.ef-meh .ef-mouth-meh,.ef-cassette.ef-worried .ef-mouth-worried{display:inline}
+.ef-cassette.ef-cheer .ef-body{animation:efc-hop 1.3s ease-in-out infinite}
+.ef-cassette.ef-thinking .reel{animation:efc-think 2s linear infinite}
+.ef-cassette.ef-thinking .ef-reel-right{animation-direction:reverse}
+.ef-cassette.ef-worried .reel{animation-duration:12s}
+.ef-cassette.ef-mascot.ef-poke-smile .ef-face-base,.ef-cassette.ef-mascot.ef-poke-giggle .ef-face-base,.ef-cassette.ef-mascot.ef-poke-angry .ef-face-base{display:none}
+.ef-cassette.ef-mascot.ef-poke-smile .ef-face-smile,.ef-cassette.ef-mascot.ef-poke-giggle .ef-face-giggle,.ef-cassette.ef-mascot.ef-poke-angry .ef-face-angry{display:inline}
+.ef-cassette.ef-mascot.ef-poke-smile .ef-body{animation:efc-jump .5s ease-out}
+.ef-cassette.ef-mascot.ef-poke-giggle .ef-body{animation:efc-giggle .25s ease-in-out 5}
+.ef-cassette.ef-mascot.ef-poke-angry{animation:efc-shake .18s linear infinite}
+.ef-cassette.ef-mascot.ef-poke-smile .ef-armR,.ef-cassette.ef-mascot.ef-poke-giggle .ef-armR{animation:efc-tap-wave .35s ease-in-out 4}
+.ef-cassette.ef-mascot.ef-poke-smile .ef-armL,.ef-cassette.ef-mascot.ef-poke-giggle .ef-armL{animation:efc-left .35s ease-in-out 4}
+.ef-cassette.ef-mascot.ef-poke-angry .ef-armR,.ef-cassette.ef-mascot.ef-poke-angry .ef-armL{animation:efc-tremble .2s ease-in-out infinite}
+.ef-cassette.ef-poke-angry .reel polygon{fill:#d99364}
+.ef-cassette.ef-mascot.ef-poke-smile .ef-heart,.ef-cassette.ef-mascot.ef-poke-giggle .ef-heart{display:inline;transform-box:fill-box;transform-origin:center;animation:efc-heart 1.2s ease-out both}
+.ef-cassette.ef-mascot.ef-poke-angry .ef-steam{display:inline;animation:efc-steam .7s ease-in-out infinite}
+@keyframes efc-hover{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes efc-shadow{0%,100%{opacity:.6;transform:scale(1)}50%{opacity:.35;transform:scale(.85)}}
+@keyframes efc-wave{0%,50%,100%{transform:rotate(0)}10%,30%{transform:rotate(-14deg)}20%,40%{transform:rotate(3deg)}}
+@keyframes efc-left{0%,100%{transform:rotate(0)}50%{transform:rotate(9deg)}}
+@keyframes efc-reel{0%,60%,100%{transform:rotate(0)}20%,40%{transform:rotate(35deg)}}
+@keyframes efc-think{to{transform:rotate(360deg)}}
+@keyframes efc-hop{0%,100%{transform:translateY(0)}45%{transform:translateY(-7px)}}
+@keyframes efc-glow{0%,100%{opacity:.75}50%{opacity:1}}
+@keyframes efc-spark{0%,12%,29%,100%{opacity:.12}16%,24%{opacity:.95}19%,27%{opacity:.25}}
+@keyframes efc-jump{0%,100%{transform:translateY(0)}40%{transform:translateY(-9px)}}
+@keyframes efc-giggle{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(3deg)}}
+@keyframes efc-shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-1.4px)}75%{transform:translateX(1.4px)}}
+@keyframes efc-tap-wave{0%,100%{transform:rotate(0)}50%{transform:rotate(-24deg)}}
+@keyframes efc-tremble{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(3deg)}}
+@keyframes efc-heart{0%{opacity:0;transform:translateY(10px) scale(.4)}30%{opacity:1}100%{opacity:0;transform:translateY(-20px) scale(1)}}
+@keyframes efc-steam{0%,100%{opacity:.3;transform:translateY(0)}50%{opacity:.8;transform:translateY(-3px)}}
+@media(prefers-reduced-motion:reduce){svg.ef-cassette:root:not([data-motion=full]),svg.ef-cassette:root:not([data-motion=full]) *{animation:none!important;transition:none!important}}
+/* Inline SVG inherits the app preference. data-motion on the SVG also works for standalone use. */
+:root[data-motion=off] .ef-cassette *,:root[data-motion=reduced] .ef-cassette *,.ef-cassette[data-motion=off] *,.ef-cassette[data-motion=reduced] *{animation:none!important;transition:none!important}
+:root[data-motion=off] .ef-cassette,:root[data-motion=reduced] .ef-cassette,.ef-cassette[data-motion=off],.ef-cassette[data-motion=reduced]{animation:none!important}
+@media(prefers-reduced-motion:reduce){:root:not([data-motion=full]) .ef-cassette,:root:not([data-motion=full]) .ef-cassette *{animation:none!important;transition:none!important}}
+
+
+/* choosing between Chip and Boogie */
+.ef-chars { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 8px 0 14px; }
+.ef-char { display: grid; justify-items: center; gap: 6px; text-align: center; padding: 14px 10px; border: 2px solid var(--line, #e6d5c5); border-radius: 20px; background: var(--surface, #fff); font: inherit; color: inherit; cursor: pointer; }
+.ef-char.on { border-color: #0f766e; box-shadow: 0 0 0 3px rgba(15, 118, 110, .18); } .ef-char small { color: var(--muted, #8a7568); line-height: 1.3; } .ef-char em { font-style: normal; font-weight: 800; color: #0f766e; font-size: .85rem; }
+.ef-char-art { min-height: 100px; display: grid; place-items: center; }
+.ef-subhead { display: flex; align-items: center; gap: 12px; margin: 4px 0 10px; } .ef-subhead h2 { margin: 0; font-size: 1.2rem; }

@@ -18,8 +18,9 @@
 	// The currency buttons for the current search text. Typing redraws only this, not the whole step.
 	const curGrid = () => {
 		const q = EX.fold( W.curQuery || '' );
-		const list = COMMON.concat( [ S().settings.currency ] ).filter( ( c, i, a ) => a.indexOf( c ) === i ).filter( ( c ) => ! q || EX.fold( c + ' ' + curName( c ) ).includes( q ) );
-		return list.map( ( c ) => `<button type="button" class="cur${ c === S().settings.currency ? ' on' : '' }" data-fstep="cur" data-cur="${ c }" role="radio" aria-checked="${ c === S().settings.currency }"><b>${ esc( curSym( c ) ) }</b><span>${ c }</span><small>${ esc( curName( c ) ) }</small></button>` ).join( '' );
+		const cur = S().settings.currency, list = COMMON.concat( [ cur ] ).filter( ( c, i, a ) => a.indexOf( c ) === i ).filter( ( c ) => ! q || EX.fold( c + ' ' + curName( c ) ).includes( q ) );
+		const shown = COMMON.slice( 0, 4 ); if ( ! shown.includes( cur ) ) shown[ 3 ] = cur; // only the first four, and the one in use; the rest wait until asked for (or until you search)
+		return list.map( ( c ) => `<button type="button" class="cur${ c === cur ? ' on' : '' }${ q || W.curOpen || shown.includes( c ) ? '' : ' cur-extra' }" data-fstep="cur" data-cur="${ c }" role="radio" aria-checked="${ c === S().settings.currency }"><b>${ esc( curSym( c ) ) }</b><span>${ c }</span><small>${ esc( curName( c ) ) }</small></button>` ).join( '' );
 	};
 	// The goal step only appears for people who said they want to save for something.
 	const steps = () => [ 'name', 'currency', 'aims' ].concat( ( S().settings.aims || [] ).includes( 'save' ) ? [ 'goal' ] : [] ).concat( [ 'plan', 'wallets', 'entry' ] ).concat( EX.feature && EX.feature( 'daily' ) === false ? [] : [ 'target' ] ).concat( [ 'look' ] ).concat( EX.feature && EX.feature( 'push' ) === false || ! EXA.push || EXA.push.state() === 'unsupported' ? [] : [ 'notify' ] ).concat( [ 'tour' ] ).concat( EX.feature && EX.feature( 'receipts' ) === false ? [] : [ 'scan' ] ).concat(EX.feature&&EX.feature('splits')?['split']:[]).concat(EX.feature&&EX.feature('reimbursements')?['reimburse']:[]).concat( [ 'quick', 'extras', 'help' ] ).concat( UI.isPhone() ? [ 'tips' ] : [] ).concat( [ 'done' ] );
@@ -41,7 +42,7 @@
 	};
 	const setStage = ( stage ) => { D().stage = stage; EX.persist(); flow.show(); };
 	/** Used by tests and screenshots to jump straight into the app. */
-	EXA.skipFlow = () => { const d = D(); d.entryMode = d.entryMode || 'casual'; d.stage = 'done'; d.onboarded = true; S().settings.setupDone = true; EX.ensureWallet(); EX.save(); flow.show(); };
+	EXA.skipFlow = () => { const d = D(); d.entryMode = d.entryMode || 'smart'; d.stage = 'done'; d.onboarded = true; S().settings.setupDone = true; EX.ensureWallet(); EX.save(); flow.show(); };
 	flow.show = ( keep ) => {
 		const host = $( '#flow' ); const prev = host.scrollTop;
 		const stage = D().stage;
@@ -179,7 +180,9 @@
 
 	const COMMON = [ 'EUR', 'USD', 'GBP', 'CHF', 'CAD', 'AUD', 'JPY', 'SEK', 'NOK', 'DKK', 'PLN', 'CZK', 'HUF', 'RON', 'BGN', 'TRY', 'AED', 'SAR', 'ILS', 'EGP', 'INR', 'CNY', 'HKD', 'SGD', 'NZD', 'ZAR', 'BRL', 'MXN' ];
 	const curName = ( c ) => { try { return new Intl.DisplayNames( [ EX.loc() || 'en' ], { type: 'currency' } ).of( c ); } catch ( e ) { return c; } };
+	EXA.curList = COMMON; EXA.curName = curName;
 	const curSym = ( c ) => { try { return ( new Intl.NumberFormat( EX.loc(), { style: 'currency', currency: c } ).formatToParts( 0 ).find( ( p ) => p.type === 'currency' ) || {} ).value || c; } catch ( e ) { return c; } };
+	EXA.curSym = curSym;
 	const defaultWallets = () => [ { type: 'cash', on: true, name: t( 'wCash' ), opening: '' }, { type: 'bank', on: true, name: t( 'wtBank' ), opening: '' }, { type: 'card', on: false, name: t( 'wtCard' ), opening: '' }, { type: 'savings', on: false, name: t( 'wtSavings' ), opening: '' } ];
 	function readGoals() {
 		$$( '#setupForm [data-grow]' ).forEach( ( r ) => { const g = ( W.goals || [] )[ Number( r.dataset.grow ) ]; if ( g ) { g.name = r.querySelector( '[name=gname]' ).value; g.target = r.querySelector( '[name=gtarget]' ).value; } } );
@@ -203,7 +206,8 @@
 		} else if ( id === 'currency' ) {
 			icon = 'coin'; color = 'amber'; title = t( 'setupCurTitle' ); text = t( 'setupCurText' );
 			body = `<div class="searchbar">${ UI.icon( 'search', 22 ) }<input id="curSearch" type="search" value="${ esc( W.curQuery || '' ) }" placeholder="${ esc( t( 'setupSearch' ) ) }" aria-label="${ esc( t( 'setupSearch' ) ) }" autocomplete="off"></div>
-				<div class="cur-grid" role="radiogroup">${ curGrid() }</div>`;
+				<div class="cur-grid" role="radiogroup">${ curGrid() }</div>
+				<button type="button" class="btn btn-ghost cur-toggle" data-fstep="curmore" aria-expanded="${ !! W.curOpen }">${ UI.icon( 'chevron-down', 18 ) } <span>${ esc( W.curOpen ? t( 'curFewer' ) : t( 'curMore', { n: COMMON.length } ) ) }</span></button>`;
 		} else if ( id === 'aims' ) {
 			icon = 'target'; color = 'pink'; title = t( 'aimsSetupTitle' ); text = t( 'aimsSetupText' );
 			if ( ! W.aimsSeen && ! ( S().settings.aims || [] ).length ) S().settings.aims = [ 'track' ]; W.aimsSeen = true; // one is already chosen to show that more than one can be
@@ -229,7 +233,7 @@
 			body = `${ EXA.themePicker( { edit: false } ) }<div class="lbl pad0">${ esc( t( 'setupMotion' ) ) }</div><div class="chips wrap">${ mt( 'auto', t( 'motionAuto' ) ) }${ mt( 'full', t( 'motionFull' ) ) }${ mt( 'reduced', t( 'motionReduced' ) ) }${ mt( 'off', t( 'motionOff' ) ) }</div>`;
 		} else if ( id === 'entry' ) {
 			icon = 'sparkles'; color = 'purple'; title = t( 'flowEntryTitle' ); text = t( 'flowEntryText' );
-			const cur = D().entryMode || 'smart', card = ( m, ic, name, desc ) => `<button type="button" class="fx-plan${ cur === m ? ' on' : '' }" role="radio" aria-checked="${ cur === m }" data-fstep="entry" data-mode="${ m }"><span class="fx-name">${ UI.icon( ic, 22 ) } ${ esc( t( name ) ) }${ cur === m ? UI.icon( 'check', 20 ) : '' }</span><small>${ esc( t( desc ) ) }</small></button>`;
+			if ( ! D().entryMode ) { D().entryMode = 'smart'; EX.persist(); } const cur = D().entryMode, card = ( m, ic, name, desc ) => `<button type="button" class="fx-plan${ cur === m ? ' on' : '' }" role="radio" aria-checked="${ cur === m }" data-fstep="entry" data-mode="${ m }"><span class="fx-name">${ UI.icon( ic, 22 ) } ${ esc( t( name ) ) }${ cur === m ? UI.icon( 'check', 20 ) : '' }</span><small>${ esc( t( desc ) ) }</small></button>`;
 			body = `<div class="fx-plans" role="radiogroup">${ card( 'smart', 'sparkles', 'flowEntrySmart', 'flowEntrySmartText' ) }${ card( 'casual', 'pencil', 'flowEntryCasual', 'flowEntryCasualText' ) }</div>`;
 		} else if ( id === 'notify' ) {
 			icon = 'bell'; color = 'amber'; title = t( 'setupNotifyTitle' ); text = t( 'setupNotifyText' );
@@ -320,6 +324,7 @@
 		else if ( a === 'entry' ) { D().entryMode = el.dataset.mode; EX.persist(); flow.show( true ); }
 		else if ( a === 'tgt' ) { const i = $( '#setupForm [name=target]' ); if ( i && W.tgt ) W.tgt.amount = i.value; W.tgt = W.tgt || {}; W.tgt.period = el.dataset.tgt; flow.show( true ); const n = $( '#setupForm [name=target]' ); if ( n && el.dataset.tgt !== 'auto' ) n.focus(); }
 		else if ( a === 'notif' ) { el.disabled = true; EXA.push.enable( 9 ).then( ( r ) => { if ( r.ok ) UI.toast( t( 'tPushOn' ) ); else UI.toast( r.error === 'denied' ? t( 'notifDenied' ) : t( 'tPushFail' ) ); flow.show( true ); } ); }
+		else if ( a === 'curmore' ) { W.curOpen = ! W.curOpen; const g = $( '.cur-grid' ); if ( g ) g.innerHTML = curGrid(); el.setAttribute( 'aria-expanded', String( !! W.curOpen ) ); el.querySelector( 'span' ).textContent = W.curOpen ? t( 'curFewer' ) : t( 'curMore', { n: COMMON.length } ); }
 		else if ( a === 'cur' ) { S().settings.currency = el.dataset.cur; EX.persist(); flow.show( true ); }
 		else if ( a === 'theme' ) { const v = el.dataset.theme; try { if ( v === 'auto' ) localStorage.removeItem( 'expenity.theme' ); else localStorage.setItem( 'expenity.theme', v ); } catch ( err ) { /* ignore */ } if ( v === 'auto' ) delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = v; flow.show(); }
 		else if ( a === 'motion' ) { EXA.setMotion( el.dataset.motion ); flow.show( true ); }

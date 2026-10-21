@@ -263,13 +263,13 @@
 			const amount = amt( el.amount.value );
 			if ( ! ok( amount ) ) return err( 'errAmount' );
 			const v = { tags: EXA.readTags(f), photo: el.photo.value, category: el.category.value, amount, period: el.period.value, rollover: el.rollover.checked };
-			if ( editing ) Object.assign( editing, v ); else S().budgets.push( Object.assign( { id: uid() }, v ) );
+			if ( editing ) Object.assign( editing, v ); else { const nb = Object.assign( { id: uid() }, v ); EXA.autoTags && EXA.autoTags.apply( nb, 'budget' ); S().budgets.push( nb ); }
 		} else if ( f.id === 'goalForm' ) {
 			const name = el.gname.value.trim(), target = amt( el.target.value );
 			if ( ! name ) return err( 'errNameReq' );
 			if ( ! ok( target ) ) return err( 'errAmount' );
 			const v = { tags: EXA.readTags(f), photo: el.photo.value, name, target, deadline: el.deadline.value || '', icon: el.icon.value };
-			if ( editing ) Object.assign( editing, v ); else S().goals.push( Object.assign( { id: uid() }, v ) );
+			if ( editing ) Object.assign( editing, v ); else { const ng = Object.assign( { id: uid() }, v ); EXA.autoTags && EXA.autoTags.apply( ng, 'goal' ); S().goals.push( ng ); }
 		} else if ( f.id === 'contribForm' ) {
 			const amount = amt( el.amount.value );
 			if ( ! ok( amount ) ) return err( 'errAmount' );
@@ -285,7 +285,7 @@
 			if(!acc||!wallets().some(a=>a.id===acc.id))return err('entryWalletGone');
 			const schedule=EXA.readSchedule(f),scheduleError=EXA.scheduleError({repeat:el.repeat.value,...schedule,next:el.next.value});if(scheduleError)return err(scheduleError);const prepared=EX.prepareSchedule({repeat:el.repeat.value,...schedule,day:editing&&editing.next===el.next.value?editing.day:parse(el.next.value).getDate()},el.next.value),next=prepared.next;if(!next)return err(prepared.endMode==='date'?'scheduleEndError':'schedulePickDates');
             const v = { ...prepared,tags: EXA.readTags(f), photo: el.photo.value, name, amount, account: el.account.value, currency: acc.currency || main(), repeat: el.repeat.value, next, day: editing&&editing.next===next&&editing.day?editing.day:parse(next).getDate(), category: el.incomeCategory.value||'salary', note:el.incomeNote.value.trim() };
-			if ( editing ) { Object.assign( editing, v ); delete editing.done; } else { const fresh = Object.assign( { id: uid() }, v ); S().incomes.push( fresh ); if ( EXA.settleIncome( fresh ) ) toast( t( 'tIncReceived', { name: fresh.name } ) ); }
+			if ( editing ) { Object.assign( editing, v ); delete editing.done; } else { const fresh = Object.assign( { id: uid() }, v ); EXA.autoTags && EXA.autoTags.apply( fresh, 'income' ); S().incomes.push( fresh ); if ( EXA.settleIncome( fresh ) ) toast( t( 'tIncReceived', { name: fresh.name } ) ); }
 		} else return false;
 		UI.closeSheet(); EX.save();
 		return true;

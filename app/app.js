@@ -12,7 +12,7 @@
 	const $ = ( s, r = document ) => r.querySelector( s );
 	const $$ = ( s, r = document ) => [ ...r.querySelectorAll( s ) ];
 	const toast = UI.toast;
-	window.EXPENITY_VERSION = '0.54.15';
+	window.EXPENITY_VERSION = '0.54.19';
 
  const seenCharacters=new Set();try{for(const skin of JSON.parse(sessionStorage.getItem('expenity.charactersSeen')||'[]'))seenCharacters.add(skin);}catch(_){}
  const characterSeen=skin=>seenCharacters.has(skin);
@@ -315,6 +315,7 @@
 			}
 			if ( ( el = e.target.closest( '[data-status-set]' ) ) ) { EXA.setStatusTint( el.dataset.statusSet ); render(); return; }
 			if ( ( el = e.target.closest( '[data-motion-set]' ) ) ) { EXA.setMotion( el.dataset.motionSet ); render(); return; }
+			if ( ( el = e.target.closest( '[data-cur-set]' ) ) ) { S().settings.currency = el.dataset.curSet; S().settings.u = Date.now(); EX.save(); return; }
 			if ( ( el = e.target.closest( '[data-skin-set]' ) ) ) { EXA.setSkin( el.dataset.skinSet ); if ( EXA.flow.active() ) EXA.flow.show( true ); else render(); return; }
 			if ( ( el = e.target.closest( '[data-mode-set]' ) ) ) { EXA.setMode( el.dataset.modeSet ); if ( EXA.flow.active() ) EXA.flow.show( true ); else render(); return; }
 			if ( ( el = e.target.closest( '[data-act]' ) ) ) { onAction( el.dataset.act, el ); return; }
@@ -339,7 +340,7 @@
 			const rowEl = e.target.closest ? e.target.closest( '.sw' ) : null;
 			if ( rowEl && ( action === 'del' || action === 'paid' ) && motionOn() ) { rowEl.classList.add( action === 'del' ? 'leaving' : 'paid-out' ); await new Promise( ( r ) => setTimeout( r, 280 ) ); }
 			if ( kind === 'tx' ) { const x = S().txs.find( ( z ) => z.id === id ); if(action==='duplicate'&&x){EXA.duplicateRecord('tx',id);return;} if ( action === 'edit' && x ) EXA.openTx( x ); else if ( action === 'del' ) EXA.removeTx( id ); else if ( action === 'unpay' && x ) EXA.openUnpay( id ); }
-			else { const b = S().bills.find( ( z ) => z.id === id ); if(action==='duplicate'&&b){EXA.duplicateRecord('bill',id);return;} if ( action === 'paid' && b ) quickPay( b ); else if ( action === 'edit' && b ) EXA.openBill( b ); else if ( action === 'del' ) EXA.removeBill( id ); }
+			else { const b = S().bills.find( ( z ) => z.id === id ); if(action==='duplicate'&&b){EXA.duplicateRecord('bill',id);return;} if ( action === 'snooze' && b ) { EXA.snoozeBill( b.id, 1 ); return; } if ( action === 'paid' && b ) quickPay( b ); else if ( action === 'edit' && b ) EXA.openBill( b ); else if ( action === 'del' ) EXA.removeBill( id ); }
 		} );
 
 		document.addEventListener( 'submit', ( e ) => {

@@ -73,7 +73,7 @@
 		const snoozed = b.snooze && b.snooze > today();
 		const meta = [ showDate ? rel( b.next ) : null, EX.scheduleLabel(b), b.autopay ? t( 'autopay' ) : null, snoozed ? t( 'snoozed' ) : null ].filter( Boolean ).join( ' · ' );
 		return `<li class="sw ${ cls }${n>=0&&n<=Math.max(0,Number(lead(b))||0)?' due-soon-attention':''}" data-kind="bill" data-id="${ esc( b.id ) }">
-			<div class="sw-back"><div class="sw-l">${ swBtn( 'paid', 'check', 'actPaid', 'paid' ) }</div><div class="sw-r">${ swBtn( 'edit', 'pencil', 'actEdit', 'edit' ) }${ swBtn( 'duplicate', 'copy', 'duplicateRecord', 'duplicate' ) }${ swBtn( 'del', 'trash', 'actDelete', 'del' ) }</div></div>
+			<div class="sw-back"><div class="sw-l">${ swBtn( 'paid', 'check', 'actPaid', 'paid' ) }${ n <= 0 ? swBtn( 'snooze', 'clock', 'actSnooze', 'snooze' ) : '' }</div><div class="sw-r">${ swBtn( 'edit', 'pencil', 'actEdit', 'edit' ) }${ swBtn( 'duplicate', 'copy', 'duplicateRecord', 'duplicate' ) }${ swBtn( 'del', 'trash', 'actDelete', 'del' ) }</div></div>
 			<button type="button" class="sw-front item" data-act="open-bill" data-id="${ esc( b.id ) }" aria-label="${ esc( b.name ) }, ${ esc( amountText( b ) ) }">
 				${ UI.catCi( EX.catInfo( b.category ) ) }
 				<span class="mid"><b>${ esc( b.name ) }${ EXA.priceChip ? EXA.priceChip( b ) : '' }</b><small class="due">${ esc( meta ) }</small>${EXA.tagsInline(b.tags)}</span>
@@ -165,6 +165,7 @@
 		if ( ! h && ! UI.isStandalone() && ! S().device.installDismissed && UI.isPhone() ) {
 			h += `<section class="promo alt"><div class="promo-head">${ UI.ci( 'device-mobile', 'purple', 44 ) }<div><b>${ esc( t( 'installTitle' ) ) }</b><p>${ esc( t( 'installText' ) ) }</p>${ installSteps() }</div></div><div class="btn-row">${ EXA.installEvent ? `<button type="button" class="btn btn-primary" data-act="install">${ esc( t( 'installBtn' ) ) }</button>` : '' }<button type="button" class="btn btn-text" data-act="dismiss-install">${ esc( t( 'dismiss' ) ) }</button></div></section>`;
 		}
+		if ( EXA.autoTagsNotice ) h += EXA.autoTagsNotice();
 		if ( ! h && EXA.sharePrompt ) h += EXA.sharePrompt();
 		return h;
 	}
@@ -206,7 +207,7 @@
 		const total = EX.sumByCur( wallets.map( ( a ) => ( { amount: EX.balance( a ) / 100, currency: a.currency } ) ) ) || money( 0 );
 		const f = EX.flow( EX.monthTxs( y, m ) );
 		const inc = EX.sumByCur( f.income ), exp = EX.sumByCur( f.expense );
-		const upcoming = active().sort( byDue ).slice( 0, 3 );
+		const upcoming = active().filter( ( b ) => ! ( b.snooze && b.snooze > today() ) ).sort( byDue ).slice( 0, 3 ); // a snoozed bill rests until its date
 		// Due soon leads the page only when something is overdue or due within two days; otherwise it follows the wallets.
 		const urgent = active().some( ( b ) => diffDays( b.next, today() ) <= 2 );
 		const DUE = `<div class="sec-head"><h2>${ esc( t( 'dueSoon' ) ) }</h2><span class="sec-acts">${ upcoming.length ? flipBtn( 'due' ) : '' }<button type="button" class="link" data-go="bills">${ esc( t( 'seeAll' ) ) }</button></span></div>
@@ -349,7 +350,7 @@
 		const inner = `${ bmDay( i.date ) }<span class="mid"><b>${ esc( name ) }</b><small>${ UI.icon( cat.iconName || 'tag', 14 ) } ${ esc( cat.name ) }${ i.kind === 'bill' && EX.scheduleLabel( i.b ) ? ' · ' + esc( EX.scheduleLabel( i.b ) ) : '' }</small></span><span class="bm-right"><b class="a">${ esc( amt ) }</b>${ bmPill( i ) }</span>`;
 		if ( i.kind === 'tx' ) return `<li class="bm-row ${ cls }"><div class="bm-front" role="button" tabindex="0" data-act="open-tx" data-id="${ esc( i.x.id ) }">${ inner }</div></li>`;
 		return `<li class="sw bm-row ${ cls }" data-kind="bill" data-id="${ esc( i.b.id ) }">
-			<div class="sw-back"><div class="sw-l">${ swBtn( 'paid', 'check', 'actPaid', 'paid' ) }</div><div class="sw-r">${ swBtn( 'edit', 'pencil', 'actEdit', 'edit' ) }${ swBtn( 'duplicate', 'copy', 'duplicateRecord', 'duplicate' ) }${ swBtn( 'del', 'trash', 'actDelete', 'danger' ) }</div></div>
+			<div class="sw-back"><div class="sw-l">${ swBtn( 'paid', 'check', 'actPaid', 'paid' ) }${ dn <= 0 && ! i.paid ? swBtn( 'snooze', 'clock', 'actSnooze', 'snooze' ) : '' }</div><div class="sw-r">${ swBtn( 'edit', 'pencil', 'actEdit', 'edit' ) }${ swBtn( 'duplicate', 'copy', 'duplicateRecord', 'duplicate' ) }${ swBtn( 'del', 'trash', 'actDelete', 'danger' ) }</div></div>
 			<div class="sw-front bm-front" role="button" tabindex="0" data-act="open-bill" data-id="${ esc( i.b.id ) }">${ inner }</div></li>`;
 	};
 
@@ -458,10 +459,19 @@
 			<section class="card danger"><h2>${ esc( t( 'devDelete' ) ) }</h2><p class="muted small">${ esc( t( 'devDeleteText' ) ) }</p><div class="btn-row"><button type="button" class="btn btn-danger" data-act="delete-account">${ esc( t( 'devDelete' ) ) }</button></div></section>
 			`;
 	}
+	/** Main currency, like language and themes: the first four and the one in use, the rest behind a fold, and any other code by hand. */
+	function curCard() {
+		const list = EXA.curList || [ 'EUR', 'USD', 'GBP', 'CHF' ], cur = S().settings.currency, shown = list.slice( 0, 4 ); if ( ! shown.includes( cur ) ) shown[ 3 ] = cur;
+		const chip = ( c ) => `<button type="button" class="chip big${ c === cur ? ' on' : '' }" data-cur-set="${ esc( c ) }" role="radio" aria-checked="${ c === cur }" title="${ esc( EXA.curName ? EXA.curName( c ) : c ) }">${ esc( EXA.curSym ? EXA.curSym( c ) : '' ) } ${ esc( c ) }</button>`;
+		const rest = list.filter( ( c ) => ! shown.includes( c ) );
+		return `<section class="card"><h2>${ esc( t( 'sMainCur' ) ) }</h2><div class="chips wrap" role="radiogroup" aria-label="${ esc( t( 'sMainCur' ) ) }">${ shown.map( chip ).join( '' ) }</div>
+			<details class="cur-more"><summary>${ esc( t( 'curMore', { n: list.length } ) ) }</summary><div class="chips wrap">${ rest.map( chip ).join( '' ) }</div>
+			<label class="f"><span>${ esc( t( 'curOther' ) ) }</span><input id="setCur" list="curList" maxlength="3" value="${ esc( cur ) }"></label></details></section>`;
+	}
 	function remindersView() {
 		const n = typeof Notification === 'undefined' ? null : Notification.permission, on = S().device.notify && n === 'granted';
 		return `<section class="card"><label class="f"><span>${ esc( t( 'sDefLead' ) ) }</span><select id="setLead">${ EX.LEADS.map( ( l ) => `<option value="${ l }"${ l === S().settings.lead ? ' selected' : '' }>${ esc( t( 'lead' + l ) ) }</option>` ).join( '' ) }</select></label>
-			<label class="f"><span>${ esc( t( 'sMainCur' ) ) }</span><input id="setCur" list="curList" maxlength="3" value="${ esc( S().settings.currency ) }"></label></section>
+</section>
 			${ EXA.pushCard() }
 			${ EXA.push.state() === 'on' ? '' : `<section class="card"><h2>${ esc( t( 'sNotif' ) ) }</h2><p class="muted small">${ esc( n === null ? t( 'notifNone' ) : n === 'denied' ? t( 'notifDenied' ) : t( 'notifDesc' ) ) }</p><div class="btn-row"><button type="button" class="btn ${ on ? 'btn-ghost' : 'btn-primary' }" id="notifyBtn" ${ n === null || n === 'denied' ? 'disabled' : '' }>${ esc( on ? t( 'turnOff' ) : t( 'turnOn' ) ) }</button></div></section>` }
 			<section class="card"><h2>${ esc( t( 'sClosed' ) ) }</h2><p class="muted small">${ esc( t( 'sClosedDesc' ) ) }</p><div class="btn-row"><button type="button" class="btn btn-primary" id="icsBtn">${ UI.icon( 'calendar-plus', 20 ) } ${ esc( t( 'dlIcs' ) ) }</button></div></section>`;
@@ -480,7 +490,7 @@
 			${ EX.auth.isSignedIn() ? '' : `<section class="card danger"><h2>${ esc( t( 'sDanger' ) ) }</h2><p class="muted small">${ esc( t( 'sDangerDesc' ) ) }</p><div class="btn-row"><button type="button" class="btn btn-danger" id="wipeBtn">${ esc( t( 'wipe' ) ) }</button></div></section>` }`;
 	}
 	function appearanceView() {
-		return `<section class="card"><h2>${ esc( t( 'sLanguage' ) ) }</h2><div class="chips wrap">${ Object.keys( EX.I18N.langs ).map( ( k ) => `<button type="button" class="chip big${ k === EX.lang() ? ' on' : '' }" data-lang="${ k }" lang="${ k }">${ UI.icon( 'language', 20 ) } ${ esc( EX.I18N.langs[ k ].langName ) }</button>` ).join( '' ) }</div></section>
+		return `<section class="card"><h2>${ esc( t( 'sLanguage' ) ) }</h2><div class="chips wrap">${ Object.keys( EX.I18N.langs ).map( ( k ) => `<button type="button" class="chip big${ k === EX.lang() ? ' on' : '' }" data-lang="${ k }" lang="${ k }">${ UI.icon( 'language', 20 ) } ${ esc( EX.I18N.langs[ k ].langName ) }</button>` ).join( '' ) }</div></section>${ curCard() }${ EXA.autoTagsCard ? EXA.autoTagsCard() : '' }
 			<section class="card"><h2>${ esc( t( 'themesTitle' ) ) }</h2>${ EXA.themePicker() }</section>
 			<section class="card"><h2>${ esc( t( 'setupMotion' ) ) }</h2><div class="chips wrap">${ [ 'auto', 'full', 'reduced', 'off' ].map( ( m ) => `<button type="button" class="chip big${ ( S().device.motion || 'auto' ) === m ? ' on' : '' }" data-motion-set="${ m }">${ esc( t( 'motion' + m.charAt( 0 ).toUpperCase() + m.slice( 1 ) ) ) }</button>` ).join( '' ) }</div><p class="muted small">${ esc( t( 'motionHint' ) ) }</p></section>
 			<section class="card"><label class="fx-row"><span class="mid"><b>${ esc( t( 'smartHomeTitle' ) ) }</b><small>${ esc( t( 'smartHomeHint' ) ) }</small></span><span class="switch"><input type="checkbox" data-smart-home${ S().settings.smartHome !== false ? ' checked' : '' } aria-label="${ esc( t( 'smartHomeTitle' ) ) }"><i></i></span></label></section>
@@ -525,4 +535,15 @@
 
 	/** The whole content of the main column for the current screen. */
 	EXA.screen = () => ( { home: EXA.home, activity: EXA.activity, bills: EXA.bills, plan: EXA.plan, reports: EXA.reports, more: EXA.more }[ st.view ] )();
+}() );
+( function () {
+	'use strict';
+	const EX = window.EX; if ( ! EX ) return;
+	Object.assign( EX.I18N.langs.en, { curMore: 'Show all {n} currencies', curFewer: 'Show fewer currencies', curOther: 'Any other currency code (for example AUD)' } );
+	Object.assign( EX.I18N.langs.el, { curMore: 'Εμφάνιση και των {n} νομισμάτων', curFewer: 'Εμφάνιση λιγότερων νομισμάτων', curOther: 'Οποιοδήποτε άλλο νόμισμα (για παράδειγμα AUD)' } );
+}() );
+( function () {
+	'use strict';
+	const EX = window.EX; if ( ! EX ) return;
+	Object.assign( EX.I18N.langs.en, { actSnooze: 'Snooze 1 day' } ); Object.assign( EX.I18N.langs.el, { actSnooze: 'Αναβολή 1 ημέρας' } );
 }() );

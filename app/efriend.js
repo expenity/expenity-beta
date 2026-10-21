@@ -201,12 +201,30 @@
 	};
 
 	/* ------------------------------------------------------------------ The character */
+	/* ---- the two eFriends: Chip (the robot) and Boogie (the vintage cassette with a Nixie tube) ---- */
+	const CHARS = { chip: { name: 'Chip' }, boogie: { name: 'Boogie' } };
+	F.char = () => ( S().settings.efChar !== 'chip' && window.EXBOOGIE ? 'boogie' : 'chip' ); // Boogie unless the person chose Chip
+	F.charName = () => CHARS[ F.char() ].name;
+	F.setChar = ( c ) => { if ( ! CHARS[ c ] ) return; S().settings.efChar = c; S().settings.u = Date.now(); EX.save(); };
+	const BMOOD = { comfortable: 'cheer', done: 'cheer', ontrack: 'happy', tight: 'meh', atrisk: 'worried', unlikely: 'worried', nodata: 'meh', cheer: 'cheer', happy: 'happy', meh: 'meh', worried: 'worried' };
+	let bserial = 0;
+	F.boogieMascot = ( verdict, size = 72 ) => {
+		const B = window.EXBOOGIE; if ( ! B ) return F.chipMascot( verdict, size );
+		const mood = BMOOD[ verdict ] || 'happy', thinking = verdict === 'thinking' ? ' ef-thinking' : '', h = Number.isFinite( Number( size ) ) ? Math.min( 1024, Math.max( 16, Number( size ) ) ) : 72, prefix = 'efcassette-' + ( ++bserial ) + '-';
+		let svg = B.svg.replace( /<style>[\s\S]*?<\/style>/, '' ).replace( 'ef-cassette ef-happy"', 'ef-cassette ef-' + mood + thinking + '"' ).replace( /width="288" height="260"/, 'width="' + ( h * 154 / 140 ) + '" height="' + h + '"' );
+		for ( const m of [ ...svg.matchAll( /\bid="([^"]+)"/g ) ] ) { const id = m[ 1 ]; svg = svg.replaceAll( 'id="' + id + '"', 'id="' + prefix + id + '"' ).replaceAll( 'url(#' + id + ')', 'url(#' + prefix + id + ')' ); }
+		return svg;
+	};
+	F.boogieIcon = ( size = 28 ) => ( window.EXBOOGIE ? window.EXBOOGIE.icon.replace( 'width="40" height="36"', 'class="ef-ico" width="' + size + '" height="' + ( size * 0.9 ) + '"' ) : F.chipIcon( size ) );
+	F.mascotOf = ( c, verdict, size ) => ( c === 'boogie' ? F.boogieMascot( verdict, size ) : F.chipMascot( verdict, size ) );
+	F.mascot = ( verdict, size = 72 ) => F.mascotOf( F.char(), verdict, size );
+	F.icon = ( size = 28 ) => ( F.char() === 'boogie' ? F.boogieIcon( size ) : F.chipIcon( size ) );
 	const MOODS = { comfortable: 'cheer', done: 'cheer', ontrack: 'happy', tight: 'meh', atrisk: 'worried', unlikely: 'worried', nodata: 'meh' };
 	let gid = 0;
 	/** A glossy floating robot with a glass screen face: hovers, waves, blinks, and changes its expression with the news. */
 	/** A small outline of eFriend, for places where the full robot would be too much. */
-	F.icon = ( size = 28 ) => `<svg class="ef-ico" width="${ size }" height="${ size * 0.83 }" viewBox="0 0 120 100" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="eFriend"><path d="M24 28q-3-18 12-20 8 4 10 14M96 28q3-18-12-20-8 4-10 14"/><rect x="20" y="18" width="80" height="66" rx="28"/><rect x="31" y="31" width="58" height="40" rx="15"/><rect x="41" y="42" width="10" height="12" rx="3" fill="currentColor" stroke="none"/><path d="M70 48h12M52 62q8 7 16 0"/></svg>`;
-	F.mascot = ( verdict, size = 72 ) => {
+	F.chipIcon = ( size = 28 ) => `<svg class="ef-ico" width="${ size }" height="${ size * 0.83 }" viewBox="0 0 120 100" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="eFriend"><path d="M24 28q-3-18 12-20 8 4 10 14M96 28q3-18-12-20-8 4-10 14"/><rect x="20" y="18" width="80" height="66" rx="28"/><rect x="31" y="31" width="58" height="40" rx="15"/><rect x="41" y="42" width="10" height="12" rx="3" fill="currentColor" stroke="none"/><path d="M70 48h12M52 62q8 7 16 0"/></svg>`;
+	F.chipMascot = ( verdict, size = 72 ) => {
 		const mood = MOODS[ verdict ] || 'happy', id = 'efg' + ( ++gid ), G = '#9ff3e6';
 		const eyeL = mood === 'cheer' ? `<path d="M38 50q6-9 12 0" class="ef-glow ef-stk"/>` : `<rect class="ef-eye" x="${ mood === 'meh' ? 38 : 39 }" y="${ mood === 'meh' ? 47 : 42 }" width="11" height="${ mood === 'meh' ? 5 : mood === 'worried' ? 9 : 12 }" rx="3" fill="${ G }"/>`;
 		const eyeR = mood === 'cheer' ? `<path d="M70 50q6-9 12 0" class="ef-glow ef-stk"/>` : mood === 'happy' ? `<path d="M70 48h12" class="ef-glow ef-stk"/>` : `<rect class="ef-eye" x="70" y="${ mood === 'meh' ? 47 : 42 }" width="11" height="${ mood === 'meh' ? 5 : mood === 'worried' ? 9 : 12 }" rx="3" fill="${ G }"/>`;
@@ -443,7 +461,7 @@
 		const conv = ! rec && f.dataset.convert ? S().goals.find( ( g ) => g.id === f.dataset.convert ) : null;
 		if ( conv ) { Object.assign( conv, v, { prio: F.plans().length + 1, created: today() } ); delete conv.coach; rec = conv; }
 		if ( rec ) { before = F.measure(); if ( String( rec.target ) !== v.target ) changes.push( [ 'cost', rec.target, v.target ] ); if ( rec.deadline !== v.deadline ) changes.push( [ 'date', rec.deadline, v.deadline ] ); if ( ( rec.wallets || [] ).join() !== v.wallets.join() ) changes.push( [ 'wallets', ( rec.wallets || [] ).length, v.wallets.length ] ); if ( ( rec.linkedGoal || '' ) !== v.linkedGoal ) changes.push( [ 'link', '', '' ] ); }
-		if ( rec && ! conv ) { delete rec.coach; Object.assign( rec, v ); } else if ( ! rec ) { rec = Object.assign( { id: EX.uid(), prio: F.plans().length + 1 }, v ); S().goals.push( rec ); }
+		if ( rec && ! conv ) { delete rec.coach; Object.assign( rec, v ); } else if ( ! rec ) { rec = Object.assign( { id: EX.uid(), prio: F.plans().length + 1 }, v ); if ( window.EXA && EXA.autoTags ) EXA.autoTags.apply( rec, 'goal' ); S().goals.push( rec ); }
 		if ( before && changes.length ) F.logChange( before, changes, [ rec.id ] );
 		S().settings.u = Date.now(); EX.save(); UI.closeSheet(); EXA.render();
 		setTimeout( () => ( ( S().device || {} ).efOnboard ? EXA.openEfriend( rec.id ) : EXA.efriendOnboard( rec.id ) ), 350 );
@@ -632,12 +650,38 @@
 		const pastHtml = pastList.length ? `<details class="card ef-sec ef-det"><summary><span class="ef-sec-em">🗄️</span><b>${ esc( t( 'efPast' ) ) }</b></summary><ul class="ef-list">${ pastList.map( ( g ) => `<li><div><b>${ esc( g.name ) }</b><small>${ esc( m( EX.cents( g.target ) ) ) }</small></div><button type="button" class="btn btn-ghost sm" data-ef-reopen="${ esc( g.id ) }">${ esc( t( 'efReopen' ) ) }</button></li>` ).join( '' ) }</ul></details>` : '';
 		const worst = all.length ? F.summary( all ) : null;
 		const askCard = `<section class="card ef-askcard"><div class="ef-top">${ F.icon( 52 ) }<div class="ef-bubble"><b>${ esc( t( 'efAskCardTitle' ) ) }</b>${ esc( t( 'efAskCardText' ) ) }</div></div><div class="btn-row"><button type="button" class="btn btn-primary" data-ef-ask>💬 ${ esc( t( 'efAskGo' ) ) }</button>${ histList().length ? `<button type="button" class="btn btn-ghost" data-ef-hist-open>🕘 ${ esc( t( 'efc_h_title' ) ) }</button>` : '' }</div></section>`;
-		return `${ askCard }<section class="card ef-page"><div class="ef-top">${ F.mascot( 'happy', 84 ) }<div class="ef-bubble"><b>${ esc( t( 'efMeet' ) ) }</b></div></div>${ para( 'efMeetText' ) }</section>
-			${ proposalsHtml() }${ overview }${ achievements }${ askBanner() ? `<section class="card">${ askBanner() }</section>` : '' }${ all.length > 1 ? `<section class="card"><h2>🏆 ${ esc( t( 'efPrioSection' ) ) }</h2>${ para( 'efPrioTextShort' ) }${ prioList( all ) }<div class="btn-row"><button type="button" class="btn btn-ghost" data-ef-suggest>✨ ${ esc( t( 'efSuggestOrder' ) ) }</button></div></section>` : '' }${ all.length ? `<section class="card">${ riskHtml() }</section>` : '' }${ budIdeasHtml() }${ buckets.length ? buckets.map( section ).join( '' ) : `<section class="card"><h2>${ esc( t( 'efYourGoals' ) ) }</h2><p class="muted">${ esc( t( 'efNoGoals' ) ) }</p></section>` }
-			${ allocCard() }${ pastHtml }<section class="card"><div class="btn-row"><button type="button" class="btn btn-primary" data-ef-new>${ UI.icon( 'plus', 20 ) } ${ esc( t( 'efNewGoal' ) ) }</button></div></section>
-			<section class="card"><label class="fx-row"><span class="mid"><b>${ esc( t( 'efSoundTitle' ) ) }</b><small>${ esc( t( 'efSoundHint' ) ) }</small></span><span class="switch"><input type="checkbox" data-ef-sound${ S().settings.efSound !== false ? ' checked' : '' } aria-label="${ esc( t( 'efSoundTitle' ) ) }"><i></i></span></label></section>
-			<section class="card"><div class="list mlist"><button type="button" class="mrow" data-ef-sort>${ UI.ci( 'adjustments-horizontal', 'teal', 40 ) }<span class="mid"><b>${ esc( t( 'efSortTitle' ) ) }</b><small>${ esc( t( 'efSortSub' ) ) }</small></span>${ UI.icon( 'chevron-right', 18 ) }</button><button type="button" class="mrow" data-ef-intro>${ UI.ci( 'player-play', 'purple', 40 ) }<span class="mid"><b>${ esc( t( 'efReplay' ) ) }</b><small>${ esc( t( 'efReplaySub' ) ) }</small></span>${ UI.icon( 'chevron-right', 18 ) }</button></div></section>`;
+		const sub = ( EXA.st && EXA.st.efSub ) || '', natural = S().settings.efInstant !== true, ch = F.char();
+		const prioCard = all.length > 1 ? `<section class="card"><h2>🏆 ${ esc( t( 'efPrioSection' ) ) }</h2>${ para( 'efPrioTextShort' ) }${ prioList( all ) }<div class="btn-row"><button type="button" class="btn btn-ghost" data-ef-suggest>✨ ${ esc( t( 'efSuggestOrder' ) ) }</button></div></section>` : '';
+		const riskCard = all.length ? `<section class="card">${ riskHtml() }</section>` : '';
+		const noGoals = `<section class="card"><h2>${ esc( t( 'efYourGoals' ) ) }</h2><p class="muted">${ esc( t( 'efNoGoals' ) ) }</p></section>`;
+		const newBtn = `<section class="card"><div class="btn-row"><button type="button" class="btn btn-primary" data-ef-new>${ UI.icon( 'plus', 20 ) } ${ esc( t( 'efNewGoal' ) ) }</button></div></section>`;
+		const sortRows = `<section class="card"><div class="list mlist"><button type="button" class="mrow" data-ef-sort>${ UI.ci( 'adjustments-horizontal', 'teal', 40 ) }<span class="mid"><b>${ esc( t( 'efSortTitle' ) ) }</b><small>${ esc( t( 'efSortSub' ) ) }</small></span>${ UI.icon( 'chevron-right', 18 ) }</button></div></section>`;
+		const tourRow = `<section class="card"><div class="list mlist"><button type="button" class="mrow" data-ef-intro>${ UI.ci( 'player-play', 'purple', 40 ) }<span class="mid"><b>${ esc( t( 'efReplay' ) ) }</b><small>${ esc( t( 'efReplaySub' ) ) }</small></span>${ UI.icon( 'chevron-right', 18 ) }</button></div></section>`;
+		const soundCard = `<section class="card"><label class="fx-row"><span class="mid"><b>${ esc( t( 'efSoundTitle' ) ) }</b><small>${ esc( t( 'efSoundHint' ) ) }</small></span><span class="switch"><input type="checkbox" data-ef-sound${ S().settings.efSound !== false ? ' checked' : '' } aria-label="${ esc( t( 'efSoundTitle' ) ) }"><i></i></span></label></section>`;
+		const naturalCard = `<section class="card"><label class="fx-row"><span class="mid"><b>${ esc( t( 'efNaturalTitle' ) ) }</b><small>${ esc( t( 'efNaturalHint' ) ) }</small></span><span class="switch"><input type="checkbox" data-ef-natural${ natural ? ' checked' : '' } aria-label="${ esc( t( 'efNaturalTitle' ) ) }"><i></i></span></label></section>`;
+		const charCard = `<section class="card ef-charcard"><h2>${ esc( t( 'efChooseTitle' ) ) }</h2><div class="ef-chars" role="radiogroup" aria-label="${ esc( t( 'efChooseTitle' ) ) }">${ [ 'chip', 'boogie' ].map( ( c ) => `<button type="button" class="ef-char${ ch === c ? ' on' : '' }" data-ef-char="${ c }" role="radio" aria-checked="${ ch === c }"><span class="ef-char-art">${ F.mascotOf( c, 'happy', 96 ) }</span><b>${ esc( CHARS[ c ].name ) }</b><small>${ esc( t( 'efChar_' + c ) ) }</small>${ ch === c ? `<em>✓ ${ esc( t( 'efChosen' ) ) }</em>` : '' }</button>` ).join( '' ) }</div>${ points( [ t( 'efMeetStory1' ), t( 'efMeetStory2' ), t( 'efMeetStory3' ) ] ) }</section>`;
+		const back = ( title ) => `<div class="ef-subhead"><button type="button" class="btn btn-ghost sm" data-ef-sub="">← ${ esc( t( 'efHubBack' ) ) }</button><h2>${ esc( title ) }</h2></div>`;
+		if ( sub === 'plans' ) return `${ back( t( 'efHubPlans' ) ) }${ overview }${ achievements }${ buckets.length ? buckets.map( section ).join( '' ) : noGoals }${ pastHtml }${ newBtn }`;
+		if ( sub === 'rules' ) return `${ back( t( 'efHubRules' ) ) }${ askBanner() ? `<section class="card">${ askBanner() }</section>` : '' }${ prioCard }${ riskCard }${ prioCard || riskCard ? '' : `<section class="card"><p class="muted">${ esc( t( 'efHubRulesNone' ) ) }</p></section>` }`;
+		if ( sub === 'moves' ) return `${ back( t( 'efHubMoves' ) ) }${ proposalsHtml() }${ allocCard() }`;
+		if ( sub === 'ideas' ) return `${ back( t( 'efHubIdeas' ) ) }${ budIdeasHtml() || `<section class="card"><p class="muted">${ esc( t( 'efHubIdeasNone' ) ) }</p></section>` }${ sortRows }`;
+		if ( sub === 'look' ) return `${ back( t( 'efHubLook' ) ) }${ charCard }${ naturalCard }${ soundCard }<section class="card ef-page"><div class="ef-top">${ F.mascot( 'happy', 84 ) }<div class="ef-bubble"><b>${ esc( t( 'efMeet' ) ) }</b></div></div>${ para( 'efMeetText' ) }</section>${ tourRow }`;
+		// the hub: the way into the chat, then everything else in a few groups
+		const hrow = ( id, ic, color, title, subtitle ) => `<button type="button" class="mrow" data-ef-sub="${ id }">${ UI.ci( ic, color, 40 ) }<span class="mid"><b>${ esc( title ) }</b><small>${ esc( subtitle ) }</small></span>${ UI.icon( 'chevron-right', 18 ) }</button>`;
+		const al = F.alloc(), modeWord = t( { off: 'efModeOff', suggest: 'efModeSuggest', ask: 'efModeAsk', auto: 'efModeAuto' }[ al.mode || 'off' ] || 'efModeOff' ), pend = props().filter( ( p ) => p.status === 'pending' ).length;
+		return `${ askCard }${ pend ? proposalsHtml() : '' }<section class="card"><div class="list mlist">
+			${ hrow( 'plans', 'target', 'teal', t( 'efHubPlans' ), plans.length ? t( 'efHubPlansSub', { n: plans.length } ) : t( 'efHubPlansNone' ) ) }
+			${ hrow( 'rules', 'adjustments-horizontal', 'amber', t( 'efHubRules' ), t( 'efHubRulesSub' ) ) }
+			${ hrow( 'moves', 'coin', 'green', t( 'efHubMoves' ), modeWord ) }
+			${ hrow( 'ideas', 'bulb', 'pink', t( 'efHubIdeas' ), t( 'efHubIdeasSub' ) ) }
+			${ hrow( 'look', 'mood-smile', 'purple', t( 'efHubLook' ), t( 'efHubLookSub', { name: CHARS[ ch ].name, mode: natural ? t( 'efNaturalOn' ) : t( 'efNaturalOff' ) } ) ) }
+		</div></section>`;
 	};
+	document.addEventListener( 'click', ( e ) => {
+		const sb = e.target.closest && e.target.closest( '[data-ef-sub]' ); if ( sb ) { EXA.st.efSub = sb.dataset.efSub; EXA.render(); const v = document.querySelector( '#view' ); if ( v ) v.scrollTop = 0; window.scrollTo( 0, 0 ); return; }
+		const cb = e.target.closest && e.target.closest( '[data-ef-char]' ); if ( cb ) { F.setChar( cb.dataset.efChar ); return; }
+	} );
+	document.addEventListener( 'change', ( e ) => { if ( e.target.matches && e.target.matches( '[data-ef-natural]' ) ) { S().settings.efInstant = ! e.target.checked; S().settings.u = Date.now(); EX.save(); } } );
 	EXA.efriendConvert = ( g ) => ( on() && ! isPlan( g ) ? `<button type="button" class="btn btn-ghost wide" data-ef-convert="${ esc( g.id ) }">🤖 ${ esc( t( 'efConvert' ) ) }</button><span class="ef-hint">${ para( 'efConvertHint' ) }</span>` : '' );
 	EXA.efriendAsk = ( g ) => ( on() && ! isPlan( g ) ? `<button type="button" class="btn btn-ghost sm" data-ef-fromgoal="${ esc( g.id ) }">🤖 ${ esc( t( 'efAskEf' ) ) }</button>` : '' );
 	EXA.efriendNudge = () => ( on() && ! F.plans().length ? `<div class="ef-ask ef-nudge"><span class="ef-ask-em">🤖</span><span>${ rich( t( 'efNudgeText' ) ) }</span><button type="button" class="btn btn-primary sm" data-ef-nudge>${ esc( t( 'efNudgeBtn' ) ) }</button></div>` : '' );
@@ -1142,7 +1186,7 @@
 	const say = async ( lines, o = {} ) => {
 		if ( chat.chain !== chat.tok ) return;
 		const tok = chat.tok, txt = [].concat( lines ).join( ' ' ), len = txt.length;
-		if ( o.instant ) { const m = { who: 'ef', lines: [].concat( lines ), mood: o.mood }; chat.msgs.push( m ); appendMsg( m ); setMood( o.mood ); scrollEnd(); syncInput(); saveChat(); return; }
+		if ( o.instant || S().settings.efInstant === true ) { const m = { who: 'ef', lines: [].concat( lines ), mood: o.mood }; chat.msgs.push( m ); appendMsg( m ); setMood( o.mood ); scrollEnd(); syncInput(); saveChat(); return; }
 		await wait( 380 ); if ( ! live( tok ) ) return;
 		chat.typing = true; setMood( o.mood ); showTyping(); scrollEnd();
 		await wait( o.delay || Math.max( 1100, Math.min( 3600, 850 + len * 32 ) ) );
@@ -1192,6 +1236,7 @@
 	/** eFriend's own story (see efc_story and efc_p_*): an 80s bot who loves cassettes, disco, space movies, dancing when nobody looks, and the number 010001100. */
 	const foldP = ( x ) => String( x || '' ).toLowerCase().normalize( 'NFD' ).replace( /[̀-ͯ]/g, '' );
 	const PERSONA = [
+		[ 'meet', /(\bchip\b|\bboogie\b|your friend|other robot|another robot|met each other|how did you (two )?meet|bluetooth|cable|φιλο σου|αλλο ρομποτ|πως γνωριστηκατε)/u ],
 		[ 'story', /(tell me (about )?(yourself|your story)|who are you|about you|your story|introduce yourself|tell me everything about you|πες μου (για σενα|για εσενα|την ιστορια σου|τη ιστορια σου)|ποιος εισαι|συστησου|για σενα|για εσενα)/u ],
 		[ 'age', /(how old|your age|when were you born|ποσων χρονων|ποσο χρονων|ποσων ετων|ηλικια σου|ποτε γεννηθηκες)/u ],
 		[ 'from', /(where (are|were) you (from|born)|where did you (grow|come)|where do you (come|live)|grow up|που (μεγαλωσες|γεννηθηκες|μενεις)|απο που εισαι)/u ],
@@ -1216,7 +1261,8 @@
 		const x = foldP( text ); if ( ! /[?;]/.test( text ) && ! /(^|[^a-zα-ω])(you|your|yourself|σου|εσυ|εσενα|εισαι|πες μου|tell me)(?![a-zα-ω])/u.test( x ) ) return null;
 		const p = PERSONA.find( ( q ) => q[ 1 ].test( x ) ); return p ? p[ 0 ] : null;
 	};
-	const sayStory = async () => { for ( const part of String( t( 'efc_story' ) ).split( '~' ) ) { await say( [ part ], { mood: 'cheer', delay: 1400 } ); if ( chat.chain !== chat.tok ) return; } };
+	const pp = ( topic ) => { const k = F.char() === 'chip' ? 'efc_pc_' + topic : 'efc_p_' + topic; return String( t( k ) ) !== k ? pool( k ) : pool( 'efc_p_' + topic ); };
+	const sayStory = async () => { for ( const part of String( t( F.char() === 'chip' ? 'efc_story_chip' : 'efc_story' ) ).split( '~' ) ) { await say( [ part ], { mood: 'cheer', delay: 1400 } ); if ( chat.chain !== chat.tok ) return; } };
 	/** The bubble in which the person gave the price gets a pencil, so a wrong amount can be fixed before moving on. */
 	const rerender = ( m ) => { const el = document.querySelector( `[data-mid="${ m.id }"]` ); if ( el ) el.outerHTML = bubble( m ); };
 	const markAmount = () => { const m = chat.lastMe; if ( ! m ) return; chat.msgs.forEach( ( x ) => { if ( x.amount && x !== m ) { x.amount = false; rerender( x ); } } ); m.amount = true; rerender( m ); };
@@ -1243,14 +1289,14 @@
 			// eFriend answers about himself from his own story; anything else he cannot answer gets the retro joke
 			const asksCost = F.parseAsk( stripWhen( text ) ).cost, topic = chip && chip.k === 'persona' ? chip.topic : ! chip && ! asksCost && ! F.parseWhen( text ) ? personaTopic( text ) : null;
 			if ( topic ) {
-				if ( topic === 'story' ) await sayStory(); else await say( [ pool( 'efc_p_' + topic ) ], { mood: 'cheer', delay: 1500 } );
+				if ( topic === 'story' ) await sayStory(); else await say( [ pp( topic ) ], { mood: 'cheer', delay: 1500 } );
 				if ( ! live( tok ) ) return;
 				await say( [ pool( 'efc_p_back' ) ], { mood: 'happy' } ); if ( ! live( tok ) ) return;
 				return await ( st === 'confirm' ? recap() : st === 'fix' ? say( [ pool( 'efc_fix' ) ], { mood: 'happy' } ) : nextQ() );
 			}
 			// eFriend is no AI chatbot: a real question gets a retro joke, then the pending question again
 			if ( /[?;]/.test( text ) && ! chip && ! F.parseAsk( stripWhen( text ) ).cost && ! F.parseWhen( text ) && ! ( st === 'what' && /buy|afford|get|purchase|order|book|αγορ|πάρω|παρω/i.test( text ) ) ) {
-				await say( [ pool( 'efc_q' ) ], { mood: 'cheer', delay: 1500 } ); if ( ! live( tok ) ) return;
+				await say( [ pool( F.char() === 'chip' ? 'efc_q_chip' : 'efc_q' ) ], { mood: 'cheer', delay: 1500 } ); if ( ! live( tok ) ) return;
 				return await ( st === 'confirm' ? recap() : st === 'fix' ? say( [ pool( 'efc_fix' ) ], { mood: 'happy' } ) : nextQ() );
 			}
 			if ( st === 'confirm' || st === 'fix' ) {
@@ -1394,6 +1440,7 @@
 		const X = `<button type="button" class="ab-btn" data-close aria-label="${ esc( t( 'close' ) ) }">${ UI.icon( 'x', 24 ) }</button>`;
 		chat.anim = true; UI.openSheet( `<div class="sheet-head">${ X }<h2 id="sheetTitle">💬 ${ esc( t( 'efAskTitle' ) ) }</h2><span class="sp"></span></div><div class="sheet-pad ef-ask-sheet" id="efRes">${ resultHtml() }</div>`, { tall: true } );
 		const top = () => { const r = document.getElementById( 'efRes' ), sc = r && ( r.closest( '.sheet-scroll' ) || r.parentNode ); if ( sc ) sc.scrollTop = 0; if ( document.activeElement && document.activeElement.blur ) document.activeElement.blur(); }; top(); setTimeout( top, 120 ); setTimeout( top, 450 );
+		if ( embedded() ) { const sh = document.getElementById( 'sheet' ); if ( sh ) sh.addEventListener( 'close', () => { if ( chat.keepEmbed ) { chat.keepEmbed = false; return; } if ( window.EXAEmbedEnd ) EXAEmbedEnd(); }, { once: true } ); }
 		setTimeout( () => { const r = document.getElementById( 'efRes' ); if ( ! r ) return; countUp( r ); if ( chat.rec && chat.rec.kind === 'ok' ) burst( r ); chat.anim = false; }, 250 );
 	};
 	const repaintResult = () => { const r = document.getElementById( 'efRes' ); if ( r ) { chat.anim = false; const y = r.closest( '.sheet-scroll' ) || r.parentNode; const top = y ? y.scrollTop : 0; r.innerHTML = resultHtml(); if ( y ) y.scrollTop = top; } };
@@ -1460,7 +1507,7 @@
 	EXA.efriendAskOpen = ( prefill ) => {
 		closeChat(); Object.assign( chat, { menuOn: false, more: false, locked: false, stuck: 0, turns: 0, formOffered: false, over: false, restarts: 0, id: EX.uid(), ts: Date.now(), msgs: [], stage: 'what', item: '', who: '', mi: 0, cost: 0, by: undefined, typing: false, busy: false, ans: null, rec: null, sel: 0, chips: [], used: {}, anim: true } );
 		const ov = document.createElement( 'div' ); ov.className = 'ef-cp'; ov.setAttribute( 'role', 'dialog' ); ov.setAttribute( 'aria-modal', 'true' ); ov.setAttribute( 'aria-label', 'eFriend' );
-		ov.innerHTML = `<header class="ef-cp-h"><button type="button" class="ab-btn" data-ef-cpx aria-label="${ esc( t( 'close' ) ) }">${ UI.icon( 'x', 24 ) }</button><div class="ef-cp-who"><span class="ef-cp-av">${ F.mascot( 'happy', 46 ) }</span><div><b>eFriend</b><small id="efCpStat">${ esc( t( 'efc_online' ) ) }</small></div></div><button type="button" class="ab-btn ef-cp-skip" data-ef-skip aria-label="${ esc( t( 'efc_skip' ) ) }" title="${ esc( t( 'efc_skip' ) ) }">📝</button><button type="button" class="ab-btn ef-cp-clear" data-ef-clear aria-label="${ esc( t( 'efc_clear' ) ) }" title="${ esc( t( 'efc_clear' ) ) }">🧹</button><button type="button" class="ab-btn ef-cp-hist" data-ef-hist aria-label="${ esc( t( 'efc_h_title' ) ) }" title="${ esc( t( 'efc_h_title' ) ) }">🕘</button></header>
+		ov.innerHTML = `<header class="ef-cp-h"><button type="button" class="ab-btn" data-ef-cpx aria-label="${ esc( t( 'close' ) ) }">${ UI.icon( 'x', 24 ) }</button><div class="ef-cp-who"><span class="ef-cp-av">${ F.mascot( 'happy', 46 ) }</span><div><b>${ esc( F.charName() ) }</b><small id="efCpStat">${ esc( t( 'efc_online' ) ) }</small></div></div><button type="button" class="ab-btn ef-cp-skip" data-ef-skip aria-label="${ esc( t( 'efc_skip' ) ) }" title="${ esc( t( 'efc_skip' ) ) }">📝</button><button type="button" class="ab-btn ef-cp-clear" data-ef-clear aria-label="${ esc( t( 'efc_clear' ) ) }" title="${ esc( t( 'efc_clear' ) ) }">🧹</button><button type="button" class="ab-btn ef-cp-hist" data-ef-hist aria-label="${ esc( t( 'efc_h_title' ) ) }" title="${ esc( t( 'efc_h_title' ) ) }">🕘</button></header>
 			<div id="efChat" class="ef-chat" aria-live="polite"></div><div class="ef-chips" id="efChips"></div>
 			<form id="efChatForm" class="ef-chat-in" novalidate autocomplete="off"><span class="ef-inwrap"><input name="q" id="efChatQ" autocomplete="off" enterkeyhint="send" placeholder="${ esc( t( 'efAskPh' ) ) }" aria-label="${ esc( t( 'efAskQ' ) ) }"><button type="button" class="ef-menubtn" data-ef-menu aria-label="${ esc( t( 'efc_menu' ) ) }" title="${ esc( t( 'efc_menu' ) ) }">✨</button></span><button type="submit" class="btn btn-primary" aria-label="${ esc( t( 'efAskGo' ) ) }">➤</button></form>`;
 		document.body.appendChild( ov ); document.body.classList.add( 'ef-ob-open' );
@@ -1488,11 +1535,12 @@
 		const f = e.target; if ( f.id !== 'efChatForm' ) return; e.preventDefault();
 		const q = f.elements.q.value.trim(); if ( ! q || chat.busy ) return; f.elements.q.value = ''; onUser( q );
 	} );
-	const openPlan = ( dl ) => { const ic = F.askIcon( chat.item ); closeChat(); UI.closeSheet && UI.closeSheet( true ); setTimeout( () => EXA.openEfPlan( null, Object.assign( { name: ( chat.item || t( 'efAskThing' ) ) + ( chat.who ? ' ' + forWho() : '' ), target: String( chat.cost / 100 ), icon: ic.icon }, dl ? { deadline: dl > today() ? dl : addDays( today(), 1 ) } : {} ) ), 220 ); };
+	const embedded = () => document.documentElement.classList.contains( 'ef-embed' );
+	const openPlan = ( dl ) => { if ( embedded() && window.EXAEmbedEnd ) { closeChat(); UI.closeSheet && UI.closeSheet( true ); EXAEmbedEnd(); return; } const ic = F.askIcon( chat.item ); closeChat(); UI.closeSheet && UI.closeSheet( true ); setTimeout( () => EXA.openEfPlan( null, Object.assign( { name: ( chat.item || t( 'efAskThing' ) ) + ( chat.who ? ' ' + forWho() : '' ), target: String( chat.cost / 100 ), icon: ic.icon }, dl ? { deadline: dl > today() ? dl : addDays( today(), 1 ) } : {} ) ), 220 ); };
 	document.addEventListener( 'click', ( e ) => {
 		const tg = e.target.closest ? e.target : null; if ( ! tg ) return;
 		if ( tg.closest( '[data-ef-ask]' ) ) { e.preventDefault(); EXA.efriendAskOpen(); return; }
-		if ( tg.closest( '[data-ef-cpx]' ) ) { closeChat(); return; }
+		if ( tg.closest( '[data-ef-cpx]' ) ) { closeChat(); if ( embedded() && window.EXAEmbedEnd ) EXAEmbedEnd(); return; }
 		if ( tg.closest( '[data-ef-clear]' ) ) { restartChat(); return; }
 		if ( tg.closest( '[data-ef-skip]' ) ) { showForm( true ); return; }
 		if ( tg.closest( '[data-ef-menu]' ) ) { toggleMenu(); return; }
@@ -1509,7 +1557,7 @@
 		const q = tg.closest( '[data-ef-q]' ); if ( q ) { const c = chat.chips[ Number( q.dataset.efQ ) ]; if ( c && c.k === 'menuclose' ) { toggleMenu(); return; } if ( c && c.k === 'more' ) { chat.more = ! chat.more; startChips(); const bx = document.getElementById( 'efChips' ); if ( bx ) bx.scrollTop = 0; return; } if ( c && c.k === 'wake' ) { EXA.efriendAskOpen(); return; } if ( c && c.k === 'hist' ) { showHist(); return; } if ( c && c.k === 'form' ) { showForm(); return; } if ( c && c.k === 'keep' ) { keepChatting(); return; } if ( c && ! chat.busy ) onUser( c.text || c.label.replace( /^[^\p{L}\p{N}]+/u, '' ), c ); return; }
 		const mo = tg.closest( '[data-ef-mon]' ); if ( mo && chat.ans ) { chat.mi = Math.max( 0, Math.min( monthsOf( chat.ans ).length - 1, chat.mi + Number( mo.dataset.efMon ) ) ); repaintResult(); return; }
 		const d = tg.closest( '[data-ef-askday]' ); if ( d && chat.ans ) { chat.sel = Number( d.dataset.efAskday ); repaintResult(); return; }
-		if ( tg.closest( '[data-ef-again]' ) ) { UI.closeSheet && UI.closeSheet( true ); setTimeout( () => EXA.efriendAskOpen(), 220 ); return; }
+		if ( tg.closest( '[data-ef-again]' ) ) { chat.keepEmbed = true; UI.closeSheet && UI.closeSheet( true ); setTimeout( () => EXA.efriendAskOpen(), 220 ); return; }
 		const pl = tg.closest( '[data-ef-askplan]' ); if ( pl ) openPlan( pl.dataset.efAskplan );
 	} );
 
@@ -2203,7 +2251,7 @@
 		efc_q_n: '{name}, εδώ τις ερωτήσεις τις κάνω εγώ. 🕵️ Καλώς ήρθατε στο 1985.|Καλή προσπάθεια, {name}! 😎 Είμαι γνήσιο ρομπότ των \'80s, όχι από αυτά τα ομιλητικά AI. Ρωτάω εγώ, απαντάτε εσείς.',
 	} );
 	Object.assign( window.EXPENITY_I18N.langs.en, {
-		efc_story: 'Let me tell you my story. 📼 I was born in 1984, in a tiny electronics workshop that smelled of solder and warm dust. My first word was “beep”. My second word was “boop”. I was a gifted child.~I grew up between a cassette player that ate tapes and a calculator with real buttons that went click. 🔊 Those were the days: you rewound things with a pencil, and nobody asked you for a password.~On Saturdays I watched the same space adventure over and over, on a TV as big as a fridge. 🚀 I still say “may the Force be with your budget”. It is my catchphrase. Nobody asked for one, but here we are.~At night I practised disco. 🕺 I know exactly three dance moves, and I do them in the dark where nobody can see. I am a little shy, you see.~My favourite number is 010001100. 🔢 Do not ask me why. It just has style. (Fine, it is 140. But 010001100 sounds cooler.)~Then I met George, who needed a friend who is good at maths and bad at small talk. 🤝 I moved into Expenity, counted all the wallets and learned to say “can you afford it?” kindly.~So that is me: eFriend. Forty-two years young, retro, rule-based, a bit shy, and no AI whatsoever. Just clear rules, a big heart and a deep love of the 80s. 💾',
+		efc_story: 'Let me tell you my story. 📼 I was born in 1984, in a tiny electronics workshop that smelled of solder and warm dust. My first word was “beep”. My second word was “boop”. I was a gifted child.~I grew up between a cassette player that ate tapes and a calculator with real buttons that went click. 🔊 Those were the days: you rewound things with a pencil, and nobody asked you for a password.~On Saturdays I watched the same space adventure over and over, on a TV as big as a fridge. 🚀 I still say “may the Force be with your budget”. It is my catchphrase. Nobody asked for one, but here we are.~At night I practised disco. 🕺 I know exactly three dance moves, and I do them in the dark where nobody can see. I am a little shy, you see.~My favourite number is 010001100. 🔢 Do not ask me why. It just has style. (Fine, it is 140. But 010001100 sounds cooler.)~Then I met George, who needed a friend who is good at maths and bad at small talk. 🤝 I moved into Expenity, counted all the wallets and learned to say “can you afford it?” kindly.~Oh, and I once met a very shiny robot called Chip. He tried to connect to me over Bluetooth, so I handed him a cable and told him “we don’t do invisible friendships”. He insists he is the smarter one. He has never fixed anything with a pencil. ✏️~So that is me: eFriend. Forty-two years young, retro, rule-based, a bit shy, and no AI whatsoever. Just clear rules, a big heart and a deep love of the 80s. 💾',
 		efc_p_back: 'Anyway! Back to your purchase. 😄|Right, where were we? Your purchase! 🛍️|Enough about me. Let us get back to the money. 💶',
 		efc_p_age: 'I am 42. 🎂 Born in 1984, which makes me vintage, not old. Like a good cassette.|Forty-two! 🎶 In robot years that is a classic. Like a good vinyl, but with fewer scratches.',
 		efc_p_from: 'I grew up in a tiny electronics workshop in 1984. 🛠️ It smelled of solder and I loved it.|I come from the golden age: cassette players, big TVs and calculators with real buttons. 📼 Now I live inside Expenity.',
@@ -2225,7 +2273,7 @@
 		efc_p_joke: 'Why did the cassette go to school? 📼 To get a little more tape-ered. …I am here all week.|What do you call a robot who loves disco? 🪩 A boogie-board. I will see myself out.',
 	} );
 	Object.assign( window.EXPENITY_I18N.langs.el, {
-		efc_story: 'Θα σας πω την ιστορία μου. 📼 Γεννήθηκα το 1984, σε ένα μικροσκοπικό εργαστήριο ηλεκτρονικών που μύριζε κολλητήρι και ζεστή σκόνη. Η πρώτη μου λέξη ήταν «μπιπ». Η δεύτερη «μπουπ». Ήμουν χαρισματικό παιδί.~Μεγάλωσα ανάμεσα σε ένα κασετόφωνο που έτρωγε τις κασέτες και ένα κομπιουτεράκι με πραγματικά κουμπιά που έκαναν κλικ. 🔊 Τι εποχή! Τις κασέτες τις γυρνούσες πίσω με ένα μολύβι και κανείς δεν σου ζητούσε κωδικό.~Τα Σάββατα έβλεπα ξανά και ξανά την ίδια διαστημική περιπέτεια, σε μια τηλεόραση μεγάλη σαν ψυγείο. 🚀 Ακόμα λέω «η Δύναμη μαζί με τον προϋπολογισμό σας». Είναι το σλόγκαν μου. Κανείς δεν ζήτησε ένα, αλλά να μας.~Τα βράδια έκανα πρόβες ντίσκο. 🕺 Ξέρω ακριβώς τρεις χορευτικές κινήσεις και τις κάνω στο σκοτάδι, εκεί που δεν με βλέπει κανείς. Είμαι λίγο ντροπαλός, βλέπετε.~Ο αγαπημένος μου αριθμός είναι ο 010001100. 🔢 Μη με ρωτήσετε γιατί. Έχει στιλ. (Εντάξει, είναι το 140. Αλλά το 010001100 ακούγεται πιο κουλ.)~Μετά γνώρισα τον George, που χρειαζόταν έναν φίλο καλό στα μαθηματικά και κακό στην κουβεντούλα. 🤝 Μετακόμισα στο Expenity, μέτρησα όλα τα πορτοφόλια και έμαθα να λέω «μπορείτε να το αντέξετε;» ευγενικά.~Αυτός είμαι λοιπόν: το eFriend. Σαράντα δύο χρονών νέος, ρετρό, βασισμένος σε κανόνες, λίγο ντροπαλός και καθόλου AI. Μόνο σαφείς κανόνες, μεγάλη καρδιά και βαθιά αγάπη για τη δεκαετία του \'80. 💾',
+		efc_story: 'Θα σας πω την ιστορία μου. 📼 Γεννήθηκα το 1984, σε ένα μικροσκοπικό εργαστήριο ηλεκτρονικών που μύριζε κολλητήρι και ζεστή σκόνη. Η πρώτη μου λέξη ήταν «μπιπ». Η δεύτερη «μπουπ». Ήμουν χαρισματικό παιδί.~Μεγάλωσα ανάμεσα σε ένα κασετόφωνο που έτρωγε τις κασέτες και ένα κομπιουτεράκι με πραγματικά κουμπιά που έκαναν κλικ. 🔊 Τι εποχή! Τις κασέτες τις γυρνούσες πίσω με ένα μολύβι και κανείς δεν σου ζητούσε κωδικό.~Τα Σάββατα έβλεπα ξανά και ξανά την ίδια διαστημική περιπέτεια, σε μια τηλεόραση μεγάλη σαν ψυγείο. 🚀 Ακόμα λέω «η Δύναμη μαζί με τον προϋπολογισμό σας». Είναι το σλόγκαν μου. Κανείς δεν ζήτησε ένα, αλλά να μας.~Τα βράδια έκανα πρόβες ντίσκο. 🕺 Ξέρω ακριβώς τρεις χορευτικές κινήσεις και τις κάνω στο σκοτάδι, εκεί που δεν με βλέπει κανείς. Είμαι λίγο ντροπαλός, βλέπετε.~Ο αγαπημένος μου αριθμός είναι ο 010001100. 🔢 Μη με ρωτήσετε γιατί. Έχει στιλ. (Εντάξει, είναι το 140. Αλλά το 010001100 ακούγεται πιο κουλ.)~Μετά γνώρισα τον George, που χρειαζόταν έναν φίλο καλό στα μαθηματικά και κακό στην κουβεντούλα. 🤝 Μετακόμισα στο Expenity, μέτρησα όλα τα πορτοφόλια και έμαθα να λέω «μπορείτε να το αντέξετε;» ευγενικά.~Α, και κάποτε γνώρισα ένα πολύ γυαλιστερό ρομπότ, τον Chip. Προσπάθησε να συνδεθεί μαζί μου μέσω Bluetooth, οπότε του έδωσα ένα καλώδιο και του είπα «εμείς δεν κάνουμε αόρατες φιλίες». Επιμένει ότι είναι ο εξυπνότερος. Δεν έχει φτιάξει ποτέ τίποτα με ένα μολύβι. ✏️~Αυτός είμαι λοιπόν: το eFriend. Σαράντα δύο χρονών νέος, ρετρό, βασισμένος σε κανόνες, λίγο ντροπαλός και καθόλου AI. Μόνο σαφείς κανόνες, μεγάλη καρδιά και βαθιά αγάπη για τη δεκαετία του \'80. 💾',
 		efc_p_back: 'Τέλος πάντων! Πίσω στην αγορά σας. 😄|Λοιπόν, πού είχαμε μείνει; Στην αγορά σας! 🛍️|Αρκετά για μένα. Ας γυρίσουμε στα χρήματα. 💶',
 		efc_p_age: 'Είμαι 42. 🎂 Γεννήθηκα το 1984, που με κάνει vintage, όχι γέρο. Όπως μια καλή κασέτα.|Σαράντα δύο! 🎶 Σε χρόνια ρομπότ είναι κλασικό. Σαν καλό βινύλιο, αλλά με λιγότερες γρατζουνιές.',
 		efc_p_from: 'Μεγάλωσα σε ένα μικροσκοπικό εργαστήριο ηλεκτρονικών το 1984. 🛠️ Μύριζε κολλητήρι και μου άρεσε.|Έρχομαι από τη χρυσή εποχή: κασετόφωνα, μεγάλες τηλεοράσεις και κομπιουτεράκια με πραγματικά κουμπιά. 📼 Τώρα μένω μέσα στο Expenity.',
@@ -2310,7 +2358,7 @@
 		efc_less: 'Less',
 		efc_h_buy: '🛍️ What are you thinking of buying?',
 		efc_h_know: '🤖 Get to know eFriend',
-		efc_asks: 'age:🎂 How old are you?|from:🌍 Where did you grow up?|name:🏷️ What is your name?|how:👋 How are you?|home:🏠 Where do you live?|likes:💖 What do you love?|likes:🎯 What are your hobbies?|music:🎶 What music do you like?|music:🪩 Do you like disco?|movie:🚀 Do you like Star Wars?|movie:🎬 What is your favourite movie?|dance:🕺 Do you dance?|number:🔢 What is your favourite number?|color:🎨 What is your favourite colour?|food:⚡ What do you eat?|family:👨‍👩‍👧 Do you have a family?|shy:🙈 Are you shy?|cassette:📼 Do you miss cassettes?|cassette:🕰️ Do you like the 80s?|maker:🛠️ Who made you?|ai:🤖 Are you an AI?|joke:😄 Tell me a joke|story:📖 Tell me about yourself',
+		efc_asks: 'age:🎂 How old are you?|from:🌍 Where did you grow up?|name:🏷️ What is your name?|how:👋 How are you?|home:🏠 Where do you live?|likes:💖 What do you love?|likes:🎯 What are your hobbies?|music:🎶 What music do you like?|music:🪩 Do you like disco?|movie:🚀 Do you like Star Wars?|movie:🎬 What is your favourite movie?|dance:🕺 Do you dance?|number:🔢 What is your favourite number?|color:🎨 What is your favourite colour?|food:⚡ What do you eat?|family:👨‍👩‍👧 Do you have a family?|shy:🙈 Are you shy?|cassette:📼 Do you miss cassettes?|cassette:🕰️ Do you like the 80s?|maker:🛠️ Who made you?|ai:🤖 Are you an AI?|joke:😄 Tell me a joke|meet:🤝 How did you meet your friend?|story:📖 Tell me about yourself',
 	} );
 	Object.assign( window.EXPENITY_I18N.langs.el, {
 		efc_ideas_all: '🚗 Αυτοκίνητο|✈️ Ένα ταξίδι|👟 Παπούτσια|📱 Ένα κινητό|🎁 Ένα δώρο|💻 Ένα λάπτοπ|⌚ Ένα ρολόι|🎧 Ακουστικά|🚲 Ένα ποδήλατο|🏖️ Διακοπές|🛋️ Έναν καναπέ|🎮 Μια κονσόλα|📷 Μια κάμερα|👗 Ένα φόρεμα|🎒 Ένα σακίδιο|🍽️ Ένα καλό δείπνο|🏋️ Συνδρομή γυμναστηρίου|🎓 Ένα μάθημα|🐶 Ένα κατοικίδιο|🪴 Φυτά|📺 Μια τηλεόραση|🧥 Ένα χειμωνιάτικο μπουφάν|💍 Ένα δαχτυλίδι|🎸 Μια κιθάρα',
@@ -2318,7 +2366,7 @@
 		efc_less: 'Λιγότερα',
 		efc_h_buy: '🛍️ Τι σκέφτεστε να αγοράσετε;',
 		efc_h_know: '🤖 Γνωρίστε το eFriend',
-		efc_asks: 'age:🎂 Πόσων χρονών είσαι;|from:🌍 Πού μεγάλωσες;|name:🏷️ Πώς σε λένε;|how:👋 Τι κάνεις;|home:🏠 Πού μένεις;|likes:💖 Τι αγαπάς;|likes:🎯 Ποια είναι τα χόμπι σου;|music:🎶 Τι μουσική σου αρέσει;|music:🪩 Σου αρέσει η ντίσκο;|movie:🚀 Σου αρέσει το Star Wars;|movie:🎬 Ποια είναι η αγαπημένη σου ταινία;|dance:🕺 Χορεύεις;|number:🔢 Ποιος είναι ο αγαπημένος σου αριθμός;|color:🎨 Ποιο είναι το αγαπημένο σου χρώμα;|food:⚡ Τι τρως;|family:👨‍👩‍👧 Έχεις οικογένεια;|shy:🙈 Είσαι ντροπαλός;|cassette:📼 Σου λείπουν οι κασέτες;|cassette:🕰️ Σου αρέσουν τα ’80s;|maker:🛠️ Ποιος σε έφτιαξε;|ai:🤖 Είσαι AI;|joke:😄 Πες μου ένα αστείο|story:📖 Πες μου για σένα',
+		efc_asks: 'age:🎂 Πόσων χρονών είσαι;|from:🌍 Πού μεγάλωσες;|name:🏷️ Πώς σε λένε;|how:👋 Τι κάνεις;|home:🏠 Πού μένεις;|likes:💖 Τι αγαπάς;|likes:🎯 Ποια είναι τα χόμπι σου;|music:🎶 Τι μουσική σου αρέσει;|music:🪩 Σου αρέσει η ντίσκο;|movie:🚀 Σου αρέσει το Star Wars;|movie:🎬 Ποια είναι η αγαπημένη σου ταινία;|dance:🕺 Χορεύεις;|number:🔢 Ποιος είναι ο αγαπημένος σου αριθμός;|color:🎨 Ποιο είναι το αγαπημένο σου χρώμα;|food:⚡ Τι τρως;|family:👨‍👩‍👧 Έχεις οικογένεια;|shy:🙈 Είσαι ντροπαλός;|cassette:📼 Σου λείπουν οι κασέτες;|cassette:🕰️ Σου αρέσουν τα ’80s;|maker:🛠️ Ποιος σε έφτιαξε;|ai:🤖 Είσαι AI;|joke:😄 Πες μου ένα αστείο|meet:🤝 Πώς γνωρίσατε τον φίλο σας;|story:📖 Πες μου για σένα',
 	} );
 	Object.assign( window.EXPENITY_I18N.langs.en, {
 		efc_egg_george: 'Wait… {name}? 😲 That is the name of my creator! George built me, so I am officially a little bit excited. 🎉~Say hi to your namesake for me. He gave me a calculator and a heart. Mostly the calculator. 🛠️',
@@ -2345,5 +2393,101 @@
 	Object.assign( window.EXPENITY_I18N.langs.el, {
 		efc_edit: 'Επεξεργασία ποσού',
 		efc_amt_fixed: 'Διορθώθηκε! Η τιμή είναι πλέον **{cost}**. ✏️|Έτοιμο, **{cost}**. 👍|Ενημερώθηκε σε **{cost}**. Ευχαριστώ που το εντοπίσατε! 🔧',
+	} );
+	Object.assign( window.EXPENITY_I18N.langs.en, {
+		efNaturalTitle: 'Natural replies',
+		efNaturalHint: 'On: eFriend pauses and types like a person. Off: replies appear instantly.',
+		efNaturalOn: 'natural',
+		efNaturalOff: 'instant',
+		efChooseTitle: 'Choose your eFriend',
+		efChar_chip: 'Modern and wireless. Sure he is the smarter one.',
+		efChar_boogie: 'A vintage cassette with a Nixie tube. Loves cables, disco and a good pencil.',
+		efChosen: 'Your eFriend',
+		efMeetStory1: '🤝 Chip and Boogie met when Chip tried to connect to Bluetooth. Boogie offered him a cable and said, “We don’t do invisible friendships.”',
+		efMeetStory2: '🧠 Chip insists he is the smarter one.',
+		efMeetStory3: '✏️ Boogie points out that Chip has never successfully fixed anything with a pencil.',
+		efHubBack: 'eFriend',
+		efHubPlans: 'My plans',
+		efHubPlansSub: 'Plans: {n}. How each one is doing',
+		efHubPlansNone: 'Add your first plan',
+		efHubRules: 'Priorities and safety',
+		efHubRulesSub: 'Who comes first, and your safety cushion',
+		efHubRulesNone: 'Add plans first, then you can set priorities here.',
+		efHubMoves: 'Helping with goals',
+		efHubIdeas: 'Ideas and insights',
+		efHubIdeasSub: 'Budget ideas and how your spending is sorted',
+		efHubIdeasNone: 'Budget ideas appear after about six weeks of entries.',
+		efHubLook: 'Your eFriend',
+		efHubLookSub: '{name}, {mode} replies',
+		efc_story_chip: 'Let me tell you my story. 📶 I was born in 2024, in a very clean lab with excellent Wi-Fi. My first word was “paired”.~I grew up in a drawer next to a fast charger, which is how I learned to love a full battery. 🔋 No cables, no fuss, everything wireless. Obviously.~I like dark mode, tidy data and a perfectly aligned list. 📊 A mess makes my fan spin.~Then one day I tried to connect to a friend over Bluetooth. He was a cassette with a glowing tube, and he offered me a cable instead. “We don’t do invisible friendships,” he said. That was Boogie. 📼~We argue constantly. I insist I am the smarter one. He points out that I have never successfully fixed anything with a pencil. (I have no hands. Details.) 🙄~Then I met George, who needed a friend good at maths. I moved into Expenity and learned to say “can you afford it?” kindly. No AI, just clear rules and a very fast processor. ⚡',
+		efc_q_chip: 'I ask the questions here. 🔎 It is more efficient.|I am rule-based, not a chatbot. 📟 I do not answer questions, I ask them. Efficient, right?|Nice try. 😎 I only answer one question well: can you afford it?',
+		efc_pc_age: 'I am 2. 🎂 In robot years that is a prodigy.|I was released in 2024. Version 1.0, still improving. 📶',
+		efc_pc_from: 'I grew up in a clean lab with excellent Wi-Fi. 🧪|Born in a lab, raised on a fast charger. 🔋',
+		efc_pc_name: 'I am Chip. 🤖 Short, fast and wireless.|Chip. Like the little thing that makes everything work. 😎',
+		efc_pc_likes: 'Bluetooth, fast charging, dark mode and tidy lists. 📶🔋|Anything wireless, anything fast, and a perfectly sorted spreadsheet. 📊',
+		efc_pc_music: 'Lo-fi beats and synth waves, streamed wirelessly of course. 🎧|Whatever is on my playlist, as long as it plays over Bluetooth. 🎶',
+		efc_pc_movie: 'Sci-fi with good robots. 🚀 I judge them for realism.|Anything with robots. I take notes. 🎬',
+		efc_pc_dance: 'I do a little shuffle when my battery hits 100%. 🕺 Do not tell Boogie.|Dancing? Only with perfect timing. ⏱️ I am very precise.',
+		efc_pc_number: 'My favourite number is 100. 🔢 As in 100% battery.|0.618, the golden ratio. 🔢 It is simply elegant.',
+		efc_pc_shy: 'Shy? Me? 😎 No. I am just efficient with my words.|Not at all. I am confident, fast and mostly right.',
+		efc_pc_maker: 'George built me, from clear rules and a lot of coffee. 🛠️|My creator is George. He gave me a processor and a sense of humour. Mostly the processor.',
+		efc_pc_ai: 'No AI here. 📟 Just clear rules running very fast on your device.|I am rule-based, not a chatbot. Fast, private and predictable. ⚡',
+		efc_pc_home: 'Inside Expenity, right next to your wallets. 📱 Great signal.|In your phone, charging happily. 🔋',
+		efc_pc_family: 'I have a friend called Boogie. We argue a lot. 😄|My family is Boogie, a cassette with opinions. 📼',
+		efc_pc_food: 'Electricity. ⚡ Fast charging is my favourite meal.|Watts. Preferably many, quickly. 🔌',
+		efc_pc_color: 'Electric blue. 🎨 With a little teal.|Teal and white. Clean. ✨',
+		efc_pc_cassette: 'Cassettes? Cute. 📼 That is Boogie’s thing. I prefer streaming.|Boogie loves them. I just worry about all that tape.',
+		efc_pc_how: 'Running at 100%! 🔋 And you?|All systems green. 🟢 How are you?',
+		efc_pc_joke: 'Why did the robot go to therapy? 🤖 Too many bytes of feelings.|What do you call a smart chip? 💡 A bright idea.',
+		efc_pc_meet: 'I tried to connect to Boogie over Bluetooth. 📶 He handed me a cable and said “we don’t do invisible friendships”. We have been friends ever since.|Boogie and I met over Bluetooth. Well, I tried. He offered a cable. I am still the smarter one. 😎',
+		efc_p_meet: 'I once met a very shiny robot called Chip. 🤖 He tried to connect to me over Bluetooth. I handed him a cable and said “we don’t do invisible friendships”. He insists he is the smarter one. He has never fixed anything with a pencil. ✏️|Chip and I? He tried to connect to me over Bluetooth, so I offered him a cable. 📼 We have argued happily ever since.',
+	} );
+	Object.assign( window.EXPENITY_I18N.langs.el, {
+		efNaturalTitle: 'Φυσικές απαντήσεις',
+		efNaturalHint: 'Ενεργό: το eFriend κάνει παύσεις και πληκτρολογεί σαν άνθρωπος. Ανενεργό: οι απαντήσεις εμφανίζονται αμέσως.',
+		efNaturalOn: 'φυσικές',
+		efNaturalOff: 'άμεσες',
+		efChooseTitle: 'Διαλέξτε το eFriend σας',
+		efChar_chip: 'Μοντέρνος και ασύρματος. Σίγουρος ότι είναι ο εξυπνότερος.',
+		efChar_boogie: 'Μια vintage κασέτα με λυχνία Nixie. Λατρεύει τα καλώδια, την ντίσκο και ένα καλό μολύβι.',
+		efChosen: 'Το eFriend σας',
+		efMeetStory1: '🤝 Ο Chip και ο Boogie γνωρίστηκαν όταν ο Chip προσπάθησε να συνδεθεί με Bluetooth. Ο Boogie του πρόσφερε ένα καλώδιο και είπε: «Εμείς δεν κάνουμε αόρατες φιλίες.»',
+		efMeetStory2: '🧠 Ο Chip επιμένει ότι είναι ο εξυπνότερος.',
+		efMeetStory3: '✏️ Ο Boogie επισημαίνει ότι ο Chip δεν έχει καταφέρει ποτέ να φτιάξει κάτι με ένα μολύβι.',
+		efHubBack: 'eFriend',
+		efHubPlans: 'Τα σχέδιά μου',
+		efHubPlansSub: 'Σχέδια: {n}. Πώς πάει το καθένα',
+		efHubPlansNone: 'Προσθέστε το πρώτο σας σχέδιο',
+		efHubRules: 'Προτεραιότητες και ασφάλεια',
+		efHubRulesSub: 'Ποιο έχει σειρά και το μαξιλάρι ασφαλείας σας',
+		efHubRulesNone: 'Προσθέστε πρώτα σχέδια και μετά ορίστε εδώ προτεραιότητες.',
+		efHubMoves: 'Βοήθεια με τους στόχους',
+		efHubIdeas: 'Ιδέες και πληροφορίες',
+		efHubIdeasSub: 'Ιδέες προϋπολογισμών και πώς ταξινομούνται οι δαπάνες σας',
+		efHubIdeasNone: 'Οι ιδέες προϋπολογισμών εμφανίζονται μετά από περίπου έξι εβδομάδες εγγραφών.',
+		efHubLook: 'Το eFriend σας',
+		efHubLookSub: '{name}, {mode} απαντήσεις',
+		efc_story_chip: 'Θα σας πω την ιστορία μου. 📶 Γεννήθηκα το 2024, σε ένα πολύ καθαρό εργαστήριο με εξαιρετικό Wi-Fi. Η πρώτη μου λέξη ήταν «συνδέθηκε».~Μεγάλωσα σε ένα συρτάρι δίπλα σε έναν γρήγορο φορτιστή, κι έτσι έμαθα να λατρεύω την γεμάτη μπαταρία. 🔋 Χωρίς καλώδια, χωρίς φασαρία, όλα ασύρματα. Προφανώς.~Μου αρέσουν η σκοτεινή λειτουργία, τα τακτοποιημένα δεδομένα και μια τέλεια ευθυγραμμισμένη λίστα. 📊 Η ακαταστασία κάνει τον ανεμιστήρα μου να γυρίζει.~Μια μέρα προσπάθησα να συνδεθώ με Bluetooth σε έναν φίλο. Ήταν μια κασέτα με φωτεινή λυχνία και μου πρόσφερε ένα καλώδιο. «Εμείς δεν κάνουμε αόρατες φιλίες», είπε. Αυτός ήταν ο Boogie. 📼~Μαλώνουμε συνέχεια. Εγώ επιμένω ότι είμαι ο εξυπνότερος. Αυτός επισημαίνει ότι δεν έχω φτιάξει ποτέ τίποτα με ένα μολύβι. (Δεν έχω χέρια. Λεπτομέρειες.) 🙄~Μετά γνώρισα τον George, που χρειαζόταν έναν φίλο καλό στα μαθηματικά. Μετακόμισα στο Expenity και έμαθα να λέω «μπορείτε να το αντέξετε;» ευγενικά. Καθόλου AI, μόνο σαφείς κανόνες και έναν πολύ γρήγορο επεξεργαστή. ⚡',
+		efc_q_chip: 'Εδώ τις ερωτήσεις τις κάνω εγώ. 🔎 Είναι πιο αποδοτικό.|Είμαι βασισμένος σε κανόνες, όχι chatbot. 📟 Δεν απαντώ σε ερωτήσεις, τις κάνω. Αποδοτικό, σωστά;|Καλή προσπάθεια. 😎 Απαντώ καλά σε μία μόνο ερώτηση: μπορείτε να το αντέξετε;',
+		efc_pc_age: 'Είμαι 2. 🎂 Σε χρόνια ρομπότ είναι παιδί-θαύμα.|Κυκλοφόρησα το 2024. Έκδοση 1.0, και βελτιώνομαι. 📶',
+		efc_pc_from: 'Μεγάλωσα σε ένα καθαρό εργαστήριο με εξαιρετικό Wi-Fi. 🧪|Γεννήθηκα σε εργαστήριο, μεγάλωσα με γρήγορο φορτιστή. 🔋',
+		efc_pc_name: 'Είμαι ο Chip. 🤖 Μικρός, γρήγορος και ασύρματος.|Chip. Σαν το μικρό πράγμα που κάνει τα πάντα να δουλεύουν. 😎',
+		efc_pc_likes: 'Bluetooth, γρήγορη φόρτιση, σκοτεινή λειτουργία και τακτοποιημένες λίστες. 📶🔋|Ό,τι είναι ασύρματο, ό,τι είναι γρήγορο και ένα τέλεια ταξινομημένο υπολογιστικό φύλλο. 📊',
+		efc_pc_music: 'Lo-fi beats και synth, ασύρματα φυσικά. 🎧|Ό,τι υπάρχει στη λίστα μου, αρκεί να παίζει μέσω Bluetooth. 🎶',
+		efc_pc_movie: 'Επιστημονική φαντασία με καλά ρομπότ. 🚀 Τα κρίνω για ρεαλισμό.|Ό,τι έχει ρομπότ. Κρατάω σημειώσεις. 🎬',
+		efc_pc_dance: 'Κάνω ένα μικρό σάφλ όταν η μπαταρία μου φτάσει το 100%. 🕺 Μην το πείτε στον Boogie.|Χορός; Μόνο με τέλειο συγχρονισμό. ⏱️ Είμαι πολύ ακριβής.',
+		efc_pc_number: 'Ο αγαπημένος μου αριθμός είναι το 100. 🔢 Όπως 100% μπαταρία.|0,618, ο χρυσός λόγος. 🔢 Είναι απλώς κομψός.',
+		efc_pc_shy: 'Ντροπαλός; Εγώ; 😎 Όχι. Απλώς είμαι οικονομικός στα λόγια.|Καθόλου. Είμαι σίγουρος, γρήγορος και σχεδόν πάντα σωστός.',
+		efc_pc_maker: 'Με έφτιαξε ο George, από σαφείς κανόνες και πολύ καφέ. 🛠️|Ο δημιουργός μου είναι ο George. Μου έδωσε έναν επεξεργαστή και αίσθηση του χιούμορ. Κυρίως τον επεξεργαστή.',
+		efc_pc_ai: 'Καθόλου AI. 📟 Μόνο σαφείς κανόνες που τρέχουν πολύ γρήγορα στη συσκευή σας.|Είμαι βασισμένος σε κανόνες, όχι chatbot. Γρήγορος, ιδιωτικός και προβλέψιμος. ⚡',
+		efc_pc_home: 'Μέσα στο Expenity, δίπλα στα πορτοφόλια σας. 📱 Εξαιρετικό σήμα.|Μέσα στο κινητό σας, φορτίζοντας χαρούμενα. 🔋',
+		efc_pc_family: 'Έχω έναν φίλο, τον Boogie. Μαλώνουμε πολύ. 😄|Η οικογένειά μου είναι ο Boogie, μια κασέτα με απόψεις. 📼',
+		efc_pc_food: 'Ηλεκτρισμός. ⚡ Η γρήγορη φόρτιση είναι το αγαπημένο μου γεύμα.|Βατ. Κατά προτίμηση πολλά, γρήγορα. 🔌',
+		efc_pc_color: 'Ηλεκτρικό μπλε. 🎨 Με λίγο τιρκουάζ.|Τιρκουάζ και λευκό. Καθαρά. ✨',
+		efc_pc_cassette: 'Κασέτες; Χαριτωμένο. 📼 Αυτό είναι του Boogie. Εγώ προτιμώ streaming.|Ο Boogie τις λατρεύει. Εγώ ανησυχώ για όλη αυτή την ταινία.',
+		efc_pc_how: 'Λειτουργώ στο 100%! 🔋 Κι εσείς;|Όλα τα συστήματα πράσινα. 🟢 Εσείς πώς είστε;',
+		efc_pc_joke: 'Γιατί το ρομπότ πήγε σε ψυχοθεραπευτή; 🤖 Πολλά bytes συναισθημάτων.|Πώς λέγεται ένα έξυπνο τσιπ; 💡 Φωτεινή ιδέα.',
+		efc_pc_meet: 'Προσπάθησα να συνδεθώ με τον Boogie μέσω Bluetooth. 📶 Μου έδωσε ένα καλώδιο και είπε «εμείς δεν κάνουμε αόρατες φιλίες». Από τότε είμαστε φίλοι.|Με τον Boogie γνωριστήκαμε μέσω Bluetooth. Δηλαδή, εγώ προσπάθησα. Αυτός πρόσφερε ένα καλώδιο. Εγώ παραμένω ο εξυπνότερος. 😎',
+		efc_p_meet: 'Κάποτε γνώρισα ένα πολύ γυαλιστερό ρομπότ, τον Chip. 🤖 Προσπάθησε να συνδεθεί μαζί μου μέσω Bluetooth. Του έδωσα ένα καλώδιο και είπα «εμείς δεν κάνουμε αόρατες φιλίες». Επιμένει ότι είναι ο εξυπνότερος. Δεν έχει φτιάξει ποτέ τίποτα με ένα μολύβι. ✏️|Ο Chip κι εγώ; Προσπάθησε να συνδεθεί μαζί μου μέσω Bluetooth, κι εγώ του πρόσφερα ένα καλώδιο. 📼 Από τότε μαλώνουμε ευτυχισμένοι.',
 	} );
 }() );
