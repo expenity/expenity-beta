@@ -1,6 +1,16 @@
 {
-  "version": "0.54.22",
+  "version": "0.54.23",
   "releases": [
+    {
+      "version": "0.54.23",
+      "date": "2026-10-21",
+      "en": [
+        "New first-run setup: a chat with eFriend. Slide to choose Boogie or Chip, then answer eight quick questions (language, name, currency, income, bills, a goal, cushion, how to add expenses). eFriend sets everything up, including estimated budgets, and shows a summary you can change."
+      ],
+      "el": [
+        "Νέα ρύθμιση πρώτης χρήσης: μια συνομιλία με το eFriend. Σύρετε για να διαλέξετε τον Boogie ή τον Chip και απαντήστε σε οκτώ γρήγορες ερωτήσεις (γλώσσα, όνομα, νόμισμα, εισόδημα, λογαριασμούς, στόχο, μαξιλάρι, τρόπο προσθήκης εξόδων). Το eFriend τα ρυθμίζει όλα, μαζί με εκτιμώμενους προϋπολογισμούς, και δείχνει μια σύνοψη που μπορείτε να αλλάξετε."
+      ]
+    },
     {
       "version": "0.54.22",
       "date": "2026-10-21",

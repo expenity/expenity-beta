@@ -64,6 +64,7 @@
 	};
 	flow.restart = () => startSetup();
 	const startSetup = () => { W.planSeen = false; W.tgt = null; W.step = Math.min( D().setupStep || 0, steps().length - 1 ); W.wallets = null; setStage( 'setup' ); };
+	flow.finish = () => finish();
 	function finish() {
 		const d = D();
 		d.stage = 'done'; d.onboarded = true;
@@ -195,6 +196,7 @@
 		} );
 	}
 	function setup() {
+		if ( EXA.onboard && EXA.onboard.enabled() ) { EXA.onboard.show(); return; } // the chat with eFriend; the classic wizard below is kept as the backup (onboard.js: USE_CHAT)
 		const id = steps()[ W.step ];
 		if ( id === 'wallets' && ! W.wallets ) { W.wallets = defaultWallets(); W.defIdx = 0; }
 		const total = steps().length - 1;
