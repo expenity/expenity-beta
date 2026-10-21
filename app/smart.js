@@ -120,7 +120,7 @@
 	// The person's own earlier entries that look like this description.
 	const history = ( text, type ) => {
 		const a = new Set( tokens( text ) ); if ( ! a.size ) return [];
-		const pool = type === 'income' ? ( S().incomes || [] ).concat( S().txs.filter( ( x ) => x.type === 'income' ) ) : ( S().txs.filter( ( x ) => x.type === 'expense' ) ).concat( S().bills || [] );
+		const pool = type === 'income' ? ( S().incomes || [] ).concat( S().txs.filter( ( x ) => x.type === 'income' && ! EX.isAdjust( x ) ) ) : ( S().txs.filter( ( x ) => x.type === 'expense' && ! EX.isAdjust( x ) ) ).concat( S().bills || [] );
 		const now = Date.now(), out = [];
 		for ( const x of pool ) {
 			if ( ! x.name ) continue; const b = new Set( tokens( x.name ) ); if ( ! b.size ) continue;

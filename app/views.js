@@ -47,6 +47,7 @@
 	const swBtn = ( action, icon, labelKey, cls ) => `<button type="button" class="sw-act ${ cls }" data-sw="${ action }" tabindex="-1" aria-hidden="true">${ UI.icon( icon, 22 ) }<span>${ esc( t( labelKey ) ) }</span></button>`;
 	/** A short status for a recorded entry: a paid bill, money received, or something dated in the future. */
 	const txPill = ( x ) => {
+		if ( EX.isAdjust( x ) && x.date <= today() ) return `<span class="bm-pill paid">${ UI.icon( 'adjustments', 14 ) } Adjusted</span>`;
 		if ( x.date > today() ) return `<span class="bm-pill later">${ esc( relEn( x.date ) ) }</span>`;
 		if ( x.type === 'income' ) return `<span class="bm-pill paid">${ UI.icon( 'check', 14 ) } Received</span>`;
 		if ( x.type === 'expense' ) return `<span class="bm-pill paid">${ UI.icon( 'check', 14 ) } Paid</span>`; // a recorded expense is a paid one
@@ -109,7 +110,7 @@
 		const act = ( attrs, icon, label, badge ) => `<button type="button" class="ab-btn ab-act" ${ attrs } aria-label="${ esc( label ) }" title="${ esc( label ) }">${ UI.icon( icon, 28 ) }${ badge ? `<i class="ab-badge">${ badge }</i>` : '' }</button>`;
 		const lateN = active().filter( ( b ) => b.next < today() ).length, filtersN = EXA.filtersActive ? EXA.filtersActive() : 0;
 		const bar = {
-			home: [ act( 'data-go="reports"', 'chart-pie', t( 'tabReports' ) ), act( 'data-home-settings', 'layout-dashboard', t( 'homeCustomise' ) ) ],
+			home: [ act( 'data-home-settings', 'layout-dashboard', t( 'homeCustomise' ) ) ],
 			activity: [ act( 'data-act="toggle-search"', st.searchOpen ? 'x' : 'search', t( st.searchOpen ? 'searchClose' : 'searchOpen' ) ), act( 'data-act="toggle-filters"', 'adjustments-horizontal', t( 'filtersTitle' ), filtersN ), act( 'data-act="jump-month"', 'calendar', t( 'jumpMonth' ) ) ],
 			bills: [ act( `data-billsmode="${ st.billsMode === 'calendar' ? 'list' : 'calendar' }"`, st.billsMode === 'calendar' ? 'list' : 'calendar', t( st.billsMode === 'calendar' ? 'modeList' : 'tabCalendar' ) ), act( 'data-act="jump-overdue"', 'alert-triangle', t( 'statOverdue' ), lateN || '' ) ],
 			plan: [ act( 'data-plan="add-budget"', 'target', t( 'newBudget' ) ), act( 'data-plan="add-goal"', 'flag', t( 'newGoal' ) ) ],
@@ -128,15 +129,17 @@
 			else if ( a === 'whatsnew' ) EXA.showReleases && EXA.showReleases();
 		} );
 	};
+	/** Bills lives inside Activity now (a switch at the top), so the Activity tab stays lit on both pages. */
+	const onTab = ( id ) => ( id === 'activity' ? st.view === 'activity' || st.view === 'bills' : st.view === id );
 	EXA.tabbar = () => {
-		const item = ( [ id, icon, label ] ) => `<button type="button" class="tab${ st.view === id ? ' on' : '' }" data-go="${ id }"${ st.view === id ? ' aria-current="page"' : '' }>${ UI.icon( icon, 26 ) }<span>${ esc( t( label ) ) }${ id === 'plan' ? EXA.goalsDiscovery() : '' }</span></button>`;
-		return `${ item( NAV[ 0 ] ) }${ item( NAV[ 1 ] ) }<button type="button" title="${esc(S().settings.receiptScanner!==false?t('scanHoldHint'):t('addNew'))}" class="fab${ S().txs.length || S().bills.length ? '' : ' nudge' }" data-act="add" aria-label="${ esc( t( 'addNew' ) ) }">${ UI.icon( 'plus', 30 ) }</button>${ item( NAV[ 2 ] ) }${ item( RAIL_PLAN ) }`;
+		const item = ( [ id, icon, label ] ) => `<button type="button" class="tab${ onTab( id ) ? ' on' : '' }" data-go="${ id }"${ onTab( id ) ? ' aria-current="page"' : '' }>${ UI.icon( icon, 26 ) }<span>${ esc( t( label ) ) }${ id === 'plan' ? EXA.goalsDiscovery() : '' }</span></button>`;
+		return `${ item( NAV[ 0 ] ) }${ item( NAV[ 1 ] ) }<button type="button" title="${esc(S().settings.receiptScanner!==false?t('scanHoldHint'):t('addNew'))}" class="fab${ S().txs.length || S().bills.length ? '' : ' nudge' }" data-act="add" aria-label="${ esc( t( 'addNew' ) ) }">${ UI.icon( 'plus', 30 ) }</button>${ item( NAV[ 3 ] ) }${ item( RAIL_PLAN ) }`;
 	};
 	EXA.rail = () => {
-		const item = ( [ id, icon, label ] ) => `<button type="button" class="rail-item${ st.view === id ? ' on' : '' }" data-go="${ id }"${ st.view === id ? ' aria-current="page"' : '' }>${ UI.icon( icon, 24 ) }<span>${ esc( t( label ) ) }${ id === 'plan' ? EXA.goalsDiscovery() : '' }</span></button>`;
+		const item = ( [ id, icon, label ] ) => `<button type="button" class="rail-item${ onTab( id ) ? ' on' : '' }" data-go="${ id }"${ onTab( id ) ? ' aria-current="page"' : '' }>${ UI.icon( icon, 24 ) }<span>${ esc( t( label ) ) }${ id === 'plan' ? EXA.goalsDiscovery() : '' }</span></button>`;
 		return `<a class="rail-brand" href="./" aria-label="Expenity"><span id="logo"></span><b>Expen<i>ity</i></b></a>
 			<button type="button" class="rail-add" data-act="add">${ UI.icon( 'plus', 24 ) }<span>${ esc( t( 'addNew' ) ) }</span></button>
-			${ NAV.slice( 0, 3 ).map( item ).join( '' ) }${ item( RAIL_PLAN ) }${ item( NAV[ 3 ] ) }
+			${ item( NAV[ 0 ] ) }${ item( NAV[ 1 ] ) }${ item( RAIL_PLAN ) }${ item( NAV[ 3 ] ) }
 			<span class="sp"></span>
 			<button type="button" class="rail-item${ st.view === 'more' ? ' on' : '' }" data-go="more">${ UI.icon( 'settings', 24 ) }<span>${ esc( t( 'tabMore' ) ) }</span></button>
 			<span class="rail-avatar">${ avatar() }</span>`;
@@ -187,6 +190,17 @@
 		const td = today(), end = addDays( td, 7 ), all = unpaidOccurrences( '', end ).sort( ( a, b ) => ( a.d < b.d ? -1 : 1 ) ).slice( 0, 4 );
 		return all.length ? `<ul class="wk-list">${ all.map( ( o ) => `<li><span>${ esc( o.d < td ? t( 'relLate', { n: diffDays( td, o.d ) } ) : EX.dayName( o.d ) ) }</span><b>${ esc( o.b.name ) }</b><em>${ esc( amountText( o.b ) ) }</em></li>` ).join( '' ) }</ul>` : '';
 	};
+	/** The back of the Home calendar: the month as a whole (what is paid and what is left, the biggest bill, the busiest day), so it never repeats the "next 7 days" of Due soon. */
+	EXA.monthBack = () => {
+		const now = new Date(), y = now.getFullYear(), m = now.getMonth(), ms = iso( new Date( y, m, 1 ) ), me = iso( new Date( y, m + 1, 0 ) ), cur = S().settings.currency, M = ( c ) => money( c / 100, cur );
+		const un = unpaidOccurrences( '', me ), paid = S().txs.filter( ( x ) => x.billId && x.type !== 'income' && x.date >= ms && x.date <= me );
+		if ( ! un.length && ! paid.length ) return `<p class="wk-line">${ esc( t( 'mbNone' ) ) }</p>`;
+		const pC = EX.mainCents( paid.map( ( x ) => ( { amount: Number( x.amount ) || 0, currency: EX.txCurrency( x ) } ) ) ), uC = EX.mainCents( un.map( ( o ) => ( { amount: Number( o.b.amount ) || 0, currency: o.b.currency } ) ) ), pct = pC + uC > 0 ? Math.round( pC / ( pC + uC ) * 100 ) : 0;
+		const all = un.map( ( o ) => ( { name: o.b.name, d: o.d, v: EX.mainCents( [ { amount: Number( o.b.amount ) || 0, currency: o.b.currency } ] ) } ) ).concat( paid.map( ( x ) => ( { name: x.name, d: x.date, v: EX.mainCents( [ { amount: Number( x.amount ) || 0, currency: EX.txCurrency( x ) } ] ) } ) ) );
+		const big = all.reduce( ( a, b ) => ( b.v > a.v ? b : a ), all[ 0 ] ), perDay = {}; all.forEach( ( x ) => { perDay[ x.d ] = ( perDay[ x.d ] || 0 ) + 1; } );
+		const busy = Object.keys( perDay ).sort().reduce( ( a, d ) => ( a === null || perDay[ d ] > perDay[ a ] ? d : a ), null );
+		return `<div class="mb-bar" role="img" aria-label="${ pct }%"><i style="width:${ pct }%"></i></div><p class="wk-line">Paid <b>${ esc( M( pC ) ) }</b> · ${ paid.length }</p><p class="wk-line">Unpaid <b>${ esc( M( uC ) ) }</b> · ${ un.length }</p>${ big && big.v > 0 ? `<p class="wk-line">${ esc( t( 'mbBiggest', { name: big.name, day: EX.dayName( big.d ) } ) ) }</p>` : '' }${ busy && perDay[ busy ] > 1 ? `<p class="wk-line">${ esc( t( 'mbBusy', { day: EX.dayName( busy ), n: perDay[ busy ] } ) ) }</p>` : '' }`;
+	};
 	EXA.weekSummary = () => {
 		const td = today(), end = addDays( td, 7 ), all = unpaidOccurrences( '', end ).sort( ( a, b ) => ( a.d < b.d ? -1 : 1 ) );
 		const late = all.filter( ( o ) => o.d < td ), soon = all.filter( ( o ) => o.d >= td );
@@ -229,9 +243,8 @@
 		const unpaidList = unpaidOccurrences( '', mEnd ), unpaidV = unpaidList.map( ( o ) => ( { amount: Number( o.b.amount ) || 0, currency: o.b.currency } ) );
 		const paidV = S().txs.filter( ( x ) => x.billId && x.type !== 'income' && x.date >= mStart && x.date <= mEnd ).map( ( x ) => ( { amount: Number( x.amount ) || 0, currency: EX.txCurrency( x ) } ) );
 		const pC = EX.mainCents( paidV ), uC = EX.mainCents( unpaidV ), pct = pC + uC > 0 ? Math.round( ( pC / ( pC + uC ) ) * 100 ) : 0;
-		let safe = null; try { if ( EX.safeSpend ) { const r = EX.safeSpend.calculate(); if ( r.valid && Number.isFinite( r.daily ) ) safe = Math.max( 0, Math.floor( r.daily ) ); } } catch ( e ) { /* the estimate needs more data */ }
 		const tile = ( id, icon, label, val, sub, backTitle, backVal, backSub ) => flipCard( id, `<div class="fc-head"><span class="fc-label">${ esc( label ) }</span><i class="fc-hint sm" aria-hidden="true">${ UI.icon( 'refresh', 14 ) }</i></div><b class="fc-val">${ esc( val ) }</b><small>${ esc( sub ) }</small>`, `<div class="fc-head"><span class="fc-label">${ esc( backTitle ) }</span><i class="fc-hint sm" aria-hidden="true">${ UI.icon( 'refresh', 14 ) }</i></div><b class="fc-val">${ esc( backVal ) }</b><small>${ esc( backSub ) }</small>`, 'fc-tile' );
-		const strip = `<section data-home="balance"><div class="key-strip">${ tile( 'k-balance', 'wallet', t( 'keyBalance' ), setAsideC ? M( totalC + setAsideC ) : total, setAsideC ? `🔒 ${ M( setAsideC ) } ${ esc( t( 'efSetAside' ) ) }` : `${ esc( t( 'ovIncome' ) ) } ${ inc }`, t( 'heroBackTitle' ), M( mC.inc - mC.exp ), `${ t( 'ovIncome' ) } ${ inc } · ${ t( 'ovExpenses' ) } ${ exp }` ) }${ tile( 'k-topay', 'calendar-event', t( 'keyToPay' ), EX.sumByCur( unpaidV ) || money( 0 ), t( 'billsN', { n: unpaidList.length } ), 'Paid', `${ pct }%`, `Paid ${ EX.sumByCur( paidV ) || money( 0 ) } · Unpaid ${ EX.sumByCur( unpaidV ) || money( 0 ) }` ) }${ safe === null ? '' : tile( 'k-safe', 'shield-check', t( 'keySafe' ), M( safe ), ( EXA.efriendPendingTotal && EXA.efriendPendingTotal() > 0 ? `🤖 ${ M( EXA.efriendPendingTotal() ) } ${ esc( t( 'efPendingWord' ) ) }` : t( 'keySafeSub' ) ), t( 'keySafe' ), M( safe ), t( 'safeEstimate' ) ) }</div></section>`;
+		const strip = `<section data-home="balance"><div class="key-strip">${ tile( 'k-balance', 'wallet', t( 'keyBalance' ), setAsideC ? M( totalC + setAsideC ) : total, setAsideC ? `🔒 ${ M( setAsideC ) } ${ esc( t( 'efSetAside' ) ) }` : `${ esc( t( 'ovIncome' ) ) } ${ inc }`, t( 'heroBackTitle' ), M( mC.inc - mC.exp ), `${ t( 'ovIncome' ) } ${ inc } · ${ t( 'ovExpenses' ) } ${ exp }` ) }${ tile( 'k-topay', 'calendar-event', t( 'keyToPay' ), EX.sumByCur( unpaidV ) || money( 0 ), t( 'billsN', { n: unpaidList.length } ), 'Paid', `${ pct }%`, `Paid ${ EX.sumByCur( paidV ) || money( 0 ) } · Unpaid ${ EX.sumByCur( unpaidV ) || money( 0 ) }` ) }</div></section>`;
 		const legacy = `<section data-home="balance"><div class="hero-flip${ st.heroFlip ? ' flipped' : '' }${st.characterRetreated?' character-retreated':''}${st.characterCollapsed?' character-collapsed':''}" data-act="flip-hero" role="button" tabindex="0" aria-pressed="${ !! st.heroFlip }" aria-label="${ esc( t( 'balanceAria' ) + '. ' + t( 'heroFlipHint' ) ) }">
 			<section class="hero hero-front"><small>${ esc( t( 'ovBalance' ) ) }</small><b${ count( total, totalC ) }>${ esc( total ) }</b>
 				<div class="hero-tiles"><div><span class="k">${ UI.icon( 'arrow-down-left', 18 ) } ${ esc( t( 'ovIncome' ) ) }</span><b${ count( inc, mC.inc ) }>${ esc( inc ) }</b></div><div><span class="k">${ UI.icon( 'arrow-up-right', 18 ) } ${ esc( t( 'ovExpenses' ) ) }</span><b${ count( exp, mC.exp ) }>${ esc( exp ) }</b></div></div><i class="flip-ic" aria-hidden="true">${ UI.icon( 'refresh', 18 ) }</i></section>
@@ -243,7 +256,7 @@
 			${ lead ? `<section data-home="ideas">${EXA.ideasHome()}</section>` : `<section data-home="wallets">${WAL}</section>` }
 			${ lead ? `<section data-home="wallets">${WAL}</section>` : `<section data-home="due">${DUE}</section>` }
 			${ lead ? '' : `<section data-home="ideas">${EXA.ideasHome()}</section>` }
-			${ S().bills.length ? `<section data-home="calendar"><div class="sec-head"><h2>${ esc( t( 'tabCalendar' ) ) }</h2><span class="sec-acts">${ flipBtn( 'cal' ) }<button type="button" class="link" data-go="bills">${ esc( t( 'seeAll' ) ) }</button></span></div>${ ( ( cp ) => flipCard( 'cal', cp[ 0 ], `<div class="wk-back"><span class="wk-ic bob">${ UI.icon( 'calendar-event', 34 ) }</span><h3>${ esc( t( 'wkTitle' ) ) }</h3>${ EXA.weekSummary() }${ EXA.weekList() }</div>`, 'fc-cal' ) + cp[ 1 ] )( billsCalendar( true ) ) }</section>` : '' }
+			${ S().bills.length ? `<section data-home="calendar"><div class="sec-head"><h2>${ esc( t( 'tabCalendar' ) ) }</h2><span class="sec-acts">${ flipBtn( 'cal' ) }<button type="button" class="link" data-go="bills">${ esc( t( 'seeAll' ) ) }</button></span></div>${ ( ( cp ) => flipCard( 'cal', cp[ 0 ], `<div class="wk-back"><span class="wk-ic bob">${ UI.icon( 'calendar-event', 34 ) }</span><h3>${ esc( monthName( y, m ) ) }</h3>${ EXA.monthBack() }</div>`, 'fc-cal' ) + cp[ 1 ] )( billsCalendar( true ) ) }</section>` : '' }
 			<section data-home="goals">${ EXA.planHome() }</section><section data-home="recent">
 			<div class="sec-head"><h2>${ esc( t( 'ovRecent' ) ) }</h2><button type="button" class="link" data-go="activity">${ esc( t( 'seeAll' ) ) }</button></div>
 			${ recent.length ? `<ul class="list">${ recent.map( txItem ).join( '' ) }</ul>` : `<p class="muted pad">${ esc( t( 'txNoneHint' ) ) }</p>` }</section>`;
@@ -251,6 +264,10 @@
 
 	/* ------------------------------------------------------------------ Activity */
 
+	/** The entries of the month in a fold, like the bills that are due: the title and the total stay visible when it is closed. "Paid" stays English, like the other status words. */
+	const paidFold = ( list, f ) => `<details class="act-fold act-paid" data-fold="paid"${ st.paidOpen !== false ? ' open' : '' }><summary><span class="af-main">${ UI.icon( 'circle-check', 18 ) } Paid <b>${ list.length }</b></span><span class="af-sub">${ esc( money( sumMain( f.expense ) / 100, mainCur() ) ) }</span>${ UI.icon( 'chevron-down', 18 ) }</summary><div class="af-body"><ul class="bm-list">${ list.map( txItem ).join( '' ) }</ul></div></details>`;
+	/** Activity and Bills are one place: a switch at the top, with the number of overdue bills on it. */
+	const pageSwitch = () => { const late = active().filter( ( b ) => b.next < today() ).length; return `<div class="segm act-switch" role="tablist">${ [ [ 'activity', 'tabActivity' ], [ 'bills', 'tabBills' ] ].map( ( [ id, k ] ) => `<button type="button" class="${ st.view === id ? 'on' : '' }" data-go="${ id }" role="tab" aria-selected="${ st.view === id }">${ esc( t( k ) ) }${ id === 'bills' && late ? `<i class="act-late" aria-label="${ late }">${ late }</i>` : '' }</button>` ).join( '' ) }</div>`; };
 	EXA.activity = () => {
 		const schedules = st.txFilter.type === 'income' && st.incomeMode === 'recurring';
 		const incomeNav = st.txFilter.type === 'income' ? `<div class="segm income-modes" role="tablist">${ [ ['recorded','incomeRecorded','arrows-sort'], ['recurring','incomeRecurring','repeat'] ].map(([id,label,ic]) => `<button type="button" role="tab" aria-selected="${ ( st.incomeMode || 'recorded' ) === id }" class="${ ( st.incomeMode || 'recorded' ) === id ? 'on' : '' }" data-income-mode="${ id }">${ UI.icon(ic,18) } ${ esc(t(label)) }</button>`).join('') }</div>` : '';
@@ -276,12 +293,11 @@
 		const toPayHtml = toPay.length ? `<details class="act-fold act-topay${ toPayDue ? ' late' : '' }"><summary><span class="af-main">${ UI.icon( 'calendar-event', 18 ) } ${ esc( t( 'dueSoon' ) ) } <b>${ toPay.length }</b></span><span class="af-sub">${ esc( EX.sumByCur( toPay.map( bmVal ) ) ) }</span>${ UI.icon( 'chevron-down', 18 ) }</summary><div class="af-body"><ul class="bm-list">${ toPay.slice( 0, 5 ).map( bmRow ).join( '' ) }</ul><button type="button" class="link" data-go="bills">${ esc( t( 'seeAll' ) ) }</button></div></details>` : '';
 		const activeFilters = ( fl.type !== 'all' ? 1 : 0 ) + ( fl.account ? 1 : 0 ) + ( EXA.tagFilter ? 1 : 0 );
 		const typeOpt = ( v, label ) => `<option value="${ v }"${ fl.type === v ? ' selected' : '' }>${ esc( label ) }</option>`;
-		return `${EXA.entryReceipt?EXA.entryReceipt():''}${ schedules ? '' : ( EXA.filtersActive && EXA.rangeTxs && EXA.rangeTxs() ? '' : monthHeader ) }
+		return `${ pageSwitch() }${EXA.entryReceipt?EXA.entryReceipt():''}${ schedules ? '' : ( EXA.filtersActive && EXA.rangeTxs && EXA.rangeTxs() ? '' : monthHeader ) }
 			${ st.searchOpen ? `<div class="searchbar">${ UI.icon( 'search', 22 ) }<input id="txSearch" type="search" value="${ esc( fl.q ) }" placeholder="${ esc( t( 'txSearchPh' ) ) }" aria-label="${ esc( t( 'txSearchPh' ) ) }" autocomplete="off"></div>` : '' }
 			${ ( st.searchOpen || st.filtersPanel ) && EXA.filterPanel ? EXA.filterPanel() : '' }
-			${ toPayHtml }
 			${ incomeNav }
-			${ schedules ? EXA.incomeSchedules() : groups.length ? `<ul class="bm-list">${ list.map( txItem ).join( '' ) }</ul>` + ( UI.isPhone() ? `<p class="hint">${ esc( t( 'swipeHint' ) ) }</p>` : '' ) : empty( 'arrows-sort', 'teal', t( 'txNone' ), t( 'txNoneHint' ), `<button type="button" class="btn btn-primary" data-act="add">${ esc( t( 'addTx' ) ) }</button>` ) }`;
+			${ schedules ? EXA.incomeSchedules() : groups.length ? paidFold( list, f ) + ( UI.isPhone() && st.paidOpen !== false ? `<p class="hint">${ esc( t( 'swipeHint' ) ) }</p>` : '' ) : empty( 'arrows-sort', 'teal', t( 'txNone' ), t( 'txNoneHint' ), `<button type="button" class="btn btn-primary" data-act="add">${ esc( t( 'addTx' ) ) }</button>` ) }`;
 	};
 
 	/* ------------------------------------------------------------------ Bills */
@@ -372,10 +388,7 @@
 			${ items.length ? `<ul class="bm-list">${ unpaid.map( bmRow ).join( '' ) }${ paidList.map( bmRow ).join( '' ) }</ul>` : `<p class="muted center pad">${ esc( t( 'noDue' ) ) }</p>` }
 			${ S().bills.length ? '' : `<div class="btn-row"><button type="button" class="btn btn-primary" data-act="add-bill">${ esc( t( 'addTitle' ) ) }</button></div>` }`;
 	}
-	EXA.bills = () => {
-		const seg = ( id, label ) => `<button type="button" class="${ st.billsMode === id ? 'on' : '' }" data-billsmode="${ id }" role="tab" aria-selected="${ st.billsMode === id }">${ esc( label ) }</button>`;
-		return `<div class="segm" role="tablist">${ seg( 'list', t( 'modeList' ) ) }${ seg( 'calendar', t( 'tabCalendar' ) ) }</div>${ st.billsMode === 'calendar' ? billsCalendar() : ( S().bills.length ? billsMonth() : billsToday() ) }`;
-	};
+	EXA.bills = () => `${ pageSwitch() }${ st.billsMode === 'calendar' ? billsCalendar() : ( S().bills.length ? billsMonth() : billsToday() ) }`;
 
 	/* ------------------------------------------------------------------ Reports */
 
@@ -400,7 +413,7 @@
 		const cfMax = Math.max( 1, ...months.map( ( x ) => Math.max( x.inc, x.exp ) ) );
 		const from = st.repPeriod === 'month' ? td.slice( 0, 7 ) + '-01' : st.repPeriod === '3m' ? iso( new Date( ref.getFullYear(), ref.getMonth() - 2, 1 ) ) : td.slice( 0, 4 ) + '-01-01';
 		const c = {};
-		S().txs.filter( ( x ) => x.type === 'expense' && EX.txCurrency( x ) === main && x.date >= from ).forEach( ( x ) => { c[ x.category ] = ( c[ x.category ] || 0 ) + EX.cents( x.amount ); } );
+		S().txs.filter( ( x ) => x.type === 'expense' && ! EX.isAdjust( x ) && EX.txCurrency( x ) === main && x.date >= from ).forEach( ( x ) => { c[ x.category ] = ( c[ x.category ] || 0 ) + EX.cents( x.amount ); } );
 		const cats = Object.entries( c ).sort( ( a, b ) => b[ 1 ] - a[ 1 ] );
 		const total = cats.reduce( ( s, x ) => s + x[ 1 ], 0 ) || 1;
 		const weeks = [];
@@ -476,7 +489,7 @@
 	}
 	function walletsView() {
 		return `<ul class="list">${ S().accounts.map( ( a ) => `<li><button type="button" class="item" data-act="edit-wallet" data-id="${ esc( a.id ) }">${ UI.walletCi( a ) }<span class="mid"><b>${ esc( EX.accountName( a ) ) }</b><small>${ esc( a.currency ) }${ a.archived ? ' · ' + esc( t( 'archivedTag' ) ) : '' }${ a.space ? ' · ' + esc( t( 'sharedTag' ) ) + ' · ' + esc( t( 'role' + EX.role( a ).charAt( 0 ).toUpperCase() + EX.role( a ).slice( 1 ) ) ) : '' }</small></span><span class="a">${ esc( money( EX.balance( a ) / 100, a.currency ) ) }</span></button></li>` ).join( '' ) }</ul>
-			<div class="btn-row"><button type="button" class="btn btn-primary" data-act="add-wallet">${ UI.icon( 'plus', 20 ) } ${ esc( t( 'walletAdd' ) ) }</button><button type="button" class="btn btn-ghost" data-act="join-wallet">${ UI.icon( 'users', 20 ) } ${ esc( t( 'joinTitle' ) ) }</button></div>`;
+			${ EXA.adjust ? EXA.adjust.setting() : '' }<div class="btn-row"><button type="button" class="btn btn-primary" data-act="add-wallet">${ UI.icon( 'plus', 20 ) } ${ esc( t( 'walletAdd' ) ) }</button><button type="button" class="btn btn-ghost" data-act="join-wallet">${ UI.icon( 'users', 20 ) } ${ esc( t( 'joinTitle' ) ) }</button></div>`;
 	}
 	function categoriesView() {
 		const custom = S().categories;
@@ -546,3 +559,6 @@
 	const EX = window.EX; if ( ! EX ) return;
 	Object.assign( EX.I18N.langs.en, { actSnooze: 'Snooze 1 day' } ); Object.assign( EX.I18N.langs.el, { actSnooze: 'Αναβολή 1 ημέρας' } );
 }() );
+
+document.addEventListener( 'toggle', ( e ) => { const d = e.target; if ( d && d.matches && d.matches( 'details[data-fold=paid]' ) && EXA.st ) EXA.st.paidOpen = d.open; }, true );
+Object.assign( EX.I18N.langs.en, { mbNone: 'No bills this month.', mbBiggest: 'Biggest: {name}, {day}', mbBusy: 'Busiest day: {day} ({n})' } ); Object.assign( EX.I18N.langs.el, { mbNone: 'Κανένας λογαριασμός αυτόν τον μήνα.', mbBiggest: 'Μεγαλύτερος: {name}, {day}', mbBusy: 'Πιο γεμάτη ημέρα: {day} ({n})' } );

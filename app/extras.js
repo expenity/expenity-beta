@@ -124,7 +124,7 @@
 	EXA.streak = () => {
 		const txs = EX.reportTxs().filter( ( x ) => x.type === 'expense' && ! x.goalId ), by = new Map();
 		txs.forEach( ( x ) => by.set( x.date, ( by.get( x.date ) || 0 ) + cents( x ) ) );
-		const dates = S().txs.map( ( x ) => x.date ).sort(), first = dates[ 0 ], td = today();
+		const dates = S().txs.filter( ( x ) => ! EX.isAdjust( x ) ).map( ( x ) => x.date ).sort(), first = dates[ 0 ], td = today();
 		if ( ! first ) return { cur: 0, best: 0, week: [], noSpend: 0, mode: 'nospend' };
 		const ok = ( d ) => ( by.get( d ) || 0 ) <= limitFor( d ), hasBudgets = S().budgets.length > 0;
 		let cur = 0, d = td; while ( d >= first && cur < 400 && ok( d ) ) { cur++; d = EX.addDays( d, -1 ); }

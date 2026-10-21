@@ -764,7 +764,7 @@
 			${ EXA.walletColorField ? EXA.walletColorField( v ) : '' }
 			<label class="entry-paid wallet-default"><span><b>${ esc( t( 'wDefault' ) ) }</b><small>${ esc( t( 'wDefaultHint' ) ) }</small></span><span class="switch"><input type="checkbox" name="isDefault"${ a && S().settings.defaultAccount === a.id ? ' checked' : '' }><i></i></span></label>
 			<label class="f chk"><input type="checkbox" name="archived"${ v.archived ? ' checked' : '' }> <span>${ esc( t( 'wArchived' ) ) }</span></label>
-			${ a ? EXA.shareRow( a ) : '' }
+			${ a && EXA.adjust ? EXA.adjust.walletButton( a ) : '' }${ a ? EXA.shareRow( a ) : '' }
 			${ EXA.tagsField(v.tags) }${ EXA.photos.slot( v.photo ) }<p class="err" id="walletErr" role="alert" hidden></p>
 			<div class="btn-row sticky-actions">${ a ? `<button type="button" class="btn btn-danger" id="walletDel">${ esc( t( 'del' ) ) }</button>` : '' }<span class="sp"></span><button type="submit" class="btn btn-primary">${ esc( t( 'saveTx' ) ) }</button></div></form>`, { cls: 'small' } );
 	};

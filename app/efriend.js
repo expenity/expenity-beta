@@ -84,7 +84,7 @@
 		if ( days <= 0 ) { out.verdict = 'unlikely'; out.late = true; out.projectedFree = 0; out.gap = remaining; out.confidence = 'low'; return out; }
 		const balance = EX.mainCents( wallets.map( ( a ) => ( { amount: EX.balance( a ) / 100, currency: a.currency } ) ) );
 		// Habits: the last 90 days (at least 14), without goal money, transfers and bill payments (bills are counted from their own schedule).
-		const txs = S().txs.filter( ( x ) => x.type !== 'transfer' && ! x.goalId && ! x.efPlan ), first = txs.reduce( ( m, x ) => ( x.date < m ? x.date : m ), now );
+		const txs = S().txs.filter( ( x ) => x.type !== 'transfer' && ! x.goalId && ! x.efPlan && ! EX.isAdjust( x ) ), first = txs.reduce( ( m, x ) => ( x.date < m ? x.date : m ), now );
 		const win = Math.max( 14, Math.min( 90, diff( now, first ) + 1 ) ), since = addDays( now, -win );
 		const inWin = txs.filter( ( x ) => x.date >= since && x.date <= now );
 		const perCat = {}; inWin.filter( ( x ) => x.type === 'expense' && ! x.billId ).forEach( ( x ) => { perCat[ x.category || 'other' ] = ( perCat[ x.category || 'other' ] || 0 ) + centsOf( x.amount, EX.txCurrency( x ) ); } );
@@ -316,7 +316,7 @@
 		// the bulb takes its colour from the light settings (CSS variables), so it can change without redrawing
 		svg = svg.replace( /stop-color="#ffa526"/g, 'style="stop-color:var(--ef-tl)"' ).replace( /stop-color="#ff8220"/g, 'style="stop-color:var(--ef-tm)"' ).replace( /stop-color="#ff7b00"/g, 'style="stop-color:var(--ef-te)"' ).replace( /stroke="#ff7417"/g, 'style="stroke:var(--ef-te)"' ).replace( /stroke="#ff941f"/g, 'style="stroke:var(--ef-tm)"' ).replace( /stroke="#ffe6a6"/g, 'style="stroke:var(--ef-tc)"' );
 		// the Nixie digit keeps flipping between 0 and 1 (binary), steady in brightness; only the halo and the blaze pulse
-		svg = svg.replace( /<g class="tube-light">(<path d="M47-4 40 5H49M47-4V12"[\s\S]*?)<\/g>/, ( m, paths ) => { const tags = paths.match( /<path [^>]*\/>/g ) || [], mk = ( d ) => tags.map( ( p ) => p.replace( /d="[^"]*"/, 'd="' + d + '"' ) ).join( '' ); return '<g class="ef-digit d0">' + mk( 'M45-4C50-4 50 12 45 12C40 12 40-4 45-4Z' ) + '</g><g class="ef-digit d1">' + mk( 'M42.5-1 46-4V12' ) + '</g>'; } );
+		svg = svg.replace( /<g class="tube-light">(<path d="M47-4 40 5H49M47-4V12"[\s\S]*?)<\/g>/, ( m, paths ) => { const tags = paths.match( /<path [^>]*\/>/g ) || [], mk = ( d ) => tags.map( ( p ) => p.replace( /d="[^"]*"/, 'd="' + d + '"' ) ).join( '' ); const thick = ( x ) => x.replace( /stroke-width="4"/g, 'stroke-width="8"' ).replace( /stroke-width="1.9"/g, 'stroke-width="4.2"' ).replace( /stroke-width=".6"/g, 'stroke-width="1.5"' ); return '<g class="ef-digit d0">' + thick( mk( 'M45-3C49.5-3 49.5 11 45 11C40.5 11 40.5-3 45-3Z' ) ) + '</g><g class="ef-digit d1">' + thick( mk( 'M42-1 46-4.5V11.5' ) ) + '</g>'; } );
 		// a bright blaze behind the glass of the Nixie tube (it pulses in style.css)
 		const bid = prefix + 'blaze';
 		svg = svg.replace( '<g class="tube-light">', `<defs><radialGradient id="${ bid }"><stop offset="0" style="stop-color:var(--ef-tc)" stop-opacity=".95"/><stop offset=".25" style="stop-color:var(--ef-tm)" stop-opacity=".9"/><stop offset=".6" style="stop-color:var(--ef-te)" stop-opacity=".55"/><stop offset="1" style="stop-color:var(--ef-te)" stop-opacity="0"/></radialGradient></defs><ellipse class="tube-blaze" cx="45" cy="3" rx="34" ry="38" fill="url(#${ bid })"/><g class="tube-light">` );
@@ -612,7 +612,7 @@
 	const LVL = [ 'must', 'need', 'want' ];
 	F.sortRows = () => {
 		const since = addDays( today(), -90 ), tot = {};
-		S().txs.filter( ( x ) => x.type === 'expense' && x.date >= since && ! x.goalId ).forEach( ( x ) => { const c = x.category || 'other'; tot[ c ] = ( tot[ c ] || 0 ) + centsOf( x.amount, EX.txCurrency( x ) ); } );
+		S().txs.filter( ( x ) => ! EX.isAdjust( x ) && x.type === 'expense' && x.date >= since && ! x.goalId ).forEach( ( x ) => { const c = x.category || 'other'; tot[ c ] = ( tot[ c ] || 0 ) + centsOf( x.amount, EX.txCurrency( x ) ); } );
 		S().bills.forEach( ( b ) => { const c = b.category || 'other'; tot[ c ] = tot[ c ] || 1; } );
 		const ov = S().settings.importance || {};
 		return Object.keys( tot ).sort( ( a, b ) => tot[ b ] - tot[ a ] ).slice( 0, 14 ).map( ( cat ) => {
@@ -772,7 +772,6 @@
 		const noGoals = `<section class="card"><h2>${ esc( t( 'efYourGoals' ) ) }</h2><p class="muted">${ esc( t( 'efNoGoals' ) ) }</p></section>`;
 		const newBtn = `<section class="card"><div class="btn-row"><button type="button" class="btn btn-primary" data-ef-new>${ UI.icon( 'plus', 20 ) } ${ esc( t( 'efNewGoal' ) ) }</button></div></section>`;
 		const sortRows = `<section class="card"><div class="list mlist"><button type="button" class="mrow" data-ef-sort>${ UI.ci( 'adjustments-horizontal', 'teal', 40 ) }<span class="mid"><b>${ esc( t( 'efSortTitle' ) ) }</b><small>${ esc( t( 'efSortSub' ) ) }</small></span>${ UI.icon( 'chevron-right', 18 ) }</button></div></section>`;
-		const tourRow = `<section class="card"><div class="list mlist"><button type="button" class="mrow" data-ef-intro>${ UI.ci( 'player-play', 'purple', 40 ) }<span class="mid"><b>${ esc( t( 'efReplay' ) ) }</b><small>${ esc( t( 'efReplaySub' ) ) }</small></span>${ UI.icon( 'chevron-right', 18 ) }</button></div></section>`;
 		const soundCard = `<section class="card"><label class="fx-row"><span class="mid"><b>${ esc( t( 'efSoundTitle' ) ) }</b><small>${ esc( t( 'efSoundHint' ) ) }</small></span><span class="switch"><input type="checkbox" data-ef-sound${ S().settings.efSound !== false ? ' checked' : '' } aria-label="${ esc( t( 'efSoundTitle' ) ) }"><i></i></span></label></section>`;
 		const naturalCard = `<section class="card"><label class="fx-row"><span class="mid"><b>${ esc( t( 'efNaturalTitle' ) ) }</b><small>${ esc( t( 'efNaturalHint' ) ) }</small></span><span class="switch"><input type="checkbox" data-ef-natural${ natural ? ' checked' : '' } aria-label="${ esc( t( 'efNaturalTitle' ) ) }"><i></i></span></label></section>`;
 		const charCard = `<section class="card ef-charcard"><h2>${ esc( t( 'efChooseTitle' ) ) }</h2><div class="ef-chars" role="radiogroup" aria-label="${ esc( t( 'efChooseTitle' ) ) }">${ [ 'chip', 'boogie' ].map( ( c ) => `<button type="button" class="ef-char${ ch === c ? ' on' : '' }" data-ef-char="${ c }" role="radio" aria-checked="${ ch === c }"><span class="ef-char-art">${ F.mascotOf( c, 'happy', 96 ) }</span><b>${ esc( CHARS[ c ].name ) }</b><small>${ esc( t( 'efChar_' + c ) ) }</small>${ ch === c ? `<em>✓ ${ esc( t( 'efChosen' ) ) }</em>` : '' }</button>` ).join( '' ) }<button type="button" class="ef-gear" data-ef-gear aria-label="${ esc( t( 'efBoogieRoom' ) ) }" title="${ esc( t( 'efBoogieRoom' ) ) }">${ UI.icon( 'settings', 24 ) }</button><button type="button" class="ef-gear chip" data-ef-gear="chip" aria-label="${ esc( t( 'efChipRoom' ) ) }" title="${ esc( t( 'efChipRoom' ) ) }">${ UI.icon( 'settings', 24 ) }</button></div>${ points( [ t( 'efMeetStory1' ), t( 'efMeetStory2' ), t( 'efMeetStory3' ) ] ) }</section>`;
@@ -781,7 +780,7 @@
 		if ( sub === 'rules' ) return `${ back( t( 'efHubRules' ) ) }${ askBanner() ? `<section class="card">${ askBanner() }</section>` : '' }${ prioCard }${ riskCard }${ prioCard || riskCard ? '' : `<section class="card"><p class="muted">${ esc( t( 'efHubRulesNone' ) ) }</p></section>` }`;
 		if ( sub === 'moves' ) return `${ back( t( 'efHubMoves' ) ) }${ proposalsHtml() }${ allocCard() }`;
 		if ( sub === 'ideas' ) return `${ back( t( 'efHubIdeas' ) ) }${ budIdeasHtml() || `<section class="card"><p class="muted">${ esc( t( 'efHubIdeasNone' ) ) }</p></section>` }${ sortRows }`;
-		if ( sub === 'look' ) return `${ back( t( 'efHubLook' ) ) }${ charCard }${ naturalCard }${ soundCard }<section class="card ef-page"><div class="ef-top">${ F.mascot( 'happy', 84 ) }<div class="ef-bubble"><b>${ esc( t( 'efMeet' ) ) }</b></div></div>${ para( 'efMeetText' ) }</section>${ tourRow }`;
+		if ( sub === 'look' ) return `${ back( t( 'efHubLook' ) ) }${ charCard }${ naturalCard }${ soundCard }`;
 		// the hub: the way into the chat, then everything else in a few groups
 		const hrow = ( id, ic, color, title, subtitle ) => `<button type="button" class="mrow" data-ef-sub="${ id }">${ UI.ci( ic, color, 40 ) }<span class="mid"><b>${ esc( title ) }</b><small>${ esc( subtitle ) }</small></span>${ UI.icon( 'chevron-right', 18 ) }</button>`;
 		const al = F.alloc(), modeWord = t( { off: 'efModeOff', suggest: 'efModeSuggest', ask: 'efModeAsk', auto: 'efModeAuto' }[ al.mode || 'off' ] || 'efModeOff' ), pend = props().filter( ( p ) => p.status === 'pending' ).length;
@@ -818,7 +817,7 @@
 
 	/** Your usual month without a plan in mind: spending, income and how much history there is. Used by the cushion slider and the "add your salary" prompts. */
 	F.baseline = () => {
-		const now = today(), txs = S().txs.filter( ( x ) => x.type !== 'transfer' && ! x.goalId && ! x.efPlan ), first = txs.reduce( ( m, x ) => ( x.date < m ? x.date : m ), now ), win = Math.max( 14, Math.min( 90, diff( now, first ) + 1 ) ), since = addDays( now, -win );
+		const now = today(), txs = S().txs.filter( ( x ) => x.type !== 'transfer' && ! x.goalId && ! x.efPlan && ! EX.isAdjust( x ) ), first = txs.reduce( ( m, x ) => ( x.date < m ? x.date : m ), now ), win = Math.max( 14, Math.min( 90, diff( now, first ) + 1 ) ), since = addDays( now, -win );
 		const inWin = txs.filter( ( x ) => x.date >= since && x.date <= now ), spend = inWin.filter( ( x ) => x.type === 'expense' && ! x.billId ).reduce( ( s, x ) => s + centsOf( x.amount, EX.txCurrency( x ) ), 0 ), other = inWin.filter( ( x ) => x.type === 'income' && ! x.incomeId ).reduce( ( s, x ) => s + centsOf( x.amount, EX.txCurrency( x ) ), 0 );
 		const m30 = addDays( now, 62 ), per = 62 / 30; let b30 = 0, i30 = 0;
 		S().bills.filter( ( b ) => ! b.done && b.next ).forEach( ( b ) => { EX.occurrences( b, m30 ).forEach( () => { b30 += centsOf( b.amount, b.currency ) / per; } ); } );
@@ -1170,7 +1169,7 @@
 		if ( ! on() || tx.type !== 'expense' || S().settings.efLimitWarn === false || tx.date > today() ) return null;
 		const L = F.limits(); if ( ! L.day && ! L.week && ! L.month ) return null;
 		const cost = centsOf( tx.amount, EX.txCurrency( tx ) ), d = parse( tx.date ), mon = addDays( tx.date, -( ( d.getDay() + 6 ) % 7 ) ), m1 = EX.iso( new Date( d.getFullYear(), d.getMonth(), 1 ) ), m2 = EX.iso( new Date( d.getFullYear(), d.getMonth() + 1, 0 ) );
-		const spent = ( from, to ) => S().txs.filter( ( x ) => x.type === 'expense' && ! x.goalId && ! x.efPlan && x.date >= from && x.date <= to ).reduce( ( n, x ) => n + centsOf( x.amount, EX.txCurrency( x ) ), 0 );
+		const spent = ( from, to ) => S().txs.filter( ( x ) => ! EX.isAdjust( x ) && x.type === 'expense' && ! x.goalId && ! x.efPlan && x.date >= from && x.date <= to ).reduce( ( n, x ) => n + centsOf( x.amount, EX.txCurrency( x ) ), 0 );
 		const ranges = { day: [ tx.date, tx.date ], week: [ mon, addDays( mon, 6 ) ], month: [ m1, m2 ] };
 		for ( const k of [ 'day', 'week', 'month' ] ) { if ( ! L[ k ] ) continue; const after = spent( ranges[ k ][ 0 ], ranges[ k ][ 1 ] ) + cost; if ( after > L[ k ] ) return t( 'efLimWarn_' + k, { a: money( after / 100, main() ), b: money( L[ k ] / 100, main() ) } ); }
 		return null;
@@ -1201,7 +1200,7 @@
 	F.budgetIdeas = () => {
 		const b = F.baseline(); if ( b.history < 45 ) return [];
 		const now = today(), win = Math.min( 90, b.history ), since = addDays( now, -win ), have = new Set( S().budgets.map( ( x ) => x.category ) ), sum = {};
-		S().txs.filter( ( x ) => x.type === 'expense' && ! x.goalId && ! x.efPlan && x.date >= since && x.date <= now && x.category && x.category !== 'uncategorized' && ! have.has( x.category ) ).forEach( ( x ) => { sum[ x.category ] = ( sum[ x.category ] || 0 ) + centsOf( x.amount, EX.txCurrency( x ) ); } );
+		S().txs.filter( ( x ) => ! EX.isAdjust( x ) && x.type === 'expense' && ! x.goalId && ! x.efPlan && x.date >= since && x.date <= now && x.category && x.category !== 'uncategorized' && ! have.has( x.category ) ).forEach( ( x ) => { sum[ x.category ] = ( sum[ x.category ] || 0 ) + centsOf( x.amount, EX.txCurrency( x ) ); } );
 		return Object.keys( sum ).map( ( c ) => { const usual = sum[ c ] / ( win / 30 ); return { cat: c, usual: Math.round( usual ), amount: nice( usual * 0.95 ) }; } ).filter( ( x ) => x.usual >= 2000 ).sort( ( a, c ) => c.usual - a.usual ).slice( 0, 5 );
 	};
 	F.addBudgets = ( list ) => { list.forEach( ( x ) => S().budgets.push( { id: EX.uid(), category: x.cat, amount: limStr( x.amount ), period: 'monthly', rollover: false, tags: [], photo: '' } ) ); if ( list.length ) { S().settings.u = Date.now(); EX.save(); } };
@@ -1213,7 +1212,7 @@
 	/** How many months of cushion fit how steady the income is: the monthly income over the last three 30-day blocks, from what was really received. */
 	F.suggestCushion2 = () => {
 		const now = today(), blocks = [ 0, 0, 0 ]; let first = now;
-		S().txs.filter( ( x ) => x.type === 'income' && ! x.goalId && x.date <= now ).forEach( ( x ) => { const k = Math.floor( diff( now, x.date ) / 30 ); if ( k >= 0 && k < 3 ) blocks[ k ] += centsOf( x.amount, EX.txCurrency( x ) ); if ( x.date < first ) first = x.date; } );
+		S().txs.filter( ( x ) => ! EX.isAdjust( x ) && x.type === 'income' && ! x.goalId && x.date <= now ).forEach( ( x ) => { const k = Math.floor( diff( now, x.date ) / 30 ); if ( k >= 0 && k < 3 ) blocks[ k ] += centsOf( x.amount, EX.txCurrency( x ) ); if ( x.date < first ) first = x.date; } );
 		const used = blocks.filter( ( v, i ) => v > 0 || ( i * 30 < diff( now, first ) ) ); if ( diff( now, first ) < 60 || used.length < 2 ) return null;
 		const mean = used.reduce( ( a, v ) => a + v, 0 ) / used.length; if ( mean <= 0 ) return { m: 3, swing: 100 };
 		const swing = Math.round( ( Math.max( ...used ) - Math.min( ...used ) ) / mean * 100 );
@@ -1694,7 +1693,7 @@
 		F.snapshot( true ); S().settings.u = Date.now(); try { EX.persist(); } catch ( e ) { /* ignore */ }
 	};
 	const wantPerWeek = ( from, to ) => {
-		const days = Math.max( 1, diff( to, from ) ), tot = S().txs.filter( ( x ) => x.type === 'expense' && ! x.goalId && ! x.efPlan && x.date >= from && x.date < to ).reduce( ( s, x ) => ( F.importance( { category: x.category, name: x.name || '' } ).level === 'want' ? s + centsOf( x.amount, EX.txCurrency( x ) ) : s ), 0 );
+		const days = Math.max( 1, diff( to, from ) ), tot = S().txs.filter( ( x ) => ! EX.isAdjust( x ) && x.type === 'expense' && ! x.goalId && ! x.efPlan && x.date >= from && x.date < to ).reduce( ( s, x ) => ( F.importance( { category: x.category, name: x.name || '' } ).level === 'want' ? s + centsOf( x.amount, EX.txCurrency( x ) ) : s ), 0 );
 		return { perWeek: tot / days * 7, any: S().txs.some( ( x ) => x.date >= from && x.date < to ) };
 	};
 	const spark = ( pts, evs = [] ) => {

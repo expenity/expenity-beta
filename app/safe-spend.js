@@ -31,7 +31,7 @@
    if(x.date<=ref)balance+=delta;
    else if(x.date<=end){
     // An unreceived future income or incoming transfer is not spending money. Reserve outgoing net transfers once.
-    const reserve=Math.max(0,-delta);if(reserve){future+=reserve;rows.push({budgetEligible:x.type==='expense'&&!x.goalId,kind:'transaction',id:x.id,date:x.date,amount:reserve,category:x.category||'uncategorized',name:x.name||EX.catInfo(x.category).name});}
+    const reserve=EX.isAdjust(x)?0:Math.max(0,-delta);if(reserve){future+=reserve;rows.push({budgetEligible:x.type==='expense'&&!x.goalId,kind:'transaction',id:x.id,date:x.date,amount:reserve,category:x.category||'uncategorized',name:x.name||EX.catInfo(x.category).name});}
    }
   }
   let bills=0;

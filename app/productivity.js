@@ -52,7 +52,7 @@ const more=A.more;A.more=()=>{
 };
 // Evidence-backed ideas: recorded expenses only, with equal rolling comparison windows.
 const previousIdeas=EX.ideas.list;
-const expenses=(from,to,category='all')=>S().txs.filter(x=>x.type==='expense'&&!x.goalId&&x.date>=from&&x.date<=to&&(category==='all'||x.category===category));
+const expenses=(from,to,category='all')=>S().txs.filter(x=>x.type==='expense'&&!x.goalId&&!EX.isAdjust(x)&&x.date>=from&&x.date<=to&&(category==='all'||x.category===category));
 const total=rows=>{let result=0;for(const row of rows){const currency=EX.txCurrency(row);if(currency!==S().settings.currency&&(!EX.rates?.date||EX.diffDays(EX.today(),EX.rates.date)>7))return null;const value=EX.convert(Number(row.amount),currency,S().settings.currency);if(value==null||!Number.isFinite(value))return null;result+=Math.round(value*100);}return result;};
 EX.ideas.list=()=>{
  const out=previousIdeas().filter(x=>['first-goal','first-income','first-budget'].includes(x.id)),off=S().settings.tipsOff||[],money=n=>EX.money(n/100,S().settings.currency),td=EX.today();

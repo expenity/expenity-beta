@@ -103,6 +103,7 @@
 		[ 'housing', '🏠' ], [ 'utilities', '💡' ], [ 'subscriptions', '📺' ], [ 'insurance', '🛡️' ], [ 'loans', '💳' ], [ 'transport', '🚗' ], [ 'health', '🩺' ],
 		[ 'education', '🎓' ], [ 'taxes', '🏛️' ], [ 'food', '🛒' ], [ 'shopping', '🛍️' ], [ 'leisure', '🎉' ], [ 'other', '📌' ],
 	];
+	EX.ADJUST_CAT = 'walletAdjust'; // built-in category of a balance correction; never in the pickers, never counted as income or spending
 	EX.INCOME_CATS = [ [ 'salary', '💼' ], [ 'freelance', '🧾' ], [ 'gifts', '🎁' ], [ 'interest', '📈' ], [ 'otherIncome', '💰' ] ];
 	EX.TEMPLATES = [
 		[ 'tplRent', 'housing', 'monthly' ], [ 'tplElectricity', 'utilities', 'monthly' ], [ 'tplWater', 'utilities', 'quarterly' ], [ 'tplInternet', 'utilities', 'monthly' ],
@@ -118,7 +119,7 @@
 	EX.CAT_STYLE = {
 		housing: [ 'home', 'blue' ], utilities: [ 'bolt', 'amber' ], subscriptions: [ 'device-tv', 'purple' ], insurance: [ 'shield', 'teal' ], loans: [ 'credit-card', 'red' ], transport: [ 'car', 'green' ],
 		health: [ 'heartbeat', 'pink' ], education: [ 'school', 'blue' ], taxes: [ 'building-bank', 'gray' ], food: [ 'shopping-cart', 'amber' ], shopping: [ 'shopping-bag', 'pink' ], leisure: [ 'confetti', 'purple' ], other: [ 'dots', 'gray' ],
-		salary: [ 'briefcase', 'green' ], freelance: [ 'receipt', 'teal' ], gifts: [ 'gift', 'pink' ], interest: [ 'trending-up', 'green' ], otherIncome: [ 'coin', 'amber' ],
+		salary: [ 'briefcase', 'green' ], freelance: [ 'receipt', 'teal' ], gifts: [ 'gift', 'pink' ], interest: [ 'trending-up', 'green' ], otherIncome: [ 'coin', 'amber' ], walletAdjust: [ 'adjustments', 'gray' ],
 	};
 	EX.repeatLabel = ( r ) => t( 'l' + r.charAt( 0 ).toUpperCase() + r.slice( 1 ) );
 
@@ -270,7 +271,9 @@
 	};
 	EX.walletLabel = ( a ) => `${ ( EX.WALLET_TYPES.find( ( w ) => w[ 0 ] === a.type ) || EX.WALLET_TYPES[ 4 ] )[ 1 ] } ${ EX.accountName(a) }`;
 
-	const builtIn = ( key ) => EX.EXPENSE_CATS.concat( EX.INCOME_CATS ).find( ( c ) => c[ 0 ] === key );
+	const builtIn = ( key ) => EX.EXPENSE_CATS.concat( EX.INCOME_CATS, [ [ EX.ADJUST_CAT, '⚖️' ] ] ).find( ( c ) => c[ 0 ] === key );
+	/** A balance correction ("Adjust balance"): it moves the wallet balance but is neither income nor spending. */
+	EX.isAdjust = ( x ) => !! x && x.adjust === true && x.category === EX.ADJUST_CAT;
 	EX.catInfo = ( key ) => {
 		if ( key === 'uncategorized' ) return { key, iconName:'dots', color:'gray', name:t('entryUncat') };
 		if ( key === 'goal' ) return { key, icon: '🎯', iconName: 'target', color: 'pink', name: t( 'cat_goal' ) }; // money set aside for a goal
@@ -287,7 +290,7 @@
 	/** Income, expense and net totals of a list of transactions, per currency. Transfers are neither. */
 	EX.flow = ( txs ) => {
 		const f = { income: [], expense: [] };
-		(EX.reportTxs?EX.reportTxs(txs):txs).forEach( ( x ) => { if ( ! x.goalId && ( x.type === 'income' || x.type === 'expense' ) ) f[ x.type ].push( { currency: EX.txCurrency( x ), amount: x.amount } ); } );
+		(EX.reportTxs?EX.reportTxs(txs):txs).forEach( ( x ) => { if ( ! x.goalId && ! EX.isAdjust( x ) && ( x.type === 'income' || x.type === 'expense' ) ) f[ x.type ].push( { currency: EX.txCurrency( x ), amount: x.amount } ); } );
 		return f;
 	};
 
