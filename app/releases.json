@@ -1,6 +1,18 @@
 {
-  "version": "0.55.5",
+  "version": "0.55.6",
   "releases": [
+    {
+      "version": "0.55.6",
+      "date": "2026-10-21",
+      "en": [
+        "First-time setup now shows only the new eFriend chat: the old intro and the old tour no longer pop up before or after it.",
+        "If you already use Expenity, you will not see the setup or the intro again."
+      ],
+      "el": [
+        "Η πρώτη ρύθμιση εμφανίζει πλέον μόνο τη νέα συνομιλία με το eFriend: η παλιά εισαγωγή και η παλιά ξενάγηση δεν εμφανίζονται πριν ή μετά από αυτήν.",
+        "Αν ήδη χρησιμοποιείτε το Expenity, δεν θα δείτε ξανά τη ρύθμιση ή την εισαγωγή."
+      ]
+    },
     {
       "version": "0.55.5",
       "date": "2026-10-21",

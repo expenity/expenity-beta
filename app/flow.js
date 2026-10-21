@@ -30,19 +30,25 @@
 
 	const needsInstall = () => ! UI.isStandalone() && ! D().installDismissed;
 	flow.active = () => [ 'welcome', 'install', 'setup', 'loading' ].includes( D().stage );
+	const chatOn = () => !! ( EXA.onboard && EXA.onboard.enabled() );
+	/** With the setup chat, the old tour and the old eFriend intro overlay are never shown: whoever gets through setup (or already had it) has seen onboarding. */
+	flow.markSeen = () => { const d = D(); d.efOnboard = 1; d.tourDone = true; };
+	{ const d = D(); if ( chatOn() && ( d.stage === 'done' || d.onboarded ) ) flow.markSeen(); } // at load, before the first render: returning users never meet the tour or the eFriend intro
 	flow.init = () => {
 		const d = D();
+		if ( chatOn() && d.stage === 'welcome' && ! EX.auth.isSignedIn() ) d.stage = 'setup'; // a device left on the classic welcome page by an older version
 		if ( UI.isStandalone() && d.stage === 'install' ) { d.installDismissed = true; d.stage = S().settings.setupDone ? 'done' : 'setup'; }
 		if ( d.onboarded && ! d.stage ) d.stage = 'done'; // devices from before this flow
 		if ( EX.auth.isSignedIn() && ! d.stage ) d.stage = 'done';
 		if ( ! d.stage ) d.stage = ( S().bills.length || S().txs.length || S().accounts.some( ( a ) => ! a.auto ) ) ? 'done' : ( EXA.onboard && EXA.onboard.enabled() ? 'setup' : 'welcome' ); // people who already had data on this device keep it; with the setup chat there is no separate welcome or install page
+		if ( chatOn() && d.stage === 'done' ) flow.markSeen(); // returning users never meet the tour or the eFriend intro
 		EX.persist();
 		if ( d.stage === 'done' ) EX.ensureWallet();
 		flow.show();
 	};
 	const setStage = ( stage ) => { D().stage = stage; EX.persist(); flow.show(); };
 	/** Used by tests and screenshots to jump straight into the app. */
-	EXA.skipFlow = () => { const d = D(); d.entryMode = d.entryMode || 'smart'; d.stage = 'done'; d.onboarded = true; S().settings.setupDone = true; EX.ensureWallet(); EX.save(); flow.show(); };
+	EXA.skipFlow = () => { const d = D(); flow.markSeen(); d.entryMode = d.entryMode || 'smart'; d.stage = 'done'; d.onboarded = true; S().settings.setupDone = true; EX.ensureWallet(); EX.save(); flow.show(); };
 	flow.show = ( keep ) => {
 		const host = $( '#flow' ); const prev = host.scrollTop;
 		const stage = D().stage;
@@ -67,13 +73,15 @@
 	flow.finish = () => finish();
 	function finish() {
 		const d = D();
+		if ( chatOn() ) flow.markSeen(); // before the first Home render, which would otherwise open the old eFriend intro
 		d.stage = 'done'; d.onboarded = true;
 		S().settings.setupDone = true;
 		EX.ensureWallet();
 		EX.save();
 		flow.show();
 		EXA.go( 'home' );
-		setTimeout( () => EXA.tutorials && EXA.tutorials.maybeStart(), 700 );
+		if ( ! chatOn() ) setTimeout( () => EXA.tutorials && EXA.tutorials.maybeStart(), 700 );
+		EX.persist();
 		if ( EXA.tryJoin ) EXA.tryJoin();
 	}
 

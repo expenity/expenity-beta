@@ -342,7 +342,7 @@
 		if ( ! needs ) { exit(); return; }
 		await say( L( 'instPitch' ) ); if ( my !== tok ) return;
 		const r = await prompt( { chips: [ { label: L( 'open' ), go: true } ] } ); if ( ! r || my !== tok ) return;
-		me( L( 'open' ) ); clearBar(); tok++; S().settings.setupDone = true; D().onboarded = true; D().stage = 'install'; EX.save(); EXA.flow.show();
+		me( L( 'open' ) ); clearBar(); tok++; S().settings.setupDone = true; D().onboarded = true; D().efOnboard = 1; D().tourDone = true; D().stage = 'install'; EX.save(); EXA.flow.show();
 	}
 	/** After the summary: keep it all safe with a free account, or open the app. */
 	async function offerAccount() {
@@ -366,7 +366,7 @@
 	}
 	function exit() {
 		clearBar(); tok++; const fl = EXA.flow; EX.persist();
-		if ( fl && fl.finish ) fl.finish(); else { D().stage = 'done'; D().onboarded = true; S().settings.setupDone = true; EX.ensureWallet(); EX.save(); }
+		if ( fl && fl.finish ) fl.finish(); else { D().efOnboard = 1; D().tourDone = true; D().stage = 'done'; D().onboarded = true; S().settings.setupDone = true; EX.ensureWallet(); EX.save(); }
 	}
 	function skipAll() { undoCreated(); if ( A.cur ) S().settings.currency = A.cur; exit(); }
 

@@ -438,7 +438,7 @@
 		return html ? html.replace( '<section data-home="efriend">', '<section data-home="efriend">' + pr ) : `<section data-home="efriend">${ pr }</section>`;
 	};
 	const home0 = () => {
-		if ( ! ( S().device || {} ).efOnboard && ! navigator.webdriver && ! document.querySelector( '.ef-ob' ) ) { try { S().device.efOnboard = 1; EX.persist(); } catch ( e ) { /* ignore */ } setTimeout( () => EXA.efriendOnboard(), 600 ); }
+		if ( ! ( S().device || {} ).efOnboard && ( S().device || {} ).stage === 'done' && ! ( EXA.flow && EXA.flow.active && EXA.flow.active() ) && ! navigator.webdriver && ! document.querySelector( '.ef-ob' ) ) { setTimeout( () => { const d = S().device || {}; if ( ! d.efOnboard && d.stage === 'done' && ! ( EXA.flow && EXA.flow.active() ) ) EXA.efriendOnboard(); }, 600 ); } // re-checked after the delay: the flow may have started or marked the intro as seen
 		if ( F.due().length && ! navigator.webdriver && ! dueOpen && ! document.querySelector( '.ef-ob' ) && ! ( EXA.flow && EXA.flow.active && EXA.flow.active() ) ) setTimeout( () => EXA.efriendDue(), 900 );
 		const f = pickGoal(); if ( f ) F.snapshot();
 		if ( ! f ) {
