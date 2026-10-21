@@ -1,6 +1,16 @@
 {
-  "version": "0.54.33",
+  "version": "0.54.34",
   "releases": [
+    {
+      "version": "0.54.34",
+      "date": "2026-10-21",
+      "en": [
+        "On the eFriend picker, Boogie's light controls are now a small animated bulb. Tap it to open the full control plate, and tap the cross to close it."
+      ],
+      "el": [
+        "Στην επιλογή eFriend, τα χειριστήρια φωτός του Boogie είναι πλέον ένας μικρός κινούμενος λαμπτήρας. Πατήστε τον για να ανοίξει ο πλήρης πίνακας ελέγχου και πατήστε το σταυρουδάκι για να κλείσει."
+      ]
+    },
     {
       "version": "0.54.33",
       "date": "2026-10-21",
