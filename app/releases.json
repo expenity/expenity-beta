@@ -1,6 +1,16 @@
 {
-  "version": "0.55.1",
+  "version": "0.55.2",
   "releases": [
+    {
+      "version": "0.55.2",
+      "date": "2026-10-21",
+      "en": [
+        "The eFriend Blog is now a story about eFriend's working day: your entries arrive as deliveries at Boogie's studio or tickets in Chip's queue, with your own data (first entry, biggest expense, favourite day, repeat entries, streaks) woven in. More variety in the jokes, too."
+      ],
+      "el": [
+        "Το eFriend Blog είναι πλέον μια ιστορία για την εργάσιμη ημέρα του eFriend: οι εγγραφές σας φτάνουν ως παραδόσεις στο στούντιο του Boogie ή ως αιτήματα στην ουρά του Chip, με τα δικά σας στοιχεία (πρώτη εγγραφή, μεγαλύτερο έξοδο, αγαπημένη μέρα, επαναλαμβανόμενες εγγραφές, σειρές ημερών) μέσα στην αφήγηση. Και περισσότερη ποικιλία στα αστεία."
+      ]
+    },
     {
       "version": "0.55.1",
       "date": "2026-10-21",
