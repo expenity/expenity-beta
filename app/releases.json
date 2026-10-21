@@ -1,6 +1,16 @@
 {
-  "version": "0.54.26",
+  "version": "0.54.27",
   "releases": [
+    {
+      "version": "0.54.27",
+      "date": "2026-10-21",
+      "en": [
+        "The Choose button on the eFriend slider now fades in smoothly, in orange for Boogie and blue for Chip."
+      ],
+      "el": [
+        "Το κουμπί Επιλογή στο slider του eFriend εμφανίζεται πλέον ομαλά, πορτοκαλί για τον Boogie και μπλε για τον Chip."
+      ]
+    },
     {
       "version": "0.54.26",
       "date": "2026-10-21",

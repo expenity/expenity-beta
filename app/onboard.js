@@ -103,7 +103,7 @@
 		host.innerHTML = `<div class="ob-pick" id="obPick">			<section class="ob-half ob-boogie" id="obB" aria-label="Boogie"><div class="ob-fall" aria-hidden="true"></div><h1 class="ob-pick-title">${ esc( L( 'pickTitle' ) ) }</h1><p class="ob-hint">${ esc( L( 'pickHint' ) ) }</p><div class="ob-half-in" id="obBin"><div class="ob-art">${ B }</div><div class="ob-txt"><h2>Boogie</h2><p>${ esc( L( 'pickBoogie' ) ) }</p></div></div></section>
 			<section class="ob-half ob-chip" id="obC" aria-label="Chip"><div class="ob-fall" aria-hidden="true"></div><h1 class="ob-pick-title">${ esc( L( 'pickTitle' ) ) }</h1><p class="ob-hint">${ esc( L( 'pickHint' ) ) }</p><div class="ob-half-in" id="obCin"><div class="ob-art">${ C }</div><div class="ob-txt"><h2>Chip</h2><p>${ esc( L( 'pickChip' ) ) }</p></div></div></section>
 			<div class="ob-handle" id="obH" role="slider" tabindex="0" aria-label="${ esc( L( 'pickTitle' ) ) }" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50"><span class="ob-grip"><i>◀</i><i>▶</i></span></div>
-			<button type="button" class="btn btn-primary big ob-choose" id="obChoose" hidden>${ esc( L( 'pickChoose' ) ) }</button></div>`;
+			<button type="button" class="btn btn-primary big ob-choose" id="obChoose" tabindex="-1" aria-hidden="true">${ esc( L( 'pickChoose' ) ) }</button></div>`;
 		const root = host.querySelector( '#obPick' ), bP = root.querySelector( '#obB' ), cP = root.querySelector( '#obC' ), bA = root.querySelector( '#obB .ob-art' ), cA = root.querySelector( '#obC .ob-art' ), bTx = root.querySelector( '#obB .ob-txt' ), cTx = root.querySelector( '#obC .ob-txt' ), h = root.querySelector( '#obH' ), btn = root.querySelector( '#obChoose' ), hints = root.querySelectorAll( '.ob-hint' );
 		let X = 50, raf = 0;
 		const apply = () => {
@@ -115,7 +115,7 @@
 			bA.style.transform = `scale(${ ( 1 + .3 * pb - .1 * pc ).toFixed( 3 ) })`; cA.style.transform = `scale(${ ( 1 + .3 * pc - .1 * pb ).toFixed( 3 ) })`; // the one you are choosing grows and comes to the centre
 			h.setAttribute( 'aria-valuenow', Math.round( X ) );
 			// the Choose button shows well before the screen edge, where a browser swipe could take over
-			const edge = X >= 84 ? 'boogie' : X <= 16 ? 'chip' : ''; btn.hidden = ! edge; btn.dataset.pick = edge; btn.setAttribute( 'aria-hidden', edge ? 'false' : 'true' );
+			const edge = X >= 84 ? 'boogie' : X <= 16 ? 'chip' : ''; btn.classList.toggle( 'show', !! edge ); if ( edge ) btn.dataset.pick = edge; btn.setAttribute( 'aria-hidden', edge ? 'false' : 'true' ); btn.tabIndex = edge ? 0 : -1;
 			if ( edge ) { btn.textContent = L( 'pickChoose' ); bP.classList.toggle( 'on', edge === 'boogie' ); cP.classList.toggle( 'on', edge === 'chip' ); } else { bP.classList.remove( 'on' ); cP.classList.remove( 'on' ); }
 			hints.forEach( ( x ) => { x.style.opacity = Math.abs( X - 50 ) < 6 ? 1 : 0; } );
 		};
