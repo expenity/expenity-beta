@@ -1014,3 +1014,28 @@
 .theme-grid:not(.open) .theme-extra { display: none; }
 .theme-toggle { width: 100%; margin: 6px 0 12px; justify-content: center; }
 .theme-toggle[aria-expanded="true"] svg { transform: rotate(180deg); }
+
+/* Cassette: a light, vivid take on Boogie: cream paper, a bright orange Nixie glow, teal and red stripes. */
+:root[data-skin="cassette"] { --bg: #fdf3dc; --bg-img: linear-gradient(to bottom, #ffe2a8 0, rgba(253, 243, 220, 0) 300px); --surface: #fffaf0; --ink: #3a2412; --ink-2: #5a3a1e; --muted: #8c6a47; --line: #ecd2a2; --accent: #f0600c; --accent-2: #c84a00; --accent-ink: #fff; --accent-soft: #ffe3c4; --late: #d62828; --late-soft: #fde0dc; --warn: #e08a00; --ok: #1a9a78; --shadow: 0 10px 24px -14px rgba(160, 80, 10, .55); --rk: .9; --bw: 2px; --font-head: var(--mono); --brand: linear-gradient(180deg, #ff9a3c, #f0600c); --brand-ink: #fff; --brand-glow: 0 8px 18px -8px rgba(240, 96, 12, .9); --fab-bg: linear-gradient(180deg, #ff9a3c, #f0600c); --hero-bg: linear-gradient(180deg, #fff1cf, #ffe2a8); --hero-ink: #3a2412; --card-line: #e0bd84; --bar-in: #1a9a78; --bar-out: #f0600c; --trail: #f0600c; }
+:root[data-skin="cassette"] .tint-teal, :root[data-skin="cassette"] .tint-green { --tbg: #d9f2e8; --tfg: #0e7a5c; } :root[data-skin="cassette"] .tint-blue { --tbg: #d8ecf5; --tfg: #1a6a96; } :root[data-skin="cassette"] .tint-amber { --tbg: #ffe6bd; --tfg: #b25e00; } :root[data-skin="cassette"] .tint-purple, :root[data-skin="cassette"] .tint-pink { --tbg: #fbdcea; --tfg: #b0245a; }
+/* the balance card is a cassette: a paper label with stripes, ruled lines, two reels and a glowing counter */
+:root[data-skin="cassette"] .hero { position: relative; overflow: hidden; border: 2px solid #c99a55; box-shadow: var(--shadow), inset 0 -4px 0 #e0bd84; background-image: linear-gradient(90deg, #e63946 0 25%, #f0600c 25% 50%, #ffb703 50% 75%, #1a9a78 75% 100%), repeating-linear-gradient(0deg, transparent 0 27px, #c99a5530 27px 28px), var(--hero-bg); background-repeat: no-repeat, repeat, no-repeat; background-size: 100% 9px, 100% 100%, 100% 100%; background-position: 0 0, 0 0, 0 0; }
+:root[data-skin="cassette"] .hero::before, :root[data-skin="cassette"] .hero::after { content: ""; position: absolute; top: 20px; width: 44px; height: 44px; border-radius: 50%; pointer-events: none; background: radial-gradient(circle, #fff1cf 0 6px, transparent 7px), repeating-conic-gradient(from 0deg, #3a2412 0 20deg, #b07a38 20deg 60deg); border: 3px solid #3a2412; opacity: .85; animation: cassetteReel 6s linear infinite; }
+:root[data-skin="cassette"] .hero::before { right: 72px; } :root[data-skin="cassette"] .hero::after { right: 16px; animation-duration: 8s; }
+:root[data-skin="cassette"] .hero > b, :root[data-skin="cassette"] .hero-front > b { color: #e8520a; font-family: var(--mono); letter-spacing: .03em; animation: cassetteGlow 2.6s ease-in-out infinite; }
+:root[data-skin="cassette"] .hero-tiles > div { background: #ffffffb0; border: 1px solid #e0bd84; color: #3a2412; }
+:root[data-skin="cassette"] .btn-primary, :root[data-skin="cassette"] .btn.primary { border-bottom: 4px solid #a8420a; font-weight: 800; letter-spacing: .02em; }
+:root[data-skin="cassette"] .btn-primary:active, :root[data-skin="cassette"] .btn.primary:active { transform: translateY(2px); border-bottom-width: 2px; }
+:root[data-skin="cassette"] .card, :root[data-skin="cassette"] .list { border-color: #e0bd84; }
+:root[data-skin="cassette"] .tabbar { border-top: 3px solid #e63946; background: #fffaf0; }
+:root[data-skin="cassette"] .tabbar .on, :root[data-skin="cassette"] .tab.on { text-shadow: 0 0 10px #ff9d2e99; }
+@keyframes cassetteReel { to { transform: rotate(360deg); } }
+@keyframes cassetteGlow { 0%, 100% { text-shadow: 0 0 4px #ff9d2e88, 0 0 10px #ffb70355; } 50% { text-shadow: 0 0 8px #ff9d2e, 0 0 22px #ff8a1fbb; } }
+.amb-nixie { top: var(--y); width: var(--s); height: var(--s); border-radius: 50%; background: #ff9d2e; box-shadow: 0 0 10px 3px #ff9d2e99; opacity: 0; animation: nixieMote var(--d) var(--w) ease-in-out infinite; }
+@keyframes nixieMote { 0%, 100% { opacity: 0; transform: translateY(0); } 50% { opacity: .8; transform: translateY(-14px); } }
+:root[data-motion=off] .hero::before, :root[data-motion=off] .hero::after, :root[data-motion=reduced] .hero::before, :root[data-motion=reduced] .hero::after, :root[data-motion=off][data-skin="cassette"] .hero > b, :root[data-motion=reduced][data-skin="cassette"] .hero > b { animation: none; }
+@media (prefers-reduced-motion: reduce) { :root:not([data-motion=full])[data-skin="cassette"] .hero::before, :root:not([data-motion=full])[data-skin="cassette"] .hero::after, :root:not([data-motion=full])[data-skin="cassette"] .hero > b { animation: none; } }
+:root[data-skin="cassette"] .daily-card { position: relative; overflow: hidden; color: #3a2412; border: 2px solid #c99a55; box-shadow: var(--shadow), inset 0 -4px 0 #e0bd84; background: linear-gradient(90deg, #e63946 0 25%, #f0600c 25% 50%, #ffb703 50% 75%, #1a9a78 75% 100%) 0 0 / 100% 9px no-repeat, repeating-linear-gradient(0deg, transparent 0 27px, #c99a5530 27px 28px), linear-gradient(180deg, #fff1cf, #ffe2a8); }
+:root[data-skin="cassette"] .daily-card b, :root[data-skin="cassette"] .daily-card strong { color: #e8520a; font-family: var(--mono); animation: cassetteGlow 2.6s ease-in-out infinite; }
+:root[data-skin="cassette"] .daily-card small, :root[data-skin="cassette"] .daily-card span { color: #5a3a1e; }
+:root[data-motion=off][data-skin="cassette"] .daily-card b, :root[data-motion=reduced][data-skin="cassette"] .daily-card b, :root[data-motion=off][data-skin="cassette"] .daily-card strong, :root[data-motion=reduced][data-skin="cassette"] .daily-card strong { animation: none; }

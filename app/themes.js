@@ -15,6 +15,9 @@
  Object.assign(EX.I18N.langs.el,{theme_mario:'Mario · Περιπέτεια σε πίξελ',themeD_mario:'Ο Mario στην κάρτα υπολοίπου, με αιωρούμενους χαρακτήρες ζωγραφισμένους με μολύβι.',theme_bricks:'Πάρτι με τουβλάκια',themeD_bricks:'Τουβλάκια με ξυλομπογιές, κάρτες σαν σελίδες τετραδίου και απαλή κίνηση.',theme_minnie:'Minnie & Mickey · Ατελιέ μολυβιού',themeD_minnie:'Ο Mickey και η Minnie ζωγραφισμένοι με μολύβι, με ροζ χαρτί, φιόγκους και πουά.'});
  Object.assign(EX.I18N.langs.en,{theme_vader:'Vader · Dark orbit',themeD_vader:'Absolute black, white light, distant worlds and patrolling fighters.'});
  Object.assign(EX.I18N.langs.el,{theme_vader:'Vader · Σκοτεινή τροχιά',themeD_vader:'Απόλυτο μαύρο, λευκό φως, μακρινοί πλανήτες και διαστημικές περιπολίες.'});
+
+ Object.assign(EX.I18N.langs.en,{theme_cassette:'Cassette · Nixie glow',themeD_cassette:'Cream paper, bright stripes and a glowing Nixie orange, like Boogie. Reels turn on your balance card.'});
+ Object.assign(EX.I18N.langs.el,{theme_cassette:'Κασέτα · Λάμψη Nixie',themeD_cassette:'Κρεμ χαρτί, έντονες ρίγες και λαμπερό πορτοκαλί Nixie, όπως ο Boogie. Οι ράγες γυρίζουν στην κάρτα υπολοίπου.'});
 	// swatch: page color, card color, accent, text. mode: the theme also has a light and a dark version.
 	const THEMES = [
 		{ id: 'emerald', mode: true, sw: [ '#eef6f3', '#ffffff', '#0a8f6a', '#0f1f1a' ] },
@@ -36,6 +39,7 @@
 		{ id: 'oled', sw: [ '#000000', '#0a0a0a', '#19e6a3', '#ffffff' ] },
 		{ id: 'glass', sw: [ '#c9d6ff', '#ffffff', '#5757d9', '#1d2142' ] },
 		{ id: 'sunset', sw: [ '#fff3e8', '#fffaf5', '#f0572d', '#4a1f10' ] },
+		{ id: 'cassette', sw: [ '#fdf3dc', '#fffaf0', '#f0600c', '#3a2412' ] },
 		{ id: 'chalk', sw: [ '#1f3a30', '#274a3d', '#ffd86b', '#f3f0e4' ] },
 	];
 	EXA.THEMES = THEMES;
@@ -56,7 +60,7 @@
 	};
 	EXA.setStatusTint = ( v ) => { if ( ! [ 'off', 'low', 'normal', 'full' ].includes( v ) ) return; root.dataset.status = v; store( 'expenity.status', v ); EX.state().device.statusTint = v; EX.persist(); };
 	// Theme effects (characters, trails, embers...) can be switched off for one theme at a time; the list lives in the browser so it is known before the page draws.
-	const FX_SKINS = [ 'mario', 'bricks', 'minnie', 'vader', 'synthwave', 'amberwave', 'ion', 'sunset', 'emerald', 'candy', 'terminal' ];
+	const FX_SKINS = [ 'mario', 'bricks', 'minnie', 'vader', 'synthwave', 'amberwave', 'ion', 'sunset', 'emerald', 'candy', 'terminal', 'cassette' ];
 	const fxOffList = () => { try { return ( localStorage.getItem( 'expenity.fxoff' ) || '' ).split( ',' ).filter( Boolean ); } catch ( e ) { return []; } };
 	EXA.hasThemeFx = ( skin ) => FX_SKINS.includes( skin ) || ( skin === 'custom' && EXA.customPalette().trails );
 	EXA.themeFxOn = ( skin ) => ! fxOffList().includes( skin );
