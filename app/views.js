@@ -108,7 +108,7 @@
 		const left = backBtn + ( v === 'home' ? `<div class="ab-title home"><small>${ esc( greeting() ) }</small><b>Expen<i>ity</i></b></div>` : `<h1 class="ab-title">${ esc( title ) }</h1>` );
 		// The bar follows the bottom menu: up to three large quick actions for this screen, the overflow menu, and the avatar.
 		const act = ( attrs, icon, label, badge ) => `<button type="button" class="ab-btn ab-act" ${ attrs } aria-label="${ esc( label ) }" title="${ esc( label ) }">${ UI.icon( icon, 28 ) }${ badge ? `<i class="ab-badge">${ badge }</i>` : '' }</button>`;
-		const lateN = active().filter( ( b ) => b.next < today() ).length, filtersN = EXA.filtersActive ? EXA.filtersActive() : 0;
+		const lateN = active().filter( ( b ) => b.next < today() && ! isSnoozed( b ) ).length, filtersN = EXA.filtersActive ? EXA.filtersActive() : 0;
 		const bar = {
 			home: [ act( 'data-home-settings', 'layout-dashboard', t( 'homeCustomise' ) ) ],
 			activity: [ act( 'data-act="toggle-search"', st.searchOpen ? 'x' : 'search', t( st.searchOpen ? 'searchClose' : 'searchOpen' ) ), act( 'data-act="toggle-filters"', 'adjustments-horizontal', t( 'filtersTitle' ), filtersN ), act( 'data-act="jump-month"', 'calendar', t( 'jumpMonth' ) ) ],
@@ -267,7 +267,7 @@
 	/** The entries of the month in a fold, like the bills that are due: the title and the total stay visible when it is closed. "Paid" stays English, like the other status words. */
 	const paidFold = ( list, f ) => `<details class="act-fold act-paid" data-fold="paid"${ st.paidOpen !== false ? ' open' : '' }><summary><span class="af-main">${ UI.icon( 'circle-check', 18 ) } Paid <b>${ list.length }</b></span><span class="af-sub">${ esc( money( sumMain( f.expense ) / 100, mainCur() ) ) }</span>${ UI.icon( 'chevron-down', 18 ) }</summary><div class="af-body"><ul class="bm-list">${ list.map( txItem ).join( '' ) }</ul></div></details>`;
 	/** Activity and Bills are one place: a switch at the top, with the number of overdue bills on it. */
-	const pageSwitch = () => { const late = active().filter( ( b ) => b.next < today() ).length; return `<div class="segm act-switch" role="tablist">${ [ [ 'activity', 'tabActivity' ], [ 'bills', 'tabBills' ] ].map( ( [ id, k ] ) => `<button type="button" class="${ st.view === id ? 'on' : '' }" data-go="${ id }" role="tab" aria-selected="${ st.view === id }">${ esc( t( k ) ) }${ id === 'bills' && late ? `<i class="act-late" aria-label="${ late }">${ late }</i>` : '' }</button>` ).join( '' ) }</div>`; };
+	const pageSwitch = () => { const late = active().filter( ( b ) => b.next < today() && ! isSnoozed( b ) ).length; return `<div class="segm act-switch" role="tablist">${ [ [ 'activity', 'tabActivity' ], [ 'bills', 'tabBills' ] ].map( ( [ id, k ] ) => `<button type="button" class="${ st.view === id ? 'on' : '' }" data-go="${ id }" role="tab" aria-selected="${ st.view === id }">${ esc( t( k ) ) }${ id === 'bills' && late ? `<i class="act-late" aria-label="${ late }">${ late }</i>` : '' }</button>` ).join( '' ) }</div>`; };
 	EXA.activity = () => {
 		const schedules = st.txFilter.type === 'income' && st.incomeMode === 'recurring';
 		const incomeNav = st.txFilter.type === 'income' ? `<div class="segm income-modes" role="tablist">${ [ ['recorded','incomeRecorded','arrows-sort'], ['recurring','incomeRecurring','repeat'] ].map(([id,label,ic]) => `<button type="button" role="tab" aria-selected="${ ( st.incomeMode || 'recorded' ) === id }" class="${ ( st.incomeMode || 'recorded' ) === id ? 'on' : '' }" data-income-mode="${ id }">${ UI.icon(ic,18) } ${ esc(t(label)) }</button>`).join('') }</div>` : '';
@@ -289,7 +289,7 @@
 		// Bills still to pay this month, right above the entries: the part people open the app for.
 		const monthEnd = iso( new Date( y, m + 1, 0 ) ), showToPay = ! schedules && st.txMonth === st.nowMonth() && fl.type === 'all' && ! fl.q && ! st.actFilters;
 		const toPay = showToPay ? active().flatMap( ( b ) => EX.occurrences( b, monthEnd ).slice( 0, 1 ).map( ( d ) => ( { kind: 'bill', b, date: d, due: d, paid: false } ) ) ).sort( ( a, b ) => ( a.due < b.due ? -1 : 1 ) ) : [];
-		const toPayDue = toPay.length ? toPay.some( ( i ) => diffDays( i.due, today() ) < 0 ) : false;
+		const toPayDue = toPay.length ? toPay.some( ( i ) => diffDays( i.due, today() ) < 0 && ! isSnoozed( i.b ) ) : false;
 		const toPayHtml = toPay.length ? `<details class="act-fold act-topay${ toPayDue ? ' late' : '' }"><summary><span class="af-main">${ UI.icon( 'calendar-event', 18 ) } ${ esc( t( 'dueSoon' ) ) } <b>${ toPay.length }</b></span><span class="af-sub">${ esc( EX.sumByCur( toPay.map( bmVal ) ) ) }</span>${ UI.icon( 'chevron-down', 18 ) }</summary><div class="af-body"><ul class="bm-list">${ toPay.slice( 0, 5 ).map( bmRow ).join( '' ) }</ul><button type="button" class="link" data-go="bills">${ esc( t( 'seeAll' ) ) }</button></div></details>` : '';
 		const activeFilters = ( fl.type !== 'all' ? 1 : 0 ) + ( fl.account ? 1 : 0 ) + ( EXA.tagFilter ? 1 : 0 );
 		const typeOpt = ( v, label ) => `<option value="${ v }"${ fl.type === v ? ' selected' : '' }>${ esc( label ) }</option>`;
@@ -356,11 +356,12 @@
 	/* Shared by the Bills tab and Home: a bill as a card with a date tile and a clear status pill. */
 	const bmVal = ( i ) => ( i.kind === 'bill' ? { amount: Number( i.b.amount ) || 0, currency: i.b.currency } : { amount: Number( i.x.amount ) || 0, currency: ( S().accounts.find( ( a ) => a.id === i.x.account ) || {} ).currency || S().settings.currency } );
 	const bmDay = ( d ) => `<span class="bm-date"><b>${ Number( d.slice( 8, 10 ) ) }</b><small>${ esc( new Date( `${ d }T00:00:00` ).toLocaleDateString( EX.loc(), { month: 'short' } ).replace( '.', '' ).toUpperCase() ) }</small></span>`;
-	const bmPill = ( i ) => { if ( i.paid ) return `<span class="bm-pill paid">${ UI.icon( 'check', 14 ) } Paid</span>`; const n = diffDays( i.due, today() ); return `<button type="button" class="bm-pill ${ n < 0 ? 'late' : n <= 3 ? 'soon' : 'later' }" data-bm-pay="${ esc( i.b.id ) }" aria-label="${ esc( t( 'actPaid' ) ) }: ${ esc( i.b.name ) }">${ esc( relEn( i.due ) ) }</button>`; };
+	const isSnoozed = ( b ) => !! ( b && b.snooze && b.snooze > today() ); // snoozed until a later day: it rests and is not counted as overdue
+	const bmPill = ( i ) => { if ( i.paid ) return `<span class="bm-pill paid">${ UI.icon( 'check', 14 ) } Paid</span>`; const n = diffDays( i.due, today() ), sn = i.kind === 'bill' && isSnoozed( i.b ); return `<button type="button" class="bm-pill ${ sn ? 'snoozed' : n < 0 ? 'late' : n <= 3 ? 'soon' : 'later' }" data-bm-pay="${ esc( i.b.id ) }" aria-label="${ esc( t( 'actPaid' ) ) }: ${ esc( i.b.name ) }">${ esc( sn ? t( 'snoozed' ) + ' · ' + dayName( i.b.snooze ) : relEn( i.due ) ) }</button>`; };
 	const bmRow = ( i ) => {
 		const name = i.kind === 'bill' ? i.b.name : ( i.x.name || EX.catInfo( i.x.category ).name ), cat = EX.catInfo( i.kind === 'bill' ? i.b.category : i.x.category );
 		const amt = i.kind === 'bill' ? amountText( i.b ) : money( Number( i.x.amount ), bmVal( i ).currency );
-		const dn = diffDays( i.due, today() ), cls = i.paid ? 'paid' : dn < 0 ? 'late' : dn <= 3 ? 'soon' : 'later';
+		const dn = diffDays( i.due, today() ), cls = i.paid ? 'paid' : i.kind === 'bill' && isSnoozed( i.b ) ? 'snoozed' : dn < 0 ? 'late' : dn <= 3 ? 'soon' : 'later';
 		const inner = `${ bmDay( i.date ) }<span class="mid"><b>${ esc( name ) }</b><small>${ UI.icon( cat.iconName || 'tag', 14 ) } ${ esc( cat.name ) }${ i.kind === 'bill' && EX.scheduleLabel( i.b ) ? ' · ' + esc( EX.scheduleLabel( i.b ) ) : '' }</small></span><span class="bm-right"><b class="a">${ esc( amt ) }</b>${ bmPill( i ) }</span>`;
 		if ( i.kind === 'tx' ) return `<li class="bm-row ${ cls }"><div class="bm-front" role="button" tabindex="0" data-act="open-tx" data-id="${ esc( i.x.id ) }">${ inner }</div></li>`;
 		return `<li class="sw bm-row ${ cls }" data-kind="bill" data-id="${ esc( i.b.id ) }">

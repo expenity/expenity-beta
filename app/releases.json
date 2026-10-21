@@ -1,6 +1,16 @@
 {
-  "version": "0.56.2",
+  "version": "0.56.3",
   "releases": [
+    {
+      "version": "0.56.3",
+      "date": "2026-10-22",
+      "en": [
+        "Fix: snoozing a bill in Bills now shows. The row says Snoozed until the new day, it is no longer counted as overdue, and the red late badge goes away."
+      ],
+      "el": [
+        "Διόρθωση: η αναβολή ενός λογαριασμού στους Λογαριασμούς φαίνεται πλέον. Η γραμμή γράφει Αναβλήθηκε μέχρι τη νέα μέρα, δεν μετράει πια ως καθυστερημένη και η κόκκινη ένδειξη καθυστέρησης φεύγει."
+      ]
+    },
     {
       "version": "0.56.2",
       "date": "2026-10-22",

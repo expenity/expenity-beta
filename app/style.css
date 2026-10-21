@@ -2108,3 +2108,6 @@ fieldset > legend { font-weight: 800; padding: 0 8px; color: var(--ink, #2a1a14)
 
 .ef-bought-msg { margin: 10px 0 0; padding: 10px 14px; border-radius: 16px; background: var(--accent-soft, #ffe6d6); font-weight: 700; line-height: 1.4; }
 .ef-editrow { display: flex; gap: 8px; flex-wrap: wrap; } .ef-gacts { flex-wrap: wrap; }
+
+.bm-pill.snoozed { background: var(--accent-soft, #eef); color: var(--ink-2, #555); border-color: var(--line, #ddd); }
+.bm-row.snoozed { opacity: .88; }
