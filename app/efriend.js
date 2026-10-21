@@ -206,6 +206,40 @@
 	F.char = () => ( S().settings.efChar !== 'chip' && window.EXBOOGIE ? 'boogie' : 'chip' ); // Boogie unless the person chose Chip
 	F.charName = () => CHARS[ F.char() ].name;
 	F.setChar = ( c ) => { if ( ! CHARS[ c ] ) return; S().settings.efChar = c; S().settings.u = Date.now(); EX.save(); };
+	/* Boogie's light: how bright the Nixie tube glows and what colour the bulb is. It is kept in the settings and applied as CSS variables, so every Boogie on screen changes at once. */
+	const hex3 = ( h ) => [ 1, 3, 5 ].map( ( k ) => parseInt( h.slice( k, k + 2 ), 16 ) ), toHex3 = ( a ) => '#' + a.map( ( v ) => Math.max( 0, Math.min( 255, Math.round( v ) ) ).toString( 16 ).padStart( 2, '0' ) ).join( '' );
+	const mixc = ( a, b, k ) => { const x = hex3( a ), y = hex3( b ); return toHex3( x.map( ( v, n ) => v + ( y[ n ] - v ) * k ) ); };
+	F.LIGHTS = [ [ 'amber', '#ff941f' ], [ 'blue', '#33b5ff' ], [ 'green', '#39ff14' ] ]; // the default, a blue and a fluorescent green
+	F.LEVELS = [ [ 'low', 40 ], [ 'normal', 70 ], [ 'high', 100 ] ]; // High is the brightest it can be
+	F.light = () => { const l = S().settings.efLight || {}, i = Number( l.i ), v = Number.isFinite( i ) ? i : 70, lv = F.LEVELS.reduce( ( best, x ) => ( Math.abs( x[ 1 ] - v ) < Math.abs( best[ 1 ] - v ) ? x : best ), F.LEVELS[ 1 ] ), c = ( l.c || '' ).toLowerCase(); return { i: lv[ 1 ], lvl: lv[ 0 ], c: F.LIGHTS.some( ( x ) => x[ 1 ] === c ) ? c : F.LIGHTS[ 0 ][ 1 ] }; };
+	F.applyLight = () => { const { i, c } = F.light(), st = document.documentElement.style; st.setProperty( '--ef-glow', ( i / 100 ).toFixed( 2 ) ); st.setProperty( '--ef-tm', c ); st.setProperty( '--ef-te', mixc( c, '#000000', .25 ) ); st.setProperty( '--ef-tc', mixc( c, '#ffffff', .78 ) ); st.setProperty( '--ef-tl', mixc( c, '#ffffff', .18 ) ); };
+	F.setLight = ( patch, final ) => { const cur = F.light(); S().settings.efLight = { i: cur.i, c: cur.c, ...patch }; S().settings.u = Date.now(); F.applyLight(); if ( final ) EX.save(); else EX.persist(); };
+	EX.on( 'change', () => F.applyLight() ); F.applyLight();
+	/** The vintage control plate: a bat-handle toggle for the brightness and three lamp buttons for the bulb colour. Used in the eFriend menu and on the picker. */
+	F.lightControls = () => {
+		const l = F.light(), pos = F.LEVELS.findIndex( ( x ) => x[ 0 ] === l.lvl );
+		return `<div class="ef-panel" role="group" aria-label="${ esc( t( 'efLightTitle' ) ) }"><i class="ef-screw a"></i><i class="ef-screw b"></i><i class="ef-screw c"></i><i class="ef-screw d"></i>
+			<div class="ef-psec"><div class="ef-eng">${ esc( t( 'efLightBright' ) ) }</div>
+				<div class="ef-toggle" data-pos="${ pos }" role="radiogroup" aria-label="${ esc( t( 'efLightBright' ) ) }">
+					<button type="button" class="ef-lever" data-ef-lightcycle tabindex="-1" aria-hidden="true"><svg viewBox="0 0 120 84" width="120" height="84"><defs><radialGradient id="efNut" cx=".35" cy=".3" r=".9"><stop offset="0" stop-color="#fdfdfd"/><stop offset=".55" stop-color="#b9bec3"/><stop offset="1" stop-color="#6b7075"/></radialGradient><linearGradient id="efArm" x1="0" x2="1"><stop offset="0" stop-color="#7c8186"/><stop offset=".4" stop-color="#f4f6f8"/><stop offset="1" stop-color="#8b9096"/></linearGradient><radialGradient id="efBall" cx=".35" cy=".3" r=".85"><stop offset="0" stop-color="#fff"/><stop offset=".5" stop-color="#c7ccd1"/><stop offset="1" stop-color="#6f7479"/></radialGradient></defs>
+						<path d="M16 60 A44 44 0 0 1 104 60" fill="none" stroke="#5a3d12" stroke-opacity=".45" stroke-width="1.6" stroke-dasharray="2 5"/>
+						<g class="ef-lever-arm"><path d="M54 62 L58 14 Q60 8 62 14 L66 62 Z" fill="url(#efArm)" stroke="#555a60" stroke-width=".8"/><circle cx="60" cy="12" r="9" fill="url(#efBall)" stroke="#555a60" stroke-width=".8"/></g>
+						<circle cx="60" cy="64" r="15" fill="url(#efNut)" stroke="#4d5257" stroke-width="1"/><circle cx="60" cy="64" r="7" fill="#3b3f43" stroke="#9aa0a6" stroke-width=".8"/></svg></button>
+					<div class="ef-pos">${ F.LEVELS.map( ( [ k, v ], n ) => `<button type="button" class="ef-lvl${ pos === n ? ' on' : '' }" data-ef-lightlvl="${ v }" role="radio" aria-checked="${ pos === n }" tabindex="${ pos === n ? 0 : -1 }">${ esc( t( 'efLvl_' + k ) ) }</button>` ).join( '' ) }</div></div></div>
+			<div class="ef-psec"><div class="ef-eng">${ esc( t( 'efLightColor' ) ) }</div><div class="ef-lamps" role="radiogroup" aria-label="${ esc( t( 'efLightColor' ) ) }">${ F.LIGHTS.map( ( [ k, c ] ) => `<button type="button" class="ef-lamp${ l.c === c ? ' on' : '' }" style="--c:${ c }" data-ef-lightc="${ c }" role="radio" aria-checked="${ l.c === c }" aria-label="${ esc( t( 'efLight_' + k ) ) }" title="${ esc( t( 'efLight_' + k ) ) }"><i></i></button>` ).join( '' ) }</div></div></div>`;
+	};
+	let lightTimer = 0; const saveLight = () => { clearTimeout( lightTimer ); lightTimer = setTimeout( () => { S().settings.u = Date.now(); EX.save(); }, 500 ); };
+	/** Moves the lever and the labels in place (no redraw), so the flick animation plays. */
+	const showLevel = ( panel, v ) => { const pos = F.LEVELS.findIndex( ( x ) => x[ 1 ] === v ), tg = panel.querySelector( '.ef-toggle' ); if ( ! tg ) return; tg.dataset.pos = pos; tg.querySelectorAll( '[data-ef-lightlvl]' ).forEach( ( b, n ) => { b.classList.toggle( 'on', n === pos ); b.setAttribute( 'aria-checked', n === pos ? 'true' : 'false' ); b.tabIndex = n === pos ? 0 : -1; } ); };
+	const setLevel = ( el, v ) => { const panel = el.closest( '.ef-panel' ); if ( ! panel || F.light().i === v ) return; F.setLight( { i: v }, false ); showLevel( panel, v ); F.sound( 'click' ); saveLight(); };
+	document.addEventListener( 'click', ( e ) => {
+		const lv = e.target.closest && e.target.closest( '[data-ef-lightlvl]' ); if ( lv ) { setLevel( lv, Number( lv.dataset.efLightlvl ) ); return; }
+		const cy = e.target.closest && e.target.closest( '[data-ef-lightcycle]' ); if ( cy ) { const i = F.LEVELS.findIndex( ( x ) => x[ 1 ] === F.light().i ); setLevel( cy, F.LEVELS[ ( i + 1 ) % 3 ][ 1 ] ); return; }
+		const b = e.target.closest && e.target.closest( '[data-ef-lightc]' ); if ( ! b ) return;
+		F.setLight( { c: b.dataset.efLightc }, false ); b.closest( '.ef-panel' ).querySelectorAll( '[data-ef-lightc]' ).forEach( ( x ) => { const on = x === b; x.classList.toggle( 'on', on ); x.setAttribute( 'aria-checked', on ? 'true' : 'false' ); } ); F.sound( 'click' ); saveLight();
+	} );
+	document.addEventListener( 'keydown', ( e ) => { const lv = e.target.closest && e.target.closest( '[data-ef-lightlvl]' ); if ( ! lv || ! [ 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown' ].includes( e.key ) ) return; e.preventDefault(); const i = F.LEVELS.findIndex( ( x ) => x[ 1 ] === F.light().i ), n = Math.max( 0, Math.min( 2, i + ( e.key === 'ArrowLeft' || e.key === 'ArrowUp' ? -1 : 1 ) ) ); setLevel( lv, F.LEVELS[ n ][ 1 ] ); lv.closest( '.ef-panel' ).querySelector( '[data-ef-lightlvl].on' ).focus(); } );
+
 	const BMOOD = { comfortable: 'cheer', done: 'cheer', ontrack: 'happy', tight: 'meh', atrisk: 'worried', unlikely: 'worried', nodata: 'meh', cheer: 'cheer', happy: 'happy', meh: 'meh', worried: 'worried' };
 	let bserial = 0;
 	F.boogieMascot = ( verdict, size = 72 ) => {
@@ -213,6 +247,14 @@
 		const mood = BMOOD[ verdict ] || 'happy', thinking = verdict === 'thinking' ? ' ef-thinking' : '', h = Number.isFinite( Number( size ) ) ? Math.min( 1024, Math.max( 16, Number( size ) ) ) : 72, prefix = 'efcassette-' + ( ++bserial ) + '-';
 		let svg = B.svg.replace( /<style>[\s\S]*?<\/style>/, '' ).replace( 'ef-cassette ef-happy"', 'ef-cassette ef-' + mood + thinking + '"' ).replace( /width="288" height="260"/, 'width="' + ( h * 154 / 140 ) + '" height="' + h + '"' );
 		for ( const m of [ ...svg.matchAll( /\bid="([^"]+)"/g ) ] ) { const id = m[ 1 ]; svg = svg.replaceAll( 'id="' + id + '"', 'id="' + prefix + id + '"' ).replaceAll( 'url(#' + id + ')', 'url(#' + prefix + id + ')' ); }
+		// the bulb takes its colour from the light settings (CSS variables), so it can change without redrawing
+		svg = svg.replace( /stop-color="#ffa526"/g, 'style="stop-color:var(--ef-tl)"' ).replace( /stop-color="#ff8220"/g, 'style="stop-color:var(--ef-tm)"' ).replace( /stop-color="#ff7b00"/g, 'style="stop-color:var(--ef-te)"' ).replace( /stroke="#ff7417"/g, 'style="stroke:var(--ef-te)"' ).replace( /stroke="#ff941f"/g, 'style="stroke:var(--ef-tm)"' ).replace( /stroke="#ffe6a6"/g, 'style="stroke:var(--ef-tc)"' );
+		// a bright blaze behind the glass of the Nixie tube (it pulses in style.css)
+		const bid = prefix + 'blaze';
+		svg = svg.replace( '<g class="tube-light">', `<defs><radialGradient id="${ bid }"><stop offset="0" style="stop-color:var(--ef-tc)" stop-opacity=".95"/><stop offset=".25" style="stop-color:var(--ef-tm)" stop-opacity=".9"/><stop offset=".6" style="stop-color:var(--ef-te)" stop-opacity=".55"/><stop offset="1" style="stop-color:var(--ef-te)" stop-opacity="0"/></radialGradient></defs><ellipse class="tube-blaze" cx="45" cy="3" rx="34" ry="38" fill="url(#${ bid })"/><g class="tube-light">` );
+		// the light falls on his body too: the upper left of the shell glows from the tube and pulses with it
+		const cid = prefix + 'cast', kid = prefix + 'castclip';
+		svg = svg.replace( '</g><g class="ef-fx">', `<defs><radialGradient id="${ cid }" cx="45" cy="22" r="64" gradientUnits="userSpaceOnUse"><stop offset="0" style="stop-color:var(--ef-tc)" stop-opacity=".95"/><stop offset=".3" style="stop-color:var(--ef-tm)" stop-opacity=".7"/><stop offset=".65" style="stop-color:var(--ef-te)" stop-opacity=".3"/><stop offset="1" style="stop-color:var(--ef-te)" stop-opacity="0"/></radialGradient><clipPath id="${ kid }"><rect x="20" y="20" width="104" height="80" rx="12"/></clipPath></defs><rect class="tube-cast" x="20" y="20" width="104" height="80" rx="12" fill="url(#${ cid })" clip-path="url(#${ kid })"/></g><g class="ef-fx">` );
 		return svg;
 	};
 	F.boogieIcon = ( size = 28 ) => ( window.EXBOOGIE ? window.EXBOOGIE.icon.replace( 'width="40" height="36"', 'class="ef-ico" width="' + size + '" height="' + ( size * 0.9 ) + '"' ) : F.chipIcon( size ) );
@@ -259,6 +301,7 @@
 			const c = actx, vol = Math.max( 0.15, Math.min( 1, ( S().settings.sounds || {} ).volume ?? 0.6 ) ) * 0.5, t0 = c.currentTime;
 			const tone = ( type, f1, f2, start, dur, g ) => { const o = c.createOscillator(), a = c.createGain(); o.type = type; o.frequency.setValueAtTime( f1, t0 + start ); if ( f2 ) o.frequency.exponentialRampToValueAtTime( f2, t0 + start + dur ); a.gain.setValueAtTime( 0.0001, t0 + start ); a.gain.exponentialRampToValueAtTime( vol * g, t0 + start + 0.015 ); a.gain.exponentialRampToValueAtTime( 0.0001, t0 + start + dur ); o.connect( a ).connect( c.destination ); o.start( t0 + start ); o.stop( t0 + start + dur + 0.02 ); };
 			if ( kind === 'smile' ) { tone( 'sine', 660, 880, 0, 0.12, 1 ); tone( 'sine', 880, 1175, 0.11, 0.16, 1 ); }
+			else if ( kind === 'click' ) { tone( 'square', 2100, 600, 0, 0.03, 0.7 ); tone( 'triangle', 320, 120, 0.012, 0.06, 0.6 ); }
 			else if ( kind === 'giggle' ) { [ 0, 1, 2, 3, 4 ].forEach( ( i ) => tone( 'triangle', i % 2 ? 1000 : 780, i % 2 ? 900 : 1100, i * 0.075, 0.07, 0.9 ) ); }
 			else {
 				const o = c.createOscillator(), o2 = c.createOscillator(), a = c.createGain(), lfo = c.createOscillator(), lg = c.createGain(), f = c.createBiquadFilter();
@@ -386,7 +429,7 @@
 		const catRows = ( f.cats || [] ).slice( 0, 8 ).map( ( c ) => `<li><div><b>${ esc( EX.catInfo( c.cat ).name ) }</b></div><div class="ef-tri" role="group" aria-label="${ esc( EX.catInfo( c.cat ).name ) }">${ [ 'must', 'need', 'want' ].map( ( l ) => `<button type="button" data-ef-level="${ esc( c.cat ) }" data-ef-to="${ l }" aria-pressed="${ c.level === l }" class="${ c.level === l ? 'on ' : '' }ef-l-${ l }">${ esc( t( 'ef_lvl_' + l ) ) }</button>` ).join( '' ) }</div></li>` ).join( '' );
 		const alt = [];
 		if ( f.gap > 0 ) { if ( f.affordable >= f.target * 0.1 ) alt.push( t( 'efAltSmaller', { a: m( Math.round( f.affordable ) ), p: Math.min( 99, Math.round( ( 1 - f.affordable / f.target ) * 100 ) ) } ) ); if ( f.laterDays ) alt.push( t( 'efAltLater', { d: EX.dayName( addDays( g.deadline, f.laterDays ) ) } ) ); }
-		const sec = ( em, title, body, det ) => ( body ? ( det ? `<details class="ef-sec ef-det"><summary><span class="ef-sec-em">${ em }</span><b>${ esc( title ) }</b></summary>${ body }</details>` : `<section class="ef-sec"><h3 class="ef-h"><span class="ef-sec-em">${ em }</span>${ esc( title ) }</h3>${ body }</section>` ) : '' );
+		const sec = ( em, title, body, det ) => ( body ? ( det ? `<details class="ef-sec ef-det"><summary><span class="ef-sec-em">${ em }</span><b>${ esc( title ) }</b></summary>${ body }</details>` : `<section class="ef-psec"><h3 class="ef-h"><span class="ef-sec-em">${ em }</span>${ esc( title ) }</h3>${ body }</section>` ) : '' );
 		const tile = ( em, label, value, cls = '', sub = '' ) => `<div class="ef-tile ${ cls }"><span class="ef-tile-em" aria-hidden="true">${ em }</span><small>${ esc( label ) }</small><b>${ value }</b>${ sub ? `<small class="ef-tile-sub">${ esc( sub ) }</small>` : '' }</div>`;
 		const free = ( f.projectedFree || 0 ) + f.saved;
 		const tiles = f.verdict === 'done' ? '' : `<div class="ef-tiles">${ tile( '💶', t( 'efTileCost' ), esc( m( f.target ) ) ) }${ tile( '🏦', t( 'efTileFree' ), esc( m( free ) ), free < 0 ? 'bad' : '' ) }${ f.left < 0 ? tile( '⚠️', t( 'efTileShort' ), esc( m( -f.left ) ), 'bad' ) : tile( '🛟', t( 'efTileLeft' ), esc( m( f.left ) ), f.left >= f.cushion ? 'good' : '', f.leftMonths == null ? '' : monthsText( f.leftMonths ) ) }${ tile( '📅', t( 'efTileDays' ), String( Math.max( 0, f.days ) ) ) }</div><p class="ef-conf">🎚️ ${ esc( t( 'efConfidence' ) ) } <b>${ esc( t( 'efConf_' + f.confidence ) ) }</b></p>`;
@@ -604,7 +647,7 @@
 		const rows = list.map( ( f ) => `<li role="button" tabindex="0" data-ef-open="${ esc( f.goal.id ) }"><div class="ef-gtop"><span class="ef-mi">${ UI.icon( f.goal.icon || 'plane', 20 ) }</span><div><b>${ esc( f.goal.name ) }</b><small>${ esc( EX.dayName( f.goal.deadline ) ) } · ${ esc( m( f.remaining ) ) }${ f.reserved > 0 ? ' · ' + esc( t( 'efReservedShort', { a: m( f.reserved ) } ) ) : '' }</small></div></div>${ chip( f.verdict ) }</li>` ).join( '' );
 		const tips = bad && bad.suggestions ? bad.suggestions.map( ( x ) => `<li><div><b>${ esc( x.kind === 'cut' ? t( 'efCutLabel', { name: EX.catInfo( x.cat ).name } ) : t( 'efPauseLabel', { name: x.name } ) ) }</b></div><span class="ef-gain">+${ esc( m( x.gain ) ) }</span></li>` ).join( '' ) : '';
 		const X = `<button type="button" class="ab-btn" data-close aria-label="${ esc( t( 'close' ) ) }">${ UI.icon( 'x', 24 ) }</button>`;
-		const sec = ( em, title, body ) => ( body ? `<section class="ef-sec"><h3 class="ef-h"><span class="ef-sec-em">${ em }</span>${ esc( title ) }</h3>${ body }</section>` : '' );
+		const sec = ( em, title, body ) => ( body ? `<section class="ef-psec"><h3 class="ef-h"><span class="ef-sec-em">${ em }</span>${ esc( title ) }</h3>${ body }</section>` : '' );
 		const tile = ( em, label, value, cls = '' ) => `<div class="ef-tile ${ cls }"><span class="ef-tile-em" aria-hidden="true">${ em }</span><small>${ esc( label ) }</small><b>${ value }</b></div>`;
 		const tiles = `<div class="ef-tiles">${ tile( '🗂️', t( 'efTileHowMany' ), String( sm.n ) ) }${ tile( '💶', t( 'efTileCost' ), esc( m( sm.cost ) ) ) }${ tile( '🏦', t( 'efTileFree' ), esc( m( sm.free ) ), sm.free >= sm.cost ? 'good' : 'bad' ) }${ tile( '📅', t( 'efTileLast' ), esc( EX.dayName( sm.lastDate ) ) ) }</div>`;
 		const tp = F.tips( bad || list[ 0 ] );
@@ -665,7 +708,7 @@
 		if ( sub === 'rules' ) return `${ back( t( 'efHubRules' ) ) }${ askBanner() ? `<section class="card">${ askBanner() }</section>` : '' }${ prioCard }${ riskCard }${ prioCard || riskCard ? '' : `<section class="card"><p class="muted">${ esc( t( 'efHubRulesNone' ) ) }</p></section>` }`;
 		if ( sub === 'moves' ) return `${ back( t( 'efHubMoves' ) ) }${ proposalsHtml() }${ allocCard() }`;
 		if ( sub === 'ideas' ) return `${ back( t( 'efHubIdeas' ) ) }${ budIdeasHtml() || `<section class="card"><p class="muted">${ esc( t( 'efHubIdeasNone' ) ) }</p></section>` }${ sortRows }`;
-		if ( sub === 'look' ) return `${ back( t( 'efHubLook' ) ) }${ charCard }${ naturalCard }${ soundCard }<section class="card ef-page"><div class="ef-top">${ F.mascot( 'happy', 84 ) }<div class="ef-bubble"><b>${ esc( t( 'efMeet' ) ) }</b></div></div>${ para( 'efMeetText' ) }</section>${ tourRow }`;
+		if ( sub === 'look' ) return `${ back( t( 'efHubLook' ) ) }${ charCard }${ ch === 'boogie' ? `<section class="card"><h2>💡 ${ esc( t( 'efLightTitle' ) ) }</h2><p class="muted small">${ esc( t( 'efLightHint' ) ) }</p>${ F.lightControls() }</section>` : '' }${ naturalCard }${ soundCard }<section class="card ef-page"><div class="ef-top">${ F.mascot( 'happy', 84 ) }<div class="ef-bubble"><b>${ esc( t( 'efMeet' ) ) }</b></div></div>${ para( 'efMeetText' ) }</section>${ tourRow }`;
 		// the hub: the way into the chat, then everything else in a few groups
 		const hrow = ( id, ic, color, title, subtitle ) => `<button type="button" class="mrow" data-ef-sub="${ id }">${ UI.ci( ic, color, 40 ) }<span class="mid"><b>${ esc( title ) }</b><small>${ esc( subtitle ) }</small></span>${ UI.icon( 'chevron-right', 18 ) }</button>`;
 		const al = F.alloc(), modeWord = t( { off: 'efModeOff', suggest: 'efModeSuggest', ask: 'efModeAsk', auto: 'efModeAuto' }[ al.mode || 'off' ] || 'efModeOff' ), pend = props().filter( ( p ) => p.status === 'pending' ).length;
@@ -2544,5 +2587,29 @@
 		efc_res_none_c_n: '{name}, έψαξα παντού! 🕵️ Καμία ασφαλής μέρα ακόμα, αλλά έχω ιδέες!',
 		efc_pc_joke: 'Γιατί το κινητό πήγε σχολείο; 📱 Για να γίνει πιο έξυπνο!|Πώς λέγεται ένα ρομπότ που αγαπά τον χορό; 🕺 Μπούγκι-μποτ… στάσου, αυτό είναι του Boogie!|Γιατί κρύωνε ο υπολογιστής; 🥶 Άφησε τα Windows ανοιχτά!|Τι είπε η μπαταρία στον φορτιστή; 🔋 Με συμπληρώνεις!|Γιατί διέσχισε το emoji τον δρόμο; 😂 Για να φτάσει στην άλλη διαφάνεια!|Γιατί το ρομπότ δεν φοβόταν ποτέ; 🤖 Έχει νεύρα από ατσάλι!',
 		efc_q_chip: 'Εδώ τις ερωτήσεις τις κάνω εγώ! 🔎 Είναι το αγαπημένο μου παιχνίδι.|Χε χε, όχι! 😎 Απαντώ μόνο σε μία ερώτηση: μπορείτε να το αντέξετε;|Ωχ, καλή! 🤔 Αλλά ξέρω μόνο για λεφτά.',
+	} );
+	Object.assign( window.EXPENITY_I18N.langs.en, {
+		efLightTitle: 'Boogie’s light',
+		efLightHint: 'Make his Nixie tube glow your way. The light falls on his body too.',
+		efLightBright: 'Brightness',
+		efLvl_low: 'Low', efLvl_normal: 'Normal', efLvl_high: 'High',
+		efLightColor: 'Bulb',
+		efLight_amber: 'Amber',
+						efLight_green: 'Fluorescent green',
+		efLight_blue: 'Blue',
+				efLight_custom: 'Your own colour',
+		efLightShort: 'Light',
+	} );
+	Object.assign( window.EXPENITY_I18N.langs.el, {
+		efLightTitle: 'Το φως του Boogie',
+		efLightHint: 'Κάντε τη λυχνία Nixie να λάμπει όπως θέλετε. Το φως πέφτει και στο σώμα του.',
+		efLightBright: 'Φωτεινότητα',
+		efLvl_low: 'Χαμηλή', efLvl_normal: 'Κανονική', efLvl_high: 'Υψηλή',
+		efLightColor: 'Λάμπα',
+		efLight_amber: 'Κεχριμπάρι',
+						efLight_green: 'Φθορίζον πράσινο',
+		efLight_blue: 'Μπλε',
+				efLight_custom: 'Δικό σας χρώμα',
+		efLightShort: 'Φως',
 	} );
 }() );

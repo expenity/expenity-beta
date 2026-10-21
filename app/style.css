@@ -1798,3 +1798,58 @@ fieldset > legend { font-weight: 800; padding: 0 8px; color: var(--ink, #2a1a14)
 @media (prefers-reduced-motion: reduce) { .ob-choose { transition: opacity .2s; } }
 
 .ob-choose { transition: opacity .18s linear, transform .18s linear; }
+
+/* Boogie's Nixie tube: a really bright orange-red glow */
+.ef-cassette .tube-light { animation: efc-blaze 2.2s ease-in-out infinite; }
+.ef-cassette .tube-blaze { transform-box: fill-box; transform-origin: center; animation: efc-blazebig 2.2s ease-in-out infinite; }
+
+.ef-cassette .tube-cast { pointer-events: none; mix-blend-mode: screen; animation: efc-cast 2.2s ease-in-out infinite; }
+:root[data-motion=off] .ef-cassette .tube-cast, :root[data-motion=reduced] .ef-cassette .tube-cast { animation: none; opacity: .8; }
+
+/* Boogie's light is adjustable: --ef-glow is the brightness (0.15 to 1), --ef-tm / --ef-te / --ef-tc / --ef-tl the bulb colour (set from the eFriend settings) */
+:root { --ef-glow: .8; --ef-tl: #ffb869; --ef-tm: #ff941f; --ef-te: #bf5712; --ef-tc: #ffe6a6; }
+@keyframes efc-blaze { 0%, 100% { opacity: calc(var(--ef-glow) * .8); transform: scale(1); filter: drop-shadow(0 0 5px var(--ef-te)) drop-shadow(0 0 calc(6px + var(--ef-glow) * 10px) var(--ef-tm)); } 50% { opacity: 1; transform: scale(calc(1 + var(--ef-glow) * 1.1)); filter: drop-shadow(0 0 10px var(--ef-tc)) drop-shadow(0 0 calc(10px + var(--ef-glow) * 26px) var(--ef-te)) drop-shadow(0 0 calc(14px + var(--ef-glow) * 42px) var(--ef-tm)); } }
+@keyframes efc-blazebig { 0%, 100% { opacity: calc(var(--ef-glow) * .7); transform: scale(calc(.5 + var(--ef-glow) * .4)); } 50% { opacity: min(1, calc(var(--ef-glow) * 1.3)); transform: scale(calc(.7 + var(--ef-glow) * .75)); } }
+@keyframes efc-cast { 0%, 100% { opacity: calc(var(--ef-glow) * .5); } 50% { opacity: min(1, calc(var(--ef-glow) * 1.25)); } }
+:root[data-motion=off] .ef-cassette .tube-cast, :root[data-motion=reduced] .ef-cassette .tube-cast { opacity: calc(var(--ef-glow) * .9); }
+:root[data-motion=off] .ef-cassette .tube-blaze, :root[data-motion=reduced] .ef-cassette .tube-blaze { animation: none; opacity: calc(var(--ef-glow) * .9); transform: scale(calc(.7 + var(--ef-glow) * .6)); }
+/* the light controls */
+.ef-light { display: grid; gap: 12px; } .ef-light-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; } .ef-light-row > b { min-width: 96px; }
+.ef-swatches { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; } .ef-sw { width: 34px; height: 34px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 0 0 2px var(--line, #ddd), 0 0 12px -2px var(--c); background: radial-gradient(circle at 35% 30%, #fff8, var(--c) 60%); cursor: pointer; padding: 0; } .ef-sw.on { box-shadow: 0 0 0 3px var(--ink, #222), 0 0 16px 0 var(--c); transform: scale(1.12); }
+.ef-sw-custom { position: relative; overflow: hidden; background: conic-gradient(#f33, #fc0, #3d9, #3bf, #a5f, #f5a, #f33); } .ef-sw-custom input { position: absolute; inset: -6px; width: 60px; height: 60px; opacity: 0; cursor: pointer; }
+.ef-light input[type=range] { flex: 1; min-width: 140px; accent-color: var(--ef-tm, #ff941f); height: 28px; }
+
+/* Boogie's light controls on the picker, shown when he fills the screen */
+.ob-light { position: absolute; z-index: 7; left: 50%; bottom: calc(clamp(84px, 13dvh, 104px) + env(safe-area-inset-bottom)); width: min(92vw, 380px); transform: translate(-50%, 10px); padding: 8px 12px; border-radius: 18px; background: #fff8e8e6; color: #3a2412; box-shadow: 0 10px 26px -10px #0006; opacity: 0; pointer-events: none; transition: opacity .4s ease, transform .4s ease; }
+.ob-light.show { opacity: 1; pointer-events: auto; transform: translate(-50%, 0); }
+.ob-light .ef-light { gap: 6px; } .ob-light .ef-light-row > b { min-width: 74px; font-size: .85rem; } .ob-light .ef-sw { width: 30px; height: 30px; } .ob-light input[type=range] { min-width: 100px; height: 22px; }
+/* the descriptions: bigger, bold and in each friend's own typeface */
+.ob-half-in p { font-weight: 700; font-size: clamp(1rem, 2.5dvh, 1.2rem); line-height: 1.38; max-width: 340px; }
+.ob-boogie .ob-half-in p { font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace; color: #2e1a0a; text-shadow: 0 1px 0 #fff9; letter-spacing: -.01em; }
+.ob-chip .ob-half-in p { font-family: 'Comfortaa', 'Noto Sans', system-ui, sans-serif; color: #fff; text-shadow: 0 2px 10px #00000066; font-weight: 700; }
+.ob-half-in h2 { font-size: clamp(1.8rem, 4.6dvh, 2.3rem); } .ob-chip .ob-half-in h2 { font-family: 'Comfortaa', 'Noto Sans', sans-serif; font-weight: 700; }
+.ob-half { align-items: start; padding-top: clamp(58px, 9.5dvh, 84px); }
+.ob-art svg { height: min(29dvh, 270px); } .ob-boogie .ob-art svg { height: min(29dvh, 270px); width: auto; max-width: 88vw; }
+.ob-art { transform-origin: 50% 30%; }
+@media (max-height: 660px) { .ob-light .ef-light-row > b { display: none; } .ob-light { padding: 6px 10px; bottom: calc(80px + env(safe-area-inset-bottom)); } .ob-art svg, .ob-boogie .ob-art svg { height: min(24dvh, 200px); } .ob-half-in p { font-size: .92rem; line-height: 1.3; } .ob-half-in h2 { margin: 2px 0; } .ob-light .ef-sw { width: 26px; height: 26px; } }
+@media (max-height: 660px) { .ob-pick-title { font-size: 1.45rem; } }
+
+/* ---- The vintage control plate: brass, screws, a bat-handle toggle and lamp buttons ---- */
+.ef-panel { position: relative; display: flex; gap: 18px; justify-content: space-around; align-items: flex-end; padding: 16px 26px 14px; border-radius: 14px; color: #4a3010; background: linear-gradient(145deg, #e7c985 0%, #c39a4a 45%, #e1c07a 100%), repeating-linear-gradient(90deg, #ffffff12 0 1px, transparent 1px 3px); border: 2px solid #7a5a1f; box-shadow: inset 0 2px 0 #fff6c8, inset 0 -3px 6px #7a5a1f66, 0 10px 22px -10px #000a; max-width: 380px; margin: 0 auto; }
+.ef-screw { position: absolute; width: 11px; height: 11px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff, #b7bcc1 55%, #6a6f74); box-shadow: 0 1px 1px #0006; } .ef-screw::before { content: ""; position: absolute; left: 2px; right: 2px; top: 50%; height: 1.5px; margin-top: -.75px; background: #4a4f54; transform: rotate(var(--r, 30deg)); }
+.ef-screw.a { left: 7px; top: 7px; --r: 20deg; } .ef-screw.b { right: 7px; top: 7px; --r: 75deg; } .ef-screw.c { left: 7px; bottom: 7px; --r: 140deg; } .ef-screw.d { right: 7px; bottom: 7px; --r: 50deg; }
+.ef-psec { display: grid; justify-items: center; gap: 4px; background: none; border: 0; padding: 0; margin: 0; box-shadow: none; } .ef-eng { font-family: 'JetBrains Mono', ui-monospace, monospace; font-weight: 700; font-size: .72rem; letter-spacing: .16em; text-transform: uppercase; color: #5a3d12; text-shadow: 0 1px 0 #f6e2a8, 0 -1px 0 #8a6a2a55; }
+.ef-toggle { position: relative; display: grid; justify-items: center; }
+.ef-lever { border: 0; background: none; padding: 0; cursor: pointer; line-height: 0; -webkit-tap-highlight-color: transparent; filter: drop-shadow(0 3px 2px #0005); } .ef-lever svg { width: 112px; height: 78px; display: block; }
+.ef-lever-arm { transform-origin: 60px 64px; transition: transform .28s cubic-bezier(.3, 1.8, .5, 1); transform: rotate(0deg); } .ef-toggle[data-pos="0"] .ef-lever-arm { transform: rotate(-36deg); } .ef-toggle[data-pos="2"] .ef-lever-arm { transform: rotate(36deg); }
+.ef-pos { display: flex; gap: 2px; margin-top: -4px; } .ef-lvl { min-width: 44px; min-height: 36px; padding: 0 4px; border: 0; background: none; font: 700 .68rem 'JetBrains Mono', ui-monospace, monospace; letter-spacing: .08em; text-transform: uppercase; color: #6b4e1b; cursor: pointer; border-radius: 6px; text-shadow: 0 1px 0 #f6e2a8; }
+.ef-lvl.on { color: #2a1800; box-shadow: inset 0 2px 4px #7a5a1f88; background: #00000012; } .ef-lvl:focus-visible, .ef-lamp:focus-visible, .ef-lever:focus-visible { outline: 3px solid #1d6fd8; outline-offset: 2px; }
+.ef-lamps { display: flex; gap: 12px; padding: 4px 0 2px; }
+.ef-lamp { position: relative; width: 50px; height: 50px; border-radius: 50%; padding: 0; border: 0; cursor: pointer; background: conic-gradient(from 20deg, #fafafa, #8a8f94, #ffffff, #7a7f84, #fafafa); box-shadow: 0 4px 6px #0006, inset 0 0 0 2px #5d6166; transition: transform .12s; -webkit-tap-highlight-color: transparent; }
+.ef-lamp i { position: absolute; inset: 7px; border-radius: 50%; background: radial-gradient(circle at 34% 28%, #ffffff66 0, transparent 34%), radial-gradient(circle, color-mix(in srgb, var(--c) 22%, #1c1c1c) 0, #101010 100%); box-shadow: inset 0 3px 6px #000b; transition: box-shadow .2s, background .2s; }
+.ef-lamp.on { transform: translateY(2px); box-shadow: 0 1px 2px #0006, inset 0 0 0 2px #5d6166; } .ef-lamp.on i { background: radial-gradient(circle at 34% 28%, #fffd 0, transparent 30%), radial-gradient(circle, color-mix(in srgb, var(--c) 65%, #fff) 0, var(--c) 52%, color-mix(in srgb, var(--c) 70%, #000) 100%); box-shadow: 0 0 20px 5px var(--c), inset 0 0 8px #fff9; }
+.ob-light { background: none !important; box-shadow: none !important; padding: 0 !important; width: min(96vw, 400px); } .ob-light .ef-panel { transform: scale(.82); transform-origin: 50% 100%; margin-bottom: -6px; }
+@media (max-height: 660px) { .ob-light .ef-panel { transform: scale(.68); } .ob-light { bottom: calc(70px + env(safe-area-inset-bottom)) !important; } }
+@media (prefers-reduced-motion: reduce) { .ef-lever-arm { transition: none; } }
+:root[data-motion=off] .ef-lever-arm, :root[data-motion=reduced] .ef-lever-arm { transition: none; }
+.ob-light .ef-panel { transform: scale(.74); margin-bottom: -14px; } .ob-boogie .ob-art svg { height: min(27dvh, 250px); }

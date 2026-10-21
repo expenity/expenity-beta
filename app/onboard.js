@@ -103,8 +103,9 @@
 		host.innerHTML = `<div class="ob-pick" id="obPick">			<section class="ob-half ob-boogie" id="obB" aria-label="Boogie"><div class="ob-fall" aria-hidden="true"></div><h1 class="ob-pick-title">${ esc( L( 'pickTitle' ) ) }</h1><p class="ob-hint">${ esc( L( 'pickHint' ) ) }</p><div class="ob-half-in" id="obBin"><div class="ob-art">${ B }</div><div class="ob-txt"><h2>Boogie</h2><p>${ esc( L( 'pickBoogie' ) ) }</p></div></div></section>
 			<section class="ob-half ob-chip" id="obC" aria-label="Chip"><div class="ob-fall" aria-hidden="true"></div><h1 class="ob-pick-title">${ esc( L( 'pickTitle' ) ) }</h1><p class="ob-hint">${ esc( L( 'pickHint' ) ) }</p><div class="ob-half-in" id="obCin"><div class="ob-art">${ C }</div><div class="ob-txt"><h2>Chip</h2><p>${ esc( L( 'pickChip' ) ) }</p></div></div></section>
 			<div class="ob-handle" id="obH" role="slider" tabindex="0" aria-label="${ esc( L( 'pickTitle' ) ) }" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50"><span class="ob-grip"><i>◀</i><i>▶</i></span></div>
+			<div class="ob-light" id="obLight">${ F().lightControls() }</div>
 			<button type="button" class="btn btn-primary big ob-choose" id="obChoose" tabindex="-1" aria-hidden="true">${ esc( L( 'pickChoose' ) ) }</button></div>`;
-		const root = host.querySelector( '#obPick' ), bP = root.querySelector( '#obB' ), cP = root.querySelector( '#obC' ), bA = root.querySelector( '#obB .ob-art' ), cA = root.querySelector( '#obC .ob-art' ), bTx = root.querySelector( '#obB .ob-txt' ), cTx = root.querySelector( '#obC .ob-txt' ), h = root.querySelector( '#obH' ), btn = root.querySelector( '#obChoose' ), hints = root.querySelectorAll( '.ob-hint' );
+		const root = host.querySelector( '#obPick' ), bP = root.querySelector( '#obB' ), cP = root.querySelector( '#obC' ), bA = root.querySelector( '#obB .ob-art' ), cA = root.querySelector( '#obC .ob-art' ), bTx = root.querySelector( '#obB .ob-txt' ), cTx = root.querySelector( '#obC .ob-txt' ), h = root.querySelector( '#obH' ), btn = root.querySelector( '#obChoose' ), hints = root.querySelectorAll( '.ob-hint' ), lightBox = root.querySelector( '#obLight' );
 		let X = 50, raf = 0;
 		const apply = () => {
 			// both friends are drawn centred on the whole screen and the slider cuts them in half; the words fade in as their side is uncovered
@@ -115,6 +116,7 @@
 			bA.style.transform = `scale(${ ( 1 + .3 * pb - .1 * pc ).toFixed( 3 ) })`; cA.style.transform = `scale(${ ( 1 + .3 * pc - .1 * pb ).toFixed( 3 ) })`; // the one you are choosing grows and comes to the centre
 			h.setAttribute( 'aria-valuenow', Math.round( X ) );
 			// the Choose button shows well before the screen edge, where a browser swipe could take over
+			lightBox.classList.toggle( 'show', X >= 84 ); // Boogie's light controls, only while he is the one on screen
 			const edge = X >= 84 ? 'boogie' : X <= 16 ? 'chip' : ''; btn.classList.toggle( 'show', !! edge ); if ( Math.abs( X - 50 ) > 4 ) btn.dataset.pick = X > 50 ? 'boogie' : 'chip';
 			const fade = Math.max( 0, Math.min( 1, ( Math.abs( X - 50 ) - 6 ) / 28 ) ); btn.style.opacity = fade; btn.style.transform = `translate(-50%, ${ ( ( 1 - fade ) * 14 ).toFixed( 1 ) }px)`; // it fades in slowly as the slider moves away from the middle; it can be pressed once the slider is at an end btn.setAttribute( 'aria-hidden', edge ? 'false' : 'true' ); btn.tabIndex = edge ? 0 : -1;
 			if ( edge ) { btn.textContent = L( 'pickChoose' ); bP.classList.toggle( 'on', edge === 'boogie' ); cP.classList.toggle( 'on', edge === 'chip' ); } else { bP.classList.remove( 'on' ); cP.classList.remove( 'on' ); }
@@ -123,7 +125,7 @@
 		const tween = ( to, ms = 260 ) => { cancelAnimationFrame( raf ); if ( reduce() ) { X = to; apply(); return; } const from = X, t0 = performance.now(); const step = ( now ) => { const k = Math.min( 1, ( now - t0 ) / ms ), e = 1 - Math.pow( 1 - k, 3 ); X = from + ( to - from ) * e; apply(); if ( k < 1 ) raf = requestAnimationFrame( step ); }; raf = requestAnimationFrame( step ); };
 		const fromEvent = ( e ) => { const r = root.getBoundingClientRect(); X = Math.max( 0, Math.min( 100, ( e.clientX - r.left ) / r.width * 100 ) ); apply(); };
 		let drag = false, down = null, lastDir = 0;
-		root.addEventListener( 'pointerdown', ( e ) => { if ( e.target.closest( 'button' ) ) return; drag = true; lastDir = 0; down = { x: e.clientX, y: e.clientY, onHandle: !! e.target.closest( '.ob-handle' ) }; cancelAnimationFrame( raf ); try { root.setPointerCapture( e.pointerId ); } catch ( x ) { /* ignore */ } fromEvent( e ); } );
+		root.addEventListener( 'pointerdown', ( e ) => { if ( e.target.closest( 'button, .ob-light' ) ) return; drag = true; lastDir = 0; down = { x: e.clientX, y: e.clientY, onHandle: !! e.target.closest( '.ob-handle' ) }; cancelAnimationFrame( raf ); try { root.setPointerCapture( e.pointerId ); } catch ( x ) { /* ignore */ } fromEvent( e ); } );
 		root.addEventListener( 'pointermove', ( e ) => {
 			if ( ! drag ) return; const before = X; fromEvent( e ); if ( X !== before ) lastDir = X > before ? 1 : -1;
 			const outward = ( X > 50 && lastDir > 0 ) || ( X < 50 && lastDir < 0 );

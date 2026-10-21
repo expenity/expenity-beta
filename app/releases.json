@@ -1,6 +1,20 @@
 {
-  "version": "0.54.32",
+  "version": "0.54.33",
   "releases": [
+    {
+      "version": "0.54.33",
+      "date": "2026-10-21",
+      "en": [
+        "Boogie's Nixie tube glows much brighter, and its light now falls on his body too.",
+        "New: set Boogie's light on a vintage brass control plate, with a bat-handle toggle for brightness (Low, Normal, High) and three lamp buttons for the bulb (amber, blue or fluorescent green). It is in the eFriend menu and on the picker.",
+        "The eFriend picker descriptions are larger and bold, each in its own typeface."
+      ],
+      "el": [
+        "Η λυχνία Nixie του Boogie λάμπει πολύ πιο έντονα και το φως της πέφτει πλέον και στο σώμα του.",
+        "Νέο: ρυθμίστε το φως του Boogie σε έναν vintage ορειχάλκινο πίνακα ελέγχου, με διακόπτη-μοχλό για τη φωτεινότητα (Χαμηλή, Κανονική, Υψηλή) και τρία κουμπιά-λαμπάκια για τη λάμπα (κεχριμπάρι, μπλε ή φθορίζον πράσινο). Βρίσκεται στο μενού του eFriend και στην επιλογή eFriend.",
+        "Οι περιγραφές στην επιλογή eFriend είναι μεγαλύτερες και έντονες, η καθεμία στη δική της γραμματοσειρά."
+      ]
+    },
     {
       "version": "0.54.32",
       "date": "2026-10-21",
