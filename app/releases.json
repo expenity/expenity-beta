@@ -1,6 +1,20 @@
 {
-  "version": "0.55.4",
+  "version": "0.55.5",
   "releases": [
+    {
+      "version": "0.55.5",
+      "date": "2026-10-21",
+      "en": [
+        "Chip now has glow controls: pick colours for his eyes, mouth and ears and set how strongly they glow. Tap the gear on his card.",
+        "Boogie's workshop: a compact bronze, rusty control board with duct tape and tangled cables, a volume fader for the gear in his left eye, and a Nixie digit that flips between 0 and 1.",
+        "Both gear pages use the colours of the choose-your-eFriend screens and fit on one screen without scrolling. In first-time setup the button now says Controls for Boogie and Lights for Chip."
+      ],
+      "el": [
+        "Ο Chip έχει πλέον χειριστήρια λάμψης: διαλέξτε χρώματα για τα μάτια, το στόμα και τα αυτιά του και ρυθμίστε πόσο έντονα λάμπουν. Πατήστε το γρανάζι στην κάρτα του.",
+        "Το εργαστήριο του Boogie: ένας συμπαγής χάλκινος, σκουριασμένος πίνακας ελέγχου με μονωτική ταινία και μπερδεμένα καλώδια, ένα fader έντασης για το γρανάζι στο αριστερό του μάτι, και ένα ψηφίο Nixie που εναλλάσσεται ανάμεσα στο 0 και το 1.",
+        "Και οι δύο σελίδες με το γρανάζι χρησιμοποιούν τα χρώματα των οθονών επιλογής eFriend και χωράνε σε μία οθόνη χωρίς κύλιση. Στην πρώτη ρύθμιση το κουμπί γράφει πλέον Controls για τον Boogie και Lights για τον Chip."
+      ]
+    },
     {
       "version": "0.55.4",
       "date": "2026-10-21",

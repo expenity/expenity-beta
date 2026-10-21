@@ -1962,3 +1962,126 @@ fieldset > legend { font-weight: 800; padding: 0 8px; color: var(--ink, #2a1a14)
 @keyframes efc-shade { 0%, 100% { opacity: min(1, calc((1 - var(--ef-glow)) * 3)); } 50% { opacity: min(1, calc((1 - var(--ef-glow)) * 2)); } }
 :root[data-motion=off] .ef-cassette .tube-shade, :root[data-motion=reduced] .ef-cassette .tube-shade { animation: none; }
 @media (prefers-reduced-motion: reduce) { :root:not([data-motion=full]) .ef-cassette .tube-shade { animation: none; } }
+
+/* Chip's glow: eyes, mouth and ears take their colour and strength from --chip-eye / --chip-mouth / --chip-ear / --chip-glow */
+:root { --chip-eye: #9ff3e6; --chip-mouth: #9ff3e6; --chip-ear: #0f766e; --chip-glow: .6; }
+.ef-ce.ef-stk { stroke: var(--chip-eye); } .ef-ce:not(.ef-stk) { fill: var(--chip-eye); }
+.ef-cm.ef-stk { stroke: var(--chip-mouth); } .ef-cm:not(.ef-stk) { fill: var(--chip-mouth); }
+.ef-ce.ef-glow { filter: drop-shadow(0 0 calc(var(--chip-glow) * 5px) var(--chip-eye)); opacity: min(1, calc(var(--chip-glow) * 1.7)); }
+.ef-cm.ef-glow { filter: drop-shadow(0 0 calc(var(--chip-glow) * 5px) var(--chip-mouth)); opacity: min(1, calc(var(--chip-glow) * 1.7)); }
+.ef-ear { stroke: var(--chip-ear); filter: drop-shadow(0 0 max(0px, calc((var(--chip-glow) - .6) * 10px)) var(--chip-ear)); }
+.ef-earf { fill: var(--chip-ear); }
+.ef-spill { pointer-events: none; opacity: max(0, calc((var(--chip-glow) - .6) * 1.8)); }
+.ef-gear.chip { right: auto; left: calc(50% - 39px); }
+.chip-panel { width: 100%; max-width: 420px; display: grid; gap: 12px; padding: 16px; border-radius: 24px; background: rgba(255,255,255,.62); border: 1px solid rgba(255,255,255,.9); box-shadow: 0 10px 30px rgba(31,41,55,.12), inset 0 1px 0 #fff; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+.chip-row { display: grid; gap: 8px; } .chip-lab { font-weight: 800; }
+.chip-sws { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip-sw { width: 38px; height: 38px; border-radius: 50%; border: 3px solid #fff; background: var(--c); box-shadow: 0 0 0 1px rgba(0,0,0,.12), 0 3px 8px rgba(0,0,0,.14); cursor: pointer; padding: 0; position: relative; transition: transform .15s, box-shadow .15s; }
+.chip-sw.on { transform: scale(1.12); box-shadow: 0 0 0 3px var(--c), 0 0 16px var(--c); }
+.chip-match { display: flex; align-items: center; gap: 12px; cursor: pointer; }
+.chip-match input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.chip-pill { width: 52px; height: 30px; border-radius: 15px; background: #cfd6e2; position: relative; flex: none; transition: background .2s; }
+.chip-pill::after { content: ""; position: absolute; top: 3px; left: 3px; width: 24px; height: 24px; border-radius: 50%; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,.25); transition: transform .2s; }
+.chip-match input:checked + .chip-pill { background: var(--chip-eye, #9ff3e6); box-shadow: 0 0 12px var(--chip-eye, #9ff3e6); } .chip-match input:checked + .chip-pill::after { transform: translateX(22px); }
+.chip-match input:focus-visible + .chip-pill, .chip-sw:focus-visible { outline: 3px solid #0f766e; outline-offset: 2px; }
+.chip-range { -webkit-appearance: none; appearance: none; width: 100%; height: 10px; border-radius: 5px; background: linear-gradient(90deg, rgba(127,127,127,.25), var(--chip-eye, #9ff3e6)); outline-offset: 6px; }
+.chip-range::-webkit-slider-thumb { -webkit-appearance: none; width: 30px; height: 30px; border-radius: 50%; background: #fff; border: 3px solid var(--chip-eye, #9ff3e6); box-shadow: 0 0 calc(var(--chip-glow) * 18px) var(--chip-eye, #9ff3e6); cursor: pointer; }
+.chip-range::-moz-range-thumb { width: 24px; height: 24px; border-radius: 50%; background: #fff; border: 3px solid var(--chip-eye, #9ff3e6); box-shadow: 0 0 calc(var(--chip-glow) * 18px) var(--chip-eye, #9ff3e6); cursor: pointer; }
+.ef-chipsheet .ef-lightart svg { max-width: 100%; height: auto; }
+@media (prefers-reduced-motion: reduce) { .chip-sw, .chip-pill, .chip-pill::after { transition: none; } }
+
+/* Boogie's Nixie digit: it keeps flipping between 0 and 1 (0101001...), steady in brightness (only the halo around it pulses) */
+.ef-cassette .ef-digit { filter: drop-shadow(0 0 calc(2px + var(--ef-glow) * 4px) var(--ef-tm)); animation-duration: 4.9s; animation-iteration-count: infinite; animation-timing-function: steps(1, end); }
+.ef-cassette .ef-digit.d1 { animation-name: efc-d1; opacity: 0; } .ef-cassette .ef-digit.d0 { animation-name: efc-d0; }
+@keyframes efc-d1 { 0% { opacity: 0 } 14.28% { opacity: 1 } 28.57% { opacity: 0 } 42.85% { opacity: 1 } 57.14% { opacity: 0 } 71.42% { opacity: 0 } 85.71% { opacity: 1 } 100% { opacity: 1 } }
+@keyframes efc-d0 { 0% { opacity: 1 } 14.28% { opacity: 0 } 28.57% { opacity: 1 } 42.85% { opacity: 0 } 57.14% { opacity: 1 } 71.42% { opacity: 1 } 85.71% { opacity: 0 } 100% { opacity: 0 } }
+:root[data-motion=off] .ef-cassette .ef-digit, :root[data-motion=reduced] .ef-cassette .ef-digit { animation: none; } :root[data-motion=off] .ef-cassette .ef-digit.d1, :root[data-motion=reduced] .ef-cassette .ef-digit.d1 { opacity: 0; } :root[data-motion=off] .ef-cassette .ef-digit.d0, :root[data-motion=reduced] .ef-cassette .ef-digit.d0 { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { :root:not([data-motion=full]) .ef-cassette .ef-digit { animation: none; } :root:not([data-motion=full]) .ef-cassette .ef-digit.d1 { opacity: 0; } :root:not([data-motion=full]) .ef-cassette .ef-digit.d0 { opacity: 1; } }
+/* The gear in his left eye: speed set by the rusty knob (data-ef-spin on the page) */
+.ef-cassette .reel.ef-reel-left { animation: efc-spin 6s linear infinite; }
+:root[data-ef-spin=still] .ef-cassette .reel.ef-reel-left { animation: none; }
+:root[data-ef-spin=slow] .ef-cassette .reel.ef-reel-left { animation-duration: 14s; }
+:root[data-ef-spin=fast] .ef-cassette .reel.ef-reel-left { animation-duration: 1.4s; }
+@keyframes efc-spin { to { transform: rotate(360deg); } }
+:root[data-motion=off] .ef-cassette .reel.ef-reel-left, :root[data-motion=reduced] .ef-cassette .reel.ef-reel-left { animation: none; }
+@media (prefers-reduced-motion: reduce) { :root:not([data-motion=full]) .ef-cassette .reel.ef-reel-left { animation: none; } }
+/* the rusty knob */
+/* The control board is bronze, rusty here and there; the text on it is always English */
+.ef-panel { background:
+	radial-gradient(ellipse 64px 40px at 14% 22%, rgba(140,56,18,.62), transparent 72%),
+	radial-gradient(ellipse 96px 50px at 84% 10%, rgba(120,48,14,.55), transparent 72%),
+	radial-gradient(ellipse 78px 48px at 72% 90%, rgba(150,64,22,.55), transparent 74%),
+	radial-gradient(ellipse 50px 74px at 5% 80%, rgba(110,42,12,.5), transparent 72%),
+	radial-gradient(circle 18px at 46% 34%, rgba(160,72,26,.45), transparent 72%),
+	radial-gradient(circle 12px at 60% 72%, rgba(140,56,18,.5), transparent 72%),
+	radial-gradient(circle 9px at 30% 58%, rgba(170,80,30,.4), transparent 72%),
+	url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' seed='7'/%3E%3CfeColorMatrix values='0 0 0 0 .32 0 0 0 0 .15 0 0 0 0 .05 0 0 0 .6 -.22'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+	linear-gradient(145deg, #d3a25c 0%, #9b6b30 46%, #c28d48 100%),
+	repeating-linear-gradient(90deg, #ffffff10 0 1px, transparent 1px 3px);
+	border-color: #5a3812; box-shadow: inset 0 2px 0 #f0cf94, inset 0 -3px 7px #4a2a0a88, 0 10px 22px -10px #000a; color: #3d230a; }
+.ef-eng { color: #3a210a; text-shadow: 0 1px 0 #e8c88a, 0 -1px 0 #5a381266; letter-spacing: .16em; }
+.ef-lvl { color: #4a2c0e; text-shadow: 0 1px 0 #e8c88a; } .ef-lvl.on { color: #1f1000; }
+.ef-screw { background: radial-gradient(circle at 35% 30%, #d9c3a0, #8a6a4a 55%, #4a3524); }
+.ef-tapew { width: 100%; display: grid; justify-items: center; filter: drop-shadow(0 3px 2.5px rgba(0,0,0,.45)); }
+.ef-tape { width: min(100%, 300px); padding: 12px 22px 11px; transform: rotate(-1.8deg); text-align: center; color: #15110d;
+	background: repeating-linear-gradient(90deg, rgba(255,255,255,.08) 0 1px, transparent 1px 3px), repeating-linear-gradient(0deg, rgba(0,0,0,.06) 0 1px, transparent 1px 4px), linear-gradient(180deg, #c3c8cc 0%, #8d9398 52%, #a9aeb3 100%);
+	clip-path: polygon(2% 0, 100% 0, 97.4% 14%, 99.4% 28%, 96.8% 42%, 99% 56%, 96.6% 70%, 99.2% 84%, 97.4% 100%, 2.4% 100%, 0.7% 88%, 3.3% 73%, 1% 60%, 3.2% 47%, .5% 34%, 2.6% 22%, 0% 10%); }
+.ef-hand { display: block; font: italic 700 1.1rem/1.15 'Bradley Hand', 'Segoe Print', 'Chalkboard SE', 'Marker Felt', 'Comic Sans MS', cursive; letter-spacing: .01em; transform: rotate(-.8deg); text-shadow: 0 0 .5px rgba(0,0,0,.6); }
+
+/* The full pages behind the gears wear the same colours and type as the choose-your-eFriend screens */
+.sheet.efpg-boogie { background: repeating-linear-gradient(0deg, transparent 0 27px, #a35d0f22 27px 28px), radial-gradient(circle at 50% 22%, #ffe7b8 0, #ffcf8a 38%, #f0a85a 100%); color: #3a2412; }
+.sheet.efpg-chip { background: linear-gradient(#ffffff14 1px, transparent 1px) 0 0 / 28px 28px, linear-gradient(90deg, #ffffff14 1px, transparent 1px) 0 0 / 28px 28px, radial-gradient(circle at 50% 22%, #6be7d8 0, #1aa6a0 40%, #0b4f66 100%); color: #effffd; }
+.efpg-boogie .sheet-head, .efpg-chip .sheet-head { background: transparent; }
+.efpg-boogie .sheet-head h2, .efpg-chip .sheet-head h2 { flex: 1; text-align: center; font-size: clamp(1.5rem, 6.4vw, 2rem); line-height: 1.1; font-weight: 800; padding-left: 40px; white-space: nowrap; }
+.efpg-boogie .sheet-head h2 { color: #3a2412; font-family: var(--mono, 'JetBrains Mono', monospace); text-shadow: 0 0 14px #ff9d2e99; }
+.efpg-chip .sheet-head h2 { color: #effffd; font-family: 'Comfortaa', 'Noto Sans', sans-serif; text-shadow: 0 0 16px #5ff3e6aa; }
+.efpg-boogie .ab-btn, .efpg-chip .ab-btn { color: inherit; }
+.efpg-boogie .muted, .efpg-chip .muted { opacity: 1; font-weight: 700; text-align: center; max-width: 340px; line-height: 1.38; }
+.efpg-boogie .muted { color: #2e1a0a; font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace; text-shadow: 0 1px 0 #fff9; letter-spacing: -.01em; }
+.efpg-chip .muted { color: #fff; font-family: 'Comfortaa', 'Noto Sans', system-ui, sans-serif; text-shadow: 0 2px 10px #00000066; }
+.efpg-boogie .ef-lightart svg, .efpg-chip .ef-lightart svg { filter: drop-shadow(0 10px 16px #0004); animation: obHop 1s ease-in-out infinite; }
+:root[data-motion=off] .efpg-boogie .ef-lightart svg, :root[data-motion=reduced] .efpg-boogie .ef-lightart svg, :root[data-motion=off] .efpg-chip .ef-lightart svg, :root[data-motion=reduced] .efpg-chip .ef-lightart svg { animation: none; }
+@media (prefers-reduced-motion: reduce) { .efpg-boogie .ef-lightart svg, .efpg-chip .ef-lightart svg { animation: none; } }
+.efpg-chip .chip-panel { background: rgba(7, 52, 70, .5); border-color: rgba(95, 243, 230, .45); box-shadow: 0 10px 30px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.2); color: #effffd; }
+.efpg-chip .chip-lab, .efpg-chip .chip-match b { color: #effffd; font-family: 'Comfortaa', 'Noto Sans', sans-serif; }
+.efpg-chip .chip-pill { background: rgba(255,255,255,.28); }
+.efpg-chip .btn-primary { background: linear-gradient(#7ff5ea, #1aa6a0); color: #05303a; box-shadow: 0 0 18px #5ff3e688; }
+.efpg-chip .chip-match input:focus-visible + .chip-pill, .efpg-chip .chip-sw:focus-visible { outline-color: #fff; }
+
+/* The board in the full page: smaller, landscape, with a tangled bundle of cables going behind it */
+.ef-rigwrap { position: relative; width: min(100%, 320px); margin: 58px auto 10px; }
+.ef-cables { position: absolute; left: -20px; top: -58px; width: calc(100% + 40px); height: 130px; z-index: 0; overflow: visible; pointer-events: none; filter: drop-shadow(0 4px 3px rgba(0,0,0,.4)); }
+.ef-rigwrap .ef-panel { position: relative; z-index: 1; max-width: none; }
+.ef-rig { display: grid; grid-template-columns: auto auto auto; justify-content: space-between; align-items: start; gap: 10px; padding: 12px 14px 12px; }
+.ef-rig .ef-tapew { grid-column: 1 / -1; margin-bottom: 4px; }
+.ef-rig .ef-tape { width: 100%; padding: 7px 14px 7px; } .ef-rig .ef-hand { font-size: .92rem; }
+.ef-rig .ef-lever svg { width: 90px; height: 62px; } .ef-rig .ef-pos { margin-top: -2px; } .ef-rig .ef-lvl { min-width: 30px; min-height: 30px; font-size: .56rem; letter-spacing: .04em; padding: 0 2px; }
+.ef-rig .ef-eng { font-size: .6rem; letter-spacing: .12em; }
+.ef-rig .ef-lamps { flex-direction: column; gap: 6px; padding: 2px 0; } .ef-rig .ef-lamp { width: 40px; height: 40px; } .ef-rig .ef-lamp i { inset: 5px; }
+.ef-fad { justify-items: stretch; }
+.ef-fader { position: relative; display: flex; gap: 8px; height: 144px; }
+.ef-ftrack { position: relative; width: 44px; height: 144px; cursor: ns-resize; touch-action: none; border-radius: 12px; background: linear-gradient(90deg, #5a3a18, #8a6030 40%, #5a3a18); box-shadow: inset 0 2px 5px #2a1608cc, inset 0 -1px 0 #e4c58a88, 0 1px 0 #f0d9a8aa; }
+.ef-fslot { position: absolute; left: 50%; top: 10px; bottom: 10px; width: 6px; margin-left: -3px; border-radius: 3px; background: #120a04; box-shadow: inset 0 1px 2px #000, 0 1px 0 #d9b673; }
+.ef-fknob { position: absolute; left: 3px; right: 3px; height: 32px; top: calc((3 - var(--p, 2)) / 3 * 112px); border-radius: 7px; background: repeating-linear-gradient(0deg, #2d2d2f 0 2px, #0c0c0d 2px 4px); border: 2px solid #b9bcc0; box-shadow: 0 4px 6px #000a, inset 0 1px 0 #ffffff55; transition: top .28s cubic-bezier(.3, 1.6, .5, 1); display: grid; place-items: center; }
+.ef-fknob b { width: 14px; height: 4px; border-radius: 2px; background: #f4f4f0; box-shadow: 0 0 4px #fff8; }
+.ef-fader[data-pos="0"] .ef-fknob { --p: 0; } .ef-fader[data-pos="1"] .ef-fknob { --p: 1; } .ef-fader[data-pos="2"] .ef-fknob { --p: 2; } .ef-fader[data-pos="3"] .ef-fknob { --p: 3; }
+.ef-flabels { position: relative; width: 42px; height: 144px; }
+.ef-flabels .ef-lvl { position: absolute; left: 0; width: 100%; top: calc((3 - var(--n)) / 3 * 112px); height: 32px; min-width: 0; min-height: 0; display: grid; place-items: center; }
+@media (prefers-reduced-motion: reduce) { .ef-fknob { transition: none; } }
+
+/* the gear pages carry no words: Boogie and his board, Chip and his controls, and Save */
+.chip-row { grid-template-columns: 34px 1fr; align-items: center; } .chip-lab { font-size: 1.5rem; line-height: 1; text-align: center; }
+.chip-row .chip-sws { grid-column: 2; }
+.chip-match b { font-size: 1.5rem; line-height: 1; }
+
+/* onboarding: one labelled button, Controls for Boogie and Lights for Chip, that opens the full page */
+.ob-light { bottom: calc(clamp(96px, 14dvh, 112px) + env(safe-area-inset-bottom)) !important; width: auto !important; }
+.ob-ctl { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 20px; border-radius: 24px; border: 2px solid #b08d57; background: #fff8e8; color: #3a2412; box-shadow: 0 4px 12px #0003; font: 800 1rem/1 var(--mono, monospace); cursor: pointer; -webkit-tap-highlight-color: transparent; }
+/* no scrolling on the gear pages: the picture shrinks with the screen height */
+.ef-lightfull .ef-lightart { min-height: 0; }
+.ef-lightfull .ef-lightart svg { height: clamp(104px, calc(100dvh - 500px), 250px); width: auto; max-width: 100%; }
+.ef-lightfull .sheet-pad { gap: 10px; padding-top: 0; padding-bottom: calc(14px + env(safe-area-inset-bottom)); }
+.ef-lightfull .ef-rigwrap { margin-top: 50px; margin-bottom: 4px; }
+.ef-lightfull.efpg-chip .chip-panel { gap: 8px; padding: 12px; }
+.ef-lightfull.efpg-chip .ef-lightart svg { height: clamp(96px, calc(100dvh - 535px), 250px); }
+.ob-light[data-m=chip] .ob-ctl { background: rgba(7, 52, 70, .72); color: #effffd; border-color: #5ff3e6; font-family: 'Comfortaa', 'Noto Sans', sans-serif; box-shadow: 0 0 16px #5ff3e655; }
