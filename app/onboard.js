@@ -122,16 +122,17 @@
 		};
 		const tween = ( to, ms = 260 ) => { cancelAnimationFrame( raf ); if ( reduce() ) { X = to; apply(); return; } const from = X, t0 = performance.now(); const step = ( now ) => { const k = Math.min( 1, ( now - t0 ) / ms ), e = 1 - Math.pow( 1 - k, 3 ); X = from + ( to - from ) * e; apply(); if ( k < 1 ) raf = requestAnimationFrame( step ); }; raf = requestAnimationFrame( step ); };
 		const fromEvent = ( e ) => { const r = root.getBoundingClientRect(); X = Math.max( 0, Math.min( 100, ( e.clientX - r.left ) / r.width * 100 ) ); apply(); };
-		let drag = false, down = null;
-		root.addEventListener( 'pointerdown', ( e ) => { if ( e.target.closest( 'button' ) ) return; drag = true; down = { x: e.clientX, y: e.clientY, onHandle: !! e.target.closest( '.ob-handle' ) }; cancelAnimationFrame( raf ); try { root.setPointerCapture( e.pointerId ); } catch ( x ) { /* ignore */ } fromEvent( e ); } );
+		let drag = false, down = null, lastDir = 0;
+		root.addEventListener( 'pointerdown', ( e ) => { if ( e.target.closest( 'button' ) ) return; drag = true; lastDir = 0; down = { x: e.clientX, y: e.clientY, onHandle: !! e.target.closest( '.ob-handle' ) }; cancelAnimationFrame( raf ); try { root.setPointerCapture( e.pointerId ); } catch ( x ) { /* ignore */ } fromEvent( e ); } );
 		root.addEventListener( 'pointermove', ( e ) => {
-			if ( ! drag ) return; fromEvent( e );
-			if ( X > 72 || X < 28 ) { drag = false; down = null; tween( X > 50 ? 100 : 0 ); } // past about 70% it goes the rest of the way by itself
+			if ( ! drag ) return; const before = X; fromEvent( e ); if ( X !== before ) lastDir = X > before ? 1 : -1;
+			const outward = ( X > 50 && lastDir > 0 ) || ( X < 50 && lastDir < 0 );
+			if ( ( X > 72 || X < 28 ) && outward ) { drag = false; down = null; tween( X > 50 ? 100 : 0 ); } // past about 70% on the way out it goes the rest of the way by itself; moving back towards the middle is free
 		} );
 		const up = ( e ) => {
 			if ( ! drag ) return; drag = false;
 			if ( down && down.onHandle && Math.abs( e.clientX - down.x ) < 6 && Math.abs( e.clientY - down.y ) < 6 ) { down = null; tween( 50 ); return; } // a tap on the handle brings it back to the middle
-			down = null; if ( X > 70 ) tween( 100 ); else if ( X < 30 ) tween( 0 );
+			down = null; if ( X > 70 && lastDir >= 0 ) tween( 100 ); else if ( X < 30 && lastDir <= 0 ) tween( 0 ); // let go on the way out: snap; let go while coming back: stay
 		};
 		root.addEventListener( 'pointerup', up ); root.addEventListener( 'pointercancel', () => { drag = false; down = null; } );
 		h.addEventListener( 'keydown', ( e ) => { const k = e.key; if ( k === 'ArrowLeft' ) X = Math.max( 0, X - 8 ); else if ( k === 'ArrowRight' ) X = Math.min( 100, X + 8 ); else if ( k === 'Home' ) X = 0; else if ( k === 'End' ) X = 100; else if ( k === 'Enter' || k === ' ' ) { e.preventDefault(); tween( 50 ); return; } else return; e.preventDefault(); apply(); } );

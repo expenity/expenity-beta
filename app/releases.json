@@ -1,6 +1,16 @@
 {
-  "version": "0.54.31",
+  "version": "0.54.32",
   "releases": [
+    {
+      "version": "0.54.32",
+      "date": "2026-10-21",
+      "en": [
+        "Fix: on the eFriend slider you can now drag back from either end. It only snaps to the end when you move away from the middle."
+      ],
+      "el": [
+        "Διόρθωση: στο slider του eFriend μπορείτε πλέον να σύρετε πίσω από οποιοδήποτε άκρο. Κολλάει στο άκρο μόνο όταν απομακρύνεστε από τη μέση."
+      ]
+    },
     {
       "version": "0.54.31",
       "date": "2026-10-21",
