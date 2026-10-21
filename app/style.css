@@ -1681,3 +1681,9 @@ fieldset > legend { font-weight: 800; padding: 0 8px; color: var(--ink, #2a1a14)
 .ef-char.on { border-color: #0f766e; box-shadow: 0 0 0 3px rgba(15, 118, 110, .18); } .ef-char small { color: var(--muted, #8a7568); line-height: 1.3; } .ef-char em { font-style: normal; font-weight: 800; color: #0f766e; font-size: .85rem; }
 .ef-char-art { min-height: 100px; display: grid; place-items: center; }
 .ef-subhead { display: flex; align-items: center; gap: 12px; margin: 4px 0 10px; } .ef-subhead h2 { margin: 0; font-size: 1.2rem; }
+
+/* Boogie's Nixie tube: a clearly visible warm glow that pulses (the pack's own pulse was too faint to notice) */
+.ef-cassette .tube-light { transform-box: fill-box; transform-origin: center; animation: efc-pulse 2.6s ease-in-out infinite; }
+.ef-cassette [filter] { animation: efc-neon 2.6s ease-in-out infinite; }
+@keyframes efc-pulse { 0%, 100% { opacity: .5; transform: scale(.85); } 50% { opacity: 1; transform: scale(1.3); } }
+@keyframes efc-neon { 0%, 100% { opacity: .6; } 50% { opacity: 1; } }

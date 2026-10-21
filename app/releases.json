@@ -1,6 +1,16 @@
 {
-  "version": "0.54.19",
+  "version": "0.54.20",
   "releases": [
+    {
+      "version": "0.54.20",
+      "date": "2026-10-21",
+      "en": [
+        "Boogie's Nixie tube now glows and pulses clearly."
+      ],
+      "el": [
+        "Η λυχνία Nixie του Boogie λάμπει και πάλλεται πλέον καθαρά."
+      ]
+    },
     {
       "version": "0.54.19",
       "date": "2026-10-21",
