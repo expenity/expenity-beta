@@ -1769,3 +1769,23 @@ fieldset > legend { font-weight: 800; padding: 0 8px; color: var(--ink, #2a1a14)
 .ob-logo svg { width: 72px; height: 72px; }
 
 .ob-have { display: flex; flex-wrap: wrap; gap: 4px 14px; justify-content: center; align-items: center; color: var(--muted, #777); font-size: .92rem; margin-top: 4px; } .ob-have .link { font-weight: 700; }
+
+/* The setup pages always fit the screen, with no scrolling: everything is sized from the height of the window */
+.ob-intro { height: 100vh; height: 100dvh; overflow: hidden; display: block; padding: calc(10px + env(safe-area-inset-top)) 16px calc(12px + env(safe-area-inset-bottom)); box-sizing: border-box; }
+.ob-intro-in { height: 100%; max-width: 440px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; justify-content: space-between; gap: clamp(4px, 1.3dvh, 12px); }
+.ob-logo svg { width: clamp(40px, 8dvh, 64px); height: clamp(40px, 8dvh, 64px); }
+.ob-intro h1 { font-size: clamp(1.3rem, 3.7dvh, 2rem); line-height: 1.1; } .ob-sub { margin: 0; font-size: clamp(.85rem, 2.1dvh, 1rem); }
+.ob-lang { height: clamp(52px, 8.5dvh, 68px); flex: none; } .ob-lang button { font-size: clamp(1.05rem, 2.7dvh, 1.25rem); }
+.ob-points { gap: clamp(4px, 1dvh, 8px); margin: 0; flex: none; } .ob-points li { padding: clamp(6px, 1.2dvh, 11px) 12px; font-size: clamp(.82rem, 2dvh, .95rem); line-height: 1.25; }
+.ob-demo { min-height: 0; flex: none; gap: 4px; } .ob-demo > * { padding: 6px 12px; font-size: clamp(.82rem, 2dvh, .95rem); } .ob-ty { display: none !important; }
+.ob-demo { grid-template-rows: auto auto; } .ob-q, .ob-a { animation-duration: 7s; } .ob-a { animation-delay: 1.4s; }
+.ob-bots { flex: 1 1 0; min-height: 44px; width: 100%; align-items: center; gap: 16px; } .ob-bot { height: 100%; display: grid; align-items: center; } .ob-bot svg { height: 100%; width: auto; max-height: 112px; max-width: 42vw; }
+.ob-poke { margin: 0; font-size: .8rem; flex: none; } .ob-go { margin: 0; flex: none; } .ob-have { margin: 0; font-size: .82rem; flex: none; gap: 2px 12px; }
+@media (max-height: 790px) { .ob-demo { display: none; } .ob-points li { padding: 5px 10px; } }
+@media (max-height: 600px) { .ob-sub, .ob-poke { display: none; } }
+.ob-half-in { max-height: 100%; } .ob-art svg { height: min(34dvh, 300px); width: auto; max-width: 100%; } .ob-boogie .ob-art svg { width: auto; max-width: 92vw; height: min(36dvh, 320px); }
+.ob-half { padding-top: clamp(60px, 11dvh, 90px); padding-bottom: clamp(88px, 14dvh, 110px); } .ob-half-in p { font-size: clamp(.82rem, 2dvh, .98rem); }
+.ob-pick { height: 100vh; height: 100dvh; } .ob-chat.ef-cp { height: 100vh; height: 100dvh; }
+.ob-logo { flex: none; display: grid; place-items: center; } .ob-intro h1, .ob-sub, .ob-points, .ob-demo { flex: none; }
+.ob-bots { overflow: hidden; }
+@media (max-height: 700px) { .ob-sub, .ob-poke, .ob-have > span { display: none; } .ob-have { gap: 2px 10px; font-size: .78rem; } .ob-bots { min-height: 84px; } .ob-intro h1 { font-size: 1.35rem; } }

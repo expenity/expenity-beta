@@ -92,7 +92,8 @@
 			<div class="ob-bots"><span class="ob-bot">${ F().mascotOf( 'boogie', 'happy', 104 ) }</span><span class="ob-bot">${ F().mascotOf( 'chip', 'happy', 104 ) }</span></div><p class="ob-poke">${ esc( L( 'introPoke' ) ) }</p>
 			<button type="button" class="btn btn-primary big ob-go" data-ob-go>${ esc( L( 'introGo' ) ) }</button>
 			<div class="ob-have"><span>${ esc( t( 'flowHaveAccount' ) ) }</span><button type="button" class="link" data-flow="signin">${ esc( t( 'authSignIn' ) ) }</button><button type="button" class="link" data-flow="restore">${ esc( t( 'restore' ) ) }</button><button type="button" class="link" data-flow="recover">${ esc( t( 'flowLost' ) ) }</button><input type="file" id="impJson" accept="application/json,.json" hidden></div></div></div>`;
-		const lg = host.querySelector( '#flowLogo' ); if ( lg && EXA.logoSvg ) lg.innerHTML = EXA.logoSvg.replace( 'width="34" height="34"', 'width="64" height="64"' );
+		const fillLogo = () => { const lg = host && host.querySelector( '#flowLogo' ); if ( lg && EXA.logoSvg ) lg.innerHTML = EXA.logoSvg.replace( 'width="34" height="34"', 'width="64" height="64"' ); }; // the logo file may still be loading
+		fillLogo(); if ( ! EXA.logoSvg ) { let n = 0; const iv = setInterval( () => { if ( EXA.logoSvg || ++n > 50 ) { clearInterval( iv ); fillLogo(); } }, 100 ); }
 	}
 
 	/* ------------------------------------------------------------------ 2. The split-screen picker */

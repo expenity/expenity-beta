@@ -1,6 +1,16 @@
 {
-  "version": "0.54.25",
+  "version": "0.54.26",
   "releases": [
+    {
+      "version": "0.54.26",
+      "date": "2026-10-21",
+      "en": [
+        "The first-run pages now fit the screen with no scrolling, on any phone size, so setup feels like an app from the first second."
+      ],
+      "el": [
+        "Οι σελίδες της πρώτης χρήσης χωράνε πλέον στην οθόνη χωρίς κύλιση, σε οποιοδήποτε μέγεθος κινητού, ώστε η ρύθμιση να μοιάζει με εφαρμογή από το πρώτο δευτερόλεπτο."
+      ]
+    },
     {
       "version": "0.54.25",
       "date": "2026-10-21",
